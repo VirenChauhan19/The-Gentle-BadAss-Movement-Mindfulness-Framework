@@ -1,11 +1,44 @@
+import { useState } from 'react'
 import styles from './ExerciseAnimation.module.css'
 
+const GIF_URLS = {
+  squat:        'https://static.exercisedb.dev/media/DhMl549.gif',
+  deadlift:     'https://static.exercisedb.dev/media/wQ2c4XD.gif',
+  benchPress:   'https://static.exercisedb.dev/media/EIeI8Vf.gif',
+  overheadPress:'https://static.exercisedb.dev/media/A6wtbuL.gif',
+  cleanToPress: 'https://static.exercisedb.dev/media/SGY8Zui.gif',
+  bentOverRow:  'https://static.exercisedb.dev/media/BJ0Hz5L.gif',
+  bicepCurl:    'https://static.exercisedb.dev/media/4dUn2iv.gif',
+  reverseLunge: 'https://static.exercisedb.dev/media/kMzUs9Y.gif',
+  farmersCarry: 'https://static.exercisedb.dev/media/qPEzJjA.gif',
+  suitcaseCarry:'https://static.exercisedb.dev/media/qPEzJjA.gif',
+  sideBend:     'https://static.exercisedb.dev/media/IpONWYv.gif',
+  slr:          'https://static.exercisedb.dev/media/bbLR7fB.gif',
+  forwardBend:  'https://static.exercisedb.dev/media/BbfB8Gb.gif',
+  hipRotation:  'https://static.exercisedb.dev/media/9gbyYKk.gif',
+  hopping:      'https://static.exercisedb.dev/media/e1e76I2.gif',
+  spotJogging:  'https://static.exercisedb.dev/media/J9zIWig.gif',
+  skipping:     'https://static.exercisedb.dev/media/e1e76I2.gif',
+}
+
 export default function ExerciseAnimation({ type, cadence }) {
+  const [gifFailed, setGifFailed] = useState(false)
+  const gifUrl = GIF_URLS[type]
   const Anim = animations[type] || animations.default
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.stage}>
-        <Anim />
+        {gifUrl && !gifFailed ? (
+          <img
+            src={gifUrl}
+            alt={type}
+            className={styles.gif}
+            onError={() => setGifFailed(true)}
+          />
+        ) : (
+          <Anim />
+        )}
       </div>
       {cadence && (
         <p className={styles.cadenceLabel}>{cadence}</p>

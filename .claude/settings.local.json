@@ -27,7 +27,18 @@
       "Bash(curl *)",
       "Bash(gh api *)",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('build_type:', d['build_type'], '| status:', d['status']\\)\")",
-      "Bash(gh workflow *)"
+      "Bash(gh workflow *)",
+      "WebSearch",
+      "WebFetch(domain:yuhonas.github.io)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.exercisedb.dev)",
+      "WebFetch(domain:lottiefiles.com)",
+      "WebFetch(domain:docs.ascendapi.com)",
+      "WebFetch(domain:oss.exercisedb.dev)",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(d['exerciseId'], d['name'], d['gifUrl']\\) for d in data['data']]\")",
+      "PowerShell($r = Invoke-RestMethod \"https://oss.exercisedb.dev/api/v1/exercises?name=barbell+squat&limit=5\"; $r.data | Select-Object exerciseId,name,gifUrl)",
+      "PowerShell($r = Invoke-RestMethod \"https://oss.exercisedb.dev/api/v1/exercises?name=squat&limit=10\" -ErrorAction Stop; $r.data | ForEach-Object { \"$\\($_.exerciseId\\) | $\\($_.name\\)\" })"
     ]
   }
 }
