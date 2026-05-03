@@ -16,7 +16,9 @@
       "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git diff HEAD -- vite.config.js src/main.jsx 2>&1)",
       "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git rm -r --cached dist/ node_modules/ 2>&1 | Select-Object -Last 5)",
       "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git commit -m \"fix: remove dist and node_modules from tracking, trigger Pages deploy\" 2>&1)",
-      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git push origin main 2>&1)"
+      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git push origin main 2>&1)",
+      "PowerShell($env:PATH)",
+      "PowerShell([System.IO.Directory]::GetFiles\\(\"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\", \"git.exe\", [System.IO.SearchOption]::AllDirectories\\) | Select-Object -First 5)"
     ]
   }
 }
