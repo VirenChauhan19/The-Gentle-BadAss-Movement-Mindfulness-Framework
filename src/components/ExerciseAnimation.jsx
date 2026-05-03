@@ -1,6 +1,30 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import lottie from 'lottie-web/build/player/lottie_light'
 import styles from './ExerciseAnimation.module.css'
 
+/* ── Lottie animations (60fps vector, sourced from LottieFiles public CDN) ── */
+const LOTTIE_URLS = {
+  squat:        'https://assets-v2.lottiefiles.com/a/88fb0ee2-1189-11ee-8b12-5f9f28e44169/YqYx6DWCzi.json',
+  deadlift:     'https://assets-v2.lottiefiles.com/a/7a007fe0-1183-11ee-a124-5f1c44b23bfc/kE3SHSNii5.json',
+  benchPress:   'https://assets-v2.lottiefiles.com/a/12631e98-1187-11ee-9621-c7250bfa88ff/oPcP15iFFx.json',
+  cleanToPress: 'https://assets-v2.lottiefiles.com/a/7e29fad4-1182-11ee-a91b-0f315e1d0acd/vAjCinizkd.json',
+  overheadPress:'https://assets-v2.lottiefiles.com/a/7e29fad4-1182-11ee-a91b-0f315e1d0acd/vAjCinizkd.json',
+  bentOverRow:  'https://assets-v2.lottiefiles.com/a/5069cc3c-2841-11f0-bcd0-3f670abdcc39/QqXzzRF8eU.json',
+  bicepCurl:    'https://assets-v2.lottiefiles.com/a/ef5833c4-1178-11ee-b6e3-db4025cb65dc/mScgr70wfH.json',
+  reverseLunge: 'https://assets-v2.lottiefiles.com/a/88fcdfc4-1189-11ee-8b14-93ac6d0a41c1/FmdST1LjSi.json',
+  farmersCarry: 'https://assets-v2.lottiefiles.com/a/6cd1f2c4-1172-11ee-8e6d-4fb0902f9b7b/kbjbX30NRL.json',
+  suitcaseCarry:'https://assets-v2.lottiefiles.com/a/cab267a6-1808-11ee-a24f-bb0dcac7ff3b/BjYrhyHide.json',
+  sideBend:     'https://assets-v2.lottiefiles.com/a/8ceb2b80-1176-11ee-8840-6f8ff89648f5/rfc6qDrkSB.json',
+  hipRotation:  'https://assets-v2.lottiefiles.com/a/bf227f50-1175-11ee-aea2-bb88cc8776ca/OeB1EFCpMg.json',
+  slr:          'https://assets-v2.lottiefiles.com/a/88fde48c-1189-11ee-8b15-27f9624e9fba/cIKqPX41qF.json',
+  forwardBend:  'https://assets-v2.lottiefiles.com/a/cebded28-1166-11ee-b6ee-87e5ec92ee9c/WcFwu9JWQ1.json',
+  spotJogging:  'https://assets-v2.lottiefiles.com/a/948b9e24-1167-11ee-8343-ff0d8001a90f/aXvKanKs9I.json',
+  hopping:      'https://assets-v2.lottiefiles.com/a/12ba38e6-1172-11ee-b9bd-d316d71234b5/N507bPwaTP.json',
+  skipping:     'https://assets-v2.lottiefiles.com/a/12ba38e6-1172-11ee-b9bd-d316d71234b5/N507bPwaTP.json',
+  sittingSlump: 'https://assets-v2.lottiefiles.com/a/57d660be-116b-11ee-a96c-a70043454fa8/S64yNuNx40.json',
+}
+
+/* ── GIF fallback (realistic but 15fps, used if Lottie load fails) ─────── */
 const GIF_URLS = {
   squat:        'https://static.exercisedb.dev/media/DhMl549.gif',
   deadlift:     'https://static.exercisedb.dev/media/wQ2c4XD.gif',
@@ -21,28 +45,49 @@ const GIF_URLS = {
   skipping:     'https://static.exercisedb.dev/media/e1e76I2.gif',
 }
 
+/* ── Lottie player component ─────────────────────────────────────────────── */
+function LottiePlayer({ src, onFail }) {
+  const containerRef = useRef(null)
+
+  useEffect(() => {
+    if (!containerRef.current || !src) return
+    const anim = lottie.loadAnimation({
+      container: containerRef.current,
+      path: src,
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+    })
+    anim.addEventListener('data_failed', onFail)
+    return () => anim.destroy()
+  }, [src, onFail])
+
+  return <div ref={containerRef} className={styles.lottieContainer} />
+}
+
+/* ── Main export ─────────────────────────────────────────────────────────── */
 export default function ExerciseAnimation({ type, cadence }) {
-  const [gifFailed, setGifFailed] = useState(false)
-  const gifUrl = GIF_URLS[type]
-  const Anim = animations[type] || animations.default
+  const [lottieFailed, setLottieFailed] = useState(false)
+  const [gifFailed, setGifFailed]       = useState(false)
+  const onLottieFail = useCallback(() => setLottieFailed(true), [])
+
+  const lottieUrl = LOTTIE_URLS[type]
+  const gifUrl    = GIF_URLS[type]
+  const Anim      = animations[type] || animations.default
+
+  let content
+  if (lottieUrl && !lottieFailed) {
+    content = <LottiePlayer src={lottieUrl} onFail={onLottieFail} />
+  } else if (gifUrl && !gifFailed) {
+    content = <img src={gifUrl} alt={type} className={styles.gif} onError={() => setGifFailed(true)} />
+  } else {
+    content = <Anim />
+  }
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.stage}>
-        {gifUrl && !gifFailed ? (
-          <img
-            src={gifUrl}
-            alt={type}
-            className={styles.gif}
-            onError={() => setGifFailed(true)}
-          />
-        ) : (
-          <Anim />
-        )}
-      </div>
-      {cadence && (
-        <p className={styles.cadenceLabel}>{cadence}</p>
-      )}
+      <div className={styles.stage}>{content}</div>
+      {cadence && <p className={styles.cadenceLabel}>{cadence}</p>}
     </div>
   )
 }

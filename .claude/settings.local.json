@@ -38,7 +38,10 @@
       "WebFetch(domain:oss.exercisedb.dev)",
       "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(d['exerciseId'], d['name'], d['gifUrl']\\) for d in data['data']]\")",
       "PowerShell($r = Invoke-RestMethod \"https://oss.exercisedb.dev/api/v1/exercises?name=barbell+squat&limit=5\"; $r.data | Select-Object exerciseId,name,gifUrl)",
-      "PowerShell($r = Invoke-RestMethod \"https://oss.exercisedb.dev/api/v1/exercises?name=squat&limit=10\" -ErrorAction Stop; $r.data | ForEach-Object { \"$\\($_.exerciseId\\) | $\\($_.name\\)\" })"
+      "PowerShell($r = Invoke-RestMethod \"https://oss.exercisedb.dev/api/v1/exercises?name=squat&limit=10\" -ErrorAction Stop; $r.data | ForEach-Object { \"$\\($_.exerciseId\\) | $\\($_.name\\)\" })",
+      "Bash(npm install *)",
+      "Bash(npm list *)",
+      "Bash(npx vite *)"
     ]
   }
 }
