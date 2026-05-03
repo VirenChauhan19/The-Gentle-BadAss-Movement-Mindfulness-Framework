@@ -1,0 +1,331 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.stage {
+  width: 240px;
+  height: 240px;
+  background: var(--cream-dark);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(44, 36, 21, 0.06);
+}
+
+.svg {
+  width: 200px;
+  height: 200px;
+}
+
+.cadenceLabel {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ─── SQUAT ──────────────────────────────────────────
+   Whole body bobs down; thighs rotate at hip; calves rotate at knee */
+@keyframes squatBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(20px); }
+}
+.squatBody {
+  animation: squatBob 5s ease-in-out infinite;
+}
+@keyframes squatHipL {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-8deg); }
+}
+.squatHipL {
+  animation: squatHipL 5s ease-in-out infinite;
+  transform-origin: 86px 138px;
+}
+@keyframes squatHipR {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(8deg); }
+}
+.squatHipR {
+  animation: squatHipR 5s ease-in-out infinite;
+  transform-origin: 114px 138px;
+}
+@keyframes squatKneeL {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(15deg); }
+}
+.squatKneeL {
+  animation: squatKneeL 5s ease-in-out infinite;
+  transform-origin: 86px 175px;
+}
+@keyframes squatKneeR {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-15deg); }
+}
+.squatKneeR {
+  animation: squatKneeR 5s ease-in-out infinite;
+  transform-origin: 114px 175px;
+}
+@keyframes squatArmL {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(20deg); }
+}
+.squatArmL {
+  animation: squatArmL 5s ease-in-out infinite;
+  transform-origin: 73px 68px;
+}
+@keyframes squatArmR {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-20deg); }
+}
+.squatArmR {
+  animation: squatArmR 5s ease-in-out infinite;
+  transform-origin: 127px 68px;
+}
+
+/* ─── DEADLIFT ──────────────────────────────────────────
+   Torso hinges from hip; bar rises with the lockout */
+@keyframes deadliftHinge {
+  0%, 100% { transform: rotate(-50deg) translateY(20px); }
+  50%      { transform: rotate(0deg) translateY(0); }
+}
+.deadliftHinge {
+  animation: deadliftHinge 5s ease-in-out infinite;
+  transform-origin: 100px 140px;
+}
+@keyframes deadliftBar {
+  0%, 100% { transform: translateY(40px); }
+  50%      { transform: translateY(-50px); }
+}
+.deadliftBar {
+  animation: deadliftBar 5s ease-in-out infinite;
+}
+
+/* ─── SUITCASE CARRY ──────────────────────────────────────
+   Whole body sways slightly; legs alternate */
+@keyframes carrySway {
+  0%, 100% { transform: translateX(-2px) translateY(0); }
+  50%      { transform: translateX(2px) translateY(-3px); }
+}
+.carryBody {
+  animation: carrySway 1.6s ease-in-out infinite;
+}
+@keyframes carryLegL {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-12deg); }
+}
+.carryLegL {
+  animation: carryLegL 1.6s ease-in-out infinite;
+  transform-origin: 88px 138px;
+}
+@keyframes carryLegR {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(12deg); }
+}
+.carryLegR {
+  animation: carryLegR 1.6s ease-in-out infinite;
+  transform-origin: 112px 138px;
+}
+@keyframes carryArmR {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(15deg); }
+}
+.carryArmR {
+  animation: carryArmR 1.6s ease-in-out infinite;
+  transform-origin: 127px 68px;
+}
+
+/* ─── HOPPING ──────────────────────────────────────────── */
+@keyframes hopBounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-30px); }
+}
+.hopBody {
+  animation: hopBounce 1s ease-in-out infinite;
+}
+@keyframes bounceArrow {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
+.bounceArrow {
+  animation: bounceArrow 1s ease-in-out infinite;
+}
+
+/* ─── SPOT JOGGING ────────────────────────────────────── */
+@keyframes jogBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.jogBody {
+  animation: jogBob 0.6s ease-in-out infinite;
+}
+@keyframes jogLegL {
+  0%, 100% { transform: rotate(15deg); }
+  50%      { transform: rotate(-25deg); }
+}
+.jogLegL {
+  animation: jogLegL 0.6s ease-in-out infinite;
+  transform-origin: 88px 138px;
+}
+@keyframes jogLegR {
+  0%, 100% { transform: rotate(-25deg); }
+  50%      { transform: rotate(15deg); }
+}
+.jogLegR {
+  animation: jogLegR 0.6s ease-in-out infinite;
+  transform-origin: 112px 138px;
+}
+@keyframes jogArmL {
+  0%, 100% { transform: rotate(-30deg); }
+  50%      { transform: rotate(20deg); }
+}
+.jogArmL {
+  animation: jogArmL 0.6s ease-in-out infinite;
+  transform-origin: 76px 68px;
+}
+@keyframes jogArmR {
+  0%, 100% { transform: rotate(20deg); }
+  50%      { transform: rotate(-30deg); }
+}
+.jogArmR {
+  animation: jogArmR 0.6s ease-in-out infinite;
+  transform-origin: 124px 68px;
+}
+
+/* ─── FORWARD BEND ────────────────────────────────────── */
+@keyframes forwardFold {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(60deg); }
+}
+.forwardFold {
+  animation: forwardFold 4s ease-in-out infinite;
+  transform-origin: 100px 140px;
+}
+@keyframes hipPulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+.hipHighlight {
+  animation: hipPulse 4s ease-in-out infinite;
+}
+
+/* ─── OVERHEAD PRESS ───────────────────────────────────── */
+@keyframes pressArmsUp {
+  0%, 100% { transform: translateY(40px); }
+  50%      { transform: translateY(0); }
+}
+.pressArmL, .pressArmR, .pressBar {
+  animation: pressArmsUp 5s ease-in-out infinite;
+}
+
+/* ─── HIP ROTATION ─────────────────────────────────────── */
+@keyframes rotateHip {
+  0%, 100% { transform: rotate(-15deg); }
+  50%      { transform: rotate(15deg); }
+}
+.rotateLeg {
+  animation: rotateHip 3s ease-in-out infinite;
+  transform-origin: 100px 148px;
+}
+
+/* ─── BENCH PRESS ─────────────────────────────────────── */
+@keyframes benchPress {
+  0%, 100% { transform: translateY(20px); }
+  50%      { transform: translateY(-10px); }
+}
+.benchArms {
+  animation: benchPress 5s ease-in-out infinite;
+}
+
+/* ─── BENT OVER ROW ───────────────────────────────────── */
+@keyframes rowPull {
+  0%, 100% { transform: translateY(20px); }
+  50%      { transform: translateY(-10px); }
+}
+.rowArms {
+  animation: rowPull 5s ease-in-out infinite;
+}
+
+/* ─── REVERSE LUNGE ───────────────────────────────────── */
+@keyframes lungeSquat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(15px); }
+}
+.lungeBody {
+  animation: lungeSquat 5s ease-in-out infinite;
+}
+.lungeBackLeg {
+  animation: lungeSquat 5s ease-in-out infinite;
+}
+
+/* ─── BICEP CURL ──────────────────────────────────────── */
+@keyframes curlL {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-110deg); }
+}
+.curlForearmL {
+  animation: curlL 5s ease-in-out infinite;
+  transform-origin: 76px 124px;
+}
+@keyframes curlR {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(110deg); }
+}
+.curlForearmR {
+  animation: curlR 5s ease-in-out infinite;
+  transform-origin: 124px 124px;
+}
+
+/* ─── SLR ─────────────────────────────────────────────── */
+@keyframes slrLift {
+  0%, 100% { transform: rotate(45deg); }
+  50%      { transform: rotate(0deg); }
+}
+.slrLeg {
+  animation: slrLift 4s ease-in-out infinite;
+  transform-origin: 35px 220px;
+}
+
+/* ─── PRONE HIP EXTENSION ─────────────────────────────── */
+@keyframes proneLift {
+  0%, 100% { transform: translateY(15px); }
+  50%      { transform: translateY(0); }
+}
+.proneLeg {
+  animation: proneLift 4s ease-in-out infinite;
+}
+
+/* ─── SITTING SLUMP ───────────────────────────────────── */
+@keyframes slumpToggle {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(15deg) translateY(8px); }
+}
+.slumpBody {
+  animation: slumpToggle 4s ease-in-out infinite;
+  transform-origin: 100px 145px;
+}
+
+/* ─── SIDE BEND ───────────────────────────────────────── */
+@keyframes sideBend {
+  0%, 100% { transform: rotate(-12deg); }
+  50%      { transform: rotate(12deg); }
+}
+.sideBendTorso {
+  animation: sideBend 4s ease-in-out infinite;
+  transform-origin: 100px 178px;
+}
+
+/* ─── DEFAULT ─────────────────────────────────────────── */
+@keyframes defaultBreath {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.015); }
+}
+.defaultFigure {
+  animation: defaultBreath 4s ease-in-out infinite;
+  transform-origin: 100px 140px;
+}

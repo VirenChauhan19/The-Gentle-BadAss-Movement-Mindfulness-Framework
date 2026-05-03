@@ -1,0 +1,178 @@
+.page {
+  padding-bottom: 40px;
+}
+
+.notFound {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--ink-light);
+}
+
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.back {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  transition: color 0.15s;
+}
+
+.back:hover {
+  color: var(--ink);
+}
+
+.catBadge {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.animSection {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0 32px;
+  background: var(--cream-dark);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.content {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.name {
+  font-size: 1.9rem;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.blockLabel {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.blockText {
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.6;
+}
+
+.cue {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--ink);
+  line-height: 1.55;
+  border-left: 3px solid var(--sand);
+  padding-left: 16px;
+  margin: 0;
+  font-style: italic;
+}
+
+.steps {
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  counter-reset: steps;
+}
+
+.step {
+  counter-increment: steps;
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.55;
+}
+
+.step:last-child {
+  border-bottom: none;
+}
+
+.step::before {
+  content: counter(steps);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1rem;
+  color: var(--ink-faint);
+  min-width: 18px;
+  flex-shrink: 0;
+}
+
+.antiRotation {
+  display: flex;
+  gap: 12px;
+  background: var(--sand-light);
+  border: 1px solid var(--sand);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.antiRotationIcon {
+  font-size: 1rem;
+  color: var(--terracotta);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.antiRotationLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.antiRotationText {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.55;
+}
+
+.cadenceBlock {
+  background: var(--cream-dark);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.cadenceTitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+
+.cadenceDetail {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.1rem;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.cadenceNote {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  font-style: italic;
+}

@@ -1,0 +1,115 @@
+.page {
+  padding-bottom: 40px;
+}
+
+.header {
+  padding: 40px 24px 20px;
+  background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 1.8rem;
+  color: var(--ink);
+}
+
+.avgText {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: var(--ink-light);
+}
+
+.avgText strong {
+  color: var(--ink);
+}
+
+.chartSection {
+  padding: 20px 20px 0;
+}
+
+.chartLabel {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.chart {
+  width: 100%;
+  height: 60px;
+}
+
+.empty {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--ink-light);
+  font-size: 0.9rem;
+}
+
+.startLink {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.list {
+  padding: 16px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.row {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 90px 1fr 36px;
+  gap: 12px;
+  align-items: center;
+}
+
+.rowDate {
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  white-space: nowrap;
+}
+
+.rowBar {
+  height: 6px;
+  background: var(--cream-dark);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.rowBarFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.rowScore {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1rem;
+  text-align: right;
+}
+
+.rowNote {
+  grid-column: 1 / -1;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  font-style: italic;
+  padding-left: 2px;
+  line-height: 1.5;
+}

@@ -1,0 +1,195 @@
+.page {
+  padding-bottom: 40px;
+}
+
+.header {
+  padding: 40px 24px 20px;
+  background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 1.5rem;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.progress {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressBar {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.progressText strong {
+  color: var(--ink);
+}
+
+.factors {
+  padding: 0 20px;
+}
+
+.section {
+  margin-top: 28px;
+}
+
+.catLabel {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+.factor {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.factorTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.factorIcon {
+  font-size: 1.1rem;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.factorInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.factorLabel {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.factorQ {
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  line-height: 1.4;
+}
+
+.factorValue {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--ink);
+  min-width: 28px;
+  text-align: right;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sliderEdge {
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  min-width: 12px;
+}
+
+.slider {
+  flex: 1;
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--ink-faint);
+  margin-top: 4px;
+  padding: 0 22px;
+}
+
+.noteSection {
+  padding: 28px 20px 8px;
+}
+
+.noteLabel {
+  display: block;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.note {
+  width: 100%;
+  background: var(--cream-dark);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.88rem;
+  color: var(--ink);
+  resize: none;
+  outline: none;
+  line-height: 1.6;
+  transition: border-color 0.2s ease;
+}
+
+.note:focus {
+  border-color: var(--ink-light);
+}
+
+.saveSection {
+  padding: 16px 20px 0;
+}
+
+.saveBtn {
+  width: 100%;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.saveBtn:active {
+  transform: scale(0.98);
+}
+
+.saveBtn:disabled {
+  background: var(--border);
+  color: var(--ink-faint);
+}
+
+.saved {
+  background: var(--sage);
+}

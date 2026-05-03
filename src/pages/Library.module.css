@@ -1,0 +1,131 @@
+.page {
+  padding-bottom: 40px;
+}
+
+.header {
+  padding: 40px 24px 20px;
+  background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 1.8rem;
+  color: var(--ink);
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filters::-webkit-scrollbar { display: none; }
+
+.filter {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--ink-light);
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.filter:hover {
+  border-color: var(--ink-light);
+  color: var(--ink);
+}
+
+.filterActive {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+
+.categoryDesc {
+  padding: 10px 20px 0;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.grid {
+  padding: 16px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card {
+  display: block;
+  background: var(--cream-dark);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.cardCat {
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.cardName {
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.cardPurpose {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+  padding-right: 24px;
+}
+
+.cadenceBadge {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--sand-light);
+  color: var(--ink-light);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.arrow {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  font-size: 0.9rem;
+  color: var(--ink-faint);
+}

@@ -1,0 +1,207 @@
+.page {
+  padding: 0 0 24px;
+}
+
+.header {
+  padding: 48px 24px 32px;
+  background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subtitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.title {
+  font-size: 2.2rem;
+  color: var(--ink);
+  line-height: 1.15;
+}
+
+.date {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  margin-top: 4px;
+}
+
+.cards {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  display: block;
+  background: var(--cream-dark);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.cardLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.score {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.cardBody {
+  font-size: 0.95rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+
+.cardArrow {
+  position: absolute;
+  bottom: 18px;
+  right: 20px;
+  font-size: 1rem;
+  color: var(--ink-faint);
+}
+
+.cardPrimary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+.cardPrimary .cardLabel { color: rgba(245, 240, 232, 0.5); }
+.cardPrimary .cardBody { color: rgba(245, 240, 232, 0.8); }
+.cardPrimary .cardArrow { color: rgba(245, 240, 232, 0.5); }
+.cardPrimary .score { color: var(--cream); }
+
+.cardMove {
+  border-left: 3px solid var(--sage);
+}
+
+.cardHistory {
+  border-left: 3px solid var(--slate);
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  background: var(--cream-dark);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.statNum {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+
+.statLabel {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.statDivider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+  margin: 0 8px;
+}
+
+.principles {
+  padding: 8px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.principlesTitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 16px;
+}
+
+.principle {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.principle:last-child {
+  border-bottom: none;
+}
+
+.principleIcon {
+  font-size: 1.2rem;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.principle strong {
+  display: block;
+  font-size: 0.9rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+
+.principle p {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+
+.footer {
+  padding: 32px 24px 0;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  line-height: 1.8;
+}
+
+.footerSub {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
