@@ -5,7 +5,15 @@
       "PowerShell(New-Item *)",
       "PowerShell(Set-ExecutionPolicy *)",
       "PowerShell(Start-Sleep -Seconds 3; Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5 | Select-Object -ExpandProperty StatusCode)",
-      "PowerShell(Start-Sleep -Seconds 4; Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5 | Select-Object -ExpandProperty StatusCode)"
+      "PowerShell(Start-Sleep -Seconds 4; Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5 | Select-Object -ExpandProperty StatusCode)",
+      "PowerShell(cmd /c \"where git 2>&1\")",
+      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git config user.email \"chauhan.viren08@gmail.com\"; & $git config user.name \"VirenChauhan19\"; & $git status 2>&1)",
+      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git log --oneline -10 2>&1)",
+      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git log --oneline --name-status HEAD~2..HEAD 2>&1 | Select-Object -First 30)",
+      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git show --stat HEAD 2>&1 | Select-Object -First 20; Write-Host \"---\"; & $git remote -v 2>&1; Write-Host \"---\"; & $git status --short 2>&1)",
+      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git ls-files 2>&1 | Select-Object -First 40)",
+      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git ls-files 2>&1 | Select-String \"^src|^package|^vite|^index.html\")",
+      "PowerShell($git = \"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\cmd\\\\git.exe\"; cd \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\"; & $git diff HEAD -- vite.config.js src/main.jsx 2>&1)"
     ]
   }
 }
