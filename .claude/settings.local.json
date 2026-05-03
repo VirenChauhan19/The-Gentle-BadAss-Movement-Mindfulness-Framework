@@ -21,7 +21,13 @@
       "PowerShell([System.IO.Directory]::GetFiles\\(\"C:\\\\Users\\\\chauh\\\\AppData\\\\Local\\\\GitHubDesktop\", \"git.exe\", [System.IO.SearchOption]::AllDirectories\\) | Select-Object -First 5)",
       "Bash(gh run *)",
       "PowerShell(gh run *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(node -e ' *)",
+      "Bash(curl -sI \"https://virenchauhan19.github.io/The-Gentle-BadAss-Movement-Mindfulness-Framework/\")",
+      "Bash(curl *)",
+      "Bash(gh api *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('build_type:', d['build_type'], '| status:', d['status']\\)\")",
+      "Bash(gh workflow *)"
     ]
   }
 }
