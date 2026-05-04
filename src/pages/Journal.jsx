@@ -23,10 +23,8 @@ export default function Journal() {
   }
 
   const wordCount = note.trim() ? note.trim().split(/\s+/).length : 0
-  const isNoteValid = wordCount >= 50
 
   async function handleSave() {
-    if (!isNoteValid) return
     await saveEntry({ scores, note })
     setSaved(true)
     setTimeout(() => navigate('/history'), 800)
@@ -65,31 +63,30 @@ export default function Journal() {
         ))}
       </div>
 
-      {/* Mandatory Reflection Note */}
+      {/* Optional Reflection Note */}
       <div className={styles.noteSection}>
-        <label className={styles.noteLabel} htmlFor="daily-note">Mandatory Reflection (Min 50 words)</label>
+        <label className={styles.noteLabel} htmlFor="daily-note">Reflection <span className={styles.optional}>(Optional)</span></label>
         <p className={styles.noteHelp}>Shift from data-logging to self-mentoring. How did you move? How was your mood? Any surprises?</p>
         <textarea
           id="daily-note"
-          className={styles.note + (!isNoteValid && note.length > 0 ? ' ' + styles.invalid : '')}
+          className={styles.note}
           placeholder="Write about your day, your movement, and your mind. This is for your 270-day archive of personal growth."
           value={note}
           onChange={e => { setNote(e.target.value); setSaved(false) }}
           rows={8}
         />
-        <div className={styles.noteFooter}>
-          <span className={isNoteValid ? styles.validCount : styles.invalidCount}>
-            {wordCount} / 50 words
-          </span>
-          {!isNoteValid && <span className={styles.warning}>Keep writing to unlock completion...</span>}
-        </div>
+        {wordCount > 0 && (
+          <div className={styles.noteFooter}>
+            <span className={styles.validCount}>{wordCount} words</span>
+          </div>
+        )}
       </div>
 
       <div className={styles.saveSection}>
         <button
           className={styles.saveBtn + (saved ? ' ' + styles.saved : '')}
           onClick={handleSave}
-          disabled={answered === 0 || !isNoteValid}
+          disabled={answered === 0}
         >
           {saved ? 'Saved ✓' : 'Complete Today\'s Journey'}
         </button>

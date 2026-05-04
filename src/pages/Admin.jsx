@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { db } from '../firebase'
-import { collectionGroup, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collectionGroup, onSnapshot, query } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
@@ -29,9 +29,12 @@ export default function Admin() {
   useEffect(() => {
     if (!isAdmin || !db) return
 
-    const q = query(collectionGroup(db, 'journal'), orderBy('date', 'desc'))
+    const q = query(collectionGroup(db, 'journal'))
     const unsub = onSnapshot(q, snapshot => {
-      setAllEntries(snapshot.docs.map(d => ({ ...d.data(), _uid: d.ref.parent.parent.id })))
+      const docs = snapshot.docs
+        .map(d => ({ ...d.data(), _uid: d.ref.parent.parent.id }))
+        .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+      setAllEntries(docs)
     }, err => {
       if (err.code === 'failed-precondition') setIndexError(err.message)
     })
