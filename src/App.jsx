@@ -13,19 +13,29 @@ import Onboarding from './pages/Onboarding'
 import styles from './App.module.css'
 
 function AppRoutes() {
-  const { profile, user } = useData()
+  const data = useData()
   const navigate = useNavigate()
   const location = useLocation()
 
+  const user = data?.user
+  const profile = data?.profile
+
   useEffect(() => {
-    // If user is logged in but profile is missing/incomplete, force onboarding
-    // except if they are already on the onboarding page
-    if (user && profile !== undefined) {
-      if (!profile?.onboardingComplete && location.pathname !== '/onboarding') {
-        navigate('/onboarding')
-      }
+    // If user is logged in but profile is explicitly null (not in DB/Local), 
+    // force onboarding unless already there.
+    if (user && profile === null && location.pathname !== '/onboarding') {
+      navigate('/onboarding')
+    }
+    // If profile exists but incomplete
+    if (user && profile && !profile.onboardingComplete && location.pathname !== '/onboarding') {
+      navigate('/onboarding')
     }
   }, [user, profile, navigate, location.pathname])
+
+  // Simple loading gate
+  if (user === undefined) {
+    return <div className={styles.loading}>Initializing...</div>
+  }
 
   return (
     <Routes>

@@ -12,3 +12,13 @@
   overflow-y: auto;
   padding-bottom: 80px;
 }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: var(--ink-light);
+}

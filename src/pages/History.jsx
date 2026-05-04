@@ -17,9 +17,21 @@ export default function History() {
       ? sessions.reduce((sum, s) => sum + s.tpr, 0) / sessions.length 
       : null
     
+    let shortDate = '—'
+    try {
+      if (e.date) {
+        const d = new Date(e.date)
+        if (!isNaN(d.getTime())) {
+          shortDate = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+        }
+      }
+    } catch (err) {
+      console.warn('Invalid date in entry:', e.date)
+    }
+
     return {
       date: e.date,
-      shortDate: new Date(e.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      shortDate,
       score: computeFeelScore(e.scores || {}),
       tpr: avgTpr
     }
