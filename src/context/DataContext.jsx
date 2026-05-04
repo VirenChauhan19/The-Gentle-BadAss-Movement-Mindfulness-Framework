@@ -36,6 +36,17 @@ export function DataProvider({ children }) {
       return
     }
 
+    // User just signed in — restore from localStorage cache so we don't
+    // land on null (which triggers the onboarding redirect) before Firestore
+    // has had a chance to respond. If there's no cache, use undefined so the
+    // App loading gate holds until Firestore confirms the actual state.
+    try {
+      const stored = localStorage.getItem(PROFILE_KEY)
+      setProfileState(stored ? JSON.parse(stored) : undefined)
+    } catch {
+      setProfileState(undefined)
+    }
+
     // Signed in — subscribe to this user's Firestore journal in real-time
     const journalRef = collection(db, 'users', user.uid, 'journal')
     const q = query(journalRef, orderBy('date', 'desc'))
