@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { db } from '../firebase'
-import { collection, doc, setDoc, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collection, doc, setDoc, deleteDoc, getDocs, onSnapshot, query, orderBy } from 'firebase/firestore'
 import { useAuth } from './AuthContext'
 import {
   getJournalEntries as getLocalEntries,
@@ -72,6 +72,25 @@ export function DataProvider({ children }) {
         setProfileState(data)
         localStorage.setItem(PROFILE_KEY, JSON.stringify(data))
       } else {
+        // No Firestore profile — check if a complete localStorage profile exists
+        // (e.g. user previously used the app as a guest or on another device).
+        // If so, migrate it to Firestore so they don't have to redo onboarding.
+        try {
+          const cached = localStorage.getItem(PROFILE_KEY)
+          if (cached) {
+            const cachedProfile = JSON.parse(cached)
+            if (cachedProfile?.onboardingComplete) {
+              const migrated = { ...cachedProfile, userId: user.uid, migratedAt: new Date().toISOString() }
+              setProfileState(migrated)
+              localStorage.setItem(PROFILE_KEY, JSON.stringify(migrated))
+              setDoc(profileRef, migrated, { merge: true }).catch(err =>
+                console.warn('Profile migration error:', err)
+              )
+              setProfileFetched(true)
+              return
+            }
+          }
+        } catch {}
         setProfileState(null)
         localStorage.removeItem(PROFILE_KEY)
       }
@@ -107,14 +126,18 @@ export function DataProvider({ children }) {
     setGuestNameState(name)
   }
 
-  async function saveProfile(data) {
+  function saveProfile(data) {
     const updated = { ...profile, ...data, updatedAt: new Date().toISOString() }
     setProfileState(updated)
+    setProfileFetched(true)
     localStorage.setItem(PROFILE_KEY, JSON.stringify(updated))
 
+    // Fire-and-forget — never block the UI on Firestore
     if (user && db) {
       const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
-      await setDoc(profileRef, updated, { merge: true })
+      setDoc(profileRef, updated, { merge: true }).catch(err =>
+        console.warn('Profile sync error:', err)
+      )
     }
   }
 
@@ -143,12 +166,35 @@ export function DataProvider({ children }) {
     return entries.find(e => e.date === today) || null
   }
 
+  async function clearAllData() {
+    // Wipe localStorage
+    localStorage.removeItem('gb_journal')
+    localStorage.removeItem('gb_profile')
+    localStorage.removeItem('gb_guest_name')
+
+    // Reset in-memory state immediately
+    setEntries([])
+    setProfileState(null)
+    setGuestNameState(null)
+    setProfileFetched(true)
+
+    // Wipe Firestore if signed in
+    if (user && db) {
+      const journalRef = collection(db, 'users', user.uid, 'journal')
+      const snap = await getDocs(journalRef)
+      await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))
+
+      const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
+      await deleteDoc(profileRef)
+    }
+  }
+
   // Expose undefined while Firestore hasn't replied yet so App.jsx loading
   // gate holds. Once profileFetched is true, expose the real value (null or object).
   const exposedProfile = (user && !profileFetched) ? undefined : profile
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, user }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user }}>
       {children}
     </DataContext.Provider>
   )

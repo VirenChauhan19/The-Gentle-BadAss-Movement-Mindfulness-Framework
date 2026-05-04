@@ -10,11 +10,13 @@ const ADMIN_EMAIL = 'chauhan.viren08@gmail.com'
 
 export default function Admin() {
   const { user, signInWithGoogle, signOut, authError } = useAuth()
-  const { guestName, setGuestName, profile, entries } = useData()
+  const { guestName, setGuestName, profile, entries, clearAllData } = useData()
   const [allEntries, setAllEntries] = useState([])
   const [indexError, setIndexError] = useState(false)
   const [nameInput, setNameInput] = useState('')
   const [namePending, setNamePending] = useState(false)
+  const [confirmClear, setConfirmClear] = useState(false)
+  const [clearing, setClearing] = useState(false)
 
   const isAdmin = user?.email === ADMIN_EMAIL
 
@@ -155,6 +157,34 @@ export default function Admin() {
             Upgrade to Google Sign-In
           </button>
         )}
+
+        {confirmClear ? (
+          <div className={styles.confirmBox}>
+            <p className={styles.confirmText}>
+              This will permanently delete all your journal entries and profile data. This cannot be undone.
+            </p>
+            <button
+              className={styles.confirmDestructBtn}
+              disabled={clearing}
+              onClick={async () => {
+                setClearing(true)
+                await clearAllData()
+                setClearing(false)
+                setConfirmClear(false)
+              }}
+            >
+              {clearing ? 'Clearing…' : 'Yes, delete everything'}
+            </button>
+            <button className={styles.confirmCancelBtn} onClick={() => setConfirmClear(false)}>
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button className={styles.clearDataBtn} onClick={() => setConfirmClear(true)}>
+            Clear My Data
+          </button>
+        )}
+
         <button className={styles.signOutBtn} onClick={user ? signOut : () => setGuestName(null)}>
           {user ? 'Sign Out' : 'Clear Guest Session'}
         </button>
