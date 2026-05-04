@@ -41,7 +41,9 @@
       "PowerShell($r = Invoke-RestMethod \"https://oss.exercisedb.dev/api/v1/exercises?name=squat&limit=10\" -ErrorAction Stop; $r.data | ForEach-Object { \"$\\($_.exerciseId\\) | $\\($_.name\\)\" })",
       "Bash(npm install *)",
       "Bash(npm list *)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(git checkout *)",
+      "Bash(npm uninstall *)"
     ]
   }
 }
