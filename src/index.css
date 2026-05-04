@@ -7,10 +7,12 @@
 :root {
   --cream: #f5f0e8;
   --cream-dark: #ede5d8;
+  --paper: #ffffff;
   --ink: #2c2415;
   --ink-light: #6b5e4a;
   --ink-faint: #a8997f;
   --sage: #7a9470;
+  --sage-dark: #5c7458;
   --sage-light: #c8d9c3;
   --terracotta: #b86b4a;
   --slate: #6a7d8e;
@@ -19,6 +21,7 @@
   --sand-light: #e8dcc8;
   --border: #d8ccb8;
   --shadow: rgba(44, 36, 21, 0.08);
+  --shadow-md: rgba(44, 36, 21, 0.14);
   font-size: 16px;
 }
 

@@ -50,9 +50,10 @@
 
 .chartCard {
   background: var(--paper);
-  border: 2px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: 1.5rem;
   padding: 1.5rem;
+  box-shadow: 0 1px 4px var(--shadow);
 }
 
 .chartTitle {

@@ -57,7 +57,7 @@ export default function Admin() {
               autoFocus
             />
             <button
-              className={styles.googleBtn}
+              className={styles.primaryBtn}
               onClick={() => { if (nameInput.trim()) setGuestName(nameInput.trim()) }}
               disabled={!nameInput.trim()}
             >
@@ -80,6 +80,7 @@ export default function Admin() {
           <GoogleIcon />
           Continue with Google
         </button>
+        <div className={styles.divider}>or</div>
         <button className={styles.guestBtn} onClick={() => setNamePending(true)}>
           Continue as Guest
         </button>
@@ -149,7 +150,7 @@ export default function Admin() {
 
       <div className={styles.accountActions}>
         {!user && (
-          <button className={styles.googleBtn} style={{ width: '100%', marginBottom: 12 }} onClick={() => signInWithGoogle('popup')}>
+          <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')}>
             <GoogleIcon />
             Upgrade to Google Sign-In
           </button>
