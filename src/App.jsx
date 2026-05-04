@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DataProvider, useData } from './context/DataContext'
 import Nav from './components/Nav'
+import FloatingChat from './components/FloatingChat'
 import Home from './pages/Home'
 import Journal from './pages/Journal'
 import History from './pages/History'
@@ -70,6 +71,7 @@ export default function App() {
             <AppRoutes />
           </main>
           <Nav />
+          <FloatingChat />
         </div>
       </DataProvider>
     </AuthProvider>

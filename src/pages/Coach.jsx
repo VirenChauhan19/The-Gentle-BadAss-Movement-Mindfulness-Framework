@@ -533,7 +533,7 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
 async function apiCall(messages, maxTokens = 600) {
   const key = import.meta.env.VITE_OPENROUTER_API_KEY
   if (!key) throw new Error('OpenRouter API key not configured')
-  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free'
+  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'openai/gpt-4o-mini'
 
   const res = await fetch(API_URL, {
     method: 'POST',
@@ -547,6 +547,7 @@ async function apiCall(messages, maxTokens = 600) {
   })
   if (!res.ok) {
     const e = await res.json().catch(() => ({}))
+    if (res.status === 429) throw new Error('Rate limit reached — wait 30 seconds and try again. (Free tier limit)')
     throw new Error(e.error?.message || `OpenRouter error ${res.status}`)
   }
   const data = await res.json()
