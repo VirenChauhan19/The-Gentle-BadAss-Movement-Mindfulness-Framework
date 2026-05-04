@@ -46,7 +46,10 @@
       "Bash(npm uninstall *)",
       "WebFetch(domain:gymvisual.com)",
       "WebFetch(domain:musclewiki.com)",
-      "WebFetch(domain:api.musclewiki.com)"
+      "WebFetch(domain:api.musclewiki.com)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
