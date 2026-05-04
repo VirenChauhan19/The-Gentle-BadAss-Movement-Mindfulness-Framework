@@ -22,7 +22,11 @@ export default function Journal() {
     setSaved(false)
   }
 
+  const wordCount = note.trim() ? note.trim().split(/\s+/).length : 0
+  const isNoteValid = wordCount >= 50
+
   async function handleSave() {
+    if (!isNoteValid) return
     await saveEntry({ scores, note })
     setSaved(true)
     setTimeout(() => navigate('/history'), 800)
@@ -35,7 +39,7 @@ export default function Journal() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.label}>Feel Journal</p>
+        <p className={styles.label}>Reflection Gate</p>
         <h1 className={styles.title}>{dateStr}</h1>
         <div className={styles.progress}>
           <div className={styles.progressBar} style={{ width: `${(answered / total) * 100}%` }} />
@@ -61,26 +65,33 @@ export default function Journal() {
         ))}
       </div>
 
-      {/* Note */}
+      {/* Mandatory Reflection Note */}
       <div className={styles.noteSection}>
-        <label className={styles.noteLabel} htmlFor="daily-note">Today's note (optional)</label>
+        <label className={styles.noteLabel} htmlFor="daily-note">Mandatory Reflection (Min 50 words)</label>
+        <p className={styles.noteHelp}>Shift from data-logging to self-mentoring. How did you move? How was your mood? Any surprises?</p>
         <textarea
           id="daily-note"
-          className={styles.note}
-          placeholder="What did you notice today? Any patterns, surprises, or moments of feeling good?"
+          className={styles.note + (!isNoteValid && note.length > 0 ? ' ' + styles.invalid : '')}
+          placeholder="Write about your day, your movement, and your mind. This is for your 270-day archive of personal growth."
           value={note}
           onChange={e => { setNote(e.target.value); setSaved(false) }}
-          rows={4}
+          rows={8}
         />
+        <div className={styles.noteFooter}>
+          <span className={isNoteValid ? styles.validCount : styles.invalidCount}>
+            {wordCount} / 50 words
+          </span>
+          {!isNoteValid && <span className={styles.warning}>Keep writing to unlock completion...</span>}
+        </div>
       </div>
 
       <div className={styles.saveSection}>
         <button
           className={styles.saveBtn + (saved ? ' ' + styles.saved : '')}
           onClick={handleSave}
-          disabled={answered === 0}
+          disabled={answered === 0 || !isNoteValid}
         >
-          {saved ? 'Saved ✓' : 'Save Today\'s Entry'}
+          {saved ? 'Saved ✓' : 'Complete Today\'s Journey'}
         </button>
       </div>
     </div>

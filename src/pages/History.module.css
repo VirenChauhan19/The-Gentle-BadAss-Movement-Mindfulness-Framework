@@ -6,6 +6,7 @@
   padding: 40px 24px 20px;
   background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
   border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
 }
 
 .label {
@@ -19,33 +20,63 @@
 .title {
   font-size: 1.8rem;
   color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.commitment {
+  font-size: 0.9rem;
+  color: var(--ink-light);
+  margin-bottom: 0.5rem;
 }
 
 .avgText {
-  margin-top: 8px;
   font-size: 0.82rem;
   color: var(--ink-light);
 }
 
-.avgText strong {
-  color: var(--ink);
+.highAvg {
+  font-size: 1rem;
+  color: #8b9e7e;
+  font-weight: 600;
 }
 
-.chartSection {
-  padding: 20px 20px 0;
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 0 20px;
+  margin-bottom: 3rem;
 }
 
-.chartLabel {
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin-bottom: 8px;
+.chartCard {
+  background: var(--paper);
+  border: 2px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
 }
 
-.chart {
+.chartTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.chartDesc {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  margin-bottom: 1.5rem;
+}
+
+.chartContainer {
   width: 100%;
-  height: 60px;
+  height: 200px;
+}
+
+.listTitle {
+  padding: 0 24px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
 }
 
 .empty {
@@ -65,51 +96,51 @@
 }
 
 .list {
-  padding: 16px 20px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  padding: 0 20px;
 }
 
 .row {
-  padding: 14px 0;
+  padding: 20px 0;
   border-bottom: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: 90px 1fr 36px;
-  gap: 12px;
+}
+
+.rowTop {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 0.5rem;
 }
 
 .rowDate {
-  font-size: 0.78rem;
-  color: var(--ink-light);
-  white-space: nowrap;
-}
-
-.rowBar {
-  height: 6px;
-  background: var(--cream-dark);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.rowBarFill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.5s ease;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .rowScore {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1rem;
-  text-align: right;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.rowSessions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.sessionBadge {
+  background: var(--border);
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .rowNote {
-  grid-column: 1 / -1;
-  font-size: 0.78rem;
-  color: var(--ink-faint);
-  font-style: italic;
-  padding-left: 2px;
+  font-size: 0.85rem;
+  color: var(--ink-light);
   line-height: 1.5;
+  font-style: italic;
 }

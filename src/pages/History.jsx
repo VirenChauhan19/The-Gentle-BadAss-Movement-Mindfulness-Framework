@@ -1,50 +1,122 @@
 import { Link } from 'react-router-dom'
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area 
+} from 'recharts'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
 import styles from './History.module.css'
 
 export default function History() {
-  const { entries: rawEntries } = useData()
-  const entries = [...rawEntries].sort((a, b) => b.date.localeCompare(a.date))
+  const { entries: rawEntries, profile } = useData()
+  const entries = [...rawEntries].sort((a, b) => a.date.localeCompare(b.date))
+  const displayEntries = [...rawEntries].sort((a, b) => b.date.localeCompare(a.date))
 
-  const scores = entries.map(e => ({
-    date: e.date,
-    score: computeFeelScore(e.scores || {})
-  }))
+  const chartData = entries.map(e => {
+    const sessions = e.sessions || []
+    const avgTpr = sessions.length 
+      ? sessions.reduce((sum, s) => sum + s.tpr, 0) / sessions.length 
+      : null
+    
+    return {
+      date: e.date,
+      shortDate: new Date(e.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+      score: computeFeelScore(e.scores || {}),
+      tpr: avgTpr
+    }
+  })
 
-  const avg = scores.length
-    ? Math.round(scores.reduce((s, e) => s + e.score, 0) / scores.length * 10) / 10
+  const avg = chartData.length
+    ? Math.round(chartData.reduce((s, e) => s + e.score, 0) / chartData.length * 10) / 10
     : null
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.label}>Feel History</p>
+        <p className={styles.label}>Quality Dashboard</p>
         <h1 className={styles.title}>Your Journey</h1>
+        <p className={styles.commitment}>
+          Path: <strong>{profile?.path || 'Rehab'}</strong> · 
+          Goal: <strong>{profile?.commitment || 270} Days</strong>
+        </p>
         {avg !== null && (
-          <p className={styles.avgText}>Average feel score: <strong>{avg}</strong> across {entries.length} {entries.length === 1 ? 'day' : 'days'}</p>
+          <p className={avg >= 7 ? styles.highAvg : styles.avgText}>
+            Average feel score: <strong>{avg}</strong>
+          </p>
         )}
       </header>
 
-      {scores.length > 1 && (
-        <div className={styles.chartSection}>
-          <p className={styles.chartLabel}>Last {Math.min(scores.length, 30)} days</p>
-          <SparkChart scores={scores.slice(0, 30).reverse()} />
+      <section className={styles.dashboard}>
+        <div className={styles.chartCard}>
+          <h2 className={styles.chartTitle}>TPR Mastery (Rising Line = Quality)</h2>
+          <p className={styles.chartDesc}>Tracking Time Per Rep: slower is smoother.</p>
+          <div className={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={chartData.filter(d => d.tpr !== null)}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                <XAxis dataKey="shortDate" hide />
+                <YAxis hide domain={['auto', 'auto']} />
+                <Tooltip 
+                  contentStyle={{ background: 'var(--paper)', border: '2px solid var(--border)', borderRadius: '1rem' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="tpr" 
+                  stroke="var(--ink)" 
+                  strokeWidth={3} 
+                  dot={{ r: 4, fill: 'var(--ink)' }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      )}
 
-      {entries.length === 0 ? (
-        <div className={styles.empty}>
-          <p>No entries yet.</p>
-          <Link to="/journal" className={styles.startLink}>Log today's feel →</Link>
+        <div className={styles.chartCard}>
+          <h2 className={styles.chartTitle}>Feel Factor Trends</h2>
+          <p className={styles.chartDesc}>Goal: Maintain a baseline above 7.0</p>
+          <div className={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#8b9e7e" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#8b9e7e" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                <XAxis dataKey="shortDate" hide />
+                <YAxis hide domain={[0, 10]} />
+                <Tooltip 
+                   contentStyle={{ background: 'var(--paper)', border: '2px solid var(--border)', borderRadius: '1rem' }}
+                />
+                <ReferenceLine y={7} stroke="#8b9e7e" strokeDasharray="3 3" label={{ position: 'right', value: '7.0 Target', fill: '#8b9e7e', fontSize: 10 }} />
+                <Area 
+                  type="monotone" 
+                  dataKey="score" 
+                  stroke="#8b9e7e" 
+                  fillOpacity={1} 
+                  fill="url(#colorScore)" 
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      ) : (
-        <div className={styles.list}>
-          {entries.map(entry => (
+      </section>
+
+      <div className={styles.list}>
+        <h2 className={styles.listTitle}>Reflection Archive</h2>
+        {displayEntries.length === 0 ? (
+          <div className={styles.empty}>
+            <p>No entries yet.</p>
+            <Link to="/journal" className={styles.startLink}>Log today's feel →</Link>
+          </div>
+        ) : (
+          displayEntries.map(entry => (
             <EntryRow key={entry.date} entry={entry} />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   )
 }
@@ -53,57 +125,28 @@ function EntryRow({ entry }) {
   const score = computeFeelScore(entry.scores || {})
   const date = new Date(entry.date)
   const dateStr = date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-  const scoreColor = score >= 7 ? 'var(--sage)' : score >= 4 ? 'var(--sand)' : 'var(--terracotta)'
+  const scoreColor = score >= 7 ? '#8b9e7e' : score >= 4 ? '#d9b38a' : '#d98a8a'
 
   return (
     <div className={styles.row}>
-      <div className={styles.rowDate}>{dateStr}</div>
-      <div className={styles.rowBar}>
-        <div
-          className={styles.rowBarFill}
-          style={{ width: `${(score / 10) * 100}%`, background: scoreColor }}
-        />
+      <div className={styles.rowTop}>
+        <div className={styles.rowDate}>{dateStr}</div>
+        <div className={styles.rowScore} style={{ color: scoreColor }}>{score.toFixed(1)}</div>
       </div>
-      <div className={styles.rowScore} style={{ color: scoreColor }}>{score.toFixed(1)}</div>
+      {entry.sessions && entry.sessions.length > 0 && (
+        <div className={styles.rowSessions}>
+          {entry.sessions.map((s, i) => (
+            <span key={i} className={styles.sessionBadge}>
+              {s.exerciseName}: {s.tpr}s TPR
+            </span>
+          ))}
+        </div>
+      )}
       {entry.note && (
-        <div className={styles.rowNote}>{entry.note}</div>
+        <div className={styles.rowNote}>
+          {entry.note.length > 100 ? entry.note.substring(0, 100) + '...' : entry.note}
+        </div>
       )}
     </div>
-  )
-}
-
-function SparkChart({ scores }) {
-  const max = 10
-  const w = 320
-  const h = 60
-  const pad = 8
-  const n = scores.length
-
-  const points = scores.map((s, i) => {
-    const x = pad + (i / (n - 1)) * (w - pad * 2)
-    const y = h - pad - (s.score / max) * (h - pad * 2)
-    return `${x},${y}`
-  }).join(' ')
-
-  const areaPoints = [
-    `${pad},${h - pad}`,
-    ...scores.map((s, i) => {
-      const x = pad + (i / (n - 1)) * (w - pad * 2)
-      const y = h - pad - (s.score / max) * (h - pad * 2)
-      return `${x},${y}`
-    }),
-    `${w - pad},${h - pad}`
-  ].join(' ')
-
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className={styles.chart}>
-      <polygon points={areaPoints} fill="var(--sage)" opacity="0.12" />
-      <polyline points={points} fill="none" stroke="var(--sage)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      {scores.map((s, i) => {
-        const x = pad + (i / (n - 1)) * (w - pad * 2)
-        const y = h - pad - (s.score / max) * (h - pad * 2)
-        return <circle key={i} cx={x} cy={y} r="3" fill="var(--sage)" />
-      })}
-    </svg>
   )
 }

@@ -70,7 +70,7 @@ export function DataProvider({ children }) {
   }
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, user }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile, saveProfile, user }}>
       {children}
     </DataContext.Provider>
   )

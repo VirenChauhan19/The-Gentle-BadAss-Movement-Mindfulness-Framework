@@ -1,0 +1,191 @@
+.page {
+  padding: 2rem 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+}
+
+.subtitle {
+  color: var(--ink-light);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.stepTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.stepDesc {
+  color: var(--ink-light);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 1rem;
+  background: var(--paper);
+  font-family: inherit;
+  font-size: 1rem;
+  min-height: 150px;
+  margin-bottom: 2rem;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.pathGrid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.pathCard {
+  background: var(--paper);
+  border: 2px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pathCard h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.pathCard p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink-light);
+}
+
+.pathActive {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pathActive p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.commitmentRow {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.commitmentValue {
+  text-align: center;
+  min-width: 80px;
+}
+
+.days {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.commitmentValue .label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.commitmentLabel {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 3rem;
+  font-size: 1.2rem;
+}
+
+.btnRow {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.nextBtn, .backBtn {
+  padding: 1rem 2rem;
+  border-radius: 3rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nextBtn {
+  flex: 2;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+}
+
+.nextBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.backBtn {
+  flex: 1;
+  background: transparent;
+  border: 2px solid var(--border);
+  color: var(--ink);
+}
+
+@media (max-width: 480px) {
+  .commitmentRow {
+    flex-direction: column-reverse;
+    gap: 1.5rem;
+  }
+}

@@ -188,6 +188,41 @@
 .saveBtn:disabled {
   background: var(--border);
   color: var(--ink-faint);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.noteHelp {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.note.invalid {
+  border-color: #d98a8a;
+}
+
+.noteFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.validCount {
+  color: #8b9e7e;
+}
+
+.invalidCount {
+  color: #d98a8a;
+}
+
+.warning {
+  color: var(--ink-faint);
+  font-style: italic;
+  font-weight: 400;
 }
 
 .saved {

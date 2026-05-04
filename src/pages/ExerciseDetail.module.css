@@ -171,8 +171,101 @@
   margin-bottom: 4px;
 }
 
-.cadenceNote {
-  font-size: 0.78rem;
-  color: var(--ink-faint);
-  font-style: italic;
+.gate {
+  margin-top: 2rem;
 }
+
+.metronomeSection {
+  margin: 2rem 0;
+}
+
+.tprTracker {
+  background: var(--paper);
+  border: 2px solid var(--border);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.tprDesc {
+  color: var(--ink-light);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.tprControl {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.tprSlider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.tprSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  background: var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.tprDisplay {
+  text-align: center;
+  min-width: 80px;
+}
+
+.tprValue {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tprUnit {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.tprTarget {
+  text-align: center;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.completeSection {
+  margin: 3rem 0;
+  text-align: center;
+}
+
+.completeBtn {
+  width: 100%;
+  padding: 1.25rem;
+  border-radius: 3rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.completeBtn.saved {
+  background: #8b9e7e;
+}
+
+.congrats {
+  margin-top: 1rem;
+  color: #5a6b4f;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
