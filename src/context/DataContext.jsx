@@ -9,6 +9,7 @@ import {
 
 const GUEST_NAME_KEY = 'gb_guest_name'
 const PROFILE_KEY = 'gb_profile'
+const COACH_KEY = 'gb_coach'
 
 const DataContext = createContext(null)
 
@@ -30,6 +31,12 @@ export function DataProvider({ children }) {
   const [guestName, setGuestNameState] = useState(
     () => localStorage.getItem(GUEST_NAME_KEY) || null
   )
+  const [coachData, setCoachData] = useState(() => {
+    try {
+      const stored = localStorage.getItem(COACH_KEY)
+      return stored ? JSON.parse(stored) : null
+    } catch { return null }
+  })
 
   useEffect(() => {
     if (user === undefined) return // auth still resolving
@@ -167,11 +174,37 @@ export function DataProvider({ children }) {
     return entries.find(e => e.date === today) || null
   }
 
+  function saveCoachGoal(goal) {
+    const next = { goal, checkins: [] }
+    localStorage.setItem(COACH_KEY, JSON.stringify(next))
+    setCoachData(next)
+  }
+
+  function saveCoachCheckin(checkin) {
+    const today = new Date().toISOString().split('T')[0]
+    const full = { ...checkin, date: today }
+    setCoachData(prev => {
+      const next = {
+        ...prev,
+        checkins: [...(prev?.checkins || []).filter(c => c.date !== today), full],
+      }
+      localStorage.setItem(COACH_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
+  function clearCoachGoal() {
+    localStorage.removeItem(COACH_KEY)
+    setCoachData(null)
+  }
+
   async function clearAllData() {
     // Wipe localStorage
     localStorage.removeItem('gb_journal')
     localStorage.removeItem('gb_profile')
     localStorage.removeItem('gb_guest_name')
+    localStorage.removeItem(COACH_KEY)
+    setCoachData(null)
 
     // Reset in-memory state immediately
     setEntries([])
@@ -208,7 +241,7 @@ export function DataProvider({ children }) {
   })()
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal }}>
       {children}
     </DataContext.Provider>
   )

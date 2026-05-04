@@ -1,0 +1,455 @@
+.page {
+  min-height: 100vh;
+  padding-bottom: 100px;
+  background: var(--cream);
+}
+
+.header {
+  background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
+  padding: 56px 24px 28px;
+  text-align: center;
+}
+
+.label {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--ink);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--ink-light);
+  line-height: 1.55;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.goalTag {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  margin-bottom: 12px;
+  font-style: italic;
+  max-width: 280px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.progress {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 10px auto 6px;
+  max-width: 240px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: var(--sage);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.progressText {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+/* ── Goal Setup ───────────────────────────────── */
+.setupForm {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-light);
+}
+
+.goalInput {
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--ink);
+  resize: none;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+}
+
+.goalInput:focus {
+  outline: none;
+  border-color: var(--sage);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pill:hover {
+  border-color: var(--sage);
+  color: var(--sage-dark);
+}
+
+.pillActive {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: var(--paper);
+  font-weight: 700;
+}
+
+.primaryBtn {
+  width: 100%;
+  padding: 16px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ── Check-in form ────────────────────────────── */
+.checkinCard {
+  margin: 20px 16px;
+  background: var(--paper);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.checkinPrompt {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.statusRow {
+  display: flex;
+  gap: 8px;
+}
+
+.statusBtn {
+  flex: 1;
+  padding: 10px 6px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.statusActive_done {
+  background: rgba(139, 158, 126, 0.13);
+  border-color: #8b9e7e;
+  color: #5a7054;
+}
+
+.statusActive_partial {
+  background: rgba(217, 179, 138, 0.13);
+  border-color: #d9b38a;
+  color: #a07840;
+}
+
+.statusActive_missed {
+  background: rgba(217, 138, 138, 0.13);
+  border-color: #d98a8a;
+  color: #a04040;
+}
+
+.checkinInput {
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--ink);
+  resize: none;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+}
+
+.checkinInput:focus {
+  outline: none;
+  border-color: var(--sage);
+}
+
+.errorMsg {
+  font-size: 0.82rem;
+  color: #d98a8a;
+  padding: 8px 12px;
+  background: rgba(217, 138, 138, 0.08);
+  border-radius: 8px;
+}
+
+/* ── Today already logged ─────────────────────── */
+.todayCard {
+  margin: 20px 16px;
+  background: var(--paper);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.todayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.todayLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.statusBadge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.status_done {
+  background: rgba(139, 158, 126, 0.15);
+  color: #5a7054;
+}
+
+.status_partial {
+  background: rgba(217, 179, 138, 0.15);
+  color: #a07840;
+}
+
+.status_missed {
+  background: rgba(217, 138, 138, 0.15);
+  color: #a04040;
+}
+
+.todayNote {
+  font-size: 0.9rem;
+  color: var(--ink-light);
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.coachReply {
+  background: linear-gradient(135deg, var(--cream-dark), var(--cream));
+  border-radius: 12px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--sage);
+}
+
+.coachLabel {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--sage-dark);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.coachText {
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+/* ── History ──────────────────────────────────── */
+.historySection {
+  padding: 8px 16px 0;
+}
+
+.sectionTitle {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-top: 16px;
+}
+
+.historyEntry {
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 13px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+
+.historyEntry:hover {
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.historyTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.historyDate {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+}
+
+.historyStatus {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.historyExpanded {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.historyNote {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.historyReply {
+  background: var(--cream);
+  border-radius: 8px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--sage);
+}
+
+.historyReplyText {
+  font-size: 0.83rem;
+  color: var(--ink);
+  line-height: 1.55;
+}
+
+/* ── Completion ───────────────────────────────── */
+.completionCard {
+  margin: 20px 16px;
+  background: var(--paper);
+  border-radius: 18px;
+  padding: 28px 20px;
+  text-align: center;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.completionMsg {
+  font-size: 1rem;
+  color: var(--ink);
+  line-height: 1.65;
+  margin-bottom: 20px;
+}
+
+.newGoalBtn {
+  padding: 14px 32px;
+  background: var(--sage);
+  color: var(--paper);
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.newGoalBtn:hover {
+  opacity: 0.85;
+}
+
+/* ── API key warning ──────────────────────────── */
+.setupWarn {
+  margin: 20px 16px;
+  background: rgba(217, 179, 138, 0.12);
+  border: 1.5px solid #d9b38a;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.warnTitle {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #a07840;
+  margin-bottom: 8px;
+}
+
+.warnText {
+  font-size: 0.83rem;
+  color: var(--ink-light);
+  line-height: 1.65;
+}
+
+.warnText code {
+  background: var(--border);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-family: monospace;
+}
+
+/* ── Footer ───────────────────────────────────── */
+.newGoalLink {
+  display: block;
+  margin: 16px auto 8px;
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

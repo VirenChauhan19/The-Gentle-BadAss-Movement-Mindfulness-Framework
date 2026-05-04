@@ -9,6 +9,7 @@ import History from './pages/History'
 import Library from './pages/Library'
 import ExerciseDetail from './pages/ExerciseDetail'
 import Admin from './pages/Admin'
+import Coach from './pages/Coach'
 import Onboarding from './pages/Onboarding'
 import styles from './App.module.css'
 
@@ -54,6 +55,7 @@ function AppRoutes() {
       <Route path="/history" element={<History />} />
       <Route path="/library" element={<Library />} />
       <Route path="/library/:id" element={<ExerciseDetail />} />
+      <Route path="/coach" element={<Coach />} />
       <Route path="/admin" element={<Admin />} />
     </Routes>
   )

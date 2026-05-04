@@ -7,6 +7,7 @@ const links = [
   { to: '/journal', label: 'Feel', icon: JournalIcon },
   { to: '/history', label: 'History', icon: HistoryIcon },
   { to: '/library', label: 'Move', icon: LibraryIcon },
+  { to: '/coach', label: 'Coach', icon: CoachIcon },
   { to: '/admin', label: 'Profile', icon: ProfileIcon },
 ]
 
@@ -62,6 +63,15 @@ function LibraryIcon() {
       <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="8" x2="12" y2="16" />
       <line x1="8" y1="12" x2="16" y2="12" />
+    </svg>
+  )
+}
+
+function CoachIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a7 7 0 0 1 7 7c0 3.5-2.5 6.5-6 7.4V18h2a1 1 0 0 1 0 2h-2v2a1 1 0 0 1-2 0v-2H9a1 1 0 0 1 0-2h2v-1.6C7.5 15.5 5 12.5 5 9a7 7 0 0 1 7-7z" />
+      <path d="M9.5 9.5 11 11l3.5-3.5" />
     </svg>
   )
 }
