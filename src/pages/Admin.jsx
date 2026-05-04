@@ -76,12 +76,10 @@ export default function Admin() {
           <h1 className={styles.title}>Sign In</h1>
           <p className={styles.sub}>Sync your feel journal across devices.</p>
         </header>
-        {isConfigured && (
-          <button className={styles.googleBtn} onClick={signInWithGoogle}>
-            <GoogleIcon />
-            Continue with Google
-          </button>
-        )}
+        <button className={styles.googleBtn} onClick={signInWithGoogle}>
+          <GoogleIcon />
+          Continue with Google
+        </button>
         <button className={styles.guestBtn} onClick={() => setNamePending(true)}>
           Continue as Guest
         </button>
@@ -139,7 +137,7 @@ export default function Admin() {
       <p className={styles.syncNote}>
         {user ? 'Your journal syncs automatically.' : 'You\'re using a guest account. Sign in to sync across devices.'}
       </p>
-      {!user && isConfigured && (
+      {!user && (
         <button className={styles.googleBtn} style={{ marginBottom: 12 }} onClick={signInWithGoogle}>
           <GoogleIcon />
           Upgrade to Google Sign-In

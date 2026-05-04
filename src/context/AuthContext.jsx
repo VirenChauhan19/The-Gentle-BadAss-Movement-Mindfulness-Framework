@@ -14,7 +14,10 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function signInWithGoogle() {
-    if (!isConfigured) return
+    if (!isConfigured) {
+      alert('Firebase is not set up yet. Fill in your real values in .env.local and restart the dev server.')
+      return
+    }
     await signInWithPopup(auth, googleProvider)
   }
 
