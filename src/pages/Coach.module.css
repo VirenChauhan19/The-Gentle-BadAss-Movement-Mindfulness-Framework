@@ -4,15 +4,16 @@
   background: var(--cream);
 }
 
+/* ── Header ──────────────────────────────────────────────────── */
 .header {
   background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
-  padding: 56px 24px 28px;
+  padding: 52px 24px 24px;
   text-align: center;
 }
 
 .label {
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-faint);
   margin-bottom: 6px;
@@ -20,40 +21,37 @@
 
 .title {
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: 2rem;
   color: var(--ink);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .subtitle {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--ink-light);
   line-height: 1.55;
   max-width: 300px;
   margin: 0 auto;
 }
 
-.goalTag {
-  font-size: 0.85rem;
+.headerSub {
+  font-size: 0.82rem;
   color: var(--ink-light);
-  margin-bottom: 12px;
-  font-style: italic;
-  max-width: 280px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-bottom: 10px;
 }
 
-.progress {
+.progressTrack {
   height: 4px;
   background: var(--border);
   border-radius: 2px;
-  margin: 10px auto 6px;
-  max-width: 240px;
+  margin: 8px auto 5px;
+  max-width: 220px;
   overflow: hidden;
 }
 
-.progressBar {
+.progressFill {
   height: 100%;
   background: var(--sage);
   border-radius: 2px;
@@ -61,113 +59,205 @@
 }
 
 .progressText {
-  font-size: 0.75rem;
+  font-size: 0.73rem;
   color: var(--ink-faint);
 }
 
-/* ── Goal Setup ───────────────────────────────── */
-.setupForm {
-  padding: 24px 20px;
+/* ── Tabs ────────────────────────────────────────────────────── */
+.tabs {
   display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.fieldLabel {
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-light);
-}
-
-.goalInput {
+  margin: 0 16px;
   background: var(--paper);
-  border: 1.5px solid var(--border);
   border-radius: 12px;
-  padding: 14px 16px;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: var(--ink);
-  resize: none;
-  line-height: 1.5;
-  transition: border-color 0.2s;
+  padding: 4px;
+  gap: 4px;
+  box-shadow: 0 1px 4px var(--shadow);
 }
 
-.goalInput:focus {
-  outline: none;
-  border-color: var(--sage);
-}
-
-.pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.pill {
-  padding: 7px 16px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border);
-  background: transparent;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--ink-light);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.pill:hover {
-  border-color: var(--sage);
-  color: var(--sage-dark);
-}
-
-.pillActive {
-  background: var(--sage);
-  border-color: var(--sage);
-  color: var(--paper);
-  font-weight: 700;
-}
-
-.primaryBtn {
-  width: 100%;
-  padding: 16px;
-  background: var(--ink);
-  color: var(--paper);
+.tab {
+  flex: 1;
+  padding: 9px;
   border: none;
-  border-radius: 14px;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.01em;
+}
+
+.tabActive {
+  background: var(--cream);
+  color: var(--ink);
+  box-shadow: 0 1px 3px var(--shadow);
+}
+
+/* ── Tab content ─────────────────────────────────────────────── */
+.tabContent {
+  padding: 16px 0 0;
+}
+
+.section {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.sectionLabel {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* ── Weekly grid ─────────────────────────────────────────────── */
+.weekGrid {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.weekGrid::-webkit-scrollbar { display: none; }
+
+.dayCard {
+  flex: 0 0 auto;
+  width: 44px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+}
+
+.dayCardToday {
+  border-width: 2px;
+}
+
+.dayShort {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dayDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.dayLabel {
+  font-size: 0.56rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dayDist {
+  font-size: 0.62rem;
+  color: var(--ink-light);
+  text-align: center;
+}
+
+/* ── Program overview ────────────────────────────────────────── */
+.overviewCard {
+  margin: 0 16px 16px;
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 6px var(--shadow);
+}
+
+.overviewText {
+  font-size: 0.88rem;
+  color: var(--ink);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.progressionNote {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+.peakVolume {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+/* ── Today's session ─────────────────────────────────────────── */
+.todaySessionCard {
+  margin: 0 16px 16px;
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 6px var(--shadow);
+}
+
+.sessionTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.sessionType {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.sessionMeta {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.sessionTitle {
   font-size: 1rem;
   font-weight: 700;
-  cursor: pointer;
-  letter-spacing: 0.03em;
-  transition: opacity 0.2s;
+  color: var(--ink);
+  margin-bottom: 4px;
 }
 
-.primaryBtn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
+.sessionPace {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  margin-bottom: 6px;
 }
 
-/* ── Check-in form ────────────────────────────── */
+.sessionNotes {
+  font-size: 0.83rem;
+  color: var(--ink-light);
+  line-height: 1.55;
+}
+
+/* ── Check-in card ───────────────────────────────────────────── */
 .checkinCard {
-  margin: 20px 16px;
+  margin: 0 16px 16px;
   background: var(--paper);
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 2px 12px var(--shadow);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 1px 8px var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .checkinPrompt {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--ink);
 }
@@ -179,272 +269,161 @@
 
 .statusBtn {
   flex: 1;
-  padding: 10px 6px;
+  padding: 10px 4px;
   border: 1.5px solid var(--border);
   border-radius: 10px;
   background: transparent;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--ink-light);
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.statusActive_done {
-  background: rgba(139, 158, 126, 0.13);
-  border-color: #8b9e7e;
-  color: #5a7054;
-}
-
-.statusActive_partial {
-  background: rgba(217, 179, 138, 0.13);
-  border-color: #d9b38a;
-  color: #a07840;
-}
-
-.statusActive_missed {
-  background: rgba(217, 138, 138, 0.13);
-  border-color: #d98a8a;
-  color: #a04040;
-}
+.statusActive_done    { background: rgba(139,158,126,0.14); border-color: #8b9e7e; color: #5a7054; }
+.statusActive_partial { background: rgba(217,179,138,0.14); border-color: #d9b38a; color: #a07840; }
+.statusActive_missed  { background: rgba(217,138,138,0.14); border-color: #d98a8a; color: #a04040; }
 
 .checkinInput {
   background: var(--cream);
   border: 1.5px solid var(--border);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 13px 15px;
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--ink);
   resize: none;
   line-height: 1.5;
   transition: border-color 0.2s;
 }
 
-.checkinInput:focus {
-  outline: none;
-  border-color: var(--sage);
-}
+.checkinInput:focus { outline: none; border-color: var(--sage); }
 
-.errorMsg {
-  font-size: 0.82rem;
-  color: #d98a8a;
-  padding: 8px 12px;
-  background: rgba(217, 138, 138, 0.08);
-  border-radius: 8px;
-}
-
-/* ── Today already logged ─────────────────────── */
-.todayCard {
-  margin: 20px 16px;
+/* ── Today's log display ─────────────────────────────────────── */
+.checkinDisplay {
+  margin: 0 16px 16px;
   background: var(--paper);
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 2px 12px var(--shadow);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 1px 8px var(--shadow);
 }
 
-.todayHeader {
+.checkinDisplayTop {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 
-.todayLabel {
-  font-size: 0.7rem;
+.loggedLabel {
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--ink-faint);
 }
 
 .statusBadge {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 20px;
 }
 
-.status_done {
-  background: rgba(139, 158, 126, 0.15);
-  color: #5a7054;
-}
+.status_done    { background: rgba(139,158,126,0.15); color: #5a7054; }
+.status_partial { background: rgba(217,179,138,0.15); color: #a07840; }
+.status_missed  { background: rgba(217,138,138,0.15); color: #a04040; }
 
-.status_partial {
-  background: rgba(217, 179, 138, 0.15);
-  color: #a07840;
-}
-
-.status_missed {
-  background: rgba(217, 138, 138, 0.15);
-  color: #a04040;
-}
-
-.todayNote {
-  font-size: 0.9rem;
+.checkinNote {
+  font-size: 0.88rem;
   color: var(--ink-light);
   line-height: 1.55;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
+/* ── Coach reply block ───────────────────────────────────────── */
 .coachReply {
   background: linear-gradient(135deg, var(--cream-dark), var(--cream));
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 13px 15px;
   border-left: 3px solid var(--sage);
 }
 
 .coachLabel {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--sage-dark);
-  font-weight: 700;
-  margin-bottom: 6px;
+  font-weight: 800;
+  margin-bottom: 5px;
 }
 
 .coachText {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--ink);
   line-height: 1.65;
 }
 
-/* ── History ──────────────────────────────────── */
-.historySection {
-  padding: 8px 16px 0;
-}
-
-.sectionTitle {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--ink-faint);
-  font-weight: 700;
-  margin-bottom: 10px;
-  padding-top: 16px;
-}
-
-.historyEntry {
+/* ── Run log ─────────────────────────────────────────────────── */
+.logEntry {
   background: var(--paper);
   border-radius: 12px;
-  padding: 13px 16px;
-  margin-bottom: 8px;
+  padding: 13px 15px;
+  margin-bottom: 7px;
   cursor: pointer;
   transition: box-shadow 0.15s;
 }
 
-.historyEntry:hover {
-  box-shadow: 0 2px 8px var(--shadow);
-}
+.logEntry:hover { box-shadow: 0 2px 8px var(--shadow); }
 
-.historyTop {
+.logTop {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.historyDate {
-  font-size: 0.85rem;
-  color: var(--ink-light);
-}
+.logDate   { font-size: 0.85rem; color: var(--ink-light); }
+.logSymbol { font-size: 1rem; font-weight: 700; }
 
-.historyStatus {
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.historyExpanded {
-  margin-top: 12px;
+.logExpanded {
+  margin-top: 11px;
   border-top: 1px solid var(--border);
-  padding-top: 12px;
+  padding-top: 11px;
 }
 
-.historyNote {
+.logNote {
   font-size: 0.85rem;
   color: var(--ink-light);
   line-height: 1.5;
-  margin-bottom: 10px;
 }
 
-.historyReply {
-  background: var(--cream);
-  border-radius: 8px;
-  padding: 10px 12px;
-  border-left: 2px solid var(--sage);
-}
-
-.historyReplyText {
-  font-size: 0.83rem;
-  color: var(--ink);
-  line-height: 1.55;
-}
-
-/* ── Completion ───────────────────────────────── */
-.completionCard {
-  margin: 20px 16px;
-  background: var(--paper);
-  border-radius: 18px;
-  padding: 28px 20px;
-  text-align: center;
-  box-shadow: 0 2px 12px var(--shadow);
-}
-
-.completionMsg {
-  font-size: 1rem;
-  color: var(--ink);
-  line-height: 1.65;
-  margin-bottom: 20px;
-}
-
-.newGoalBtn {
-  padding: 14px 32px;
-  background: var(--sage);
+/* ── Shared ──────────────────────────────────────────────────── */
+.primaryBtn {
+  width: 100%;
+  padding: 15px;
+  background: var(--ink);
   color: var(--paper);
   border: none;
-  border-radius: 12px;
-  font-size: 0.95rem;
+  border-radius: 13px;
+  font-size: 0.97rem;
   font-weight: 700;
   cursor: pointer;
+  letter-spacing: 0.02em;
   transition: opacity 0.2s;
 }
 
-.newGoalBtn:hover {
-  opacity: 0.85;
+.primaryBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.errorMsg {
+  font-size: 0.82rem;
+  color: #d98a8a;
+  padding: 8px 12px;
+  background: rgba(217,138,138,0.08);
+  border-radius: 8px;
 }
 
-/* ── API key warning ──────────────────────────── */
-.setupWarn {
-  margin: 20px 16px;
-  background: rgba(217, 179, 138, 0.12);
-  border: 1.5px solid #d9b38a;
-  border-radius: 14px;
-  padding: 20px;
-}
-
-.warnTitle {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #a07840;
-  margin-bottom: 8px;
-}
-
-.warnText {
-  font-size: 0.83rem;
-  color: var(--ink-light);
-  line-height: 1.65;
-}
-
-.warnText code {
-  background: var(--border);
-  padding: 1px 5px;
-  border-radius: 4px;
-  font-size: 0.78rem;
-  font-family: monospace;
-}
-
-/* ── Footer ───────────────────────────────────── */
-.newGoalLink {
+.changeGoalBtn {
   display: block;
-  margin: 16px auto 8px;
+  margin: 12px auto 0;
   background: none;
   border: none;
   color: var(--ink-faint);
@@ -453,3 +432,354 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ── Completion ──────────────────────────────────────────────── */
+.completionCard {
+  margin: 0 16px 16px;
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 26px 20px;
+  text-align: center;
+  box-shadow: 0 1px 8px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.completionMsg {
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.65;
+}
+
+/* ── Goal setup form ─────────────────────────────────────────── */
+.setupForm {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.fieldLabel {
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-light);
+}
+
+.optLabel {
+  font-weight: 400;
+  text-transform: none;
+  font-size: 0.8em;
+  color: var(--ink-faint);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.pill {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pill:hover  { border-color: var(--sage); color: var(--sage-dark); }
+
+.pillActive {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: var(--paper);
+  font-weight: 700;
+}
+
+.expRow {
+  display: flex;
+  gap: 8px;
+}
+
+.expCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 12px 6px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.expCardActive {
+  border-color: var(--sage);
+  background: rgba(139,158,126,0.1);
+}
+
+.expTitle {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.expSub {
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+}
+
+.notesInput {
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 15px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--ink);
+  resize: none;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+}
+
+.notesInput:focus { outline: none; border-color: var(--sage); }
+
+/* ── Generating loading ───────────────────────────────────────── */
+.generatingWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 24px;
+}
+
+.generatingDots {
+  display: flex;
+  gap: 8px;
+}
+
+.generatingDots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sage);
+  animation: pulse 1.4s infinite ease-in-out;
+}
+
+.generatingDots span:nth-child(2) { animation-delay: 0.2s; }
+.generatingDots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+  40%            { transform: scale(1);   opacity: 1;   }
+}
+
+.generatingNote {
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+/* ── API key warning ─────────────────────────────────────────── */
+.warnCard {
+  margin: 20px 16px;
+  background: rgba(217,179,138,0.12);
+  border: 1.5px solid #d9b38a;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.warnTitle {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #a07840;
+  margin-bottom: 7px;
+}
+
+.warnText {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.65;
+}
+
+.warnText code {
+  background: var(--border);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.78rem;
+}
+
+/* ── Chat tab ────────────────────────────────────────────────── */
+.chatWrap {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 300px);
+}
+
+.chatMessages {
+  flex: 1;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chatEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0 8px;
+  gap: 16px;
+}
+
+.chatEmptyTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+}
+
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.suggestion {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  text-align: left;
+  font-size: 0.83rem;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.suggestion:hover { border-color: var(--sage); color: var(--ink); }
+
+/* Chat bubbles */
+.bubble {
+  max-width: 88%;
+  border-radius: 16px;
+  padding: 11px 14px;
+}
+
+.bubbleUser {
+  align-self: flex-end;
+  background: var(--ink);
+  border-bottom-right-radius: 4px;
+}
+
+.bubbleCoach {
+  align-self: flex-start;
+  background: var(--paper);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px var(--shadow);
+}
+
+.bubbleText {
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.bubbleUser .bubbleText { color: var(--paper); }
+.bubbleCoach .bubbleText { color: var(--ink); }
+
+/* Typing indicator */
+.typingDots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  height: 18px;
+  padding: 2px 0;
+}
+
+.typingDots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  animation: bounce 1.2s infinite ease-in-out;
+}
+
+.typingDots span:nth-child(2) { animation-delay: 0.18s; }
+.typingDots span:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%            { transform: translateY(-5px); }
+}
+
+.chatError {
+  font-size: 0.8rem;
+  color: #d98a8a;
+  text-align: center;
+}
+
+/* Chat input */
+.chatInputRow {
+  position: sticky;
+  bottom: 72px;
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px 12px;
+  background: var(--paper);
+  border-top: 1px solid var(--border);
+}
+
+.chatInput {
+  flex: 1;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--ink);
+  resize: none;
+  line-height: 1.4;
+  transition: border-color 0.2s;
+}
+
+.chatInput:focus { outline: none; border-color: var(--sage); }
+
+.sendBtn {
+  flex: 0 0 44px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-end;
+  transition: opacity 0.2s;
+}
+
+.sendBtn:disabled { opacity: 0.35; cursor: not-allowed; }

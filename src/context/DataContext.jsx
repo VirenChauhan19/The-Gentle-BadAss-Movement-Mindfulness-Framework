@@ -198,6 +198,17 @@ export function DataProvider({ children }) {
     setCoachData(null)
   }
 
+  function addChatMessage(message) {
+    setCoachData(prev => {
+      const next = {
+        ...prev,
+        chatHistory: [...(prev?.chatHistory || []), { ...message, timestamp: new Date().toISOString() }],
+      }
+      localStorage.setItem(COACH_KEY, JSON.stringify(next))
+      return next
+    })
+  }
+
   async function clearAllData() {
     // Wipe localStorage
     localStorage.removeItem('gb_journal')
@@ -241,7 +252,7 @@ export function DataProvider({ children }) {
   })()
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage }}>
       {children}
     </DataContext.Provider>
   )
