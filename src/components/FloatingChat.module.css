@@ -1,8 +1,8 @@
 /* ── Floating action button ─────────────────────────────────── */
 .fab {
   position: fixed;
-  bottom: 84px;
-  right: 18px;
+  bottom: 76px;
+  right: 12px;
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -81,8 +81,8 @@
 /* ── Chat panel ─────────────────────────────────────────────── */
 .panel {
   position: fixed;
-  bottom: 156px;
-  right: 18px;
+  bottom: 148px;
+  right: 12px;
   width: 340px;
   max-height: 520px;
   background: var(--paper, #faf7f2);
@@ -111,8 +111,7 @@
 }
 
 @media (max-width: 390px) {
-  .panel  { width: calc(100vw - 28px); right: 14px; }
-  .fab    { right: 14px; }
+  .panel  { width: calc(100vw - 24px); right: 12px; }
 }
 
 /* ── Panel header ───────────────────────────────────────────── */

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { db } from '../firebase'
-import { collectionGroup, onSnapshot, query } from 'firebase/firestore'
+import { collectionGroup, onSnapshot, query, doc, getDoc } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
@@ -17,8 +17,9 @@ const PATH_NAMES = {
 export default function Admin() {
   const { user, signInWithGoogle, signOut, authError } = useAuth()
   const { guestName, setGuestName, profile, entries, clearAllData } = useData()
-  const [allEntries, setAllEntries] = useState([])
-  const [indexError, setIndexError] = useState(false)
+  const [allEntries,   setAllEntries]   = useState([])
+  const [allCoachData, setAllCoachData] = useState({})
+  const [indexError,   setIndexError]   = useState(false)
   const [nameInput, setNameInput] = useState('')
   const [namePending, setNamePending] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
@@ -35,6 +36,18 @@ export default function Admin() {
         .map(d => ({ ...d.data(), _uid: d.ref.parent.parent.id }))
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
       setAllEntries(docs)
+
+      // Fetch coach data for every unique user
+      const uids = [...new Set(docs.map(d => d._uid))]
+      Promise.all(
+        uids.map(uid =>
+          getDoc(doc(db, 'users', uid, 'config', 'coach'))
+            .then(snap => [uid, snap.exists() ? snap.data() : null])
+            .catch(() => [uid, null])
+        )
+      ).then(pairs => {
+        setAllCoachData(Object.fromEntries(pairs.filter(([, v]) => v !== null)))
+      })
     }, err => {
       if (err.code === 'failed-precondition') setIndexError(err.message)
     })
@@ -101,7 +114,7 @@ export default function Admin() {
 
   // ── Signed in as admin ──────────────────────────────────────────────────────
   if (isAdmin) {
-    return <AdminView entries={allEntries} indexError={indexError} onSignOut={signOut} />
+    return <AdminView entries={allEntries} coachData={allCoachData} indexError={indexError} onSignOut={signOut} />
   }
 
   // ── User Profile View ──────────────────────────────────────────────────────
@@ -204,7 +217,7 @@ export default function Admin() {
   )
 }
 
-function AdminView({ entries, indexError, onSignOut }) {
+function AdminView({ entries, coachData, indexError, onSignOut }) {
   const byUser = entries.reduce((acc, e) => {
     const key = e._uid
     if (!acc[key]) acc[key] = { name: e.userName, email: e.userEmail, entries: [] }
@@ -230,17 +243,27 @@ function AdminView({ entries, indexError, onSignOut }) {
         <p className={styles.empty}>Waiting for users to log their first movement…</p>
       )}
       {Object.entries(byUser).map(([uid, { name, email, entries }]) => (
-        <UserBlock key={uid} name={name} email={email} entries={entries} />
+        <UserBlock key={uid} uid={uid} name={name} email={email} entries={entries} coach={coachData[uid] || null} />
       ))}
       <button className={styles.signOutBtn} onClick={onSignOut}>Sign out from Admin</button>
     </div>
   )
 }
 
-function UserBlock({ name, email, entries }) {
+const STATUS_COLOR = { done: '#8b9e7e', partial: '#d9b38a', missed: '#d98a8a' }
+const STATUS_ICON  = { done: '✓', partial: '↗', missed: '✗' }
+
+function UserBlock({ name, email, entries, coach }) {
+  const [showCoach, setShowCoach] = useState(false)
   const avg = entries.length
     ? Math.round(entries.reduce((s, e) => s + computeFeelScore(e.scores || {}), 0) / entries.length * 10) / 10
     : null
+
+  const goal     = coach?.goal
+  const checkins = coach?.checkins || []
+  const doneCount    = checkins.filter(c => c.status === 'done').length
+  const partialCount = checkins.filter(c => c.status === 'partial').length
+  const missedCount  = checkins.filter(c => c.status === 'missed').length
 
   return (
     <div className={styles.userBlock}>
@@ -254,6 +277,8 @@ function UserBlock({ name, email, entries }) {
           <span className={styles.statSmall}>avg feel</span>
         </div>
       </div>
+
+      {/* Feel journal */}
       <div className={styles.entryList}>
         {entries.slice(0, 5).map(e => {
           const score = computeFeelScore(e.scores || {})
@@ -269,6 +294,39 @@ function UserBlock({ name, email, entries }) {
           )
         })}
       </div>
+
+      {/* Coach program section */}
+      {goal && (
+        <div className={styles.coachSection}>
+          <button className={styles.coachToggle} onClick={() => setShowCoach(s => !s)}>
+            <span>🏃 {goal.raceGoal} · {goal.weeks}wk · {goal.experience}</span>
+            <span className={styles.toggleArrow}>{showCoach ? '▲' : '▼'}</span>
+          </button>
+
+          {showCoach && (
+            <div className={styles.coachDetail}>
+              <div className={styles.coachStats}>
+                <span className={styles.coachStat} style={{ color: '#8b9e7e' }}>✓ {doneCount} done</span>
+                <span className={styles.coachStat} style={{ color: '#d9b38a' }}>↗ {partialCount} partial</span>
+                <span className={styles.coachStat} style={{ color: '#d98a8a' }}>✗ {missedCount} missed</span>
+              </div>
+              {checkins.length > 0 && (
+                <div className={styles.checkinLog}>
+                  {[...checkins].reverse().slice(0, 7).map(c => (
+                    <div key={c.date} className={styles.checkinRow}>
+                      <span className={styles.checkinDate}>{c.date}</span>
+                      <span className={styles.checkinStatus} style={{ color: STATUS_COLOR[c.status] }}>
+                        {STATUS_ICON[c.status]}
+                      </span>
+                      <span className={styles.checkinNote}>{c.userNote}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

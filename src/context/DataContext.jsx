@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { db } from '../firebase'
-import { collection, doc, setDoc, deleteDoc, getDocs, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collection, doc, setDoc, deleteDoc, getDocs, getDoc, onSnapshot, query, orderBy } from 'firebase/firestore'
 import { useAuth } from './AuthContext'
 import {
   getJournalEntries as getLocalEntries,
@@ -8,8 +8,9 @@ import {
 } from '../data/storage'
 
 const GUEST_NAME_KEY = 'gb_guest_name'
-const PROFILE_KEY = 'gb_profile'
-const COACH_KEY = 'gb_coach'
+const PROFILE_KEY    = 'gb_profile'
+const COACH_KEY      = 'gb_coach'           // guest fallback
+const coachKey = uid => uid ? `gb_coach_${uid}` : COACH_KEY
 
 const DataContext = createContext(null)
 
@@ -31,12 +32,7 @@ export function DataProvider({ children }) {
   const [guestName, setGuestNameState] = useState(
     () => localStorage.getItem(GUEST_NAME_KEY) || null
   )
-  const [coachData, setCoachData] = useState(() => {
-    try {
-      const stored = localStorage.getItem(COACH_KEY)
-      return stored ? JSON.parse(stored) : null
-    } catch { return null }
-  })
+  const [coachData, setCoachData] = useState(null) // loaded after auth resolves
 
   useEffect(() => {
     if (user === undefined) return // auth still resolving
@@ -44,9 +40,33 @@ export function DataProvider({ children }) {
     if (!user || !db) {
       setEntries(getLocalEntries())
       setProfileState(null)
+      setCoachData(null)      // Clear any previous user's coach data
       setProfileFetched(true) // No Firestore needed — gate can release
       return
     }
+
+    // Load this user's coach data from Firestore (source of truth) or their local cache
+    setCoachData(null) // clear previous user's data immediately
+    const userCoachKey = coachKey(user.uid)
+    getDoc(doc(db, 'users', user.uid, 'config', 'coach'))
+      .then(snap => {
+        if (snap.exists()) {
+          const data = snap.data()
+          localStorage.setItem(userCoachKey, JSON.stringify(data))
+          setCoachData(data)
+        } else {
+          try {
+            const cached = localStorage.getItem(userCoachKey)
+            setCoachData(cached ? JSON.parse(cached) : null)
+          } catch { setCoachData(null) }
+        }
+      })
+      .catch(() => {
+        try {
+          const cached = localStorage.getItem(userCoachKey)
+          setCoachData(cached ? JSON.parse(cached) : null)
+        } catch { setCoachData(null) }
+      })
 
     // Reset fetch flag so the gate re-engages while Firestore loads
     setProfileFetched(false)
@@ -174,37 +194,55 @@ export function DataProvider({ children }) {
     return entries.find(e => e.date === today) || null
   }
 
+  function syncCoachToFirestore(data) {
+    if (user && db) {
+      const ref = doc(db, 'users', user.uid, 'config', 'coach')
+      const { chatHistory: _, ...toSync } = data
+      setDoc(ref, { ...toSync, userId: user.uid, userEmail: user.email, userName: user.displayName || guestName }, { merge: true })
+        .catch(err => console.warn('Coach sync error:', err))
+    }
+  }
+
   function saveCoachGoal(goal) {
-    const next = { goal, checkins: [] }
-    localStorage.setItem(COACH_KEY, JSON.stringify(next))
+    const next = { goal, checkins: [], chatHistory: [] }
+    const key = coachKey(user?.uid)
+    localStorage.setItem(key, JSON.stringify(next))
     setCoachData(next)
+    syncCoachToFirestore(next)
   }
 
   function saveCoachCheckin(checkin) {
     const today = new Date().toISOString().split('T')[0]
     const full = { ...checkin, date: today }
+    const key = coachKey(user?.uid)
     setCoachData(prev => {
       const next = {
         ...prev,
         checkins: [...(prev?.checkins || []).filter(c => c.date !== today), full],
       }
-      localStorage.setItem(COACH_KEY, JSON.stringify(next))
+      localStorage.setItem(key, JSON.stringify(next))
+      syncCoachToFirestore(next)
       return next
     })
   }
 
   function clearCoachGoal() {
-    localStorage.removeItem(COACH_KEY)
+    const key = coachKey(user?.uid)
+    localStorage.removeItem(key)
     setCoachData(null)
+    if (user && db) {
+      deleteDoc(doc(db, 'users', user.uid, 'config', 'coach')).catch(() => {})
+    }
   }
 
   function addChatMessage(message) {
+    const key = coachKey(user?.uid)
     setCoachData(prev => {
       const next = {
         ...prev,
         chatHistory: [...(prev?.chatHistory || []), { ...message, timestamp: new Date().toISOString() }],
       }
-      localStorage.setItem(COACH_KEY, JSON.stringify(next))
+      localStorage.setItem(key, JSON.stringify(next))
       return next
     })
   }
@@ -214,7 +252,7 @@ export function DataProvider({ children }) {
     localStorage.removeItem('gb_journal')
     localStorage.removeItem('gb_profile')
     localStorage.removeItem('gb_guest_name')
-    localStorage.removeItem(COACH_KEY)
+    localStorage.removeItem(coachKey(user?.uid))
     setCoachData(null)
 
     // Reset in-memory state immediately

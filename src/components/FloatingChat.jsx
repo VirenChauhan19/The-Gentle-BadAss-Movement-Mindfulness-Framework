@@ -2,8 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useData } from '../context/DataContext'
 import styles from './FloatingChat.module.css'
 
-const API_URL  = 'https://openrouter.ai/api/v1/chat/completions'
-const CHAT_KEY = 'gb_float_chat'
+const API_URL   = 'https://openrouter.ai/api/v1/chat/completions'
+const chatKey = uid => uid ? `gb_float_chat_${uid}` : 'gb_float_chat'
 
 const QUICK = [
   "I got injured — what now?",
@@ -16,17 +16,26 @@ const QUICK = [
 
 export default function FloatingChat() {
   const [open,    setOpen]    = useState(false)
-  const [msgs,    setMsgs]    = useState(() => {
-    try { return JSON.parse(localStorage.getItem(CHAT_KEY) || '[]') } catch { return [] }
-  })
   const [input,   setInput]   = useState('')
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(null)
   const [unread,  setUnread]  = useState(0)
   const bottomRef = useRef(null)
   const inputRef  = useRef(null)
-  const { coachData } = useData()
+  const { coachData, user } = useData()
   const hasKey = !!import.meta.env.VITE_OPENROUTER_API_KEY
+
+  // Keyed per user so chat history never leaks between accounts
+  const key = chatKey(user?.uid)
+  const [msgs, setMsgs] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(key) || '[]') } catch { return [] }
+  })
+
+  // Reload history when account switches
+  useEffect(() => {
+    try { setMsgs(JSON.parse(localStorage.getItem(key) || '[]')) } catch { setMsgs([]) }
+    setUnread(0)
+  }, [key])
 
   useEffect(() => {
     if (open) {
@@ -42,7 +51,7 @@ export default function FloatingChat() {
   function save(list) {
     const trimmed = list.slice(-40)
     setMsgs(trimmed)
-    localStorage.setItem(CHAT_KEY, JSON.stringify(trimmed))
+    localStorage.setItem(key, JSON.stringify(trimmed))
   }
 
   async function send(text) {

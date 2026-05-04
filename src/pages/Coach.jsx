@@ -249,6 +249,11 @@ function GoalSetup({ onSave }) {
 // ── Program Tab ───────────────────────────────────────────────────────────────
 function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNum, isComplete, onCheckin, onNewGoal }) {
   const weekTemplate = goal.weekTemplate || []
+  const [selectedDay, setSelectedDay] = useState(null)
+
+  function toggleDay(s) {
+    setSelectedDay(prev => prev?.day === s.day ? null : s)
+  }
 
   return (
     <div className={styles.tabContent}>
@@ -256,17 +261,19 @@ function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNu
       {/* Weekly grid */}
       {weekTemplate.length > 0 && (
         <div className={styles.section}>
-          <p className={styles.sectionLabel}>Weekly Structure</p>
+          <p className={styles.sectionLabel}>Weekly Structure — tap a day</p>
           <div className={styles.weekGrid}>
             {weekTemplate.map((s, i) => {
               const st = SESSION_STYLE[s.type] || SESSION_STYLE.rest
               const dayIdx = DAYS_FULL.indexOf(s.day)
               const isToday = s.day === DAYS_FULL[new Date().getDay()]
+              const isSelected = selectedDay?.day === s.day
               return (
                 <div
                   key={i}
-                  className={`${styles.dayCard} ${isToday ? styles.dayCardToday : ''}`}
-                  style={isToday ? { background: st.bg, borderColor: st.border } : {}}
+                  className={`${styles.dayCard} ${isToday ? styles.dayCardToday : ''} ${isSelected ? styles.dayCardSelected : ''}`}
+                  style={{ background: (isToday || isSelected) ? st.bg : undefined, borderColor: (isToday || isSelected) ? st.border : undefined }}
+                  onClick={() => toggleDay(s)}
                 >
                   <span className={styles.dayShort}>{DAYS_SHORT[dayIdx] ?? s.day.slice(0,3)}</span>
                   <span className={styles.dayDot} style={{ background: st.border }} />
@@ -276,6 +283,25 @@ function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNu
               )
             })}
           </div>
+
+          {/* Selected day detail */}
+          {selectedDay && (() => {
+            const st = SESSION_STYLE[selectedDay.type] || SESSION_STYLE.rest
+            return (
+              <div className={styles.dayDetail} style={{ borderLeft: `4px solid ${st.border}`, background: st.bg }}>
+                <div className={styles.dayDetailTop}>
+                  <div>
+                    <span className={styles.dayDetailType} style={{ color: st.color }}>{st.label}</span>
+                    <span className={styles.dayDetailMeta}>{selectedDay.day} · {selectedDay.distance} · {selectedDay.duration}</span>
+                  </div>
+                  <button className={styles.dayDetailClose} onClick={() => setSelectedDay(null)}>✕</button>
+                </div>
+                <p className={styles.dayDetailTitle}>{selectedDay.title}</p>
+                {selectedDay.pace && <p className={styles.dayDetailPace}>Pace: {selectedDay.pace}</p>}
+                {selectedDay.notes && <p className={styles.dayDetailNotes}>{selectedDay.notes}</p>}
+              </div>
+            )
+          })()}
         </div>
       )}
 

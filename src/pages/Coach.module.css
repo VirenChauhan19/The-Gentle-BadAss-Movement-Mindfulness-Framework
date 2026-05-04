@@ -135,10 +135,77 @@
   align-items: center;
   gap: 4px;
   padding: 8px 4px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.dayCardToday {
-  border-width: 2px;
+.dayCard:hover { transform: translateY(-2px); box-shadow: 0 4px 10px var(--shadow); }
+.dayCard:active { transform: translateY(0); }
+
+.dayCardToday  { border-width: 2px; }
+.dayCardSelected { border-width: 2px; box-shadow: 0 4px 10px var(--shadow); }
+
+/* Selected day detail panel */
+.dayDetail {
+  margin-top: 10px;
+  border-radius: 12px;
+  padding: 14px 16px;
+  animation: fadeSlideIn 0.2s ease;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dayDetailTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.dayDetailType {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 3px;
+}
+
+.dayDetailMeta {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.dayDetailClose {
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+}
+
+.dayDetailTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+
+.dayDetailPace {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  margin-bottom: 5px;
+}
+
+.dayDetailNotes {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.55;
 }
 
 .dayShort {

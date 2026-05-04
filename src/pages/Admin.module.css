@@ -509,3 +509,83 @@
   width: 30px;
   text-align: right;
 }
+
+/* ── Coach program section in admin ─────────────── */
+.coachSection {
+  margin-top: 12px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.coachToggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  cursor: pointer;
+  text-align: left;
+}
+
+.coachToggle:hover { color: var(--ink); }
+
+.toggleArrow {
+  font-size: 0.65rem;
+  color: var(--ink-faint);
+}
+
+.coachDetail {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coachStats {
+  display: flex;
+  gap: 14px;
+}
+
+.coachStat {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.checkinLog {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkinRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+}
+
+.checkinDate {
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  width: 82px;
+}
+
+.checkinStatus {
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 14px;
+}
+
+.checkinNote {
+  color: var(--ink-light);
+  line-height: 1.4;
+  flex: 1;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
