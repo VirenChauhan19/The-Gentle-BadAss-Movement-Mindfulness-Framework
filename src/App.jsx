@@ -32,11 +32,6 @@ function AppRoutes() {
     }
   }, [user, profile, navigate, location.pathname])
 
-  // Simple loading gate
-  if (user === undefined) {
-    return <div className={styles.loading}>Initializing...</div>
-  }
-
   return (
     <Routes>
       <Route path="/" element={<Home />} />
