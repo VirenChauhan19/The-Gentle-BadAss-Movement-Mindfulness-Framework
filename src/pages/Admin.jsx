@@ -2,36 +2,73 @@ import { useEffect, useState } from 'react'
 import { db } from '../firebase'
 import { collectionGroup, onSnapshot, query, orderBy } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
+import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
 import styles from './Admin.module.css'
 
 const ADMIN_EMAIL = 'chauhan.viren08@gmail.com'
 
 export default function Admin() {
-  const { user, signInWithGoogle, signOut } = useAuth()
+  const { user, signInWithGoogle, signOut, isConfigured } = useAuth()
+  const { guestName, setGuestName } = useData()
   const [allEntries, setAllEntries] = useState([])
   const [indexError, setIndexError] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const [namePending, setNamePending] = useState(false)
 
   const isAdmin = user?.email === ADMIN_EMAIL
 
   useEffect(() => {
-    if (!isAdmin) return
+    if (!isAdmin || !db) return
 
     const q = query(collectionGroup(db, 'journal'), orderBy('date', 'desc'))
     const unsub = onSnapshot(q, snapshot => {
       setAllEntries(snapshot.docs.map(d => ({ ...d.data(), _uid: d.ref.parent.parent.id })))
     }, err => {
-      // Firestore will suggest an index URL in the error message if missing
       if (err.code === 'failed-precondition') setIndexError(err.message)
     })
     return unsub
   }, [isAdmin])
 
+  // ── Loading (Firebase auth resolving) ──────────────────────────────────────
   if (user === undefined) {
     return <div className={styles.page}><p className={styles.loading}>Loading…</p></div>
   }
 
-  if (!user) {
+  // ── Not signed in ──────────────────────────────────────────────────────────
+  if (!user && !guestName) {
+    if (namePending) {
+      return (
+        <div className={styles.page}>
+          <header className={styles.header}>
+            <p className={styles.label}>Profile</p>
+            <h1 className={styles.title}>What's your name?</h1>
+            <p className={styles.sub}>Just so we can personalise your journal.</p>
+          </header>
+          <div className={styles.nameForm}>
+            <input
+              className={styles.nameInput}
+              type="text"
+              placeholder="Your first name"
+              value={nameInput}
+              onChange={e => setNameInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && nameInput.trim()) setGuestName(nameInput.trim())
+              }}
+              autoFocus
+            />
+            <button
+              className={styles.googleBtn}
+              onClick={() => { if (nameInput.trim()) setGuestName(nameInput.trim()) }}
+              disabled={!nameInput.trim()}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className={styles.page}>
         <header className={styles.header}>
@@ -39,63 +76,82 @@ export default function Admin() {
           <h1 className={styles.title}>Sign In</h1>
           <p className={styles.sub}>Sync your feel journal across devices.</p>
         </header>
-        <button className={styles.googleBtn} onClick={signInWithGoogle}>
-          <GoogleIcon />
-          Continue with Google
+        {isConfigured && (
+          <button className={styles.googleBtn} onClick={signInWithGoogle}>
+            <GoogleIcon />
+            Continue with Google
+          </button>
+        )}
+        <button className={styles.guestBtn} onClick={() => setNamePending(true)}>
+          Continue as Guest
         </button>
       </div>
     )
   }
 
-  if (!isAdmin) {
+  // ── Signed in as admin ──────────────────────────────────────────────────────
+  if (isAdmin) {
+    const byUser = allEntries.reduce((acc, e) => {
+      const key = e._uid
+      if (!acc[key]) acc[key] = { name: e.userName, email: e.userEmail, entries: [] }
+      acc[key].entries.push(e)
+      return acc
+    }, {})
+    const totalEntries = allEntries.length
+    const userCount = Object.keys(byUser).length
+
     return (
       <div className={styles.page}>
         <header className={styles.header}>
-          <p className={styles.label}>Profile</p>
-          {user.photoURL && <img src={user.photoURL} alt="avatar" className={styles.avatar} />}
-          <h1 className={styles.name}>{user.displayName}</h1>
-          <p className={styles.email}>{user.email}</p>
+          <p className={styles.label}>Admin · Live</p>
+          <h1 className={styles.title}>All Users</h1>
+          <p className={styles.sub}>{userCount} {userCount === 1 ? 'user' : 'users'} · {totalEntries} {totalEntries === 1 ? 'entry' : 'entries'}</p>
         </header>
-        <p className={styles.syncNote}>Your journal syncs automatically.</p>
+        {indexError && (
+          <div className={styles.indexWarn}>
+            <p>Firestore index needed. Check the browser console for a link to create it — takes ~1 min.</p>
+          </div>
+        )}
+        {userCount === 0 && !indexError && (
+          <p className={styles.empty}>No entries yet. Waiting for users…</p>
+        )}
+        {Object.entries(byUser).map(([uid, { name, email, entries }]) => (
+          <UserBlock key={uid} name={name} email={email} entries={entries} />
+        ))}
         <button className={styles.signOutBtn} onClick={signOut}>Sign out</button>
       </div>
     )
   }
 
-  // Group entries by user
-  const byUser = allEntries.reduce((acc, e) => {
-    const key = e._uid
-    if (!acc[key]) acc[key] = { name: e.userName, email: e.userEmail, entries: [] }
-    acc[key].entries.push(e)
-    return acc
-  }, {})
-
-  const totalEntries = allEntries.length
-  const userCount = Object.keys(byUser).length
+  // ── Signed in as regular user, or guest with name ──────────────────────────
+  const displayName = user?.displayName || guestName
+  const displayEmail = user?.email || 'Guest account'
+  const photoURL = user?.photoURL
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.label}>Admin · Live</p>
-        <h1 className={styles.title}>All Users</h1>
-        <p className={styles.sub}>{userCount} {userCount === 1 ? 'user' : 'users'} · {totalEntries} {totalEntries === 1 ? 'entry' : 'entries'}</p>
+        <p className={styles.label}>Profile</p>
+        {photoURL && <img src={photoURL} alt="avatar" className={styles.avatar} referrerPolicy="no-referrer" />}
+        <h1 className={styles.name}>{displayName}</h1>
+        <p className={styles.email}>{displayEmail}</p>
       </header>
-
-      {indexError && (
-        <div className={styles.indexWarn}>
-          <p>Firestore index needed. Check the browser console for a link to create it — takes ~1 min.</p>
-        </div>
+      <p className={styles.syncNote}>
+        {user ? 'Your journal syncs automatically.' : 'You\'re using a guest account. Sign in to sync across devices.'}
+      </p>
+      {!user && isConfigured && (
+        <button className={styles.googleBtn} style={{ marginBottom: 12 }} onClick={signInWithGoogle}>
+          <GoogleIcon />
+          Upgrade to Google Sign-In
+        </button>
       )}
-
-      {userCount === 0 && !indexError && (
-        <p className={styles.empty}>No entries yet. Waiting for users…</p>
+      {user ? (
+        <button className={styles.signOutBtn} onClick={signOut}>Sign out</button>
+      ) : (
+        <button className={styles.signOutBtn} onClick={() => setGuestName(null)}>
+          Clear guest name
+        </button>
       )}
-
-      {Object.entries(byUser).map(([uid, { name, email, entries }]) => (
-        <UserBlock key={uid} name={name} email={email} entries={entries} />
-      ))}
-
-      <button className={styles.signOutBtn} onClick={signOut}>Sign out</button>
     </div>
   )
 }

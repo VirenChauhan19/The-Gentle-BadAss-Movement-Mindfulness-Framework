@@ -56,6 +56,50 @@
   background: var(--border);
 }
 
+.guestBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px auto 0;
+  padding: 12px 24px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.guestBtn:hover {
+  border-color: var(--ink-light);
+  color: var(--ink);
+}
+
+.nameForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.nameInput {
+  padding: 14px 16px;
+  background: var(--cream-dark);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 1rem;
+  color: var(--ink);
+  text-align: center;
+  outline: none;
+}
+
+.nameInput:focus {
+  border-color: var(--sage);
+}
+
 /* ─── Profile (non-admin) ─── */
 .avatar {
   width: 72px;

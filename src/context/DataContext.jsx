@@ -7,17 +7,21 @@ import {
   saveJournalEntry as saveLocalEntry,
 } from '../data/storage'
 
+const GUEST_NAME_KEY = 'gb_guest_name'
+
 const DataContext = createContext(null)
 
 export function DataProvider({ children }) {
   const { user } = useAuth()
-  // Seed from localStorage immediately so there is no loading flash
   const [entries, setEntries] = useState(() => getLocalEntries())
+  const [guestName, setGuestNameState] = useState(
+    () => localStorage.getItem(GUEST_NAME_KEY) || null
+  )
 
   useEffect(() => {
     if (user === undefined) return // auth still resolving
 
-    if (!user) {
+    if (!user || !db) {
       setEntries(getLocalEntries())
       return
     }
@@ -31,6 +35,15 @@ export function DataProvider({ children }) {
     return unsub
   }, [user])
 
+  function setGuestName(name) {
+    if (name) {
+      localStorage.setItem(GUEST_NAME_KEY, name)
+    } else {
+      localStorage.removeItem(GUEST_NAME_KEY)
+    }
+    setGuestNameState(name)
+  }
+
   async function saveEntry(entry) {
     const today = new Date().toISOString().split('T')[0]
     const full = { ...entry, date: today }
@@ -38,16 +51,15 @@ export function DataProvider({ children }) {
     // Always persist to localStorage as offline cache
     saveLocalEntry(entry)
 
-    if (user) {
+    if (user && db) {
       const docRef = doc(db, 'users', user.uid, 'journal', today)
       await setDoc(
         docRef,
-        { ...full, userId: user.uid, userEmail: user.email, userName: user.displayName },
+        { ...full, userId: user.uid, userEmail: user.email, userName: user.displayName || guestName },
         { merge: true }
       )
-      // Firestore snapshot listener will update entries automatically
+      // Firestore snapshot listener updates entries automatically
     } else {
-      // No subscription active — refresh state from localStorage
       setEntries(getLocalEntries())
     }
   }
@@ -58,7 +70,7 @@ export function DataProvider({ children }) {
   }
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, user }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, user }}>
       {children}
     </DataContext.Provider>
   )
