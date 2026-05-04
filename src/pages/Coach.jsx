@@ -598,8 +598,8 @@ Required JSON structure:
       "title": "Easy Recovery Run",
       "distance": "6 km",
       "duration": "35–40 min",
-      "pace": "Conversational (able to speak full sentences)",
-      "notes": "Detailed session instructions"
+      "pace": "Conversational — you can speak full sentences comfortably",
+      "notes": "Warm-up (5 min): leg swings x10 each leg, hip circles x10, high knees 20m x2, dynamic lunges 10m x2, calf raises x15. Main set: [describe the run]. Cool-down: 5 min walk, quad stretch, hamstring stretch, calf stretch."
     }
   ],
   "progressionNote": "How volume and intensity build across the weeks",
@@ -608,18 +608,32 @@ Required JSON structure:
 
 type must be exactly one of: easy, moderate, hard, long, rest, cross
 
+PACING RULES — critical, do NOT use specific min/km targets:
+- Easy runs: "Conversational pace — you can chat in full sentences. Feels effortless."
+- Moderate/Tempo: "Comfortably hard — you can speak in short phrases but not full sentences." NEVER say 3:30/km or any pace faster than the runner's current easy pace.
+- Long run: "Easy conversational pace — slower than your easy run days. Prioritise time on feet."
+- For Beginner or Intermediate runners: NEVER prescribe paces faster than 5:00/km in any session. Describe intensity as effort level only.
+- Week 1 especially: all paces must be conservative and effort-based. Build confidence, not speed.
+- Base intensity on current fitness (${currentKm}/week), NOT on target race pace.
+
+SESSION NOTES RULES — every non-rest session must include:
+1. Warm-up (5 min): List 4–5 specific dynamic exercises (leg swings, hip circles, high knees, dynamic lunges, arm circles, ankle rolls, bum kicks). Include reps/distance.
+2. Main set: Clear description of the workout with effort cues.
+3. Cool-down: 5 min easy walk + 2–3 specific stretches (quad, hamstring, calf, hip flexor).
+
 PROGRAM RULES:
 - ${daysPerWeek} training days, ${restDays} full rest days
 - ${hardSessions} hard/moderate session(s): tempo or intervals (not on days adjacent to long run)
 - 1 long run: always Saturday or Sunday
 - ${easySessions} easy run(s): truly easy, conversational pace
 - Base all distances on current weekly km: ${currentKm}
-- For ${raceGoal} at ${experience} level over ${weeks} weeks`
+- For ${raceGoal} at ${experience} level over ${weeks} weeks
+- Week 1 distances should be at or slightly below current weekly volume — do NOT start with a spike`
 
   const raw = await apiCall([
     { role: 'system', content: system },
     { role: 'user',   content: `Build my ${weeks}-week ${raceGoal} plan. I'm ${experience}, currently doing ${currentKm}/week, training ${daysPerWeek} days/week.${notes ? ` Extra info: ${notes}` : ''}` },
-  ], 900)
+  ], 1400)
 
   return extractJSON(raw)
 }
