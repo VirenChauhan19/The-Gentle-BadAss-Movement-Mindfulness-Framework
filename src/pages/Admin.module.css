@@ -36,6 +36,16 @@
 }
 
 /* ─── Sign In ─── */
+.authError {
+  background: var(--terracotta);
+  color: var(--cream);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
 .googleBtn {
   display: flex;
   align-items: center;

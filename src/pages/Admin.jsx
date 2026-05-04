@@ -9,7 +9,7 @@ import styles from './Admin.module.css'
 const ADMIN_EMAIL = 'chauhan.viren08@gmail.com'
 
 export default function Admin() {
-  const { user, signInWithGoogle, signOut, isConfigured } = useAuth()
+  const { user, signInWithGoogle, signOut, isConfigured, authError } = useAuth()
   const { guestName, setGuestName } = useData()
   const [allEntries, setAllEntries] = useState([])
   const [indexError, setIndexError] = useState(false)
@@ -76,6 +76,7 @@ export default function Admin() {
           <h1 className={styles.title}>Sign In</h1>
           <p className={styles.sub}>Sync your feel journal across devices.</p>
         </header>
+        {authError && <p className={styles.authError}>{authError}</p>}
         <button className={styles.googleBtn} onClick={signInWithGoogle}>
           <GoogleIcon />
           Continue with Google

@@ -1,15 +1,30 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { auth, googleProvider, isConfigured } from '../firebase'
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
+import {
+  signInWithRedirect,
+  signOut,
+  onAuthStateChanged,
+  getRedirectResult,
+} from 'firebase/auth'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  // Skip loading state if Firebase isn't configured
   const [user, setUser] = useState(isConfigured ? undefined : null)
+  const [authError, setAuthError] = useState(null)
 
   useEffect(() => {
     if (!isConfigured) return
+
+    // Handle the redirect result when the user lands back after Google sign-in
+    getRedirectResult(auth)
+      .then(result => {
+        if (result?.user) setUser(result.user)
+      })
+      .catch(err => {
+        setAuthError(err.message)
+      })
+
     return onAuthStateChanged(auth, setUser)
   }, [])
 
@@ -18,7 +33,8 @@ export function AuthProvider({ children }) {
       alert('Firebase is not set up yet. Fill in your real values in .env.local and restart the dev server.')
       return
     }
-    await signInWithPopup(auth, googleProvider)
+    setAuthError(null)
+    await signInWithRedirect(auth, googleProvider)
   }
 
   async function signOutUser() {
@@ -27,7 +43,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, signInWithGoogle, signOut: signOutUser, isConfigured }}>
+    <AuthContext.Provider value={{ user, signInWithGoogle, signOut: signOutUser, isConfigured, authError }}>
       {children}
     </AuthContext.Provider>
   )
