@@ -21,12 +21,20 @@ function AppRoutes() {
   const profile = data?.profile
 
   useEffect(() => {
-    // ONLY redirect if we are CERTAIN about the state (profile is null, not undefined)
-    if (user && profile === null && location.pathname !== '/onboarding') {
-      navigate('/onboarding')
-    }
-    // If profile exists but incomplete
-    if (user && profile && !profile.onboardingComplete && location.pathname !== '/onboarding') {
+    if (!user || location.pathname === '/onboarding') return
+
+    const needsOnboarding =
+      profile === null ||
+      (profile && !profile.onboardingComplete)
+
+    if (needsOnboarding) {
+      // Last-resort check: Firestore writes are fire-and-forget and can fail
+      // silently. If localStorage already has a completed profile on this
+      // device, honour it and never redirect to onboarding.
+      try {
+        const local = JSON.parse(localStorage.getItem('gb_profile') || 'null')
+        if (local?.onboardingComplete) return
+      } catch {}
       navigate('/onboarding')
     }
   }, [user, profile, navigate, location.pathname])

@@ -48,12 +48,19 @@
   border-radius: 16px;
   padding: 20px;
   position: relative;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
   box-shadow: 0 1px 3px var(--shadow);
 }
 
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px var(--shadow-md);
+  }
+}
+
 .card:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
   box-shadow: none;
 }
 

@@ -8,6 +8,12 @@ import styles from './Admin.module.css'
 
 const ADMIN_EMAIL = 'chauhan.viren08@gmail.com'
 
+const PATH_NAMES = {
+  rehab: 'The Rehab Path',
+  beginner: 'The Beginner Path',
+  performance: 'The Performance Path',
+}
+
 export default function Admin() {
   const { user, signInWithGoogle, signOut, authError } = useAuth()
   const { guestName, setGuestName, profile, entries, clearAllData } = useData()
@@ -113,18 +119,18 @@ export default function Admin() {
           <p className={styles.email}>{displayEmail}</p>
         </div>
 
-        <div className={styles.journeyOverview}>
-          <div className={styles.journeyStat}>
-            <span className={styles.statLabel}>Current Path</span>
-            <span className={styles.statValue}>{profile?.path || 'Not Set'}</span>
+        <div className={styles.journeyStats}>
+          <div className={styles.journeyRow}>
+            <span className={styles.journeyLabel}>Current Path</span>
+            <span className={styles.journeyValue}>{PATH_NAMES[profile?.path] || 'Not set'}</span>
           </div>
-          <div className={styles.journeyStat}>
-            <span className={styles.statLabel}>Commitment</span>
-            <span className={styles.statValue}>{profile?.commitment || 30} Days</span>
+          <div className={styles.journeyRow}>
+            <span className={styles.journeyLabel}>Commitment</span>
+            <span className={styles.journeyValue}>{profile?.commitment || 30} days</span>
           </div>
-          <div className={styles.journeyStat}>
-            <span className={styles.statLabel}>Days Logged</span>
-            <span className={styles.statValue}>{entries.length}</span>
+          <div className={styles.journeyRow}>
+            <span className={styles.journeyLabel}>Days Logged</span>
+            <span className={styles.journeyValue}>{entries.length}</span>
           </div>
         </div>
       </div>

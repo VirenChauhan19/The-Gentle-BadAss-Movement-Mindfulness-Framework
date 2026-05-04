@@ -19,6 +19,12 @@
   justify-content: center;
   height: 100vh;
   font-family: 'Playfair Display', serif;
-  font-size: 1.2rem;
-  color: var(--ink-light);
+  font-size: 1.1rem;
+  color: var(--ink-faint);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
 }

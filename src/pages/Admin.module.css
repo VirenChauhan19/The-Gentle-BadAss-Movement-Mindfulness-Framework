@@ -39,133 +39,147 @@
 /* ─── Profile Card ─── */
 .profileCard {
   background: var(--paper);
-  border: 2px solid var(--border);
-  border-radius: 2rem;
-  padding: 2rem 1.5rem;
-  margin-bottom: 2rem;
-  text-align: center;
+  border: 1.5px solid var(--border);
+  border-radius: 1.75rem;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .profileHeader {
-  margin-bottom: 2rem;
+  background: linear-gradient(160deg, var(--ink) 0%, #3d3020 100%);
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: center;
 }
 
 .largeAvatar {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  margin: 0 auto 1rem;
-  border: 3px solid var(--border);
+  margin: 0 auto 0.75rem;
+  border: 3px solid rgba(255,255,255,0.25);
   object-fit: cover;
+  display: block;
 }
 
 .avatarPlaceholder {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  margin: 0 auto 1rem;
-  background: var(--ink);
+  margin: 0 auto 0.75rem;
+  background: rgba(255,255,255,0.15);
   color: var(--paper);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   font-family: 'Playfair Display', serif;
 }
 
 .name {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 800;
-  color: var(--ink);
-  margin-bottom: 0.25rem;
+  color: var(--paper);
+  margin-bottom: 0.2rem;
 }
 
 .email {
-  font-size: 0.9rem;
-  color: var(--ink-light);
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.6);
 }
 
-.journeyOverview {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  border-top: 1px solid var(--border);
-  padding-top: 1.5rem;
-}
-
-.journeyStat {
-  flex: 1;
+/* ─── Journey stats — vertical rows ─── */
+.journeyStats {
+  padding: 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
+  gap: 0;
 }
 
-.statLabel {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.journeyRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.journeyRow:last-child {
+  border-bottom: none;
+}
+
+.journeyLabel {
+  font-size: 0.8rem;
   color: var(--ink-faint);
-  margin-bottom: 0.25rem;
+  font-weight: 500;
 }
 
-.statValue {
-  font-size: 0.95rem;
+.journeyValue {
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--ink);
+  text-align: right;
+  max-width: 60%;
 }
 
 /* ─── Settings Section ─── */
 .settingsSection {
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .sectionTitle {
-  font-size: 1rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--ink-faint);
-  margin-bottom: 1rem;
-  padding-left: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-left: 0.25rem;
 }
 
 .settingsList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 1px 4px var(--shadow);
 }
 
 .settingItem {
-  background: var(--paper);
-  border: 1px solid var(--border);
-  border-radius: 1.25rem;
-  padding: 1.25rem;
+  padding: 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.settingItem:last-child {
+  border-bottom: none;
 }
 
 .settingInfo {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .settingLabel {
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
   color: var(--ink);
 }
 
 .settingDesc {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--ink-light);
 }
 
 .togglePlaceholder {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--ink-faint);
   background: var(--cream-dark);
-  padding: 0.4rem 0.8rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 2rem;
 }
 
