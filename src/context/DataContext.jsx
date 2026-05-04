@@ -92,7 +92,8 @@ export function DataProvider({ children }) {
           }
         } catch {}
         setProfileState(null)
-        localStorage.removeItem(PROFILE_KEY)
+        // Do NOT remove localStorage here — App.jsx uses it as a fallback.
+        // Only clearAllData() should ever wipe localStorage intentionally.
       }
       setProfileFetched(true)
     }, err => {
@@ -190,8 +191,21 @@ export function DataProvider({ children }) {
   }
 
   // Expose undefined while Firestore hasn't replied yet so App.jsx loading
-  // gate holds. Once profileFetched is true, expose the real value (null or object).
-  const exposedProfile = (user && !profileFetched) ? undefined : profile
+  // gate holds. Once profileFetched is true, expose the real value.
+  // If Firestore returned null but localStorage has a complete profile (e.g. Firestore
+  // rules blocked the write), use that so the user isn't re-sent to onboarding.
+  const exposedProfile = (() => {
+    if (user && !profileFetched) return undefined
+    if (profile !== null && profile !== undefined) return profile
+    if (profile === null) {
+      try {
+        const raw = localStorage.getItem(PROFILE_KEY)
+        const local = raw ? JSON.parse(raw) : null
+        if (local?.onboardingComplete) return local
+      } catch {}
+    }
+    return profile
+  })()
 
   return (
     <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user }}>
