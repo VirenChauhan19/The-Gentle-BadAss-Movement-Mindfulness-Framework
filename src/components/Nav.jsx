@@ -1,11 +1,13 @@
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import styles from './Nav.module.css'
 
 const links = [
   { to: '/', label: 'Home', icon: HomeIcon },
   { to: '/journal', label: 'Feel', icon: JournalIcon },
   { to: '/history', label: 'History', icon: HistoryIcon },
-  { to: '/library', label: 'Move', icon: LibraryIcon }
+  { to: '/library', label: 'Move', icon: LibraryIcon },
+  { to: '/admin', label: 'Profile', icon: ProfileIcon },
 ]
 
 export default function Nav() {
@@ -60,6 +62,19 @@ function LibraryIcon() {
       <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="8" x2="12" y2="16" />
       <line x1="8" y1="12" x2="16" y2="12" />
+    </svg>
+  )
+}
+
+function ProfileIcon() {
+  const { user } = useAuth()
+  if (user?.photoURL) {
+    return <img src={user.photoURL} alt="avatar" className={styles.navAvatar} referrerPolicy="no-referrer" />
+  }
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-4 3.58-7 8-7s8 3 8 7" />
     </svg>
   )
 }

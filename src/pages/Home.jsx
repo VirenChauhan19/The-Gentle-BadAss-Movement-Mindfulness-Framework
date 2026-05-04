@@ -1,13 +1,14 @@
 import { Link } from 'react-router-dom'
-import { getTodayEntry, computeFeelScore, getJournalEntries } from '../data/storage'
+import { useData } from '../context/DataContext'
+import { computeFeelScore } from '../data/storage'
 import styles from './Home.module.css'
 
 export default function Home() {
+  const { entries, getTodayEntry } = useData()
   const today = getTodayEntry()
-  const allEntries = getJournalEntries()
-  const streak = computeStreak(allEntries)
+  const streak = computeStreak(entries)
   const feelScore = today ? computeFeelScore(today.scores || {}) : null
-  const dayOfJourney = allEntries.length
+  const dayOfJourney = entries.length
 
   const dateStr = new Date().toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric', month: 'long'

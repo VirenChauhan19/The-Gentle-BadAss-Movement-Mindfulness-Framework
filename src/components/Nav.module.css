@@ -34,3 +34,11 @@
 .active {
   color: var(--ink);
 }
+
+.navAvatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}

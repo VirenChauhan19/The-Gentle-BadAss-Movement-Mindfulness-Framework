@@ -1,9 +1,11 @@
-import { getJournalEntries, computeFeelScore } from '../data/storage'
 import { Link } from 'react-router-dom'
+import { useData } from '../context/DataContext'
+import { computeFeelScore } from '../data/storage'
 import styles from './History.module.css'
 
 export default function History() {
-  const entries = getJournalEntries().sort((a, b) => b.date.localeCompare(a.date))
+  const { entries: rawEntries } = useData()
+  const entries = [...rawEntries].sort((a, b) => b.date.localeCompare(a.date))
 
   const scores = entries.map(e => ({
     date: e.date,

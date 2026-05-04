@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { JOURNAL_FACTORS, CATEGORIES } from '../data/journalFactors'
-import { getTodayEntry, saveJournalEntry, computeFeelScore } from '../data/storage'
+import { computeFeelScore } from '../data/storage'
+import { useData } from '../context/DataContext'
 import styles from './Journal.module.css'
 
 export default function Journal() {
+  const { getTodayEntry, saveEntry } = useData()
   const existing = getTodayEntry()
   const [scores, setScores] = useState(existing?.scores || {})
   const [note, setNote] = useState(existing?.note || '')
@@ -20,8 +22,8 @@ export default function Journal() {
     setSaved(false)
   }
 
-  function handleSave() {
-    saveJournalEntry({ scores, note })
+  async function handleSave() {
+    await saveEntry({ scores, note })
     setSaved(true)
     setTimeout(() => navigate('/history'), 800)
   }
