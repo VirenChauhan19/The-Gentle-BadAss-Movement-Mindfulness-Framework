@@ -43,7 +43,10 @@
       "Bash(npm list *)",
       "Bash(npx vite *)",
       "Bash(git checkout *)",
-      "Bash(npm uninstall *)"
+      "Bash(npm uninstall *)",
+      "WebFetch(domain:gymvisual.com)",
+      "WebFetch(domain:musclewiki.com)",
+      "WebFetch(domain:api.musclewiki.com)"
     ]
   }
 }
