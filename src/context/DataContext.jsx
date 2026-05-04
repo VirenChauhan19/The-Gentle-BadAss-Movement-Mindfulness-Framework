@@ -8,12 +8,20 @@ import {
 } from '../data/storage'
 
 const GUEST_NAME_KEY = 'gb_guest_name'
+const PROFILE_KEY = 'gb_profile'
 
 const DataContext = createContext(null)
 
 export function DataProvider({ children }) {
   const { user } = useAuth()
   const [entries, setEntries] = useState(() => getLocalEntries())
+  const [profile, setProfileState] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(PROFILE_KEY)) || null
+    } catch {
+      return null
+    }
+  })
   const [guestName, setGuestNameState] = useState(
     () => localStorage.getItem(GUEST_NAME_KEY) || null
   )
@@ -29,10 +37,24 @@ export function DataProvider({ children }) {
     // Signed in — subscribe to this user's Firestore journal in real-time
     const journalRef = collection(db, 'users', user.uid, 'journal')
     const q = query(journalRef, orderBy('date', 'desc'))
-    const unsub = onSnapshot(q, snapshot => {
+    const unsubJournal = onSnapshot(q, snapshot => {
       setEntries(snapshot.docs.map(d => d.data()))
     })
-    return unsub
+
+    // Subscribe to profile
+    const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
+    const unsubProfile = onSnapshot(profileRef, snapshot => {
+      if (snapshot.exists()) {
+        const data = snapshot.data()
+        setProfileState(data)
+        localStorage.setItem(PROFILE_KEY, JSON.stringify(data))
+      }
+    })
+
+    return () => {
+      unsubJournal()
+      unsubProfile()
+    }
   }, [user])
 
   function setGuestName(name) {
@@ -42,6 +64,17 @@ export function DataProvider({ children }) {
       localStorage.removeItem(GUEST_NAME_KEY)
     }
     setGuestNameState(name)
+  }
+
+  async function saveProfile(data) {
+    const updated = { ...profile, ...data, updatedAt: new Date().toISOString() }
+    setProfileState(updated)
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(updated))
+
+    if (user && db) {
+      const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
+      await setDoc(profileRef, updated, { merge: true })
+    }
   }
 
   async function saveEntry(entry) {
