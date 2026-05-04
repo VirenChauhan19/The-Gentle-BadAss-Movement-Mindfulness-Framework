@@ -17,9 +17,10 @@ export function DataProvider({ children }) {
   const [entries, setEntries] = useState(() => getLocalEntries())
   const [profile, setProfileState] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem(PROFILE_KEY)) || null
+      const stored = localStorage.getItem(PROFILE_KEY)
+      return stored ? JSON.parse(stored) : undefined // undefined = check firestore
     } catch {
-      return null
+      return undefined
     }
   })
   const [guestName, setGuestNameState] = useState(
@@ -31,6 +32,7 @@ export function DataProvider({ children }) {
 
     if (!user || !db) {
       setEntries(getLocalEntries())
+      setProfileState(null) // No user, no profile
       return
     }
 
@@ -48,6 +50,9 @@ export function DataProvider({ children }) {
         const data = snapshot.data()
         setProfileState(data)
         localStorage.setItem(PROFILE_KEY, JSON.stringify(data))
+      } else {
+        setProfileState(null) // Explicitly no profile found
+        localStorage.removeItem(PROFILE_KEY)
       }
     })
 

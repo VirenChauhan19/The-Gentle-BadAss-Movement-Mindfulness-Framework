@@ -21,8 +21,7 @@ function AppRoutes() {
   const profile = data?.profile
 
   useEffect(() => {
-    // If user is logged in but profile is explicitly null (not in DB/Local), 
-    // force onboarding unless already there.
+    // ONLY redirect if we are CERTAIN about the state (profile is null, not undefined)
     if (user && profile === null && location.pathname !== '/onboarding') {
       navigate('/onboarding')
     }
@@ -31,6 +30,13 @@ function AppRoutes() {
       navigate('/onboarding')
     }
   }, [user, profile, navigate, location.pathname])
+
+  // Gate rendering until we know the Auth and Profile status
+  // user === undefined means auth is still resolving
+  // profile === undefined means we are logged in but still checking Firestore for a profile
+  if (user === undefined || (user && profile === undefined)) {
+    return <div className={styles.loading}>Initializing...</div>
+  }
 
   return (
     <Routes>
