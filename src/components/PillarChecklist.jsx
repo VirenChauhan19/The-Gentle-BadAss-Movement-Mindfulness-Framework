@@ -20,7 +20,7 @@ export default function PillarChecklist({ onComplete }) {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>The 5 Pillars of La Ultra Readiness</h2>
+      <h2 className={styles.title}>The 5 Pillars of La Ultra-The High Readiness</h2>
       <p className={styles.subtitle}>Check off all pillars to begin your session.</p>
       
       <div className={styles.list}>

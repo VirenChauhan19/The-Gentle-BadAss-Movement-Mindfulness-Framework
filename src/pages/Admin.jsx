@@ -249,7 +249,7 @@ export default function Admin() {
         </button>
       </div>
 
-      <p className={styles.version}>La Ultra Run &amp; Bee v1.2.0</p>
+      <p className={styles.version}>La Ultra-The High Run &amp; Bee v1.2.0</p>
     </div>
   )
 }
