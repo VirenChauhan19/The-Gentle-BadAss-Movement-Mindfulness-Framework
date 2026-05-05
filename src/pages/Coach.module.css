@@ -7,7 +7,9 @@
 
 /* ── Header ──────────────────────────────────────────────────── */
 .header {
-  background: linear-gradient(175deg, var(--ink) 0%, #2e2416 55%, #3a2e1c 100%);
+  background:
+    radial-gradient(circle at 84% 10%, rgba(215, 229, 209, 0.18), transparent 10rem),
+    linear-gradient(175deg, var(--ink) 0%, #243525 58%, #213342 100%);
   padding: 52px 24px 24px;
   text-align: center;
   position: relative;
@@ -100,17 +102,17 @@
   display: flex;
   margin: 0 16px;
   background: var(--paper);
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   padding: 4px;
   gap: 4px;
-  box-shadow: 0 2px 8px var(--shadow);
+  box-shadow: 0 10px 24px var(--shadow-xs);
 }
 
 .tab {
   flex: 1;
   padding: 10px;
   border: none;
-  border-radius: 9px;
+  border-radius: var(--r-md);
   background: transparent;
   font-size: 0.82rem;
   font-weight: 600;
@@ -121,9 +123,9 @@
 }
 
 .tabActive {
-  background: var(--cream);
+  background: linear-gradient(135deg, rgba(99, 127, 95, 0.16), rgba(66, 105, 125, 0.08));
   color: var(--ink);
-  box-shadow: 0 1px 4px var(--shadow);
+  box-shadow: inset 0 0 0 1px rgba(99, 127, 95, 0.12);
 }
 
 /* ── Tab content ─────────────────────────────────────────────── */
@@ -159,7 +161,7 @@
 .dayCard {
   flex: 0 0 auto;
   width: 44px;
-  border-radius: 10px;
+  border-radius: var(--r-md);
   border: 1.5px solid transparent;
   background: var(--paper);
   display: flex;
@@ -168,10 +170,10 @@
   gap: 4px;
   padding: 8px 4px;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.dayCard:hover { transform: translateY(-2px); box-shadow: 0 4px 10px var(--shadow); }
+.dayCard:hover { transform: translateY(-3px); box-shadow: 0 10px 22px var(--shadow); }
 .dayCard:active { transform: translateY(0); }
 
 .dayCardToday  { border-width: 2px; }
@@ -271,9 +273,10 @@
 .overviewCard {
   margin: 0 16px 16px;
   background: var(--paper);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 16px 18px;
-  box-shadow: 0 1px 6px var(--shadow);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 .overviewText {
@@ -300,9 +303,10 @@
 .todaySessionCard {
   margin: 0 16px 16px;
   background: var(--paper);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 16px 18px;
-  box-shadow: 0 1px 6px var(--shadow);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 .sessionTop {
@@ -347,9 +351,10 @@
 .checkinCard {
   margin: 0 16px 16px;
   background: var(--paper);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 18px;
-  box-shadow: 0 1px 8px var(--shadow);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 22px var(--shadow-xs);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -402,9 +407,10 @@
 .checkinDisplay {
   margin: 0 16px 16px;
   background: var(--paper);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   padding: 18px;
-  box-shadow: 0 1px 8px var(--shadow);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 .checkinDisplayTop {
@@ -469,10 +475,11 @@
   padding: 13px 15px;
   margin-bottom: 7px;
   cursor: pointer;
-  transition: box-shadow 0.15s;
+  border: 1px solid var(--border-light);
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.logEntry:hover { box-shadow: 0 2px 8px var(--shadow); }
+.logEntry:hover { transform: translateY(-2px); box-shadow: 0 10px 22px var(--shadow); }
 
 .logTop {
   display: flex;
@@ -499,7 +506,7 @@
 .primaryBtn {
   width: 100%;
   padding: 15px;
-  background: var(--ink);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--paper);
   border: none;
   border-radius: 13px;
@@ -507,10 +514,11 @@
   font-weight: 700;
   cursor: pointer;
   letter-spacing: 0.02em;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .primaryBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+.primaryBtn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 22px var(--shadow-md); }
 
 .errorMsg {
   font-size: 0.82rem;
@@ -561,7 +569,9 @@
 }
 
 .wizardTop {
-  background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
+  background:
+    linear-gradient(135deg, rgba(99, 127, 95, 0.16), transparent 60%),
+    linear-gradient(160deg, var(--paper-soft) 0%, var(--cream) 100%);
   padding: 52px 24px 20px;
   text-align: center;
 }
@@ -637,14 +647,14 @@
   gap: 4px;
   padding: 16px 6px 14px;
   border: 1.5px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   background: var(--paper);
   cursor: pointer;
   transition: all 0.15s;
   text-align: center;
 }
 
-.goalCard:hover { border-color: var(--ink-faint); transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow); }
+.goalCard:hover { border-color: var(--ink-faint); transform: translateY(-3px); box-shadow: 0 10px 22px var(--shadow); }
 .goalCard:active { transform: scale(0.95); }
 
 .goalCardActive {
@@ -686,14 +696,14 @@
   gap: 12px;
   padding: 18px 14px;
   border: 1.5px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--r-lg);
   background: var(--paper);
   cursor: pointer;
   transition: all 0.15s;
   text-align: left;
 }
 
-.expBigCard:hover { border-color: var(--ink-faint); box-shadow: 0 3px 10px var(--shadow); }
+.expBigCard:hover { border-color: var(--ink-faint); transform: translateY(-2px); box-shadow: 0 10px 22px var(--shadow); }
 .expBigCard:active { transform: scale(0.97); }
 
 .expBigCardActive {
@@ -834,7 +844,7 @@
 .wizardNext {
   width: 100%;
   padding: 16px;
-  background: var(--ink);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--paper);
   border: none;
   border-radius: 14px;
@@ -1086,10 +1096,10 @@
   font-size: 0.83rem;
   color: var(--ink-light);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
 }
 
-.suggestion:hover { border-color: var(--sage); color: var(--ink); }
+.suggestion:hover { border-color: var(--sage); color: var(--ink); transform: translateY(-1px); box-shadow: 0 8px 18px var(--shadow-xs); }
 
 /* Chat bubbles */
 .bubble {

@@ -5,7 +5,9 @@
 
 .header {
   padding: 52px 24px 22px;
-  background: linear-gradient(175deg, #f0e9dd 0%, var(--cream) 100%);
+  background:
+    linear-gradient(135deg, rgba(195, 139, 63, 0.14), transparent 58%),
+    linear-gradient(175deg, var(--paper-soft) 0%, var(--cream) 100%);
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -67,9 +69,16 @@
 .chartCard {
   background: var(--paper);
   border: 1px solid var(--border-light);
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
   padding: 20px;
-  box-shadow: 0 2px 8px var(--shadow-xs);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.chartCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(66, 105, 125, 0.22);
+  box-shadow: 0 14px 30px var(--shadow);
 }
 
 .chartTitle {
@@ -108,6 +117,11 @@
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
+  transition: color 0.15s ease;
+}
+
+.startLink:hover {
+  color: var(--sage-dark);
 }
 
 /* ── Entry list ──────────────────────────────────────── */
@@ -125,12 +139,22 @@
 }
 
 .row {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border-light);
+  padding: 16px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.60);
+  box-shadow: 0 5px 16px var(--shadow-xs);
+  margin-bottom: 10px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .row:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px var(--shadow);
 }
 
 .rowTop {

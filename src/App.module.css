@@ -3,7 +3,10 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: var(--cream);
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.58), transparent 42%),
+    radial-gradient(circle at 88% 14%, rgba(66, 105, 125, 0.12), transparent 26rem),
+    var(--cream);
 }
 
 /* Phone: full width, nav at bottom */
@@ -19,6 +22,7 @@
     /* Prevent content from overflowing horizontally on zoom */
     overflow-x: hidden;
     width: 100%;
+    scroll-behavior: smooth;
   }
 }
 
@@ -33,12 +37,14 @@
   .main {
     flex: 1;
     /* Center content within a comfortable reading column */
-    max-width: 600px;
+    max-width: 720px;
     margin: 0 auto;
     overflow-y: auto;
     overflow-x: hidden;
     padding-bottom: 40px;
     min-height: 100vh;
+    background: rgba(255, 255, 255, 0.24);
+    box-shadow: 0 0 0 1px rgba(217, 207, 191, 0.35);
   }
 }
 
@@ -46,7 +52,7 @@
 @media (min-width: 1024px) {
   .app {
     flex-direction: row;
-    background: var(--cream);
+    background: transparent;
   }
 
   .main {
@@ -57,6 +63,8 @@
     padding-bottom: 48px;
     min-height: 100vh;
     overflow-x: hidden;
+    background: transparent;
+    box-shadow: none;
   }
 }
 

@@ -47,15 +47,17 @@
 /* ─── Profile Card ─── */
 .profileCard {
   background: var(--paper);
-  border: 1.5px solid var(--border);
-  border-radius: 1.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
   overflow: hidden;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px var(--shadow);
+  box-shadow: 0 10px 28px var(--shadow-xs);
 }
 
 .profileHeader {
-  background: linear-gradient(160deg, var(--ink) 0%, #3d3020 100%);
+  background:
+    radial-gradient(circle at 82% 12%, rgba(215, 229, 209, 0.20), transparent 8rem),
+    linear-gradient(160deg, var(--ink) 0%, #22382d 100%);
   padding: 2rem 1.5rem 1.5rem;
   text-align: center;
 }
@@ -147,10 +149,10 @@
 
 .settingsList {
   background: var(--paper);
-  border: 1.5px solid var(--border);
-  border-radius: 1.25rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: 0 1px 4px var(--shadow);
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 .settingItem {
@@ -205,18 +207,19 @@
   padding: 1rem 1.25rem;
   background: var(--paper);
   border: 1.5px solid var(--border);
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   font-size: 1rem;
   font-weight: 600;
   color: var(--ink);
   cursor: pointer;
-  box-shadow: 0 1px 4px var(--shadow);
+  box-shadow: 0 8px 22px var(--shadow-xs);
   transition: box-shadow 0.2s ease, transform 0.1s ease;
   margin-bottom: 0.75rem;
 }
 
 .googleBtn:hover {
-  box-shadow: 0 3px 12px var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px var(--shadow);
 }
 
 .googleBtn:active {
@@ -231,7 +234,7 @@
   padding: 0.9rem 1.25rem;
   background: transparent;
   border: 1.5px solid var(--border);
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--ink-light);
@@ -251,10 +254,10 @@
   justify-content: center;
   width: 100%;
   padding: 1rem 1.25rem;
-  background: var(--ink);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--paper);
   border: none;
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
@@ -313,7 +316,7 @@
   width: 100%;
   padding: 1rem 1.25rem;
   border: 1.5px solid var(--border);
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   background: var(--paper);
   font-family: inherit;
   font-size: 1rem;
@@ -362,7 +365,7 @@
   padding: 0.9rem 1.25rem;
   background: transparent;
   border: 1.5px solid rgba(184, 107, 74, 0.4);
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--terracotta);
@@ -379,7 +382,7 @@
 .confirmBox {
   background: rgba(184, 107, 74, 0.07);
   border: 1.5px solid rgba(184, 107, 74, 0.35);
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   padding: 1.25rem;
   margin-bottom: 0.75rem;
   display: flex;
@@ -433,7 +436,7 @@
   padding: 1rem;
   background: transparent;
   border: 1.5px solid var(--border);
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   font-size: 1rem;
   font-weight: 700;
   color: var(--terracotta);
@@ -605,7 +608,7 @@
   gap: 8px;
   margin-bottom: 1.25rem;
   padding: 0.65rem 1.1rem;
-  background: linear-gradient(135deg, var(--ink) 0%, #3a2e1c 100%);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--cream);
   border: none;
   border-radius: 0.9rem;
@@ -633,7 +636,7 @@
   border-left: 3px solid var(--sage);
   border-radius: var(--r-lg);
   padding: 14px 16px;
-  box-shadow: 0 1px 4px var(--shadow-xs);
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 .remarkMeta {
@@ -676,7 +679,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px 16px;
-  background: linear-gradient(175deg, var(--ink) 0%, #2e2416 60%, #3a2e1c 100%);
+  background: linear-gradient(175deg, var(--ink) 0%, #22382d 60%, #213342 100%);
   gap: 16px;
   flex-wrap: wrap;
 }
@@ -762,10 +765,10 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.15s;
 }
 
-.userListItem:hover { background: var(--cream); }
+.userListItem:hover { background: var(--cream); transform: translateX(2px); }
 
 .userListItemActive {
   background: rgba(122, 148, 112, 0.08);
@@ -776,7 +779,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--ink) 0%, #3a2e1c 100%);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--cream);
   display: flex;
   align-items: center;
@@ -859,7 +862,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--ink) 0%, #3a2e1c 100%);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--cream);
   display: flex;
   align-items: center;
@@ -999,10 +1002,10 @@
   padding: 14px 16px;
   margin-bottom: 8px;
   cursor: pointer;
-  transition: box-shadow 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.entryCard:hover { box-shadow: 0 3px 10px var(--shadow); }
+.entryCard:hover { transform: translateY(-2px); box-shadow: 0 10px 24px var(--shadow); }
 
 .entryCardTop {
   display: flex;

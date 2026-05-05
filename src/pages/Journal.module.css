@@ -6,7 +6,9 @@
 /* ── Header ──────────────────────────────────────────── */
 .header {
   padding: 52px 24px 22px;
-  background: linear-gradient(175deg, #f0e9dd 0%, var(--cream) 100%);
+  background:
+    linear-gradient(135deg, rgba(99, 127, 95, 0.16), transparent 55%),
+    linear-gradient(175deg, var(--paper-soft) 0%, var(--cream) 100%);
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -29,9 +31,9 @@
 }
 
 .progress {
-  height: 4px;
+  height: 8px;
   background: var(--border-light);
-  border-radius: 2px;
+  border-radius: 999px;
   overflow: hidden;
   margin-bottom: 6px;
 }
@@ -39,7 +41,7 @@
 .progressBar {
   height: 100%;
   background: linear-gradient(90deg, var(--sage) 0%, var(--sage-dark) 100%);
-  border-radius: 2px;
+  border-radius: 999px;
   transition: width 0.4s ease;
 }
 
@@ -60,6 +62,11 @@
 
 .section {
   margin-top: 26px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 .catLabel {
@@ -69,11 +76,11 @@
   color: var(--ink-faint);
   font-weight: 700;
   margin-bottom: 10px;
-  padding: 0 4px;
+  padding: 0;
 }
 
 .factor {
-  padding: 18px 0;
+  padding: 16px 0;
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -94,6 +101,10 @@
   flex-shrink: 0;
   width: 26px;
   text-align: center;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-sm);
+  padding: 4px 0;
 }
 
 .factorInfo {
@@ -121,7 +132,7 @@
   font-size: 1.5rem;
   color: var(--ink);
   font-weight: 700;
-  min-width: 30px;
+  min-width: 38px;
   text-align: right;
   line-height: 1;
 }
@@ -143,8 +154,8 @@
 .slider {
   flex: 1;
   -webkit-appearance: none;
-  height: 5px;
-  border-radius: 3px;
+  height: 7px;
+  border-radius: 999px;
   background: var(--border);
   outline: none;
 }
@@ -214,8 +225,8 @@
 }
 
 .note:focus {
-  border-color: var(--ink);
-  box-shadow: 0 0 0 3px rgba(30, 26, 18, 0.06);
+  border-color: var(--sage-dark);
+  box-shadow: 0 0 0 4px rgba(99, 127, 95, 0.12);
 }
 
 .note.invalid {
@@ -269,7 +280,7 @@
 
 .saveBtn {
   width: 100%;
-  background: var(--ink);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--cream);
   border-radius: var(--r-lg);
   padding: 16px;
@@ -282,8 +293,8 @@
 
 @media (hover: hover) {
   .saveBtn:hover:not(:disabled) {
-    box-shadow: 0 6px 20px var(--shadow-md);
-    transform: translateY(-1px);
+    box-shadow: 0 10px 24px var(--shadow-md);
+    transform: translateY(-2px);
   }
 }
 

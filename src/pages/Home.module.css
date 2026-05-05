@@ -5,8 +5,10 @@
 
 /* ── Hero header ─────────────────────────────────────── */
 .header {
-  padding: 52px 24px 28px;
-  background: linear-gradient(175deg, var(--ink) 0%, #2e2416 55%, #3a2e1c 100%);
+  padding: 54px 24px 30px;
+  background:
+    linear-gradient(135deg, rgba(99, 127, 95, 0.32), transparent 52%),
+    linear-gradient(175deg, var(--ink) 0%, #273527 58%, #203242 100%);
   position: relative;
   overflow: hidden;
 }
@@ -17,10 +19,11 @@
   position: absolute;
   top: -40px;
   right: -40px;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  width: 240px;
+  height: 240px;
+  border-radius: 40%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transform: rotate(18deg);
   pointer-events: none;
 }
 
@@ -31,8 +34,9 @@
   right: -20px;
   width: 160px;
   height: 160px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 34%;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transform: rotate(-12deg);
   pointer-events: none;
 }
 
@@ -73,7 +77,7 @@
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   margin-top: -1px;
 }
 
@@ -82,18 +86,19 @@
   display: block;
   background: var(--paper);
   border: 1px solid var(--border-light);
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
   padding: 20px;
   position: relative;
   overflow: hidden;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-  box-shadow: 0 2px 8px var(--shadow-xs);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 @media (hover: hover) {
   .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px var(--shadow);
+    transform: translateY(-3px);
+    border-color: rgba(99, 127, 95, 0.28);
+    box-shadow: 0 14px 32px var(--shadow);
   }
 }
 
@@ -133,15 +138,17 @@
 
 .cardArrow {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 18px;
+  right: 18px;
   font-size: 1rem;
   color: var(--border);
 }
 
 /* ── Primary card (Today's Feel) ─────────────────────── */
 .cardPrimary {
-  background: linear-gradient(145deg, var(--ink) 0%, #352a18 100%);
+  background:
+    radial-gradient(circle at 86% 18%, rgba(215, 229, 209, 0.20), transparent 9rem),
+    linear-gradient(145deg, var(--ink) 0%, #243525 52%, #213342 100%);
   border-color: transparent;
   box-shadow: 0 4px 16px var(--shadow-md);
 }
@@ -173,9 +180,9 @@
   align-items: stretch;
   background: var(--paper);
   border: 1px solid var(--border-light);
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
   overflow: hidden;
-  box-shadow: 0 2px 8px var(--shadow-xs);
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 .stat {
@@ -232,8 +239,16 @@
   display: flex;
   gap: 14px;
   align-items: flex-start;
-  padding: 15px 4px;
-  border-bottom: 1px solid var(--border-light);
+  padding: 14px 12px;
+  border: 1px solid transparent;
+  border-bottom-color: var(--border-light);
+  border-radius: var(--r-sm);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.principle:hover {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: var(--border-light);
 }
 
 .principle:last-child {
@@ -270,16 +285,16 @@
 }
 
 @media (min-width: 1024px) {
-  .header { padding: 40px 48px 32px; }
+  .header { padding: 44px 56px 34px; }
   .cards  {
-    padding: 24px 48px;
+    padding: 24px 56px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
+    gap: 16px;
   }
-  .statsRow { max-width: 420px; }
-  .principles { padding: 8px 48px 0; }
-  .footer { padding: 28px 48px 8px; }
+  .statsRow { max-width: none; }
+  .principles { padding: 8px 56px 0; max-width: 980px; }
+  .footer { padding: 28px 56px 8px; }
 }
 
 /* ── Footer ──────────────────────────────────────────── */

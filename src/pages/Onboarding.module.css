@@ -5,6 +5,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: rgba(255, 255, 255, 0.20);
 }
 
 /* ── Progress bar ─────────────────────────────────────── */
@@ -89,7 +90,7 @@
   width: 100%;
   padding: 1rem 1.25rem;
   border: 1.5px solid var(--border);
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
   background: var(--paper);
   font-family: var(--font-body);
   font-size: 0.92rem;
@@ -103,8 +104,8 @@
 
 .textarea:focus {
   outline: none;
-  border-color: var(--ink);
-  box-shadow: 0 0 0 3px rgba(30, 26, 18, 0.07);
+  border-color: var(--sage-dark);
+  box-shadow: 0 0 0 4px rgba(99, 127, 95, 0.12);
 }
 
 .hint {
@@ -128,13 +129,19 @@
   gap: 1rem;
   background: var(--paper);
   border: 1.5px solid var(--border);
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
   padding: 1.1rem 1.25rem;
   text-align: left;
   cursor: pointer;
-  transition: all 0.18s ease;
-  box-shadow: 0 2px 6px var(--shadow-xs);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  box-shadow: 0 8px 22px var(--shadow-xs);
   width: 100%;
+}
+
+.pathCard:hover {
+  border-color: rgba(99, 127, 95, 0.34);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px var(--shadow);
 }
 
 .pathCard:active { transform: scale(0.98); }
@@ -183,7 +190,7 @@
 
 .pathActive {
   border-color: var(--ink);
-  background: var(--ink);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   box-shadow: 0 4px 14px var(--shadow-md);
 }
 
@@ -193,9 +200,11 @@
 
 /* ── Commitment card ──────────────────────────────────── */
 .commitmentCard {
-  background: var(--ink);
+  background:
+    radial-gradient(circle at 84% 14%, rgba(215, 229, 209, 0.18), transparent 8rem),
+    linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--paper);
-  border-radius: var(--r-2xl);
+  border-radius: var(--r-lg);
   padding: 2rem 1.5rem 1.5rem;
   text-align: center;
   margin-bottom: 1rem;
@@ -287,7 +296,7 @@
 .primaryBtn {
   width: 100%;
   padding: 1rem;
-  background: var(--ink);
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--paper);
   border: none;
   border-radius: var(--r-lg);
@@ -298,7 +307,7 @@
   box-shadow: 0 4px 14px var(--shadow-md);
 }
 
-.primaryBtn:hover     { opacity: 0.88; }
+.primaryBtn:hover:not(:disabled) { opacity: 1; transform: translateY(-2px); box-shadow: 0 10px 22px var(--shadow-md); }
 .primaryBtn:active    { transform: scale(0.98); }
 .primaryBtn:disabled  { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 
