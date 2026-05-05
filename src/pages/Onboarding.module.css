@@ -7,13 +7,13 @@
   flex-direction: column;
 }
 
-/* ── Progress bar ── */
+/* ── Progress bar ─────────────────────────────────────── */
 .progressBar {
   position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   padding: 0 4px;
 }
 
@@ -22,7 +22,7 @@
   left: 4px;
   right: 4px;
   height: 2px;
-  background: var(--border);
+  background: var(--border-light);
   z-index: 0;
 }
 
@@ -34,8 +34,8 @@
 }
 
 .progressDot {
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   background: var(--border);
   border: 2px solid var(--border);
@@ -48,75 +48,77 @@
   border-color: var(--ink);
 }
 
-/* ── Header ── */
+/* ── Header ───────────────────────────────────────────── */
 .header {
   margin-bottom: 2rem;
 }
 
 .stepLabel {
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  margin-bottom: 6px;
+  font-weight: 700;
+  margin-bottom: 7px;
 }
 
 .title {
-  font-size: 1.8rem;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
   font-weight: 700;
   line-height: 1.15;
   color: var(--ink);
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
 .subtitle {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--ink-light);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-/* ── Section ── */
+/* ── Section ──────────────────────────────────────────── */
 .section {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* ── Step 1 ── */
+/* ── Story textarea ───────────────────────────────────── */
 .textarea {
   width: 100%;
   padding: 1rem 1.25rem;
   border: 1.5px solid var(--border);
-  border-radius: 1.25rem;
+  border-radius: var(--r-xl);
   background: var(--paper);
-  font-family: inherit;
-  font-size: 0.95rem;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
   color: var(--ink);
   min-height: 160px;
   margin-bottom: 0.75rem;
   resize: none;
-  line-height: 1.6;
+  line-height: 1.65;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .textarea:focus {
   outline: none;
   border-color: var(--ink);
-  box-shadow: 0 0 0 3px rgba(44, 36, 21, 0.07);
+  box-shadow: 0 0 0 3px rgba(30, 26, 18, 0.07);
 }
 
 .hint {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--ink-faint);
   margin-bottom: 2rem;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
-/* ── Step 2 — Path cards ── */
+/* ── Path cards ───────────────────────────────────────── */
 .pathGrid {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 10px;
   margin-bottom: 2rem;
 }
 
@@ -126,18 +128,16 @@
   gap: 1rem;
   background: var(--paper);
   border: 1.5px solid var(--border);
-  border-radius: 1.25rem;
+  border-radius: var(--r-xl);
   padding: 1.1rem 1.25rem;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 3px var(--shadow);
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 6px var(--shadow-xs);
   width: 100%;
 }
 
-.pathCard:active {
-  transform: scale(0.98);
-}
+.pathCard:active { transform: scale(0.98); }
 
 .pathIcon {
   font-size: 1.6rem;
@@ -157,17 +157,17 @@
   font-size: 1rem;
   font-weight: 700;
   color: var(--ink);
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-display);
 }
 
 .pathDesc {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--ink-light);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .pathCheck {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--paper);
   width: 24px;
@@ -184,71 +184,62 @@
 .pathActive {
   border-color: var(--ink);
   background: var(--ink);
-  box-shadow: 0 3px 10px rgba(44, 36, 21, 0.18);
+  box-shadow: 0 4px 14px var(--shadow-md);
 }
 
-.pathActive .pathTitle {
-  color: var(--paper);
-}
+.pathActive .pathTitle { color: var(--paper); }
+.pathActive .pathDesc  { color: rgba(255, 255, 255, 0.7); }
+.pathActive .pathCheck { background: rgba(255, 255, 255, 0.18); color: var(--paper); }
 
-.pathActive .pathDesc {
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.pathActive .pathCheck {
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--paper);
-}
-
-/* ── Step 3 — Commitment ── */
+/* ── Commitment card ──────────────────────────────────── */
 .commitmentCard {
   background: var(--ink);
   color: var(--paper);
-  border-radius: 1.5rem;
+  border-radius: var(--r-2xl);
   padding: 2rem 1.5rem 1.5rem;
   text-align: center;
   margin-bottom: 1rem;
+  box-shadow: 0 6px 24px var(--shadow-md);
 }
 
 .commitDays {
-  font-family: 'Playfair Display', serif;
-  font-size: 4rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 4.5rem;
+  font-weight: 700;
   line-height: 1;
-  color: var(--paper);
+  color: var(--cream);
 }
 
 .commitUnit {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.45);
   margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 .commitLabelText {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--paper);
 }
 
 .commitDesc {
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   color: var(--ink-light);
   text-align: center;
   margin-bottom: 1.5rem;
-  line-height: 1.5;
+  line-height: 1.55;
   min-height: 2.5em;
 }
 
-.sliderWrap {
-  margin-bottom: 2.5rem;
-}
+.sliderWrap { margin-bottom: 2.5rem; }
 
 .slider {
   width: 100%;
   -webkit-appearance: none;
-  height: 6px;
+  height: 5px;
   background: var(--border);
   border-radius: 3px;
   outline: none;
@@ -262,13 +253,11 @@
   background: var(--ink);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(44, 36, 21, 0.25);
+  box-shadow: 0 2px 8px var(--shadow-md);
   transition: transform 0.15s ease;
 }
 
-.slider::-webkit-slider-thumb:active {
-  transform: scale(1.15);
-}
+.slider::-webkit-slider-thumb:active { transform: scale(1.15); }
 
 .slider::-moz-range-thumb {
   width: 26px;
@@ -283,11 +272,11 @@
   display: flex;
   justify-content: space-between;
   padding: 0 2px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--ink-faint);
 }
 
-/* ── Buttons ── */
+/* ── Buttons ──────────────────────────────────────────── */
 .btnStack {
   display: flex;
   flex-direction: column;
@@ -301,26 +290,17 @@
   background: var(--ink);
   color: var(--paper);
   border: none;
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.1s ease;
+  transition: opacity 0.2s ease, transform 0.12s ease;
+  box-shadow: 0 4px 14px var(--shadow-md);
 }
 
-.primaryBtn:hover {
-  opacity: 0.88;
-}
-
-.primaryBtn:active {
-  transform: scale(0.98);
-}
-
-.primaryBtn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  transform: none;
-}
+.primaryBtn:hover     { opacity: 0.88; }
+.primaryBtn:active    { transform: scale(0.98); }
+.primaryBtn:disabled  { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .startBtn {
   width: 100%;
@@ -328,27 +308,23 @@
   background: var(--sage);
   color: #fff;
   border: none;
-  border-radius: 1.25rem;
+  border-radius: var(--r-lg);
   font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition: background 0.2s ease, transform 0.12s ease;
+  box-shadow: 0 4px 14px rgba(122, 148, 112, 0.35);
   letter-spacing: 0.01em;
 }
 
-.startBtn:hover {
-  background: var(--sage-dark);
-}
-
-.startBtn:active {
-  transform: scale(0.98);
-}
+.startBtn:hover  { background: var(--sage-dark); }
+.startBtn:active { transform: scale(0.98); }
 
 .backLink {
   background: transparent;
   border: none;
   color: var(--ink-faint);
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: 500;
   cursor: pointer;
   padding: 0.5rem;
@@ -356,6 +332,4 @@
   transition: color 0.2s ease;
 }
 
-.backLink:hover {
-  color: var(--ink-light);
-}
+.backLink:hover { color: var(--ink-light); }

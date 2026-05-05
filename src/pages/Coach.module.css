@@ -2,65 +2,94 @@
   min-height: 100vh;
   padding-bottom: 100px;
   background: var(--cream);
+  overflow-x: hidden;
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
 .header {
-  background: linear-gradient(160deg, var(--cream-dark) 0%, var(--cream) 100%);
+  background: linear-gradient(175deg, var(--ink) 0%, #2e2416 55%, #3a2e1c 100%);
   padding: 52px 24px 24px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.05);
+  pointer-events: none;
 }
 
 .label {
-  font-size: 0.64rem;
-  letter-spacing: 0.16em;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: rgba(245, 240, 232, 0.45);
+  font-weight: 700;
   margin-bottom: 6px;
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: 2rem;
-  color: var(--ink);
+  font-size: 1.9rem;
+  color: var(--cream);
   margin-bottom: 4px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
 }
 
 .subtitle {
-  font-size: 0.88rem;
-  color: var(--ink-light);
+  font-size: 0.85rem;
+  color: rgba(245, 240, 232, 0.6);
   line-height: 1.55;
   max-width: 300px;
-  margin: 0 auto;
+  margin: 6px auto 0;
 }
 
 .headerSub {
-  font-size: 0.82rem;
-  color: var(--ink-light);
-  margin-bottom: 10px;
+  font-size: 0.8rem;
+  color: rgba(245, 240, 232, 0.5);
+  margin-bottom: 12px;
 }
 
 .progressTrack {
   height: 4px;
-  background: var(--border);
+  background: rgba(255,255,255,0.12);
   border-radius: 2px;
-  margin: 8px auto 5px;
+  margin: 10px auto 5px;
   max-width: 220px;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: var(--sage);
+  background: var(--sage-light);
   border-radius: 2px;
   transition: width 0.6s ease;
 }
 
 .progressText {
-  font-size: 0.73rem;
-  color: var(--ink-faint);
+  font-size: 0.72rem;
+  color: rgba(245, 240, 232, 0.4);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .header { padding: 40px 28px 24px; }
+  .tabs   { margin: 0 20px; }
+  .section { padding: 0 20px; }
+  .overviewCard, .todaySessionCard, .checkinCard, .checkinDisplay, .completionCard { margin: 0 20px 16px; }
+}
+
+@media (min-width: 1024px) {
+  .header { padding: 36px 32px 24px; }
+  .tabs   { margin: 0 24px; }
+  .section { padding: 0 24px; }
+  .overviewCard, .todaySessionCard, .checkinCard, .checkinDisplay, .completionCard { margin: 0 24px 16px; }
 }
 
 /* ── Tabs ────────────────────────────────────────────────────── */
@@ -68,15 +97,15 @@
   display: flex;
   margin: 0 16px;
   background: var(--paper);
-  border-radius: 12px;
+  border-radius: var(--r-md);
   padding: 4px;
   gap: 4px;
-  box-shadow: 0 1px 4px var(--shadow);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .tab {
   flex: 1;
-  padding: 9px;
+  padding: 10px;
   border: none;
   border-radius: 9px;
   background: transparent;
@@ -91,7 +120,7 @@
 .tabActive {
   background: var(--cream);
   color: var(--ink);
-  box-shadow: 0 1px 3px var(--shadow);
+  box-shadow: 0 1px 4px var(--shadow);
 }
 
 /* ── Tab content ─────────────────────────────────────────────── */
@@ -1127,6 +1156,10 @@
   padding: 10px 16px 12px;
   background: var(--paper);
   border-top: 1px solid var(--border);
+}
+
+@media (min-width: 1024px) {
+  .chatInputRow { bottom: 0; }
 }
 
 .chatInput {
