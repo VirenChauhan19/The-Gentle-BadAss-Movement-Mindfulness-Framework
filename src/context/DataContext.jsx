@@ -68,7 +68,11 @@ export function DataProvider({ children }) {
         } catch { setCoachData(null) }
       })
 
-    // Reset fetch flag so the gate re-engages while Firestore loads
+    // Reset profile and fetch flag so the gate re-engages while Firestore loads.
+    // Clearing profile to undefined (not null) prevents the stale logout-state
+    // (profile=null + profileFetched=true) from briefly exposing null to App.jsx
+    // and triggering a spurious onboarding redirect before Firestore replies.
+    setProfileState(undefined)
     setProfileFetched(false)
 
     // Safety valve: if Firestore doesn't respond within 4 seconds
@@ -95,7 +99,18 @@ export function DataProvider({ children }) {
     const unsubProfile = onSnapshot(profileRef, snapshot => {
       clearTimeout(safetyTimeout)
       if (snapshot.exists()) {
-        const data = snapshot.data()
+        let data = snapshot.data()
+        // If Firestore profile is missing onboardingComplete (e.g. old/partial save),
+        // recover it from localStorage and repair Firestore so future logins work.
+        if (!data.onboardingComplete) {
+          try {
+            const cached = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null')
+            if (cached?.onboardingComplete) {
+              data = { ...data, onboardingComplete: true }
+              setDoc(profileRef, { onboardingComplete: true }, { merge: true }).catch(() => {})
+            }
+          } catch {}
+        }
         setProfileState(data)
         localStorage.setItem(PROFILE_KEY, JSON.stringify(data))
       } else {
@@ -160,13 +175,13 @@ export function DataProvider({ children }) {
     setProfileFetched(true)
     localStorage.setItem(PROFILE_KEY, JSON.stringify(updated))
 
-    // Fire-and-forget — never block the UI on Firestore
     if (user && db) {
       const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
-      setDoc(profileRef, updated, { merge: true }).catch(err =>
+      return setDoc(profileRef, updated, { merge: true }).catch(err =>
         console.warn('Profile sync error:', err)
       )
     }
+    return Promise.resolve()
   }
 
   async function saveEntry(entry) {

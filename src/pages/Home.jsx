@@ -4,7 +4,7 @@ import { computeFeelScore } from '../data/storage'
 import styles from './Home.module.css'
 
 export default function Home() {
-  const { entries, getTodayEntry } = useData()
+  const { entries, getTodayEntry, profile } = useData()
   const today = getTodayEntry()
   const streak = computeStreak(entries)
   const feelScore = today ? computeFeelScore(today.scores || {}) : null
@@ -54,7 +54,7 @@ export default function Home() {
           </div>
           <div className={styles.statDivider} />
           <div className={styles.stat}>
-            <span className={styles.statNum}>{270 - dayOfJourney > 0 ? 270 - dayOfJourney : 0}</span>
+            <span className={styles.statNum}>{Math.max(0, (profile?.commitment || 270) - dayOfJourney)}</span>
             <span className={styles.statLabel}>Days to go</span>
           </div>
         </div>

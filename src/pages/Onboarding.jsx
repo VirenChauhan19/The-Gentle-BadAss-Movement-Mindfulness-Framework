@@ -42,8 +42,8 @@ export default function Onboarding() {
   const [step, setStep] = useState(1)
   const [data, setData] = useState({ fitnessHistory: '', path: '', commitment: 90 })
 
-  function handleComplete() {
-    saveProfile({ ...data, onboardingComplete: true })
+  async function handleComplete() {
+    await saveProfile({ ...data, onboardingComplete: true })
     navigate('/')
   }
 
