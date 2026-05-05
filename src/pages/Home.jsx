@@ -5,72 +5,76 @@ import styles from './Home.module.css'
 
 const PROGRAM_AUDIENCES = [
   {
-    title: 'The Recovering',
-    text: 'Those coming back from injury or managing chronic aches and pains.',
+    title: 'Women 35+',
+    text: 'For women who have spent years caring for everyone else and now need a system that respects their body.',
   },
   {
-    title: 'The Chronic Warriors',
-    text: 'People managing chronic diseases who need movement as medicine.',
+    title: 'Older Adults',
+    text: 'For people who want strength, confidence, and better daily movement without performative toughness.',
   },
   {
-    title: 'The Fresh Starters',
-    text: 'Absolute beginners who want to "Run & Bee" without the "Angry Landings".',
+    title: 'Recovering Bodies',
+    text: 'For anyone returning from injury, chronic aches, surgery, or a long season away from movement.',
   },
   {
-    title: 'The Seekers',
-    text: 'Advanced runners who realize that after 20 years, they still do not actually know their own movement.',
+    title: 'Fresh Starters',
+    text: 'For beginners who want to run and move without angry landings or punishment-based training.',
   },
   {
-    title: 'Women',
-    text: 'If you have been too busy taking care of everyone else but ignored yourself, now is the time you focus on yourself.',
+    title: 'Chronic Warriors',
+    text: 'For people managing chronic disease who need movement as medicine, not another stressor.',
   },
   {
-    title: 'Elderly',
-    text: 'Maybe you have retired from work, but that does not mean you need to retire from life. Improve your quality of life by moving better.',
+    title: 'Experienced Runners',
+    text: 'For runners ready to relearn form, cadence, breath, and control from the ground up.',
   },
 ]
 
 const PHILOSOPHY = [
   {
     term: 'I',
-    text: 'Your identity as a runner - who chooses to show up.',
+    text: 'Your identity as a runner: the person who chooses to show up at the right scale today.',
   },
   {
     term: 'MY',
-    text: 'Your body and biological engine - we are learning to maintain and respect.',
+    text: 'Your body and biological engine: maintained, listened to, and respected.',
   },
   {
     term: 'ME',
-    text: 'The consciousness and experience of movement - the quiet consciousness that emerges when breath, posture, and movement align.',
+    text: 'The felt experience of movement: the quiet awareness that appears when breath, posture, and rhythm align.',
   },
 ]
 
 export default function Home() {
-  const { entries, getTodayEntry, profile } = useData()
+  const { entries, getTodayEntry, profile, user, guestName } = useData()
   const today = getTodayEntry()
+  const guestLocked = Boolean(guestName && !user)
   const streak = computeStreak(entries)
   const feelScore = today ? computeFeelScore(today.scores || {}) : null
   const dayOfJourney = entries.length
 
   const dateStr = new Date().toLocaleDateString('en-GB', {
-    weekday: 'long', day: 'numeric', month: 'long'
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
   })
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.titleBlock}>
-          <p className={styles.subtitle}>La Ultra</p>
-          <h1 className={styles.title}>Run &amp; Bee</h1>
+          <p className={styles.subtitle}>La Ultra: Run &amp; Bee</p>
+          <h1 className={styles.title}>Mountains Within</h1>
+          <p className={styles.heroCopy}>Distance and toughness are relative. Your mountain is the honest edge of your body today.</p>
           <p className={styles.date}>{dateStr}</p>
         </div>
       </header>
 
       <section className={styles.cards}>
-        {/* Today's Feel Card */}
-        <Link to="/journal" className={styles.card + ' ' + styles.cardPrimary}>
+        <Link to={guestLocked ? '/admin' : '/journal'} className={styles.card + ' ' + styles.cardPrimary + (guestLocked ? ' ' + styles.cardLocked : '')}>
           <div className={styles.cardTop}>
             <span className={styles.cardLabel}>Today's Feel</span>
+            {guestLocked && <span className={styles.lockBadge}>Locked</span>}
             {feelScore !== null && (
               <span className={styles.score}>{feelScore.toFixed(1)}</span>
             )}
@@ -80,10 +84,9 @@ export default function Home() {
           ) : (
             <p className={styles.cardBody}>How does your body feel today?</p>
           )}
-          <span className={styles.cardArrow}>→</span>
+          <span className={styles.cardArrow}>-&gt;</span>
         </Link>
 
-        {/* Journey progress */}
         <div className={styles.statsRow}>
           <div className={styles.stat}>
             <span className={styles.statNum}>{dayOfJourney}</span>
@@ -101,29 +104,29 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Move section */}
-        <Link to="/library" className={styles.card + ' ' + styles.cardMove}>
+        <Link to={guestLocked ? '/admin' : '/library'} className={styles.card + ' ' + styles.cardMove + (guestLocked ? ' ' + styles.cardLocked : '')}>
           <div className={styles.cardTop}>
             <span className={styles.cardLabel}>Movement Library</span>
+            {guestLocked && <span className={styles.lockBadge}>Locked</span>}
           </div>
-          <p className={styles.cardBody}>Functional tests · Strength tools · Running drills</p>
-          <span className={styles.cardArrow}>→</span>
+          <p className={styles.cardBody}>{guestLocked ? 'Sign in to unlock TPR, quality scoring, and exercise flow.' : 'Functional tests, strength tools, and running drills.'}</p>
+          <span className={styles.cardArrow}>-&gt;</span>
         </Link>
 
-        {/* History */}
-        <Link to="/history" className={styles.card + ' ' + styles.cardHistory}>
+        <Link to={guestLocked ? '/admin' : '/history'} className={styles.card + ' ' + styles.cardHistory + (guestLocked ? ' ' + styles.cardLocked : '')}>
           <div className={styles.cardTop}>
-            <span className={styles.cardLabel}>Feel History</span>
+            <span className={styles.cardLabel}>History</span>
+            {guestLocked && <span className={styles.lockBadge}>Locked</span>}
           </div>
-          <p className={styles.cardBody}>Track your 30–270 day journey.</p>
-          <span className={styles.cardArrow}>→</span>
+          <p className={styles.cardBody}>{guestLocked ? 'Sign in to view and sync long-term progress.' : 'Track Feel, Move quality, TPR, and clean movement over time.'}</p>
+          <span className={styles.cardArrow}>-&gt;</span>
         </Link>
       </section>
 
       <section className={styles.fitSection}>
         <div className={styles.fitIntro}>
           <p className={styles.sectionKicker}>Who this is for</p>
-          <h2 className={styles.fitTitle}>This program is for you if you belong to any one or more categories below.</h2>
+          <h2 className={styles.fitTitle}>A movement framework for people whose starting line is personal.</h2>
         </div>
 
         <div className={styles.audienceGrid}>
@@ -138,7 +141,7 @@ export default function Home() {
         <div className={styles.philosophy}>
           <div className={styles.philosophyIntro}>
             <p className={styles.sectionKicker}>Core framework</p>
-            <h2>The &quot;I - My - Me&quot; Philosophy</h2>
+            <h2>The I - My - Me Philosophy</h2>
           </div>
           <div className={styles.philosophyGrid}>
             {PHILOSOPHY.map(item => (
@@ -151,35 +154,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Principles */}
-      <section className={styles.principles}>
-        <h2 className={styles.principlesTitle}>The Three Principles</h2>
-        <div className={styles.principle}>
-          <span className={styles.principleIcon}>🦴</span>
-          <div>
-            <strong>The Hip Engine</strong>
-            <p>Your hips are the engine. Your knees follow — they never lead.</p>
-          </div>
-        </div>
-        <div className={styles.principle}>
-          <span className={styles.principleIcon}>🪄</span>
-          <div>
-            <strong>The Stable Pillar</strong>
-            <p>The lumbar spine stays still. Hips and shoulders move around it.</p>
-          </div>
-        </div>
-        <div className={styles.principle}>
-          <span className={styles.principleIcon}>🌉</span>
-          <div>
-            <strong>Core as the Bridge</strong>
-            <p>The core connects your upper and lower body. Without it, power leaks.</p>
-          </div>
-        </div>
-      </section>
-
       <footer className={styles.footer}>
         <p>By Dr. Rajat Chauhan</p>
-        <p className={styles.footerSub}>La Ultra · Run &amp; Bee</p>
+        <p className={styles.footerSub}>La Ultra: Run &amp; Bee</p>
       </footer>
     </div>
   )

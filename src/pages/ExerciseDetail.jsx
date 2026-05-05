@@ -42,6 +42,11 @@ export default function ExerciseDetail() {
   const categoryExercises = EXERCISES.filter(e => e.category === exercise.category)
   const exerciseIndex = categoryExercises.findIndex(e => e.id === exercise.id)
   const nextExercise = categoryExercises[(exerciseIndex + 1) % categoryExercises.length]
+  const metronomeProps = exercise.category === 'strength'
+    ? { fixedBpm: 60 }
+    : exercise.category === 'running'
+      ? { allowedBpms: [160, 170, 180, 190] }
+      : { fixedBpm: 60 }
 
   function handlePillarsComplete() {
     localStorage.setItem('gb_pillars_ready', new Date().toISOString().split('T')[0])
@@ -75,6 +80,7 @@ export default function ExerciseDetail() {
     localStorage.setItem('gb_performed_exercises', JSON.stringify([...new Set([...performed, exercise.id])]))
     setSessionState(status)
     setDetailsOpen(false)
+    window.setTimeout(goNext, 450)
   }
 
   function goNext() {
@@ -91,7 +97,7 @@ export default function ExerciseDetail() {
       </section>
 
       <div className={styles.topBar}>
-        <Link to="/library" className={styles.back}>Back</Link>
+        <button className={styles.back} onClick={goNext}>Next</button>
         <span className={styles.catBadge} style={{ color: cat.color }}>{cat.label}</span>
       </div>
 
@@ -115,7 +121,7 @@ export default function ExerciseDetail() {
             </div>
 
             <div className={styles.metronomeSection}>
-              <Metronome playing={metronomePlaying} onPlayingChange={setMetronomePlaying} />
+              <Metronome playing={metronomePlaying} onPlayingChange={setMetronomePlaying} {...metronomeProps} />
             </div>
 
             <div className={styles.workflowCard}>
@@ -124,8 +130,8 @@ export default function ExerciseDetail() {
                 <button className={styles.startBtn} onClick={handleStart} disabled={sessionState === 'active'}>
                   {sessionState === 'active' ? 'Running' : 'Start'}
                 </button>
-                <button className={styles.stopBtn} onClick={() => handleEndSession('stopped')} disabled={sessionState !== 'active'}>
-                  Stop
+                <button className={styles.stopBtn} onClick={() => handleEndSession('completed')} disabled={sessionState !== 'active'}>
+                  Complete
                 </button>
                 <button className={styles.missedBtn} onClick={() => handleEndSession('missed')} disabled={sessionState !== 'active'}>
                   Missed

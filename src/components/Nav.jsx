@@ -1,33 +1,41 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useData } from '../context/DataContext'
 import styles from './Nav.module.css'
 
 const links = [
   { to: '/', label: 'Home', icon: HomeIcon },
-  { to: '/journal', label: 'Feel', icon: JournalIcon },
+  { to: '/journal', label: 'Feel', icon: JournalIcon, lockedForGuest: true },
   { to: '/breathing', label: 'Breathe', icon: BreathIcon },
-  { to: '/history', label: 'History', icon: HistoryIcon },
-  { to: '/library', label: 'Move', icon: LibraryIcon },
+  { to: '/history', label: 'History', icon: HistoryIcon, lockedForGuest: true },
+  { to: '/library', label: 'Move', icon: LibraryIcon, lockedForGuest: true },
   { to: '/coach', label: 'Running', icon: CoachIcon },
   { to: '/admin', label: 'Profile', icon: ProfileIcon },
 ]
 
 export default function Nav() {
+  const { user, guestName } = useData()
+  const guestLocked = Boolean(guestName && !user)
+
   return (
     <nav className={styles.nav}>
-      {links.map(({ to, label, icon: Icon }) => (
+      {links.map(({ to, label, icon: Icon, lockedForGuest }) => {
+        const locked = guestLocked && lockedForGuest
+        return (
         <NavLink
           key={to}
-          to={to}
+          to={locked ? '/admin' : to}
           end={to === '/'}
+          title={locked ? `${label} unlocks after sign-in` : label}
           className={({ isActive }) =>
-            `${styles.link} ${isActive ? styles.active : ''}`
+            `${styles.link} ${isActive && !locked ? styles.active : ''} ${locked ? styles.locked : ''}`
           }
         >
           <Icon />
           <span>{label}</span>
+          {locked && <span className={styles.lockDot} aria-hidden="true">Lock</span>}
         </NavLink>
-      ))}
+      )})}
     </nav>
   )
 }

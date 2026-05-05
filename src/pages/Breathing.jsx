@@ -3,26 +3,25 @@ import { useData } from '../context/DataContext'
 import Metronome from '../components/Metronome'
 import styles from './Breathing.module.css'
 
-const INHALE_SECONDS = 4
-const EXHALE_SECONDS = 8
-const CYCLE_SECONDS = INHALE_SECONDS + EXHALE_SECONDS
-
 export default function Breathing() {
   const { getTodayEntry, saveEntry } = useData()
   const [running, setRunning] = useState(false)
   const [elapsed, setElapsed] = useState(0)
+  const [inhaleSeconds, setInhaleSeconds] = useState(4)
+  const [exhaleSeconds, setExhaleSeconds] = useState(8)
   const [saved, setSaved] = useState(false)
 
-  const cyclePosition = elapsed % CYCLE_SECONDS
-  const phase = cyclePosition < INHALE_SECONDS ? 'Inhale' : 'Exhale'
+  const cycleSeconds = inhaleSeconds + exhaleSeconds
+  const cyclePosition = elapsed % cycleSeconds
+  const phase = cyclePosition < inhaleSeconds ? 'Inhale' : 'Exhale'
   const phaseSecond = phase === 'Inhale'
     ? cyclePosition + 1
-    : cyclePosition - INHALE_SECONDS + 1
-  const phaseTotal = phase === 'Inhale' ? INHALE_SECONDS : EXHALE_SECONDS
-  const cycles = Math.floor(elapsed / CYCLE_SECONDS)
+    : cyclePosition - inhaleSeconds + 1
+  const phaseTotal = phase === 'Inhale' ? inhaleSeconds : exhaleSeconds
+  const cycles = Math.floor(elapsed / cycleSeconds)
   const progress = phase === 'Inhale'
-    ? phaseSecond / INHALE_SECONDS
-    : 1 - (phaseSecond / EXHALE_SECONDS)
+    ? phaseSecond / inhaleSeconds
+    : 1 - (phaseSecond / exhaleSeconds)
 
   useEffect(() => {
     if (!running) return
@@ -42,6 +41,8 @@ export default function Breathing() {
           exerciseName: '5 BPM Breathing',
           durationSeconds: elapsed,
           cycles,
+          inhaleSeconds,
+          exhaleSeconds,
           completedAt: new Date().toISOString(),
         },
       ],
@@ -54,7 +55,7 @@ export default function Breathing() {
       <header className={styles.header}>
         <p className={styles.label}>Daily Foundation</p>
         <h1 className={styles.title}>5 BPM Breathing</h1>
-        <p className={styles.subtitle}>4 seconds inhale. 8 seconds exhale. Use the 60 BPM metronome as your true second.</p>
+        <p className={styles.subtitle}>{inhaleSeconds} seconds inhale. {exhaleSeconds} seconds exhale. The metronome stays fixed at 60 BPM so each click is a true second.</p>
       </header>
 
       <section className={styles.practice}>
@@ -82,6 +83,35 @@ export default function Breathing() {
             </div>
           </div>
 
+          <div className={styles.rhythmControls}>
+            <label>
+              <span>Inhale</span>
+              <input
+                type="range"
+                min="2"
+                max="8"
+                step="1"
+                value={inhaleSeconds}
+                onChange={e => { setInhaleSeconds(Number(e.target.value)); setElapsed(0); setSaved(false) }}
+                disabled={running}
+              />
+              <strong>{inhaleSeconds}s</strong>
+            </label>
+            <label>
+              <span>Exhale</span>
+              <input
+                type="range"
+                min="4"
+                max="14"
+                step="1"
+                value={exhaleSeconds}
+                onChange={e => { setExhaleSeconds(Number(e.target.value)); setElapsed(0); setSaved(false) }}
+                disabled={running}
+              />
+              <strong>{exhaleSeconds}s</strong>
+            </label>
+          </div>
+
           <div className={styles.controls}>
             <button onClick={() => setRunning(v => !v)}>
               {running ? 'Pause' : 'Start'}
@@ -91,7 +121,7 @@ export default function Breathing() {
             </button>
           </div>
 
-          <button className={styles.saveBtn} onClick={saveBreathSession} disabled={elapsed < CYCLE_SECONDS || saved}>
+          <button className={styles.saveBtn} onClick={saveBreathSession} disabled={elapsed < cycleSeconds || saved}>
             {saved ? 'Saved' : 'Save Breathing Session'}
           </button>
         </div>

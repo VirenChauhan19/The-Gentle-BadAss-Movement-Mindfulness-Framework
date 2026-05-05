@@ -284,6 +284,22 @@
   font-style: italic;
 }
 
+.whyNotes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.whyNotes span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(66, 105, 125, 0.10);
+  color: var(--slate);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
 .moveArchive {
   padding: 0 16px 24px;
   max-width: 1180px;

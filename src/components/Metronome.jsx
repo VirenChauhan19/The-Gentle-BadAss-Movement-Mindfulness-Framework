@@ -9,8 +9,12 @@ const TEMPOS = [
   { bpm: 190, purpose: 'Running drills', vibe: 'High-turnover drill work.' },
 ]
 
-export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null }) {
-  const availableTempos = fixedBpm ? TEMPOS.filter(t => t.bpm === fixedBpm) : TEMPOS
+export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null, allowedBpms = null }) {
+  const availableTempos = fixedBpm
+    ? TEMPOS.filter(t => t.bpm === fixedBpm)
+    : allowedBpms
+      ? TEMPOS.filter(t => allowedBpms.includes(t.bpm))
+      : TEMPOS
   const [selectedTempo, setSelectedTempo] = useState(() => availableTempos[0] || TEMPOS[0])
   const [beat, setBeat] = useState(0)
   const audioRef = useRef(null)

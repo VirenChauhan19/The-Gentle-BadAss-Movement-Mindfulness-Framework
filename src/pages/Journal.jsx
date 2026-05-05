@@ -8,7 +8,8 @@ import styles from './Journal.module.css'
 export default function Journal() {
   const { getTodayEntry, saveEntry } = useData()
   const existing = getTodayEntry()
-  const [scores, setScores] = useState(existing?.scores || {})
+  const [scores, setScores] = useState(() => pickCurrentFactors(existing?.scores || {}))
+  const [scoreNotes, setScoreNotes] = useState(() => pickCurrentFactors(existing?.scoreNotes || {}))
   const [note, setNote] = useState(existing?.note || '')
   const [saved, setSaved] = useState(false)
   const navigate = useNavigate()
@@ -16,61 +17,68 @@ export default function Journal() {
   const feelScore = computeFeelScore(scores)
   const answered = Object.keys(scores).length
   const total = JOURNAL_FACTORS.length
+  const wordCount = note.trim() ? note.trim().split(/\s+/).length : 0
 
   function handleScore(id, val) {
     setScores(prev => ({ ...prev, [id]: Number(val) }))
     setSaved(false)
   }
 
-  const wordCount = note.trim() ? note.trim().split(/\s+/).length : 0
+  function handleScoreNote(id, val) {
+    setScoreNotes(prev => ({ ...prev, [id]: val }))
+    setSaved(false)
+  }
 
   async function handleSave() {
-    await saveEntry({ scores, note })
+    await saveEntry({ scores, scoreNotes, note })
     setSaved(true)
     setTimeout(() => navigate('/library'), 650)
   }
 
   const dateStr = new Date().toLocaleDateString('en-GB', {
-    weekday: 'long', day: 'numeric', month: 'long'
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
   })
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.label}>Reflection Gate</p>
+        <p className={styles.label}>Feel Module</p>
         <h1 className={styles.title}>{dateStr}</h1>
         <div className={styles.progress}>
           <div className={styles.progressBar} style={{ width: `${(answered / total) * 100}%` }} />
         </div>
-        <p className={styles.progressText}>{answered} of {total} factors · Feel score: <strong>{feelScore.toFixed(1)}</strong></p>
+        <p className={styles.progressText}>
+          {answered} of {total} factors. Feel score: <strong>{feelScore.toFixed(1)}</strong>
+        </p>
       </header>
 
       <div className={styles.factors}>
-        {Object.entries(groupByCategory()).map(([catId, factors]) => (
-          <section key={catId} className={styles.section}>
-            <h2 className={styles.catLabel} style={{ color: CATEGORIES[catId].color }}>
-              {CATEGORIES[catId].label}
-            </h2>
-            {factors.map(factor => (
-              <FactorSlider
-                key={factor.id}
-                factor={factor}
-                value={scores[factor.id]}
-                onChange={val => handleScore(factor.id, val)}
-              />
-            ))}
-          </section>
+        {JOURNAL_FACTORS.map((factor, index) => (
+          <FactorSlider
+            key={factor.id}
+            factor={factor}
+            index={index}
+            value={scores[factor.id]}
+            note={scoreNotes[factor.id] || ''}
+            onChange={val => handleScore(factor.id, val)}
+            onNoteChange={val => handleScoreNote(factor.id, val)}
+          />
         ))}
       </div>
 
-      {/* Optional Reflection Note */}
       <div className={styles.noteSection}>
-        <label className={styles.noteLabel} htmlFor="daily-note">Reflection <span className={styles.optional}>(Optional)</span></label>
-        <p className={styles.noteHelp}>Shift from data-logging to self-mentoring. How did you move? How was your mood? Any surprises?</p>
+        <label className={styles.noteLabel} htmlFor="daily-note">
+          Reflection <span className={styles.optional}>(Optional)</span>
+        </label>
+        <p className={styles.noteHelp}>
+          Optional personal diary. Longer reflections can reveal patterns, but this should never become a chore.
+        </p>
         <textarea
           id="daily-note"
           className={styles.note}
-          placeholder="Write about your day, your movement, and your mind. This is for your 270-day archive of personal growth."
+          placeholder="Write 50+ words if it helps: what happened, what you noticed, and what your body may be asking for."
           value={note}
           onChange={e => { setNote(e.target.value); setSaved(false) }}
           rows={8}
@@ -88,16 +96,18 @@ export default function Journal() {
           onClick={handleSave}
           disabled={answered === 0}
         >
-          {saved ? 'Saved ✓' : 'Complete Today\'s Journey'}
+          {saved ? 'Saved' : 'Submit Feel and Start Move'}
         </button>
       </div>
     </div>
   )
 }
 
-function FactorSlider({ factor, value, onChange }) {
+function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
   const hasValue = value !== undefined
   const currentValue = hasValue ? value : 5
+  const needsWhy = hasValue && (value <= 2 || value >= 9)
+  const cat = CATEGORIES[factor.category]
   const status =
     !hasValue ? 'Tap or drag' :
     value <= 3 ? 'Needs care' :
@@ -108,8 +118,9 @@ function FactorSlider({ factor, value, onChange }) {
   return (
     <div className={styles.factor}>
       <div className={styles.factorTop}>
-        <span className={styles.factorIcon}>{factor.icon}</span>
+        <span className={styles.factorIndex}>{String(index + 1).padStart(2, '0')}</span>
         <div className={styles.factorInfo}>
+          <span className={styles.factorCat} style={{ color: cat.color }}>{cat.label}</span>
           <span className={styles.factorLabel}>{factor.label}</span>
           <span className={styles.factorQ}>{factor.question}</span>
         </div>
@@ -154,6 +165,17 @@ function FactorSlider({ factor, value, onChange }) {
         <span>Okay</span>
         <span>Great</span>
       </div>
+      {needsWhy && (
+        <label className={styles.whyPrompt}>
+          <span>{value <= 2 ? 'Low signal' : 'High signal'}: what is the why?</span>
+          <input
+            type="text"
+            value={note}
+            onChange={e => onNoteChange(e.target.value)}
+            placeholder="Add the context in one line."
+          />
+        </label>
+      )}
     </div>
   )
 }
@@ -165,11 +187,7 @@ function scoreColor(value) {
   return '#42697d'
 }
 
-function groupByCategory() {
-  const groups = {}
-  for (const f of JOURNAL_FACTORS) {
-    if (!groups[f.category]) groups[f.category] = []
-    groups[f.category].push(f)
-  }
-  return groups
+function pickCurrentFactors(values) {
+  const allowed = new Set(JOURNAL_FACTORS.map(f => f.id))
+  return Object.fromEntries(Object.entries(values).filter(([id]) => allowed.has(id)))
 }

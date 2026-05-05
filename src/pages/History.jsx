@@ -4,6 +4,7 @@ import {
 } from 'recharts'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
+import { JOURNAL_FACTORS } from '../data/journalFactors'
 import styles from './History.module.css'
 
 export default function History() {
@@ -197,6 +198,7 @@ function EntryRow({ entry }) {
   const date = new Date(entry.date)
   const dateStr = date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
   const scoreColor = score >= 7 ? '#8b9e7e' : score >= 4 ? '#d9b38a' : '#d98a8a'
+  const factorLabels = Object.fromEntries(JOURNAL_FACTORS.map(f => [f.id, f.label]))
 
   return (
     <div className={styles.row}>
@@ -218,6 +220,13 @@ function EntryRow({ entry }) {
       {entry.note && (
         <div className={styles.rowNote}>
           {entry.note.length > 100 ? entry.note.substring(0, 100) + '...' : entry.note}
+        </div>
+      )}
+      {entry.scoreNotes && Object.values(entry.scoreNotes).some(Boolean) && (
+        <div className={styles.whyNotes}>
+          {Object.entries(entry.scoreNotes).filter(([, text]) => text).map(([id, text]) => (
+            <span key={id}>{factorLabels[id] || id}: {text}</span>
+          ))}
         </div>
       )}
     </div>

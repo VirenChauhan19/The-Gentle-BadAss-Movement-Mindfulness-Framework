@@ -60,9 +60,11 @@
 
 /* ── Factors ─────────────────────────────────────────── */
 .factors {
-  padding: 0 16px;
+  padding: 16px;
   width: 100%;
   margin: 0 auto;
+  display: grid;
+  gap: 12px;
 }
 
 .section {
@@ -75,6 +77,7 @@
 }
 
 :global(html[data-theme="dark"]) .section,
+:global(html[data-theme="dark"]) .factor,
 :global(html[data-theme="dark"]) .note {
   background: #1b211b;
   border-color: #2d382f;
@@ -92,12 +95,18 @@
 }
 
 .factor {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border-light);
+  min-height: 238px;
+  padding: 16px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.06);
+  display: flex;
+  flex-direction: column;
 }
 
 .factor:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .factorTop {
@@ -107,23 +116,34 @@
   margin-bottom: 12px;
 }
 
-.factorIcon {
-  font-size: 1.15rem;
-  margin-top: 1px;
+.factorIndex {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink-faint);
   flex-shrink: 0;
-  width: 26px;
+  width: 34px;
   text-align: center;
   background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-sm);
-  padding: 4px 0;
+  padding: 6px 0;
 }
 
 .factorInfo {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  min-width: 0;
+}
+
+.factorCat {
+  font-size: 0.58rem;
+  line-height: 1;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-weight: 900;
 }
 
 .factorLabel {
@@ -277,6 +297,38 @@
   letter-spacing: 0.05em;
 }
 
+.whyPrompt {
+  margin-top: auto;
+  padding-top: 12px;
+  display: grid;
+  gap: 7px;
+}
+
+.whyPrompt span {
+  font-size: 0.66rem;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 800;
+}
+
+.whyPrompt input {
+  width: 100%;
+  min-height: 38px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-light);
+  background: var(--paper-soft);
+  color: var(--ink);
+  padding: 0 11px;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.whyPrompt input:focus {
+  border-color: var(--sage-dark);
+  box-shadow: 0 0 0 3px rgba(99, 127, 95, 0.12);
+}
+
 /* ── Notes ───────────────────────────────────────────── */
 .noteSection {
   padding: 26px 16px 8px;
@@ -367,18 +419,13 @@
     max-width: 1180px;
     padding: 6px 56px 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 16px;
-    align-items: start;
-  }
-
-  .section {
-    min-height: 100%;
-    padding: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: stretch;
   }
 
   .factor {
-    padding: 14px 0;
+    min-height: 248px;
   }
 
   .factorLabel {

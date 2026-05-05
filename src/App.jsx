@@ -53,14 +53,89 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/journal" element={<Journal />} />
+      <Route path="/journal" element={<LockedRoute feature="Feel"><Journal /></LockedRoute>} />
       <Route path="/breathing" element={<Breathing />} />
-      <Route path="/history" element={<History />} />
-      <Route path="/library" element={<Library />} />
-      <Route path="/library/:id" element={<ExerciseDetail />} />
+      <Route path="/history" element={<LockedRoute feature="History"><History /></LockedRoute>} />
+      <Route path="/library" element={<LockedRoute feature="Move"><Library /></LockedRoute>} />
+      <Route path="/library/:id" element={<LockedRoute feature="Move"><ExerciseDetail /></LockedRoute>} />
       <Route path="/coach" element={<Coach />} />
       <Route path="/admin" element={<Admin />} />
     </Routes>
+  )
+}
+
+function LockedRoute({ feature, children }) {
+  const { user, guestName } = useData()
+  const { signInWithGoogle, authError, isConfigured } = useAuth()
+
+  if (user || !guestName) return children
+
+  return (
+    <div className={styles.lockedPage}>
+      <div className={styles.lockedPanel}>
+        <p className={styles.lockedLabel}>Member area</p>
+        <h1>{feature} is locked in guest mode</h1>
+        <p>Guest mode lets you explore the app. Sign in to save Feel records, Move quality metrics, and long-term History.</p>
+        {authError && <p className={styles.authError}>{authError}</p>}
+        <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>
+          Continue with Google
+        </button>
+        {!isConfigured && <p className={styles.lockHint}>Firebase is not configured yet, so Google sign-in is unavailable in this environment.</p>}
+      </div>
+    </div>
+  )
+}
+
+function SignInGate() {
+  const { user, signInWithGoogle, authError, isConfigured } = useAuth()
+  const { guestName, setGuestName } = useData()
+  const [nameInput, setNameInput] = useState('')
+  const [guestOpen, setGuestOpen] = useState(false)
+
+  if (user === undefined) return null
+  if (user || guestName) return null
+
+  function continueGuest() {
+    const name = nameInput.trim()
+    if (!name) return
+    setGuestName(name)
+  }
+
+  return (
+    <div className={styles.signInGate} role="dialog" aria-modal="true" aria-labelledby="signin-title">
+      <section className={styles.signInCard}>
+        <p className={styles.signInKicker}>La Ultra: Run &amp; Bee</p>
+        <h1 id="signin-title">Start with sign-in</h1>
+        <p className={styles.signInCopy}>
+          Sign in to unlock Feel, Move, and History with saved progress across sessions. Guest mode is view-only for those sections.
+        </p>
+        {authError && <p className={styles.authError}>{authError}</p>}
+        <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>
+          Continue with Google
+        </button>
+        {!isConfigured && <p className={styles.lockHint}>Firebase is not configured yet, so Google sign-in is unavailable in this environment.</p>}
+        <div className={styles.divider}>or</div>
+        {!guestOpen ? (
+          <button className={styles.guestBtn} onClick={() => setGuestOpen(true)}>
+            Continue as Guest
+          </button>
+        ) : (
+          <div className={styles.guestForm}>
+            <input
+              type="text"
+              value={nameInput}
+              onChange={e => setNameInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') continueGuest() }}
+              placeholder="Your first name"
+              autoFocus
+            />
+            <button className={styles.guestBtn} onClick={continueGuest} disabled={!nameInput.trim()}>
+              Enter Guest Mode
+            </button>
+          </div>
+        )}
+      </section>
+    </div>
   )
 }
 
@@ -79,6 +154,7 @@ export default function App() {
           <main className={styles.main}>
             <AppRoutes />
           </main>
+          <SignInGate />
           <button
             className={styles.themeToggle}
             onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}

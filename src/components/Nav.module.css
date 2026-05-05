@@ -26,6 +26,7 @@
 }
 
 .link {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -73,6 +74,32 @@
   opacity: 1;
   color: var(--sage-dark);
   transform: none;
+}
+
+.locked {
+  opacity: 0.62;
+}
+
+.locked:hover {
+  opacity: 1;
+}
+
+.lockDot {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  max-width: 34px;
+  overflow: hidden;
+  padding: 2px 4px;
+  border-radius: 999px;
+  background: rgba(186, 95, 69, 0.12);
+  color: var(--terracotta);
+  border: 1px solid rgba(186, 95, 69, 0.22);
+  font-size: 0.46rem;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  font-weight: 900;
 }
 
 .navAvatar {
@@ -152,5 +179,11 @@
 
   .active svg {
     opacity: 1;
+  }
+
+  .lockDot {
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
   }
 }

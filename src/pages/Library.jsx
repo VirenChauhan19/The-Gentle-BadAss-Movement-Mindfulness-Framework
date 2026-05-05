@@ -3,20 +3,31 @@ import { Link } from 'react-router-dom'
 import { EXERCISES, CATEGORIES } from '../data/exercises'
 import styles from './Library.module.css'
 
-export default function Library() {
-  const [activeCategory, setActiveCategory] = useState('all')
+const PILLARS = ['Smile', 'Tall Puppet', 'Relaxed Fists', 'Uncurl Toes', 'Breathe']
+const PRINCIPLES = [
+  ['The Hip Engine', 'Hips are the engine. Knees follow; they never lead.'],
+  ['The Stable Pillar', 'The lumbar spine stays quiet while hips and shoulders move around it.'],
+  ['Core as the Bridge', 'The core connects upper and lower body so power does not leak.'],
+]
 
-  const filtered = activeCategory === 'all'
-    ? EXERCISES
-    : EXERCISES.filter(e => e.category === activeCategory)
+export default function Library() {
+  const [activeCategory, setActiveCategory] = useState('functional')
+  const filtered = EXERCISES.filter(e => e.category === activeCategory)
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <p className={styles.label}>Movement Library</p>
         <h1 className={styles.title}>Learn to Feel</h1>
-        <p className={styles.subtitle}>Animations built on three principles: Hip Engine · Stable Pillar · Core as Bridge</p>
+        <p className={styles.subtitle}>Slow, clinical movement practice built around quality before quantity.</p>
       </header>
+
+      <section className={styles.pillarBanner}>
+        <p>5 Pillars</p>
+        <div>
+          {PILLARS.map(pillar => <span key={pillar}>{pillar}</span>)}
+        </div>
+      </section>
 
       <section className={styles.weeklyModule}>
         <div className={styles.weeklyIcon}>7</div>
@@ -29,12 +40,6 @@ export default function Library() {
       </section>
 
       <div className={styles.filters}>
-        <button
-          className={styles.filter + (activeCategory === 'all' ? ' ' + styles.filterActive : '')}
-          onClick={() => setActiveCategory('all')}
-        >
-          All
-        </button>
         {Object.entries(CATEGORIES).map(([id, cat]) => (
           <button
             key={id}
@@ -47,8 +52,20 @@ export default function Library() {
         ))}
       </div>
 
-      {activeCategory !== 'all' && (
-        <p className={styles.categoryDesc}>{CATEGORIES[activeCategory]?.description}</p>
+      <p className={styles.categoryDesc}>{CATEGORIES[activeCategory]?.description}</p>
+
+      {activeCategory === 'running' && (
+        <section className={styles.principlesBanner}>
+          <p className={styles.principlesTitle}>The Three Principles</p>
+          <div className={styles.principlesGrid}>
+            {PRINCIPLES.map(([title, text]) => (
+              <article key={title}>
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </article>
+            ))}
+          </div>
+        </section>
       )}
 
       <div className={styles.grid}>
@@ -72,7 +89,7 @@ function ExerciseCard({ exercise }) {
       {exercise.cadence && (
         <span className={styles.cadenceBadge}>{exercise.cadence}</span>
       )}
-      <span className={styles.arrow}>→</span>
+      <span className={styles.arrow}>-&gt;</span>
     </Link>
   )
 }
