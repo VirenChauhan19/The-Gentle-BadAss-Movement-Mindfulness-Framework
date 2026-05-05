@@ -19,10 +19,11 @@ export default function Library() {
       </header>
 
       <section className={styles.weeklyModule}>
-        <div>
+        <div className={styles.weeklyIcon}>7</div>
+        <div className={styles.weeklyCopy}>
           <p className={styles.weeklyLabel}>Weekly Module</p>
           <h2>Functional Tests</h2>
-          <p>Use Slump, Hip Rotation, Straight Leg Raise, and other tests once a week to notice change. Daily work should focus on breath, quality movement, and control.</p>
+          <p>Use Slump, Hip Rotation, Straight Leg Raise, and other tests once a week to notice change. Daily work stays focused on breath, quality movement, and control.</p>
         </div>
         <button onClick={() => setActiveCategory('functional')}>Open weekly tests</button>
       </section>

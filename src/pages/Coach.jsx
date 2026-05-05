@@ -18,7 +18,7 @@ const SESSION_STYLE = {
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function Coach() {
-  const { coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries } = useData()
+  const { coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries, adminRemarks } = useData()
   const [tab, setTab] = useState('program')
 
   const goal     = coachData?.goal        || null
@@ -44,7 +44,7 @@ export default function Coach() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.label}>AI Running Coach</p>
+        <p className={styles.label}>Running</p>
         <h1 className={styles.title}>{goal.raceGoal}</h1>
         <p className={styles.headerSub}>
           {isComplete ? 'Program complete!' : `Week ${weekNum} of ${goal.weeks} · Day ${dayNum}`}
@@ -71,6 +71,7 @@ export default function Coach() {
             goal={goal} todaySession={todaySession} todayCheckin={todayCheckin}
             checkins={checkins} entries={entries} dayNum={dayNum}
             isComplete={isComplete} onCheckin={saveCoachCheckin} onNewGoal={clearCoachGoal}
+            adminRemarks={adminRemarks}
           />
         : <ChatTab
             history={chat} goal={goal} checkins={checkins}
@@ -148,7 +149,7 @@ function GoalSetup({ onSave }) {
     return (
       <div className={styles.page}>
         <header className={styles.header}>
-          <p className={styles.label}>AI Running Coach</p>
+          <p className={styles.label}>Running</p>
           <h1 className={styles.title}>Setup Required</h1>
         </header>
         <div className={styles.warnCard}>
@@ -165,7 +166,7 @@ function GoalSetup({ onSave }) {
     return (
       <div className={styles.page}>
         <header className={styles.header}>
-          <p className={styles.label}>AI Running Coach</p>
+          <p className={styles.label}>Running</p>
           <h1 className={styles.title}>Building Your Plan</h1>
           <p className={styles.subtitle}>Designing your {weeks}-week {raceGoal} program…</p>
         </header>
@@ -344,7 +345,7 @@ function GoalSetup({ onSave }) {
 }
 
 // ── Program Tab ───────────────────────────────────────────────────────────────
-function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNum, isComplete, onCheckin, onNewGoal }) {
+function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNum, isComplete, onCheckin, onNewGoal, adminRemarks = [] }) {
   const weekTemplate = goal.weekTemplate || []
   const [selectedDay, setSelectedDay] = useState(null)
 
@@ -446,6 +447,10 @@ function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNu
         />
       )}
 
+      {adminRemarks.length > 0 && (
+        <DailyRemarks remarks={adminRemarks} checkins={checkins} />
+      )}
+
       {/* Run log */}
       {checkins.length > 0 && (
         <div className={styles.section}>
@@ -455,6 +460,34 @@ function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNu
       )}
 
       <button className={styles.changeGoalBtn} onClick={onNewGoal}>← Change program</button>
+    </div>
+  )
+}
+
+function DailyRemarks({ remarks, checkins }) {
+  const checkinByDate = Object.fromEntries(checkins.map(c => [c.date, c]))
+  const sorted = [...remarks].sort((a, b) => (b.createdAt || b.date || '').localeCompare(a.createdAt || a.date || ''))
+
+  return (
+    <div className={styles.dailyRemarks}>
+      <p className={styles.sectionLabel}>Daily Remarks</p>
+      {sorted.map(r => {
+        const run = r.runDate ? checkinByDate[r.runDate] : null
+        return (
+          <div key={r.id} className={styles.dailyRemarkCard}>
+            <div className={styles.dailyRemarkTop}>
+              <span>{r.from || 'Coach'}</span>
+              <span>{r.runDate || r.date}</span>
+            </div>
+            {run && (
+              <p className={styles.dailyRemarkRun}>
+                Run: {run.status} · {run.userNote?.slice(0, 80)}
+              </p>
+            )}
+            <p className={styles.dailyRemarkText}>{r.text}</p>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -472,7 +505,7 @@ function CheckinDisplay({ checkin }) {
       <p className={styles.checkinNote}>{checkin.userNote}</p>
       {checkin.aiReply && (
         <div className={styles.coachReply}>
-          <p className={styles.coachLabel}>Coach</p>
+          <p className={styles.coachLabel}>Running</p>
           <p className={styles.coachText}>{checkin.aiReply}</p>
         </div>
       )}
@@ -556,7 +589,7 @@ function RunLogEntry({ checkin }) {
           <p className={styles.logNote}>{checkin.userNote}</p>
           {checkin.aiReply && (
             <div className={styles.coachReply} style={{ marginTop: 10 }}>
-              <p className={styles.coachLabel}>Coach</p>
+              <p className={styles.coachLabel}>Running</p>
               <p className={styles.coachText}>{checkin.aiReply}</p>
             </div>
           )}
@@ -602,7 +635,7 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
       <div className={styles.chatMessages}>
         {history.length === 0 && !loading && (
           <div className={styles.chatEmpty}>
-            <p className={styles.chatEmptyTitle}>Ask your running coach anything</p>
+            <p className={styles.chatEmptyTitle}>Ask about your running plan</p>
             <div className={styles.suggestions}>
               {[
                 'Give me a 3-day running plan for this week',
@@ -620,14 +653,14 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
 
         {history.map((msg, i) => (
           <div key={i} className={`${styles.bubble} ${msg.role === 'user' ? styles.bubbleUser : styles.bubbleCoach}`}>
-            {msg.role === 'assistant' && <p className={styles.coachLabel}>Coach</p>}
+            {msg.role === 'assistant' && <p className={styles.coachLabel}>Running</p>}
             <p className={styles.bubbleText} style={{ whiteSpace: 'pre-line' }}>{msg.content}</p>
           </div>
         ))}
 
         {loading && (
           <div className={`${styles.bubble} ${styles.bubbleCoach}`}>
-            <p className={styles.coachLabel}>Coach</p>
+            <p className={styles.coachLabel}>Running</p>
             <div className={styles.typingDots}><span /><span /><span /></div>
           </div>
         )}
@@ -639,7 +672,7 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
       <div className={styles.chatInputRow}>
         <textarea
           className={styles.chatInput}
-          placeholder="Ask your coach…"
+          placeholder="Ask about running…"
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={onKey}

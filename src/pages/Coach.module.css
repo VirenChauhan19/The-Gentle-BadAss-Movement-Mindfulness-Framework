@@ -84,14 +84,14 @@
   .header { padding: 40px 28px 24px; }
   .tabs   { margin: 0 20px; }
   .section { padding: 0 20px; }
-  .overviewCard, .todaySessionCard, .checkinCard, .checkinDisplay, .completionCard { margin: 0 20px 16px; }
+  .overviewCard, .todaySessionCard, .checkinCard, .checkinDisplay, .completionCard, .dailyRemarks { margin: 0 20px 16px; }
 }
 
 @media (min-width: 1024px) {
   .header  { padding: 36px 48px 24px; text-align: left; }
   .tabs    { margin: 16px 48px 0; }
   .section { padding: 0 48px; }
-  .overviewCard, .todaySessionCard, .checkinCard, .checkinDisplay, .completionCard { margin: 0 48px 16px; }
+  .overviewCard, .todaySessionCard, .checkinCard, .checkinDisplay, .completionCard, .dailyRemarks { margin: 0 48px 16px; }
   .tabContent { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; padding: 16px 48px 0; }
   .tabContent .section { padding: 0; }
   .chatWrap { max-width: 860px; }
@@ -538,6 +538,49 @@
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.dailyRemarks {
+  margin: 0 16px 16px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.dailyRemarkCard {
+  padding: 13px 0;
+  border-top: 1px solid var(--border-light);
+}
+
+.dailyRemarkCard:first-of-type {
+  border-top: none;
+}
+
+.dailyRemarkTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--sage-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dailyRemarkRun {
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.dailyRemarkText {
+  font-size: 0.86rem;
+  color: var(--ink);
+  line-height: 1.58;
 }
 
 /* ── Completion ──────────────────────────────────────────────── */

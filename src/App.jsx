@@ -1,5 +1,5 @@
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DataProvider, useData } from './context/DataContext'
 import Nav from './components/Nav'
@@ -65,6 +65,13 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const [theme, setTheme] = useState(() => localStorage.getItem('gb_theme') || 'light')
+
+  useEffect(() => {
+    localStorage.setItem('gb_theme', theme)
+    document.documentElement.dataset.theme = theme
+  }, [theme])
+
   return (
     <AuthProvider>
       <DataProvider>
@@ -72,6 +79,14 @@ export default function App() {
           <main className={styles.main}>
             <AppRoutes />
           </main>
+          <button
+            className={styles.themeToggle}
+            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? 'Light' : 'Dark'}
+          </button>
           <Nav />
           <FloatingChat />
         </div>

@@ -8,7 +8,7 @@ const links = [
   { to: '/breathing', label: 'Breathe', icon: BreathIcon },
   { to: '/history', label: 'History', icon: HistoryIcon },
   { to: '/library', label: 'Move', icon: LibraryIcon },
-  { to: '/coach', label: 'Coach', icon: CoachIcon },
+  { to: '/coach', label: 'Running', icon: CoachIcon },
   { to: '/admin', label: 'Profile', icon: ProfileIcon },
 ]
 

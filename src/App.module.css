@@ -9,6 +9,38 @@
     var(--cream);
 }
 
+.themeToggle {
+  position: fixed;
+  right: 14px;
+  top: 14px;
+  z-index: 260;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--ink);
+  border: 1px solid var(--border-light);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 22px var(--shadow-xs);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.themeToggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px var(--shadow);
+}
+
+@media (min-width: 1024px) {
+  .themeToggle {
+    right: 22px;
+    top: 18px;
+  }
+}
+
 /* Phone: full width, nav at bottom */
 @media (max-width: 767px) {
   .app {

@@ -383,6 +383,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
 function UserDetail({ user, adminUser, onRemarkSent }) {
   const [tab,           setTab]           = useState('journal')
   const [remarkText,    setRemarkText]    = useState('')
+  const [remarkRunDate, setRemarkRunDate] = useState('')
   const [sending,       setSending]       = useState(false)
   const [remarkError,   setRemarkError]   = useState(null)
   const [expandedEntry, setExpandedEntry] = useState(null)
@@ -400,6 +401,8 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
     const remark = {
       id: Date.now().toString(),
       date: new Date().toISOString().split('T')[0],
+      runDate: remarkRunDate || null,
+      runLabel: remarkRunDate ? `Run on ${remarkRunDate}` : null,
       text: remarkText.trim(),
       from: adminUser.displayName || 'Dr. Rajat',
       createdAt: new Date().toISOString(),
@@ -412,6 +415,7 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
       )
       setLocalRemarks(prev => [...prev, remark])
       setRemarkText('')
+      setRemarkRunDate('')
       onRemarkSent(remark)
     } catch (err) {
       setRemarkError('Could not send remark: ' + err.message)
@@ -545,6 +549,20 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
           <div>
             <div className={styles.remarkForm}>
               <p className={styles.remarkFormLabel}>Send a remark to {user.name}</p>
+              {checkins.length > 0 && (
+                <select
+                  className={styles.remarkSelect}
+                  value={remarkRunDate}
+                  onChange={e => setRemarkRunDate(e.target.value)}
+                >
+                  <option value="">General running remark</option>
+                  {[...checkins].reverse().map(c => (
+                    <option key={c.date} value={c.date}>
+                      {c.date} - {c.status} - {c.userNote?.slice(0, 48)}
+                    </option>
+                  ))}
+                </select>
+              )}
               <textarea
                 className={styles.remarkInput}
                 placeholder="Write your feedback, encouragement, or advice for this user…"
@@ -571,8 +589,9 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
                     <div key={r.id} className={styles.remarkCard}>
                       <div className={styles.remarkMeta}>
                         <span className={styles.remarkFrom}>{r.from}</span>
-                        <span className={styles.remarkDate}>{r.date}</span>
+                        <span className={styles.remarkDate}>{r.runDate || r.date}</span>
                       </div>
+                      {r.runDate && <p className={styles.remarkRunLink}>Attached to run on {r.runDate}</p>}
                       <p className={styles.remarkText}>{r.text}</p>
                     </div>
                   ))}

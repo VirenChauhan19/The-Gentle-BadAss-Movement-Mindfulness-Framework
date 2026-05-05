@@ -86,7 +86,7 @@ export default function FloatingChat() {
           <div className={styles.headerLeft}>
             <div className={styles.headerAvatar}><BotFace /></div>
             <div>
-              <p className={styles.headerName}>AI Coach</p>
+              <p className={styles.headerName}>Running</p>
               <p className={styles.headerSub}><span className={styles.onlineDot} />Ready to help</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function FloatingChat() {
             <div className={styles.welcome}>
               <div className={styles.welcomeAvatar}><BotFace /></div>
               <p className={styles.welcomeText}>
-                Hey! I'm your AI running coach. Ask me anything — injuries, indoor training, pacing, nutrition, recovery…
+                Ask me anything about running, pacing, injuries, indoor training, nutrition, or recovery.
               </p>
               {!hasKey && (
                 <p className={styles.noKeyMsg}>
@@ -162,7 +162,7 @@ export default function FloatingChat() {
           <input
             ref={inputRef}
             className={styles.input}
-            placeholder={hasKey ? 'Ask your coach anything…' : 'API key not configured'}
+            placeholder={hasKey ? 'Ask about running…' : 'API key not configured'}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={onKey}
@@ -182,7 +182,7 @@ export default function FloatingChat() {
       <button
         className={`${styles.fab} ${open ? styles.fabOpen : ''}`}
         onClick={() => setOpen(o => !o)}
-        aria-label={open ? 'Close coach chat' : 'Open coach chat'}
+        aria-label={open ? 'Close running chat' : 'Open running chat'}
       >
         <div className={styles.fabInner}>
           {open ? <XIcon size={22} /> : <ChatBubbleIcon />}
