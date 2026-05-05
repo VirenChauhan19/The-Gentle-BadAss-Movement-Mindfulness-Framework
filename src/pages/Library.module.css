@@ -11,6 +11,10 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+:global(html[data-theme="dark"]) .header {
+  background: #151a15;
+}
+
 .label {
   font-size: 0.64rem;
   letter-spacing: 0.16em;
@@ -46,6 +50,18 @@
   gap: 12px;
   align-items: center;
   box-shadow: 0 8px 22px rgba(24, 23, 19, 0.06);
+}
+
+:global(html[data-theme="dark"]) .weeklyModule,
+:global(html[data-theme="dark"]) .card,
+:global(html[data-theme="dark"]) .filter {
+  background: #1b211b;
+  border-color: #2d382f;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+}
+
+:global(html[data-theme="dark"]) .weeklyIcon {
+  background: linear-gradient(135deg, rgba(131, 168, 120, 0.16), rgba(127, 169, 188, 0.10));
 }
 
 .weeklyIcon {

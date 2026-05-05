@@ -373,7 +373,7 @@ function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNu
                   style={{ background: (isToday || isSelected) ? st.bg : undefined, borderColor: (isToday || isSelected) ? st.border : undefined }}
                   onClick={() => toggleDay(s)}
                 >
-                  <span className={styles.dayShort}>{DAYS_SHORT[dayIdx] ?? s.day.slice(0,3)}</span>
+                  <span className={styles.dayShort}>{DAYS_FULL[dayIdx] ?? s.day}</span>
                   <span className={styles.dayDot} style={{ background: st.border }} />
                   <span className={styles.dayLabel} style={{ color: st.color }}>{st.label}</span>
                   <span className={styles.dayDist}>{s.distance || '—'}</span>

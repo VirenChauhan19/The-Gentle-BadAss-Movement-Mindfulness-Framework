@@ -10,6 +10,10 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+:global(html[data-theme="dark"]) .header {
+  background: #151a15;
+}
+
 .label {
   font-size: 0.64rem;
   letter-spacing: 0.16em;
@@ -45,6 +49,18 @@
   border-radius: var(--r-lg);
   padding: 18px;
   box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+:global(html[data-theme="dark"]) .breathCard,
+:global(html[data-theme="dark"]) .stats div {
+  background: #1b211b;
+  border-color: #2d382f;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+}
+
+:global(html[data-theme="dark"]) .orbWrap {
+  background: linear-gradient(135deg, #151a15, #111711);
+  border-color: #2d382f;
 }
 
 .orbWrap {

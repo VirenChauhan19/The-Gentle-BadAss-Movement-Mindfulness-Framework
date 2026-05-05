@@ -10,6 +10,10 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+:global(html[data-theme="dark"]) .header {
+  background: #151a15;
+}
+
 .label {
   font-size: 0.64rem;
   letter-spacing: 0.16em;
@@ -52,6 +56,16 @@
   padding: 14px 10px;
   text-align: center;
   box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+:global(html[data-theme="dark"]) .summaryCard,
+:global(html[data-theme="dark"]) .chartCard,
+:global(html[data-theme="dark"]) .row,
+:global(html[data-theme="dark"]) .moveRow,
+:global(html[data-theme="dark"]) .empty {
+  background: #1b211b;
+  border-color: #2d382f;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
 }
 
 .summaryCard span {

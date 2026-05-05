@@ -48,26 +48,26 @@
 }
 
 :root[data-theme="dark"] {
-  --cream:        #111713;
-  --cream-dark:   #0c100e;
-  --cream-mid:    #171f1a;
-  --paper:        #1a211d;
-  --paper-soft:   #151b17;
-  --ink:          #f3efe7;
-  --ink-light:    #d3c8b7;
-  --ink-faint:    #9c907f;
-  --sage:         #8fb786;
-  --sage-dark:    #b1d2a8;
-  --sage-light:   #263b29;
-  --terracotta:   #dc8468;
-  --slate:        #8fb5c9;
-  --slate-light:  #21333c;
-  --gold:         #d4a85c;
-  --sand:         #c6a978;
-  --sand-light:   #2c261b;
-  --border:       #334036;
-  --border-light: #2a342d;
-  --focus:        rgba(143, 181, 201, 0.34);
+  --cream:        #10130f;
+  --cream-dark:   #0a0d0b;
+  --cream-mid:    #171c16;
+  --paper:        #1b211b;
+  --paper-soft:   #151a15;
+  --ink:          #f4efe4;
+  --ink-light:    #cfc5b4;
+  --ink-faint:    #918879;
+  --sage:         #83a878;
+  --sage-dark:    #a8c89f;
+  --sage-light:   #263424;
+  --terracotta:   #d57d63;
+  --slate:        #7fa9bc;
+  --slate-light:  #22313a;
+  --gold:         #d2a257;
+  --sand:         #bfa16e;
+  --sand-light:   #2b251a;
+  --border:       #3a443a;
+  --border-light: #2a332b;
+  --focus:        rgba(127, 169, 188, 0.36);
 
   --shadow-xs: rgba(0, 0, 0, 0.18);
   --shadow:    rgba(0, 0, 0, 0.28);
@@ -88,12 +88,31 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-:root[data-theme="dark"] html,
-:root[data-theme="dark"] body,
-:root[data-theme="dark"] #root {
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] #root {
   background:
-    radial-gradient(circle at 12% 8%, rgba(143, 183, 134, 0.10), transparent 24rem),
-    linear-gradient(135deg, #0b0f0d 0%, #111713 52%, #151b17 100%);
+    radial-gradient(circle at 14% 8%, rgba(131, 168, 120, 0.13), transparent 22rem),
+    radial-gradient(circle at 88% 12%, rgba(127, 169, 188, 0.10), transparent 24rem),
+    linear-gradient(135deg, #090c0a 0%, #10130f 52%, #141a14 100%);
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  background: #111711;
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #746d62;
+}
+
+html[data-theme="dark"] iframe,
+html[data-theme="dark"] img {
+  color-scheme: dark;
 }
 
 #root {
