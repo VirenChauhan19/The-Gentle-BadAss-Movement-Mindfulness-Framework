@@ -3,6 +3,48 @@ import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
 import styles from './Home.module.css'
 
+const PROGRAM_AUDIENCES = [
+  {
+    title: 'The Recovering',
+    text: 'Those coming back from injury or managing chronic aches and pains.',
+  },
+  {
+    title: 'The Chronic Warriors',
+    text: 'People managing chronic diseases who need movement as medicine.',
+  },
+  {
+    title: 'The Fresh Starters',
+    text: 'Absolute beginners who want to "Run & Bee" without the "Angry Landings".',
+  },
+  {
+    title: 'The Seekers',
+    text: 'Advanced runners who realize that after 20 years, they still do not actually know their own movement.',
+  },
+  {
+    title: 'Women',
+    text: 'If you have been too busy taking care of everyone else but ignored yourself, now is the time you focus on yourself.',
+  },
+  {
+    title: 'Elderly',
+    text: 'Maybe you have retired from work, but that does not mean you need to retire from life. Improve your quality of life by moving better.',
+  },
+]
+
+const PHILOSOPHY = [
+  {
+    term: 'I',
+    text: 'Your identity as a runner - who chooses to show up.',
+  },
+  {
+    term: 'MY',
+    text: 'Your body and biological engine - we are learning to maintain and respect.',
+  },
+  {
+    term: 'ME',
+    text: 'The consciousness and experience of movement - the quiet consciousness that emerges when breath, posture, and movement align.',
+  },
+]
+
 export default function Home() {
   const { entries, getTodayEntry, profile } = useData()
   const today = getTodayEntry()
@@ -76,6 +118,37 @@ export default function Home() {
           <p className={styles.cardBody}>Track your 30–270 day journey.</p>
           <span className={styles.cardArrow}>→</span>
         </Link>
+      </section>
+
+      <section className={styles.fitSection}>
+        <div className={styles.fitIntro}>
+          <p className={styles.sectionKicker}>Who this is for</p>
+          <h2 className={styles.fitTitle}>This program is for you if you belong to any one or more categories below.</h2>
+        </div>
+
+        <div className={styles.audienceGrid}>
+          {PROGRAM_AUDIENCES.map(item => (
+            <article key={item.title} className={styles.audienceCard}>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className={styles.philosophy}>
+          <div className={styles.philosophyIntro}>
+            <p className={styles.sectionKicker}>Core framework</p>
+            <h2>The &quot;I - My - Me&quot; Philosophy</h2>
+          </div>
+          <div className={styles.philosophyGrid}>
+            {PHILOSOPHY.map(item => (
+              <article key={item.term} className={styles.philosophyItem}>
+                <span>{item.term}</span>
+                <p>{item.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Principles */}
