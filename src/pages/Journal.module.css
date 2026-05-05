@@ -1,14 +1,13 @@
 .page {
   padding-bottom: 48px;
   overflow-x: hidden;
+  background: var(--cream);
 }
 
 /* ── Header ──────────────────────────────────────────── */
 .header {
   padding: 52px 24px 22px;
-  background:
-    linear-gradient(135deg, rgba(99, 127, 95, 0.16), transparent 55%),
-    linear-gradient(175deg, var(--paper-soft) 0%, var(--cream) 100%);
+  background: var(--paper-soft);
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -58,15 +57,17 @@
 /* ── Factors ─────────────────────────────────────────── */
 .factors {
   padding: 0 16px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .section {
-  margin-top: 26px;
-  background: rgba(255, 255, 255, 0.45);
+  margin-top: 18px;
+  background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
-  padding: 14px;
-  box-shadow: 0 8px 22px var(--shadow-xs);
+  padding: 16px;
+  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.06);
 }
 
 .catLabel {
@@ -80,7 +81,7 @@
 }
 
 .factor {
-  padding: 16px 0;
+  padding: 18px 0;
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -141,7 +142,8 @@
 .sliderRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
 }
 
 .sliderEdge {
@@ -153,6 +155,7 @@
 
 .slider {
   flex: 1;
+  min-width: 0;
   -webkit-appearance: none;
   height: 7px;
   border-radius: 999px;
@@ -190,13 +193,15 @@
   font-size: 0.6rem;
   color: var(--ink-faint);
   margin-top: 5px;
-  padding: 0 22px;
+  padding: 0 28px;
   font-weight: 500;
 }
 
 /* ── Notes ───────────────────────────────────────────── */
 .noteSection {
   padding: 26px 16px 8px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .noteLabel {
@@ -260,22 +265,76 @@
 
 /* ── Responsive ──────────────────────────────────────── */
 @media (min-width: 768px) {
-  .header   { padding: 40px 28px 22px; }
-  .factors  { padding: 0 20px; }
-  .noteSection { padding: 26px 20px 8px; }
-  .saveSection { padding: 18px 20px 0; }
+  .header {
+    padding: 40px 32px 22px;
+  }
+
+  .factors,
+  .noteSection,
+  .saveSection {
+    padding-left: 32px;
+    padding-right: 32px;
+    max-width: 900px;
+  }
 }
 
 @media (min-width: 1024px) {
-  .header      { padding: 36px 48px 22px; }
-  .factors     { padding: 0 48px; max-width: 860px; }
-  .noteSection { padding: 26px 48px 8px; max-width: 860px; }
-  .saveSection { padding: 18px 48px 0; max-width: 860px; }
+  .header {
+    padding: 40px 56px 24px;
+  }
+
+  .factors {
+    max-width: 1180px;
+    padding: 6px 56px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 18px;
+    align-items: start;
+  }
+
+  .section {
+    min-height: 100%;
+  }
+
+  .noteSection,
+  .saveSection {
+    max-width: 1180px;
+    padding-left: 56px;
+    padding-right: 56px;
+  }
+
+  .noteSection {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.42fr) minmax(420px, 1fr);
+    gap: 12px 24px;
+    align-items: start;
+  }
+
+  .noteLabel,
+  .noteHelp {
+    grid-column: 1;
+  }
+
+  .noteHelp {
+    margin-bottom: 0;
+  }
+
+  .note {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    min-height: 190px;
+  }
+
+  .noteFooter {
+    grid-column: 2;
+  }
 }
 
 /* ── Save button ─────────────────────────────────────── */
 .saveSection {
   padding: 18px 16px 0;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .saveBtn {
@@ -314,4 +373,20 @@
 .saved {
   background: var(--sage);
   box-shadow: 0 4px 14px rgba(122, 148, 112, 0.35);
+}
+
+@media (min-width: 768px) {
+  .saveSection {
+    padding-left: 32px;
+    padding-right: 32px;
+    max-width: 900px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .saveSection {
+    max-width: 1180px;
+    padding-left: 56px;
+    padding-right: 56px;
+  }
 }

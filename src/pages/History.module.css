@@ -1,13 +1,12 @@
 .page {
   padding-bottom: 48px;
   overflow-x: hidden;
+  background: var(--cream);
 }
 
 .header {
   padding: 52px 24px 22px;
-  background:
-    linear-gradient(135deg, rgba(195, 139, 63, 0.14), transparent 58%),
-    linear-gradient(175deg, var(--paper-soft) 0%, var(--cream) 100%);
+  background: var(--paper-soft);
   border-bottom: 1px solid var(--border-light);
 }
 
@@ -39,22 +38,43 @@
 
 /* ── Responsive ──────────────────────────────────────── */
 @media (min-width: 768px) {
-  .header    { padding: 40px 28px 22px; }
-  .dashboard { padding: 20px 20px 0; }
-  .list      { padding: 0 20px; }
-  .listTitle { padding: 0 24px; }
+  .header { padding: 40px 32px 22px; }
+
+  .dashboard,
+  .list {
+    padding-left: 32px;
+    padding-right: 32px;
+    max-width: 980px;
+  }
+
+  .listTitle {
+    padding: 0 32px;
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 @media (min-width: 1024px) {
-  .header    { padding: 36px 48px 22px; }
+  .header { padding: 40px 56px 24px; }
+
   .dashboard {
-    padding: 24px 48px 0;
+    padding: 24px 56px 0;
+    max-width: 1180px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
-  .list      { padding: 0 48px; }
-  .listTitle { padding: 0 48px; }
+
+  .list {
+    padding: 0 56px;
+    max-width: 1180px;
+  }
+
+  .listTitle {
+    padding: 0 56px;
+    max-width: 1180px;
+  }
 }
 
 /* ── Dashboard charts ────────────────────────────────── */
@@ -64,6 +84,9 @@
   flex-direction: column;
   gap: 14px;
   margin-bottom: 28px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .chartCard {
@@ -102,26 +125,38 @@
 
 /* ── Empty state ─────────────────────────────────────── */
 .empty {
-  padding: 64px 24px;
+  padding: 56px 24px;
   text-align: center;
   color: var(--ink-light);
   font-size: 0.9rem;
   line-height: 1.7;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.06);
 }
 
 .startLink {
-  display: inline-block;
-  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin: 18px auto 0;
+  padding: 0 18px;
   font-size: 0.88rem;
-  color: var(--ink);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color 0.15s ease;
+  color: var(--paper);
+  font-weight: 700;
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
+  border-radius: var(--r-md);
+  box-shadow: 0 8px 18px rgba(63, 95, 62, 0.22);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .startLink:hover {
-  color: var(--sage-dark);
+  color: var(--paper);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(63, 95, 62, 0.28);
 }
 
 /* ── Entry list ──────────────────────────────────────── */
@@ -136,6 +171,8 @@
 
 .list {
   padding: 0 16px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .row {
@@ -199,4 +236,38 @@
   color: var(--ink-light);
   line-height: 1.55;
   font-style: italic;
+}
+
+@media (min-width: 768px) {
+  .dashboard,
+  .list {
+    padding-left: 32px;
+    padding-right: 32px;
+    max-width: 980px;
+  }
+
+  .listTitle {
+    padding-left: 32px;
+    padding-right: 32px;
+    max-width: 980px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard {
+    padding-left: 56px;
+    padding-right: 56px;
+    max-width: 1180px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .list,
+  .listTitle {
+    padding-left: 56px;
+    padding-right: 56px;
+    max-width: 1180px;
+  }
 }
