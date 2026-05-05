@@ -82,22 +82,41 @@ export default function Coach() {
 }
 
 // ── Goal Setup ────────────────────────────────────────────────────────────────
-const RACE_GOALS  = ['5K Race','10K Race','Half Marathon','Marathon','Base Fitness']
-const EXPERIENCE  = [
-  { id: 'Beginner',     sub: 'New to running' },
-  { id: 'Intermediate', sub: '1–3 years'       },
-  { id: 'Advanced',     sub: '3+ years'         },
+const RACE_GOALS = [
+  { id: '800m',          label: '800m',          icon: '⚡', sub: 'Speed & track'   },
+  { id: '1500m',         label: '1500m',         icon: '🏃', sub: 'Middle distance' },
+  { id: '3K',            label: '3K',            icon: '🔥', sub: 'Speed endurance' },
+  { id: '5K Race',       label: '5K',            icon: '🌱', sub: 'Short road'      },
+  { id: '10K Race',      label: '10K',           icon: '💪', sub: 'Road classic'    },
+  { id: 'Half Marathon', label: 'Half Marathon', icon: '🏅', sub: '21.1 km'         },
+  { id: 'Marathon',      label: 'Marathon',      icon: '🏆', sub: '42.2 km'         },
+  { id: 'Ultra',         label: 'Ultra',         icon: '🌄', sub: '50K+'            },
+  { id: 'Base Fitness',  label: 'Base Fitness',  icon: '🧘', sub: 'General fitness' },
 ]
-const DAY_OPTS  = [3, 4, 5, 6]
-const WEEK_OPTS = [4, 8, 12, 16, 20]
-const KM_OPTS   = ['0–20 km', '20–40 km', '40–60 km', '60+ km']
+
+const EXPERIENCE = [
+  { id: 'Beginner',     sub: 'New to running', icon: '🌱' },
+  { id: 'Intermediate', sub: '1–3 years',      icon: '🚶' },
+  { id: 'Advanced',     sub: '3+ years',       icon: '🏃' },
+  { id: 'Competitive',  sub: 'Racing to win',  icon: '🏆' },
+]
+
+const TOTAL_STEPS = 4
+const STEP_TITLES = ['What\'s your goal?', 'Your experience', 'Your training', 'Anything else?']
+const STEP_SUBS   = [
+  'Pick the race or distance you\'re training for.',
+  'Be honest — this shapes every session.',
+  'Type any number — no limits here.',
+  'Injuries, target time, schedule constraints… (optional)',
+]
 
 function GoalSetup({ onSave }) {
-  const [raceGoal,    setRaceGoal]    = useState('10K Race')
-  const [experience,  setExperience]  = useState('Intermediate')
-  const [daysPerWeek, setDaysPerWeek] = useState(5)
-  const [currentKm,   setCurrentKm]   = useState('20–40 km')
-  const [weeks,       setWeeks]       = useState(12)
+  const [step,        setStep]        = useState(1)
+  const [raceGoal,    setRaceGoal]    = useState('')
+  const [experience,  setExperience]  = useState('')
+  const [daysPerWeek, setDaysPerWeek] = useState(4)
+  const [weeks,       setWeeks]       = useState('')
+  const [currentKm,   setCurrentKm]   = useState('')
   const [notes,       setNotes]       = useState('')
   const [loading,     setLoading]     = useState(false)
   const [error,       setError]       = useState(null)
@@ -107,15 +126,17 @@ function GoalSetup({ onSave }) {
   async function handleGenerate() {
     setLoading(true)
     setError(null)
+    const weeksNum = Math.max(1, parseInt(weeks) || 12)
+    const kmStr    = currentKm ? `${currentKm} km/week` : '20–40 km/week'
     try {
-      const program = await generateProgram({ raceGoal, experience, daysPerWeek, currentKm, weeks, notes })
+      const program = await generateProgram({ raceGoal, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, notes })
       onSave({
-        raceGoal, experience, daysPerWeek, currentKm, weeks,
+        raceGoal, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum,
         startDate: new Date().toISOString().split('T')[0],
-        overview:          program.overview,
-        weekTemplate:      program.weekTemplate,
-        progressionNote:   program.progressionNote,
-        peakWeeklyVolume:  program.peakWeeklyVolume,
+        overview:         program.overview,
+        weekTemplate:     program.weekTemplate,
+        progressionNote:  program.progressionNote,
+        peakWeeklyVolume: program.peakWeeklyVolume,
       })
     } catch (err) {
       setError(err.message)
@@ -134,7 +155,6 @@ function GoalSetup({ onSave }) {
           <p className={styles.warnTitle}>OpenRouter API key not configured</p>
           <p className={styles.warnText}>
             Add <code>VITE_OPENROUTER_API_KEY=your-key</code> to <code>.env.local</code> and restart the dev server.
-            Get a free key at openrouter.ai
           </p>
         </div>
       </div>
@@ -147,100 +167,177 @@ function GoalSetup({ onSave }) {
         <header className={styles.header}>
           <p className={styles.label}>AI Running Coach</p>
           <h1 className={styles.title}>Building Your Plan</h1>
-          <p className={styles.subtitle}>Your coach is designing a personalised {weeks}-week {raceGoal} program…</p>
+          <p className={styles.subtitle}>Designing your {weeks}-week {raceGoal} program…</p>
         </header>
         <div className={styles.generatingWrap}>
           <div className={styles.generatingDots}><span /><span /><span /></div>
-          <p className={styles.generatingNote}>Analysing your fitness level, goal, and schedule</p>
+          <p className={styles.generatingNote}>Analysing your fitness, goal, and schedule</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <p className={styles.label}>AI Running Coach</p>
-        <h1 className={styles.title}>Build My Program</h1>
-        <p className={styles.subtitle}>Answer a few questions and get a full personalised training plan.</p>
-      </header>
-
-      <div className={styles.setupForm}>
-        <div className={styles.field}>
-          <label className={styles.fieldLabel}>Race Goal</label>
-          <div className={styles.pills}>
-            {RACE_GOALS.map(g => (
-              <button key={g} className={`${styles.pill} ${raceGoal === g ? styles.pillActive : ''}`} onClick={() => setRaceGoal(g)}>
-                {g}
-              </button>
-            ))}
-          </div>
+    <div className={styles.wizard}>
+      {/* Header */}
+      <div className={styles.wizardTop}>
+        <p className={styles.wizardStepLabel}>Step {step} of {TOTAL_STEPS}</p>
+        <h1 className={styles.wizardTitle}>{STEP_TITLES[step - 1]}</h1>
+        <p className={styles.wizardSub}>{STEP_SUBS[step - 1]}</p>
+        <div className={styles.wizardDots}>
+          {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+            <div
+              key={i}
+              className={`${styles.wizardDot} ${step === i + 1 ? styles.wizardDotCurrent : step > i + 1 ? styles.wizardDotDone : ''}`}
+            />
+          ))}
         </div>
+      </div>
 
-        <div className={styles.field}>
-          <label className={styles.fieldLabel}>Your Experience</label>
-          <div className={styles.expRow}>
-            {EXPERIENCE.map(e => (
-              <button key={e.id} className={`${styles.expCard} ${experience === e.id ? styles.expCardActive : ''}`} onClick={() => setExperience(e.id)}>
-                <span className={styles.expTitle}>{e.id}</span>
-                <span className={styles.expSub}>{e.sub}</span>
-              </button>
-            ))}
-          </div>
-        </div>
+      <div className={styles.wizardBody}>
 
-        <div className={styles.fieldRow}>
-          <div className={styles.field}>
-            <label className={styles.fieldLabel}>Days / week</label>
-            <div className={styles.pills}>
-              {DAY_OPTS.map(d => (
-                <button key={d} className={`${styles.pill} ${daysPerWeek === d ? styles.pillActive : ''}`} onClick={() => setDaysPerWeek(d)}>
-                  {d}
+        {/* ── Step 1: Race Goal ── */}
+        {step === 1 && (
+          <>
+            <div className={styles.goalGrid}>
+              {RACE_GOALS.map(g => (
+                <button
+                  key={g.id}
+                  className={`${styles.goalCard} ${raceGoal === g.id ? styles.goalCardActive : ''}`}
+                  onClick={() => setRaceGoal(g.id)}
+                >
+                  <span className={styles.goalIcon}>{g.icon}</span>
+                  <span className={styles.goalName}>{g.label}</span>
+                  <span className={styles.goalSub}>{g.sub}</span>
                 </button>
               ))}
             </div>
-          </div>
-          <div className={styles.field}>
-            <label className={styles.fieldLabel}>Weeks to race</label>
-            <div className={styles.pills}>
-              {WEEK_OPTS.map(w => (
-                <button key={w} className={`${styles.pill} ${weeks === w ? styles.pillActive : ''}`} onClick={() => setWeeks(w)}>
-                  {w}
+            <div className={styles.wizardBtns}>
+              <button className={styles.wizardNext} disabled={!raceGoal} onClick={() => setStep(2)}>
+                Next →
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ── Step 2: Experience ── */}
+        {step === 2 && (
+          <>
+            <div className={styles.expGrid}>
+              {EXPERIENCE.map(e => (
+                <button
+                  key={e.id}
+                  className={`${styles.expBigCard} ${experience === e.id ? styles.expBigCardActive : ''}`}
+                  onClick={() => setExperience(e.id)}
+                >
+                  <span className={styles.expBigIcon}>{e.icon}</span>
+                  <div>
+                    <p className={styles.expBigTitle}>{e.id}</p>
+                    <p className={styles.expBigSub}>{e.sub}</p>
+                  </div>
                 </button>
               ))}
             </div>
-          </div>
-        </div>
-
-        <div className={styles.field}>
-          <label className={styles.fieldLabel}>Current weekly distance</label>
-          <div className={styles.pills}>
-            {KM_OPTS.map(k => (
-              <button key={k} className={`${styles.pill} ${currentKm === k ? styles.pillActive : ''}`} onClick={() => setCurrentKm(k)}>
-                {k}
+            <div className={styles.wizardBtns}>
+              <button className={styles.wizardNext} disabled={!experience} onClick={() => setStep(3)}>
+                Next →
               </button>
-            ))}
-          </div>
-        </div>
+              <button className={styles.wizardBack} onClick={() => setStep(1)}>← Back</button>
+            </div>
+          </>
+        )}
 
-        <div className={styles.field}>
-          <label className={styles.fieldLabel}>
-            Anything else? <span className={styles.optLabel}>(optional)</span>
-          </label>
-          <textarea
-            className={styles.notesInput}
-            placeholder="Injuries, target finish time, preferred long run day, schedule constraints…"
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            rows={3}
-          />
-        </div>
+        {/* ── Step 3: Training numbers ── */}
+        {step === 3 && (
+          <>
+            <div className={styles.inputsStack}>
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>
+                  Days per week <span className={styles.inputSub}>how many days you can train</span>
+                </label>
+                <div className={styles.stepper}>
+                  <button
+                    className={styles.stepperBtn}
+                    disabled={daysPerWeek <= 1}
+                    onClick={() => setDaysPerWeek(d => d - 1)}
+                  >−</button>
+                  <div className={styles.stepperVal}>
+                    {daysPerWeek}
+                    <span className={styles.stepperSub}>days</span>
+                  </div>
+                  <button
+                    className={styles.stepperBtn}
+                    disabled={daysPerWeek >= 7}
+                    onClick={() => setDaysPerWeek(d => d + 1)}
+                  >+</button>
+                </div>
+              </div>
 
-        {error && <p className={styles.errorMsg}>{error}</p>}
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>
+                  Weeks until race <span className={styles.inputSub}>type any number</span>
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="104"
+                  className={styles.numberInput}
+                  value={weeks}
+                  onChange={e => setWeeks(e.target.value)}
+                  placeholder="e.g. 14"
+                />
+              </div>
 
-        <button className={styles.primaryBtn} onClick={handleGenerate}>
-          Generate My Program
-        </button>
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>
+                  Current weekly km <span className={styles.inputSub}>your average right now</span>
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  className={styles.numberInput}
+                  value={currentKm}
+                  onChange={e => setCurrentKm(e.target.value)}
+                  placeholder="e.g. 30"
+                />
+              </div>
+            </div>
+            <div className={styles.wizardBtns}>
+              <button
+                className={styles.wizardNext}
+                disabled={!weeks || !currentKm}
+                onClick={() => setStep(4)}
+              >
+                Next →
+              </button>
+              <button className={styles.wizardBack} onClick={() => setStep(2)}>← Back</button>
+            </div>
+          </>
+        )}
+
+        {/* ── Step 4: Notes + Generate ── */}
+        {step === 4 && (
+          <>
+            <div className={styles.inputsStack}>
+              <textarea
+                className={styles.notesInput}
+                placeholder="e.g. recovering from knee injury, want sub-45 min 10K, can only run mornings…"
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                rows={6}
+                autoFocus
+              />
+            </div>
+            {error && <p className={styles.errorMsg}>{error}</p>}
+            <div className={styles.wizardBtns}>
+              <button className={styles.wizardNext} onClick={handleGenerate}>
+                Generate My Program ✦
+              </button>
+              <button className={styles.wizardBack} onClick={() => setStep(3)}>← Back</button>
+            </div>
+          </>
+        )}
+
       </div>
     </div>
   )
@@ -507,7 +604,12 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
           <div className={styles.chatEmpty}>
             <p className={styles.chatEmptyTitle}>Ask your running coach anything</p>
             <div className={styles.suggestions}>
-              {['How should I pace my long run?', 'What should I eat before a race?', 'How do I avoid shin splints?', 'When do I know I\'m overtrained?'].map(q => (
+              {[
+                'Give me a 3-day running plan for this week',
+                'What gym exercises should I do on cross-training days?',
+                'How should I pace my long run?',
+                'How do I avoid shin splints?',
+              ].map(q => (
                 <button key={q} className={styles.suggestion} onClick={() => { setInput(q) }}>
                   {q}
                 </button>
@@ -519,7 +621,7 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
         {history.map((msg, i) => (
           <div key={i} className={`${styles.bubble} ${msg.role === 'user' ? styles.bubbleUser : styles.bubbleCoach}`}>
             {msg.role === 'assistant' && <p className={styles.coachLabel}>Coach</p>}
-            <p className={styles.bubbleText}>{msg.content}</p>
+            <p className={styles.bubbleText} style={{ whiteSpace: 'pre-line' }}>{msg.content}</p>
           </div>
         ))}
 
@@ -582,58 +684,80 @@ async function apiCall(messages, maxTokens = 600) {
 
 async function generateProgram({ raceGoal, experience, daysPerWeek, currentKm, weeks, notes }) {
   const hardSessions = daysPerWeek >= 5 ? 2 : 1
-  const easySessions = daysPerWeek - hardSessions - 1 // -1 for long run
+  const easySessions = Math.max(0, daysPerWeek - hardSessions - 1)
   const restDays     = 7 - daysPerWeek
 
-  const system = `You are an expert running coach. Generate a personalised weekly training template.
-Return ONLY valid JSON — no markdown, no explanation, nothing else outside the JSON object.
+  const isTrackEvent = ['800m', '1500m', '3K'].includes(raceGoal)
+  const isCompetitive = experience === 'Competitive' || experience === 'Advanced'
 
-Required JSON structure:
+  const trackRules = isTrackEvent ? `
+TRACK EVENT RULES (${raceGoal}):
+- Hard sessions MUST use actual track interval notation: "6 × 400m", "4 × 800m", "3 × 1200m", "2 × 1500m"
+- Always include recovery: "with 90s standing recovery", "with 200m jog recovery"
+- Tempo runs: 1–3 km blocks at comfortably hard effort (NOT race pace)
+- Easy runs can be 20–30 min — shorter is fine for speed recovery
+- Week 1: introduce track conservatively (e.g. 6 × 300m with full recovery)
+- Progress reps/volume each week, not intensity
+- For ${raceGoal}: speciality sessions should target race-specific effort (e.g. 1500m pace for 800m training)
+- Distance field for track sessions: use interval notation ("6 × 400m") not km` : ''
+
+  const paceRules = isCompetitive
+    ? `PACING (Competitive/Advanced allowed relative pace refs):
+- Easy: "Conversational — full sentences comfortably"
+- Tempo: "Comfortably hard — short phrases only, sustainable for 20–30 min"
+- Intervals: "Race effort — controlled and sharp"
+- Long: "Easy conversational — 60–90 s/km slower than tempo"
+- MAY reference "10K race effort", "5K pace", "slightly faster than half marathon pace"`
+    : `PACING (effort descriptions only — no min/km numbers):
+- Easy: "Conversational pace — full sentences comfortably"
+- Moderate: "Comfortably hard — short phrases only"
+- Hard: "Strong effort — controlled aggression"
+- Long: "Easy conversational — slower than easy days, prioritise time on feet"`
+
+  const system = `You are an expert running coach. Generate a personalised weekly training template.
+Return ONLY valid JSON — no markdown, no explanation, no text outside the JSON.
+
+JSON structure:
 {
-  "overview": "2-3 sentence program philosophy and what the runner will achieve",
+  "overview": "2–3 sentence program philosophy and what the runner will achieve",
   "weekTemplate": [
     {
       "day": "Monday",
-      "type": "easy",
-      "title": "Easy Recovery Run",
-      "distance": "6 km",
+      "type": "easy|moderate|hard|long|rest|cross",
+      "title": "Session title",
+      "distance": "6 km  OR  6 × 400m  OR  45 min",
       "duration": "35–40 min",
-      "pace": "Conversational — you can speak full sentences comfortably",
-      "notes": "Warm-up (5 min): leg swings x10 each leg, hip circles x10, high knees 20m x2, dynamic lunges 10m x2, calf raises x15. Main set: [describe the run]. Cool-down: 5 min walk, quad stretch, hamstring stretch, calf stretch."
+      "pace": "effort description",
+      "notes": "Warm-up (5 min): [4 dynamic exercises with reps]. Main set: [exact workout]. Cool-down: [2–3 stretches]."
     }
   ],
-  "progressionNote": "How volume and intensity build across the weeks",
-  "peakWeeklyVolume": "XX km"
+  "progressionNote": "How volume and intensity build week to week",
+  "peakWeeklyVolume": "XX km or total reps"
 }
 
-type must be exactly one of: easy, moderate, hard, long, rest, cross
+${trackRules}
 
-PACING RULES — critical, do NOT use specific min/km targets:
-- Easy runs: "Conversational pace — you can chat in full sentences. Feels effortless."
-- Moderate/Tempo: "Comfortably hard — you can speak in short phrases but not full sentences." NEVER say 3:30/km or any pace faster than the runner's current easy pace.
-- Long run: "Easy conversational pace — slower than your easy run days. Prioritise time on feet."
-- For Beginner or Intermediate runners: NEVER prescribe paces faster than 5:00/km in any session. Describe intensity as effort level only.
-- Week 1 especially: all paces must be conservative and effort-based. Build confidence, not speed.
-- Base intensity on current fitness (${currentKm}/week), NOT on target race pace.
+${paceRules}
 
-SESSION NOTES RULES — every non-rest session must include:
-1. Warm-up (5 min): List 4–5 specific dynamic exercises (leg swings, hip circles, high knees, dynamic lunges, arm circles, ankle rolls, bum kicks). Include reps/distance.
-2. Main set: Clear description of the workout with effort cues.
-3. Cool-down: 5 min easy walk + 2–3 specific stretches (quad, hamstring, calf, hip flexor).
+SESSION NOTES — every non-rest day must have all three:
+1. Warm-up (5 min): 4 specific dynamic exercises with reps/distance (leg swings ×10, hip circles ×10, high knees 20m ×2, dynamic lunges 10m ×2)
+2. Main set: exact description with effort cues
+3. Cool-down: 2–3 named stretches (quad, hamstring, calf, hip flexor)
 
-PROGRAM RULES:
-- ${daysPerWeek} training days, ${restDays} full rest days
-- ${hardSessions} hard/moderate session(s): tempo or intervals (not on days adjacent to long run)
-- 1 long run: always Saturday or Sunday
-- ${easySessions} easy run(s): truly easy, conversational pace
-- Base all distances on current weekly km: ${currentKm}
-- For ${raceGoal} at ${experience} level over ${weeks} weeks
-- Week 1 distances should be at or slightly below current weekly volume — do NOT start with a spike`
+PROGRAM STRUCTURE:
+- ${daysPerWeek} training days · ${restDays} rest days
+- ${hardSessions} hard/quality session(s) — NOT adjacent to long run
+- 1 long run on Saturday or Sunday
+- ${easySessions} easy run(s) at truly conversational effort
+- Cross-training days: specify activity (cycling, swimming, yoga, rowing) with duration
+- Base all distances on current volume: ${currentKm}
+- Goal: ${raceGoal} · Level: ${experience} · Duration: ${weeks} weeks
+- Week 1 must start at or slightly below current volume — no spikes`
 
   const raw = await apiCall([
     { role: 'system', content: system },
-    { role: 'user',   content: `Build my ${weeks}-week ${raceGoal} plan. I'm ${experience}, currently doing ${currentKm}/week, training ${daysPerWeek} days/week.${notes ? ` Extra info: ${notes}` : ''}` },
-  ], 1400)
+    { role: 'user',   content: `Build my ${weeks}-week ${raceGoal} plan. I'm ${experience} level, currently doing ${currentKm}, training ${daysPerWeek} days/week.${notes ? ` Notes: ${notes}` : ''}` },
+  ], 1500)
 
   return extractJSON(raw)
 }
@@ -657,21 +781,48 @@ Respond: 1) Acknowledge specifically what they said. 2) One concrete action for 
 }
 
 async function getChatReply(goal, checkins, entries, messages) {
-  const scores   = entries.slice(0, 5).map(e => `${e.date}: ${computeFeelScore(e.scores || {}).toFixed(1)}/10`).join(', ') || 'none'
-  const weekInfo = goal.weekTemplate?.map(s => `${s.day}: ${s.type} ${s.distance || ''}`).join(' | ') || ''
+  const scores    = entries.slice(0, 5).map(e => `${e.date}: ${computeFeelScore(e.scores || {}).toFixed(1)}/10`).join(', ') || 'none'
+  const weekInfo  = goal.weekTemplate?.map(s => `${s.day}: ${s.type} ${s.distance || ''}`).join(' | ') || ''
   const recentLog = [...checkins].slice(-3).reverse().map(c => `${c.date}: ${c.status}`).join(', ') || 'none'
 
-  return apiCall([
-    { role: 'system', content:
-`You are an expert running coach. Answer all running questions clearly and practically.
-Runner profile: ${goal.raceGoal} goal, ${goal.experience} level, ${goal.daysPerWeek} days/week, ${goal.weeks}-week program.
-Weekly structure: ${weekInfo}
-Program overview: ${goal.overview || 'N/A'}
+  const lastMsg     = messages[messages.length - 1]?.content?.toLowerCase() || ''
+  const isPlanQuery = /(\d+[\s-]*day|week|schedule|plan|program|cross[\s-]?train|gym|workout|session|routine|what.*do|today|tomorrow)/i.test(lastMsg)
+
+  const profile = `Runner: ${goal.raceGoal} goal · ${goal.experience} · ${goal.daysPerWeek} days/week · ${goal.weeks}-week plan.
+Weekly template: ${weekInfo}
 Recent feel scores: ${scores}
-Recent sessions: ${recentLog}
-Be specific and reference their program where relevant. Max 160 words. No fluff.` },
+Recent sessions: ${recentLog}`
+
+  const systemPrompt = isPlanQuery
+    ? `You are an expert running coach. When asked for a plan or schedule, give COMPLETE details for every single day — no summaries, no "similar to above".
+
+${profile}
+
+FORMAT each training day exactly like this:
+📅 [Day name] — [Session type]
+• Distance/Duration: [e.g. 5 km / 30 min]
+• Intensity: [effort description, never a pace number]
+• Warm-up (5 min): [list 3–4 specific dynamic exercises with reps, e.g. leg swings ×10, hip circles ×10, high knees 20 m ×2]
+• Main set: [exactly what to do, with effort cues]
+• Cool-down: [2–3 specific stretches]
+
+Session type rules:
+- Running day → describe the run type (easy jog, tempo, intervals, long run) with effort cues
+- Cross-training → pick ONE activity (cycling, swimming, yoga, rowing) and describe what to do for the full duration
+- Gym / Strength → list 5–6 exercises with sets × reps (e.g. goblet squats 3×12, single-leg RDL 3×10 each, glute bridges 3×15, calf raises 3×20, plank 3×30 s, side-lying clams 3×15)
+- Rest day → one optional recovery suggestion (foam roll, gentle walk, or full rest)
+
+Use effort levels only (conversational, comfortably hard, hard effort) — never cite min/km pace.
+Base distances on their current fitness, not race pace.`
+    : `You are an expert running coach. Answer all running questions clearly and practically.
+${profile}
+Program overview: ${goal.overview || 'N/A'}
+Be specific and reference their program where relevant. Max 180 words. No fluff.`
+
+  return apiCall([
+    { role: 'system', content: systemPrompt },
     ...messages,
-  ], 280)
+  ], isPlanQuery ? 1000 : 300)
 }
 
 function extractJSON(text) {
