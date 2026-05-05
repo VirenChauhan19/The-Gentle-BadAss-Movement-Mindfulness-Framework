@@ -23,5 +23,11 @@ service cloud.firestore {
       allow read: if request.auth != null
                   && request.auth.token.email == 'chauhan.viren08@gmail.com';
     }
+
+    // Admin can write remarks to any user's config/adminRemarks document
+    match /users/{userId}/config/adminRemarks {
+      allow write: if request.auth != null
+                   && request.auth.token.email == 'chauhan.viren08@gmail.com';
+    }
   }
 }

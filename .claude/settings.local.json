@@ -51,7 +51,9 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(node_modules/.bin/vite --version)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(npx firebase *)",
+      "Bash(firebase deploy *)"
     ]
   }
 }

@@ -1,9 +1,11 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { db } from '../firebase'
-import { collectionGroup, onSnapshot, query, doc, getDoc } from 'firebase/firestore'
+import { collectionGroup, onSnapshot, query, doc, getDoc, setDoc } from 'firebase/firestore'
+import { arrayUnion } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
+import { JOURNAL_FACTORS } from '../data/journalFactors'
 import styles from './Admin.module.css'
 
 const ADMIN_EMAIL = 'chauhan.viren08@gmail.com'
@@ -14,40 +16,44 @@ const PATH_NAMES = {
   performance: 'The Performance Path',
 }
 
+const SCORE_COLOR = v =>
+  v >= 8 ? '#8b9e7e' : v >= 6 ? '#a0b870' : v >= 4 ? '#d9b38a' : '#d98a8a'
+
 export default function Admin() {
   const { user, signInWithGoogle, signOut, authError } = useAuth()
-  const { guestName, setGuestName, profile, entries, clearAllData } = useData()
+  const { guestName, setGuestName, profile, entries, clearAllData, adminRemarks } = useData()
+
+  const [adminMode,    setAdminMode]    = useState(false)
   const [allEntries,   setAllEntries]   = useState([])
-  const [allCoachData, setAllCoachData] = useState({})
+  const [allUserData,  setAllUserData]  = useState({})
   const [indexError,   setIndexError]   = useState(false)
-  const [nameInput, setNameInput] = useState('')
-  const [namePending, setNamePending] = useState(false)
+  const [nameInput,    setNameInput]    = useState('')
+  const [namePending,  setNamePending]  = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
-  const [clearing, setClearing] = useState(false)
+  const [clearing,     setClearing]     = useState(false)
 
   const isAdmin = user?.email === ADMIN_EMAIL
 
+  // Live listener for all users' journal entries (admin only)
   useEffect(() => {
     if (!isAdmin || !db) return
-
-    const q = query(collectionGroup(db, 'journal'))
-    const unsub = onSnapshot(q, snapshot => {
+    const unsub = onSnapshot(query(collectionGroup(db, 'journal')), async snapshot => {
       const docs = snapshot.docs
         .map(d => ({ ...d.data(), _uid: d.ref.parent.parent.id }))
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
       setAllEntries(docs)
 
-      // Fetch coach data for every unique user
       const uids = [...new Set(docs.map(d => d._uid))]
-      Promise.all(
+      const pairs = await Promise.all(
         uids.map(uid =>
-          getDoc(doc(db, 'users', uid, 'config', 'coach'))
-            .then(snap => [uid, snap.exists() ? snap.data() : null])
-            .catch(() => [uid, null])
+          Promise.all([
+            getDoc(doc(db, 'users', uid, 'config', 'profile')).then(s => s.exists() ? s.data() : null).catch(() => null),
+            getDoc(doc(db, 'users', uid, 'config', 'coach')).then(s => s.exists() ? s.data() : null).catch(() => null),
+            getDoc(doc(db, 'users', uid, 'config', 'adminRemarks')).then(s => s.exists() ? (s.data().remarks || []) : []).catch(() => []),
+          ]).then(([userProfile, coach, remarks]) => [uid, { userProfile, coach, remarks }])
         )
-      ).then(pairs => {
-        setAllCoachData(Object.fromEntries(pairs.filter(([, v]) => v !== null)))
-      })
+      )
+      setAllUserData(Object.fromEntries(pairs))
     }, err => {
       if (err.code === 'failed-precondition') setIndexError(err.message)
     })
@@ -58,7 +64,7 @@ export default function Admin() {
     return <div className={styles.page}><p className={styles.loading}>Loading…</p></div>
   }
 
-  // ── Not signed in ──────────────────────────────────────────────────────────
+  // ── Not signed in ───────────────────────────────────────────────────────────
   if (!user && !guestName) {
     if (namePending) {
       return (
@@ -75,9 +81,7 @@ export default function Admin() {
               placeholder="Your first name"
               value={nameInput}
               onChange={e => setNameInput(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && nameInput.trim()) setGuestName(nameInput.trim())
-              }}
+              onKeyDown={e => { if (e.key === 'Enter' && nameInput.trim()) setGuestName(nameInput.trim()) }}
               autoFocus
             />
             <button
@@ -101,8 +105,7 @@ export default function Admin() {
         </header>
         {authError && <p className={styles.authError}>{authError}</p>}
         <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')}>
-          <GoogleIcon />
-          Continue with Google
+          <GoogleIcon /> Continue with Google
         </button>
         <div className={styles.divider}>or</div>
         <button className={styles.guestBtn} onClick={() => setNamePending(true)}>
@@ -112,29 +115,52 @@ export default function Admin() {
     )
   }
 
-  // ── Signed in as admin ──────────────────────────────────────────────────────
-  if (isAdmin) {
-    return <AdminView entries={allEntries} coachData={allCoachData} indexError={indexError} onSignOut={signOut} />
+  // ── Admin panel mode ────────────────────────────────────────────────────────
+  if (isAdmin && adminMode) {
+    return (
+      <AdminPanel
+        allEntries={allEntries}
+        allUserData={allUserData}
+        indexError={indexError}
+        adminUser={user}
+        onClose={() => setAdminMode(false)}
+        onRemarkSent={(uid, remark) =>
+          setAllUserData(prev => ({
+            ...prev,
+            [uid]: { ...prev[uid], remarks: [...(prev[uid]?.remarks || []), remark] },
+          }))
+        }
+      />
+    )
   }
 
-  // ── User Profile View ──────────────────────────────────────────────────────
-  const displayName = user?.displayName || guestName
+  // ── Profile view (all users incl. admin) ────────────────────────────────────
+  const displayName  = user?.displayName || guestName
   const displayEmail = user?.email || 'Guest account'
-  const photoURL = user?.photoURL
+  const photoURL     = user?.photoURL
 
   return (
     <div className={styles.page}>
+
+      {isAdmin && (
+        <button className={styles.adminModeBtn} onClick={() => setAdminMode(true)}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          Admin Panel
+        </button>
+      )}
+
       <div className={styles.profileCard}>
         <div className={styles.profileHeader}>
-          {photoURL ? (
-            <img src={photoURL} alt="avatar" className={styles.largeAvatar} referrerPolicy="no-referrer" />
-          ) : (
-            <div className={styles.avatarPlaceholder}>{displayName?.[0]}</div>
-          )}
+          {photoURL
+            ? <img src={photoURL} alt="avatar" className={styles.largeAvatar} referrerPolicy="no-referrer" />
+            : <div className={styles.avatarPlaceholder}>{displayName?.[0]}</div>
+          }
           <h1 className={styles.name}>{displayName}</h1>
           <p className={styles.email}>{displayEmail}</p>
         </div>
-
         <div className={styles.journeyStats}>
           <div className={styles.journeyRow}>
             <span className={styles.journeyLabel}>Current Path</span>
@@ -150,6 +176,24 @@ export default function Admin() {
           </div>
         </div>
       </div>
+
+      {/* Coach remarks visible to the user */}
+      {adminRemarks?.length > 0 && (
+        <div className={styles.settingsSection}>
+          <h2 className={styles.sectionTitle}>Coach Remarks</h2>
+          <div className={styles.remarksList}>
+            {[...adminRemarks].reverse().map(r => (
+              <div key={r.id} className={styles.remarkCard}>
+                <div className={styles.remarkMeta}>
+                  <span className={styles.remarkFrom}>{r.from}</span>
+                  <span className={styles.remarkDate}>{r.date}</span>
+                </div>
+                <p className={styles.remarkText}>{r.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className={styles.settingsSection}>
         <h2 className={styles.sectionTitle}>Journey Settings</h2>
@@ -175,11 +219,9 @@ export default function Admin() {
       <div className={styles.accountActions}>
         {!user && (
           <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')}>
-            <GoogleIcon />
-            Upgrade to Google Sign-In
+            <GoogleIcon /> Upgrade to Google Sign-In
           </button>
         )}
-
         {confirmClear ? (
           <div className={styles.confirmBox}>
             <p className={styles.confirmText}>
@@ -197,16 +239,11 @@ export default function Admin() {
             >
               {clearing ? 'Clearing…' : 'Yes, delete everything'}
             </button>
-            <button className={styles.confirmCancelBtn} onClick={() => setConfirmClear(false)}>
-              Cancel
-            </button>
+            <button className={styles.confirmCancelBtn} onClick={() => setConfirmClear(false)}>Cancel</button>
           </div>
         ) : (
-          <button className={styles.clearDataBtn} onClick={() => setConfirmClear(true)}>
-            Clear My Data
-          </button>
+          <button className={styles.clearDataBtn} onClick={() => setConfirmClear(true)}>Clear My Data</button>
         )}
-
         <button className={styles.signOutBtn} onClick={user ? signOut : () => setGuestName(null)}>
           {user ? 'Sign Out' : 'Clear Guest Session'}
         </button>
@@ -217,112 +254,381 @@ export default function Admin() {
   )
 }
 
-function AdminView({ entries, coachData, indexError, onSignOut }) {
-  const byUser = entries.reduce((acc, e) => {
-    const key = e._uid
-    if (!acc[key]) acc[key] = { name: e.userName, email: e.userEmail, entries: [] }
-    acc[key].entries.push(e)
-    return acc
-  }, {})
-  const totalEntries = entries.length
-  const userCount = Object.keys(byUser).length
+// ── Admin Panel ───────────────────────────────────────────────────────────────
+function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent }) {
+  const [selectedUid, setSelectedUid] = useState(null)
+
+  const userMap = useMemo(() => {
+    const map = {}
+    allEntries.forEach(e => {
+      const uid = e._uid
+      if (!map[uid]) {
+        map[uid] = {
+          uid,
+          name: e.userName || allUserData[uid]?.userProfile?.displayName || 'Anonymous',
+          email: e.userEmail || '',
+          entries: [],
+        }
+      }
+      map[uid].entries.push(e)
+    })
+    // Merge in profile / coach / remarks from allUserData
+    Object.entries(allUserData).forEach(([uid, data]) => {
+      if (!map[uid]) return
+      map[uid].userProfile = data.userProfile
+      map[uid].coach       = data.coach
+      map[uid].remarks     = data.remarks || []
+      // Prefer profile displayName if present
+      if (data.userProfile?.displayName) map[uid].name = data.userProfile.displayName
+    })
+    return map
+  }, [allEntries, allUserData])
+
+  const userList = useMemo(() =>
+    Object.values(userMap)
+      .map(u => ({
+        ...u,
+        avgScore: u.entries.length
+          ? Math.round(u.entries.reduce((s, e) => s + computeFeelScore(e.scores || {}), 0) / u.entries.length * 10) / 10
+          : null,
+        lastDate: u.entries[0]?.date || null,
+      }))
+      .sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''))
+  , [userMap])
+
+  const selectedUser = selectedUid
+    ? userList.find(u => u.uid === selectedUid) || null
+    : null
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <p className={styles.label}>Admin Control Panel</p>
-        <h1 className={styles.title}>System Overview</h1>
-        <p className={styles.sub}>{userCount} users · {totalEntries} entries</p>
-      </header>
+    <div className={styles.adminPanelPage}>
+      {/* Panel header */}
+      <div className={styles.adminPanelHeader}>
+        <div className={styles.adminPanelHeaderLeft}>
+          <button className={styles.backBtn} onClick={onClose}>
+            ← Profile
+          </button>
+          <div>
+            <p className={styles.adminPanelLabel}>Admin Control Panel</p>
+            <h1 className={styles.adminPanelTitle}>All Users</h1>
+          </div>
+        </div>
+        <div className={styles.adminHeaderStats}>
+          <span className={styles.adminStatChip}>{userList.length} users</span>
+          <span className={styles.adminStatChip}>{allEntries.length} journal entries</span>
+        </div>
+      </div>
+
       {indexError && (
         <div className={styles.indexWarn}>
-          <p>Firestore index needed. Check the browser console for the direct link.</p>
+          Firestore index needed. Check browser console for the setup link.
         </div>
       )}
-      {userCount === 0 && !indexError && (
-        <p className={styles.empty}>Waiting for users to log their first movement…</p>
-      )}
-      {Object.entries(byUser).map(([uid, { name, email, entries }]) => (
-        <UserBlock key={uid} uid={uid} name={name} email={email} entries={entries} coach={coachData[uid] || null} />
-      ))}
-      <button className={styles.signOutBtn} onClick={onSignOut}>Sign out from Admin</button>
+
+      <div className={styles.adminLayout}>
+        {/* Left: user list */}
+        <aside className={styles.userListPanel}>
+          {userList.length === 0 && (
+            <p className={styles.empty}>No users yet…</p>
+          )}
+          {userList.map(u => {
+            const color = u.avgScore === null ? 'var(--ink-faint)'
+              : u.avgScore >= 7 ? '#8b9e7e' : u.avgScore >= 4 ? '#d9b38a' : '#d98a8a'
+            return (
+              <button
+                key={u.uid}
+                className={`${styles.userListItem} ${selectedUid === u.uid ? styles.userListItemActive : ''}`}
+                onClick={() => setSelectedUid(u.uid)}
+              >
+                <div className={styles.userListAvatar}>{(u.name || '?')[0].toUpperCase()}</div>
+                <div className={styles.userListInfo}>
+                  <span className={styles.userListName}>{u.name}</span>
+                  <span className={styles.userListEmail}>{u.email}</span>
+                  <span className={styles.userListMeta}>
+                    {u.entries.length} entries · {u.lastDate || 'no entries'}
+                  </span>
+                </div>
+                <span className={styles.userListScore} style={{ color }}>
+                  {u.avgScore !== null ? u.avgScore.toFixed(1) : '—'}
+                </span>
+              </button>
+            )
+          })}
+        </aside>
+
+        {/* Right: user detail */}
+        <main className={styles.userDetailPanel}>
+          {!selectedUser ? (
+            <div className={styles.noSelection}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.25">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.58-7 8-7s8 3 8 7"/>
+              </svg>
+              <p>Select a user to view their details</p>
+            </div>
+          ) : (
+            <UserDetail
+              key={selectedUser.uid}
+              user={selectedUser}
+              adminUser={adminUser}
+              onRemarkSent={remark => onRemarkSent(selectedUser.uid, remark)}
+            />
+          )}
+        </main>
+      </div>
     </div>
   )
 }
 
-const STATUS_COLOR = { done: '#8b9e7e', partial: '#d9b38a', missed: '#d98a8a' }
-const STATUS_ICON  = { done: '✓', partial: '↗', missed: '✗' }
+// ── User Detail ───────────────────────────────────────────────────────────────
+function UserDetail({ user, adminUser, onRemarkSent }) {
+  const [tab,           setTab]           = useState('journal')
+  const [remarkText,    setRemarkText]    = useState('')
+  const [sending,       setSending]       = useState(false)
+  const [remarkError,   setRemarkError]   = useState(null)
+  const [expandedEntry, setExpandedEntry] = useState(null)
+  const [localRemarks,  setLocalRemarks]  = useState(user.remarks || [])
 
-function UserBlock({ name, email, entries, coach }) {
-  const [showCoach, setShowCoach] = useState(false)
-  const avg = entries.length
-    ? Math.round(entries.reduce((s, e) => s + computeFeelScore(e.scores || {}), 0) / entries.length * 10) / 10
-    : null
+  const userProfile = user.userProfile
+  const coach       = user.coach
+  const goal        = coach?.goal
+  const checkins    = coach?.checkins || []
 
-  const goal     = coach?.goal
-  const checkins = coach?.checkins || []
-  const doneCount    = checkins.filter(c => c.status === 'done').length
-  const partialCount = checkins.filter(c => c.status === 'partial').length
-  const missedCount  = checkins.filter(c => c.status === 'missed').length
+  async function sendRemark() {
+    if (!remarkText.trim() || sending) return
+    setSending(true)
+    setRemarkError(null)
+    const remark = {
+      id: Date.now().toString(),
+      date: new Date().toISOString().split('T')[0],
+      text: remarkText.trim(),
+      from: adminUser.displayName || 'Dr. Rajat',
+      createdAt: new Date().toISOString(),
+    }
+    try {
+      await setDoc(
+        doc(db, 'users', user.uid, 'config', 'adminRemarks'),
+        { remarks: arrayUnion(remark) },
+        { merge: true }
+      )
+      setLocalRemarks(prev => [...prev, remark])
+      setRemarkText('')
+      onRemarkSent(remark)
+    } catch (err) {
+      setRemarkError('Could not send remark: ' + err.message)
+    }
+    setSending(false)
+  }
+
+  const avgScore = user.avgScore
+  const scoreColor = SCORE_COLOR(avgScore || 0)
 
   return (
-    <div className={styles.userBlock}>
-      <div className={styles.userHeader}>
-        <div>
-          <p className={styles.userName}>{name || 'Anonymous'}</p>
-          <p className={styles.userEmail}>{email}</p>
+    <div className={styles.userDetail}>
+      {/* User header */}
+      <div className={styles.userDetailHeader}>
+        <div className={styles.userDetailAvatarBig}>{(user.name || '?')[0].toUpperCase()}</div>
+        <div className={styles.userDetailMeta}>
+          <h2 className={styles.userDetailName}>{user.name}</h2>
+          <p className={styles.userDetailEmail}>{user.email}</p>
+          <div className={styles.userDetailTags}>
+            {userProfile?.path && <span className={styles.tag}>{PATH_NAMES[userProfile.path] || userProfile.path}</span>}
+            {userProfile?.commitment && <span className={styles.tag}>{userProfile.commitment}-day commitment</span>}
+            <span className={styles.tag}>{user.entries.length} entries logged</span>
+            {goal && <span className={styles.tagCoach}>Training: {goal.raceGoal}</span>}
+          </div>
         </div>
-        <div className={styles.userStats}>
-          <span className={styles.statBig}>{avg ?? '—'}</span>
-          <span className={styles.statSmall}>avg feel</span>
+        <div className={styles.userDetailScoreBig}>
+          <span className={styles.scoreBigNum} style={{ color: scoreColor }}>
+            {avgScore !== null ? avgScore.toFixed(1) : '—'}
+          </span>
+          <span className={styles.scoreBigLabel}>avg feel</span>
         </div>
       </div>
 
-      {/* Feel journal */}
-      <div className={styles.entryList}>
-        {entries.slice(0, 5).map(e => {
-          const score = computeFeelScore(e.scores || {})
-          const color = score >= 7 ? '#8b9e7e' : score >= 4 ? '#d9b38a' : '#d98a8a'
-          return (
-            <div key={e.date} className={styles.entryRow}>
-              <span className={styles.entryDate}>{e.date}</span>
-              <div className={styles.entryBar}>
-                <div className={styles.entryBarFill} style={{ width: `${score * 10}%`, background: color }} />
-              </div>
-              <span className={styles.entryScore} style={{ color }}>{score.toFixed(1)}</span>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Coach program section */}
-      {goal && (
-        <div className={styles.coachSection}>
-          <button className={styles.coachToggle} onClick={() => setShowCoach(s => !s)}>
-            <span>🏃 {goal.raceGoal} · {goal.weeks}wk · {goal.experience}</span>
-            <span className={styles.toggleArrow}>{showCoach ? '▲' : '▼'}</span>
+      {/* Tabs */}
+      <div className={styles.detailTabs}>
+        {[
+          { id: 'journal', label: `Journal (${user.entries.length})` },
+          { id: 'coach',   label: goal ? `Coach · ${goal.raceGoal}` : 'Coach' },
+          { id: 'remarks', label: `Remarks (${localRemarks.length})` },
+        ].map(t => (
+          <button
+            key={t.id}
+            className={`${styles.detailTab} ${tab === t.id ? styles.detailTabActive : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
           </button>
+        ))}
+      </div>
 
-          {showCoach && (
-            <div className={styles.coachDetail}>
-              <div className={styles.coachStats}>
-                <span className={styles.coachStat} style={{ color: '#8b9e7e' }}>✓ {doneCount} done</span>
-                <span className={styles.coachStat} style={{ color: '#d9b38a' }}>↗ {partialCount} partial</span>
-                <span className={styles.coachStat} style={{ color: '#d98a8a' }}>✗ {missedCount} missed</span>
+      <div className={styles.detailContent}>
+
+        {/* ── Journal Tab ─────────────────────────────────────── */}
+        {tab === 'journal' && (
+          <div>
+            {userProfile?.story && (
+              <div className={styles.storyCard}>
+                <p className={styles.storyLabel}>Their Story</p>
+                <p className={styles.storyText}>{userProfile.story}</p>
               </div>
-              {checkins.length > 0 && (
-                <div className={styles.checkinLog}>
-                  {[...checkins].reverse().slice(0, 7).map(c => (
-                    <div key={c.date} className={styles.checkinRow}>
-                      <span className={styles.checkinDate}>{c.date}</span>
-                      <span className={styles.checkinStatus} style={{ color: STATUS_COLOR[c.status] }}>
-                        {STATUS_ICON[c.status]}
-                      </span>
-                      <span className={styles.checkinNote}>{c.userNote}</span>
+            )}
+            {user.entries.length === 0
+              ? <p className={styles.empty}>No journal entries yet.</p>
+              : user.entries.map(entry => (
+                  <EntryCard
+                    key={entry.date}
+                    entry={entry}
+                    expanded={expandedEntry === entry.date}
+                    onToggle={() => setExpandedEntry(p => p === entry.date ? null : entry.date)}
+                  />
+                ))
+            }
+          </div>
+        )}
+
+        {/* ── Coach Tab ───────────────────────────────────────── */}
+        {tab === 'coach' && (
+          <div>
+            {!goal
+              ? <p className={styles.empty}>No training program set up yet.</p>
+              : <>
+                  <div className={styles.coachGoalCard}>
+                    {[
+                      ['Goal',         goal.raceGoal],
+                      ['Level',        goal.experience],
+                      ['Program',      `${goal.weeks} weeks · ${goal.daysPerWeek} days/week`],
+                      ['Weekly volume', goal.currentKm],
+                      ['Started',      goal.startDate],
+                    ].map(([label, val]) => (
+                      <div key={label} className={styles.coachGoalRow}>
+                        <span className={styles.coachGoalLabel}>{label}</span>
+                        <span className={styles.coachGoalValue}>{val || '—'}</span>
+                      </div>
+                    ))}
+                    {goal.overview && (
+                      <div className={styles.coachOverview}>
+                        <p className={styles.coachGoalLabel}>Overview</p>
+                        <p className={styles.coachOverviewText}>{goal.overview}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.checkinSummaryRow}>
+                    <span style={{ color: '#8b9e7e' }}>✓ {checkins.filter(c => c.status === 'done').length} done</span>
+                    <span style={{ color: '#d9b38a' }}>↗ {checkins.filter(c => c.status === 'partial').length} partial</span>
+                    <span style={{ color: '#d98a8a' }}>✗ {checkins.filter(c => c.status === 'missed').length} missed</span>
+                  </div>
+
+                  {checkins.length > 0 && (
+                    <div className={styles.runLogFull}>
+                      <p className={styles.runLogTitle}>Full Run Log</p>
+                      {[...checkins].reverse().map(c => (
+                        <div key={c.date} className={styles.runLogRow}>
+                          <span className={styles.runLogDate}>{c.date}</span>
+                          <span className={styles.runLogStatus}
+                            style={{ color: c.status === 'done' ? '#8b9e7e' : c.status === 'partial' ? '#d9b38a' : '#d98a8a' }}>
+                            {c.status === 'done' ? '✓' : c.status === 'partial' ? '↗' : '✗'}
+                          </span>
+                          <span className={styles.runLogNote}>{c.userNote}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+            }
+          </div>
+        )}
+
+        {/* ── Remarks Tab ─────────────────────────────────────── */}
+        {tab === 'remarks' && (
+          <div>
+            <div className={styles.remarkForm}>
+              <p className={styles.remarkFormLabel}>Send a remark to {user.name}</p>
+              <textarea
+                className={styles.remarkInput}
+                placeholder="Write your feedback, encouragement, or advice for this user…"
+                value={remarkText}
+                onChange={e => setRemarkText(e.target.value)}
+                rows={4}
+              />
+              {remarkError && <p className={styles.errorMsg}>{remarkError}</p>}
+              <button
+                className={styles.sendRemarkBtn}
+                disabled={!remarkText.trim() || sending}
+                onClick={sendRemark}
+              >
+                {sending ? 'Sending…' : 'Send Remark'}
+              </button>
+            </div>
+
+            {localRemarks.length === 0
+              ? <p className={styles.empty}>No remarks sent yet.</p>
+              : (
+                <div className={styles.remarksHistory}>
+                  <p className={styles.remarksHistoryLabel}>Sent remarks</p>
+                  {[...localRemarks].reverse().map(r => (
+                    <div key={r.id} className={styles.remarkCard}>
+                      <div className={styles.remarkMeta}>
+                        <span className={styles.remarkFrom}>{r.from}</span>
+                        <span className={styles.remarkDate}>{r.date}</span>
+                      </div>
+                      <p className={styles.remarkText}>{r.text}</p>
                     </div>
                   ))}
                 </div>
-              )}
+              )
+            }
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ── Entry Card ────────────────────────────────────────────────────────────────
+function EntryCard({ entry, expanded, onToggle }) {
+  const score = computeFeelScore(entry.scores || {})
+  const color = SCORE_COLOR(score)
+
+  return (
+    <div className={styles.entryCard} onClick={onToggle}>
+      <div className={styles.entryCardTop}>
+        <span className={styles.entryCardDate}>{entry.date}</span>
+        <div className={styles.entryCardBar}>
+          <div className={styles.entryCardBarFill} style={{ width: `${score * 10}%`, background: color }} />
+        </div>
+        <span className={styles.entryCardScore} style={{ color }}>{score.toFixed(1)}</span>
+        <span className={styles.entryCardToggle}>{expanded ? '▲' : '▼'}</span>
+      </div>
+
+      {expanded && (
+        <div className={styles.entryCardBody}>
+          <div className={styles.factorGrid}>
+            {JOURNAL_FACTORS.map(f => {
+              const val = entry.scores?.[f.id]
+              if (val === undefined) return null
+              return (
+                <div key={f.id} className={styles.factorItem}>
+                  <span className={styles.factorIcon}>{f.icon}</span>
+                  <div className={styles.factorBarWrap}>
+                    <span className={styles.factorName}>{f.label}</span>
+                    <div className={styles.factorBar}>
+                      <div
+                        className={styles.factorBarFill}
+                        style={{ width: `${val * 10}%`, background: SCORE_COLOR(val) }}
+                      />
+                    </div>
+                  </div>
+                  <span className={styles.factorScore} style={{ color: SCORE_COLOR(val) }}>{val}</span>
+                </div>
+              )
+            })}
+          </div>
+          {entry.note && (
+            <div className={styles.entryNote}>
+              <p className={styles.entryNoteLabel}>Reflection</p>
+              <p className={styles.entryNoteText}>{entry.note}</p>
             </div>
           )}
         </div>

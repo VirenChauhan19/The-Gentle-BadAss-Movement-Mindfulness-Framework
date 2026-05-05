@@ -33,6 +33,7 @@ export function DataProvider({ children }) {
     () => localStorage.getItem(GUEST_NAME_KEY) || null
   )
   const [coachData, setCoachData] = useState(null) // loaded after auth resolves
+  const [adminRemarks, setAdminRemarks] = useState([])
 
   useEffect(() => {
     if (user === undefined) return // auth still resolving
@@ -45,6 +46,7 @@ export function DataProvider({ children }) {
       return
     }
 
+    setAdminRemarks([]) // clear previous user's remarks
     // Load this user's coach data from Firestore (source of truth) or their local cache
     setCoachData(null) // clear previous user's data immediately
     const userCoachKey = coachKey(user.uid)
@@ -152,6 +154,13 @@ export function DataProvider({ children }) {
       }
       setProfileFetched(true)
     })
+
+    // Fetch admin remarks once (not a live listener — remarks don't change often)
+    getDoc(doc(db, 'users', user.uid, 'config', 'adminRemarks'))
+      .then(snap => {
+        if (snap.exists()) setAdminRemarks(snap.data().remarks || [])
+      })
+      .catch(() => {})
 
     return () => {
       clearTimeout(safetyTimeout)
@@ -305,7 +314,7 @@ export function DataProvider({ children }) {
   })()
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks }}>
       {children}
     </DataContext.Provider>
   )
