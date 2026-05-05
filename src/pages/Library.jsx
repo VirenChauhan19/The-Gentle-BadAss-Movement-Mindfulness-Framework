@@ -18,6 +18,15 @@ export default function Library() {
         <p className={styles.subtitle}>Animations built on three principles: Hip Engine · Stable Pillar · Core as Bridge</p>
       </header>
 
+      <section className={styles.weeklyModule}>
+        <div>
+          <p className={styles.weeklyLabel}>Weekly Module</p>
+          <h2>Functional Tests</h2>
+          <p>Use Slump, Hip Rotation, Straight Leg Raise, and other tests once a week to notice change. Daily work should focus on breath, quality movement, and control.</p>
+        </div>
+        <button onClick={() => setActiveCategory('functional')}>Open weekly tests</button>
+      </section>
+
       <div className={styles.filters}>
         <button
           className={styles.filter + (activeCategory === 'all' ? ' ' + styles.filterActive : '')}

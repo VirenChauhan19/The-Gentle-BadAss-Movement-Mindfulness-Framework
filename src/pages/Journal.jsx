@@ -27,7 +27,7 @@ export default function Journal() {
   async function handleSave() {
     await saveEntry({ scores, note })
     setSaved(true)
-    setTimeout(() => navigate('/history'), 800)
+    setTimeout(() => navigate('/library'), 650)
   }
 
   const dateStr = new Date().toLocaleDateString('en-GB', {

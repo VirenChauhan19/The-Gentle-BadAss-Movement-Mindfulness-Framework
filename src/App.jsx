@@ -8,6 +8,7 @@ import Home from './pages/Home'
 import Journal from './pages/Journal'
 import History from './pages/History'
 import Library from './pages/Library'
+import Breathing from './pages/Breathing'
 import ExerciseDetail from './pages/ExerciseDetail'
 import Admin from './pages/Admin'
 import Coach from './pages/Coach'
@@ -53,6 +54,7 @@ function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/journal" element={<Journal />} />
+      <Route path="/breathing" element={<Breathing />} />
       <Route path="/history" element={<History />} />
       <Route path="/library" element={<Library />} />
       <Route path="/library/:id" element={<ExerciseDetail />} />

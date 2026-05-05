@@ -9,8 +9,9 @@ const TEMPOS = [
   { bpm: 190, purpose: 'Running drills', vibe: 'High-turnover drill work.' },
 ]
 
-export default function Metronome({ playing = false, onPlayingChange }) {
-  const [selectedTempo, setSelectedTempo] = useState(TEMPOS[0])
+export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null }) {
+  const availableTempos = fixedBpm ? TEMPOS.filter(t => t.bpm === fixedBpm) : TEMPOS
+  const [selectedTempo, setSelectedTempo] = useState(() => availableTempos[0] || TEMPOS[0])
   const [beat, setBeat] = useState(0)
   const audioRef = useRef(null)
   const timerRef = useRef(null)
@@ -51,6 +52,7 @@ export default function Metronome({ playing = false, onPlayingChange }) {
   }
 
   function selectTempo(tempo) {
+    if (fixedBpm) return
     setSelectedTempo(tempo)
     setBeat(0)
   }
@@ -68,7 +70,7 @@ export default function Metronome({ playing = false, onPlayingChange }) {
       </div>
 
       <div className={styles.tempoGrid}>
-        {TEMPOS.map(t => (
+        {availableTempos.map(t => (
           <button
             key={t.bpm}
             className={styles.tempoBtn + (selectedTempo.bpm === t.bpm ? ' ' + styles.active : '')}

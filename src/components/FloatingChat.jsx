@@ -206,7 +206,7 @@ async function callAI(history, coachData) {
     ? `The user is following a ${goal.weeks}-week ${goal.raceGoal} running program (${goal.experience} level, ${goal.daysPerWeek} training days/week).`
     : 'The user is using a running and mindfulness training app.'
 
-  const system = `You are an expert AI running and fitness coach for the Gentle BadAss Framework. ${ctx}
+  const system = `You are an expert AI running and fitness coach for La Ultra Run & Bee. ${ctx}
 
 Answer questions about: running training, injury prevention and recovery, indoor workouts for rainy days, pacing, nutrition for runners, strength work, recovery, mindfulness, and general fitness.
 
@@ -218,7 +218,7 @@ Rules: Be direct, warm, and practical. Under 140 words unless the question truly
       'Authorization': `Bearer ${key}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': window.location.origin,
-      'X-Title': 'Gentle BadAss Framework',
+      'X-Title': 'La Ultra Run & Bee',
     },
     body: JSON.stringify({
       model,

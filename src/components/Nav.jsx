@@ -5,6 +5,7 @@ import styles from './Nav.module.css'
 const links = [
   { to: '/', label: 'Home', icon: HomeIcon },
   { to: '/journal', label: 'Feel', icon: JournalIcon },
+  { to: '/breathing', label: 'Breathe', icon: BreathIcon },
   { to: '/history', label: 'History', icon: HistoryIcon },
   { to: '/library', label: 'Move', icon: LibraryIcon },
   { to: '/coach', label: 'Coach', icon: CoachIcon },
@@ -53,6 +54,16 @@ function HistoryIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  )
+}
+
+function BreathIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 12c3-5 7-5 10-2 2 2 1 5-2 5H8" />
+      <path d="M4 17h9c4 0 6-4 3-7" />
+      <path d="M4 7c2-2 5-2 7 0" />
     </svg>
   )
 }

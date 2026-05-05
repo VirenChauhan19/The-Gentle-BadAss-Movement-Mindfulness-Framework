@@ -35,15 +35,56 @@
   line-height: 1.5;
 }
 
+.weeklyModule {
+  margin: 16px 16px 0;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(99, 127, 95, 0.12), rgba(66, 105, 125, 0.08));
+  border: 1px solid rgba(99, 127, 95, 0.22);
+  border-radius: var(--r-lg);
+  display: grid;
+  gap: 12px;
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.weeklyLabel {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--sage-dark);
+  margin-bottom: 5px;
+}
+
+.weeklyModule h2 {
+  font-size: 1.08rem;
+  margin-bottom: 5px;
+}
+
+.weeklyModule p {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+
+.weeklyModule button {
+  min-height: 42px;
+  border-radius: var(--r-md);
+  background: var(--sage-dark);
+  color: var(--paper);
+  font-weight: 800;
+}
+
 /* ── Responsive ──────────────────────────────────────── */
 @media (min-width: 768px) {
   .header  { padding: 40px 28px 20px; }
+  .weeklyModule { margin: 16px 20px 0; grid-template-columns: 1fr auto; align-items: center; }
   .filters { padding: 16px 20px 0; }
   .grid    { padding: 14px 20px 0; }
 }
 
 @media (min-width: 1024px) {
   .header  { padding: 36px 48px 20px; }
+  .weeklyModule { margin: 18px 48px 0; }
   .filters { padding: 16px 48px 0; }
   .grid    {
     padding: 14px 48px 0;

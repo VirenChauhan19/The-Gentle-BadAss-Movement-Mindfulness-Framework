@@ -36,6 +36,38 @@
 .avgText  { font-size: 0.82rem; color: var(--ink-light); }
 .highAvg  { font-size: 0.95rem; color: var(--sage-dark); font-weight: 700; }
 
+.summaryGrid {
+  padding: 16px 16px 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.summaryCard {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.summaryCard span {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 800;
+}
+
+.summaryCard p {
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 800;
+}
+
 /* ── Responsive ──────────────────────────────────────── */
 @media (min-width: 768px) {
   .header { padding: 40px 32px 22px; }
@@ -238,9 +270,59 @@
   font-style: italic;
 }
 
+.moveArchive {
+  padding: 0 16px 24px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.moveRows {
+  display: grid;
+  gap: 10px;
+}
+
+.moveRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.moveRow strong {
+  font-size: 0.9rem;
+}
+
+.moveRow p {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.moveMetrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.moveMetrics span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(99, 127, 95, 0.12);
+  color: var(--sage-dark);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
 @media (min-width: 768px) {
   .dashboard,
-  .list {
+  .list,
+  .moveArchive,
+  .summaryGrid {
     padding-left: 32px;
     padding-right: 32px;
     max-width: 980px;
@@ -265,7 +347,9 @@
   }
 
   .list,
-  .listTitle {
+  .listTitle,
+  .moveArchive,
+  .summaryGrid {
     padding-left: 56px;
     padding-right: 56px;
     max-width: 1180px;
