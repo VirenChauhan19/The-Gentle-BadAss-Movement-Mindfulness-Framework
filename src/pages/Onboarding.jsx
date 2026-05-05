@@ -33,7 +33,7 @@ const commitmentLabels = {
   180: { label: '180-Day Commitment', desc: 'Six months of dedicated practice.' },
   210: { label: '210-Day Challenge', desc: 'A serious commitment to change.' },
   240: { label: '240-Day Quest', desc: 'Eight months of sustained effort.' },
-  270: { label: '270-Day Transformation', desc: 'The full La Ultra-The High journey.' },
+  270: { label: '270-Day Transformation', desc: 'The full La Ultra journey.' },
 }
 
 export default function Onboarding() {

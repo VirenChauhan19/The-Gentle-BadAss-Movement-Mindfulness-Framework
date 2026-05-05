@@ -669,7 +669,7 @@ async function apiCall(messages, maxTokens = 600) {
       'Authorization': `Bearer ${key}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': window.location.origin,
-      'X-Title': 'La Ultra-The High Run & Bee',
+      'X-Title': 'La Ultra Run & Bee',
     },
     body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.75 }),
   })

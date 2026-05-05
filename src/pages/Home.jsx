@@ -60,7 +60,7 @@ export default function Home() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div className={styles.titleBlock}>
-          <p className={styles.subtitle}>La Ultra-The High</p>
+          <p className={styles.subtitle}>La Ultra</p>
           <h1 className={styles.title}>Run &amp; Bee</h1>
           <p className={styles.date}>{dateStr}</p>
         </div>
@@ -179,7 +179,7 @@ export default function Home() {
 
       <footer className={styles.footer}>
         <p>By Dr. Rajat Chauhan</p>
-        <p className={styles.footerSub}>La Ultra-The High · Run &amp; Bee</p>
+        <p className={styles.footerSub}>La Ultra · Run &amp; Bee</p>
       </footer>
     </div>
   )
