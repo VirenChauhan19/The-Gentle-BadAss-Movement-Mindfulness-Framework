@@ -16,6 +16,19 @@ const SESSION_STYLE = {
   cross:    { color: '#704090', bg: 'rgba(180,138,217,0.14)', border: '#c89ad9', label: 'Cross'    },
 }
 
+const COACH_REFUSAL = "I'm your running coach - I can only help with running, fitness, training, recovery, and your program. What running question can I answer?"
+
+const RUNNING_SCOPE_RULE = `IMPORTANT - RUNNING FITNESS SCOPE:
+Only answer from the Running fitness coach role. Allowed topics are running, run training, workouts, pacing, strength for runners, mobility, injury prevention, recovery, sleep for training, athlete nutrition, race preparation, and this user's program.
+If the user asks about anything else, respond exactly: "${COACH_REFUSAL}"
+Do not answer general trivia, celebrities, news, coding, schoolwork, entertainment, or unrelated general knowledge.`
+
+const RUNNING_TOPIC_RE = /(run|running|runner|jog|jogging|race|racing|track|800m|1500m|3k|5k|10k|marathon|ultra|pace|pacing|split|splits|workout|training|train|fitness|exercise|strength|gym|mobility|stretch|warm[-\s]?up|cool[-\s]?down|interval|tempo|stride|sprint|hill|endurance|aerobic|recovery|injur|shin|knee|ankle|hamstring|calf|quad|glute|sleep|nutrition|protein|carb|hydration|program|plan|schedule|session|easy day|long run|cross[-\s]?train)/i
+
+function isRunningFitnessQuestion(text) {
+  return RUNNING_TOPIC_RE.test(text || '')
+}
+
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function Coach() {
   const { coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries, adminRemarks } = useData()
@@ -659,9 +672,10 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
         ))}
 
         {loading && (
-          <div className={`${styles.bubble} ${styles.bubbleCoach}`}>
+          <div className={`${styles.bubble} ${styles.bubbleCoach} ${styles.liveBubble}`}>
             <p className={styles.coachLabel}>Running</p>
             <div className={styles.typingDots}><span /><span /><span /></div>
+            <p className={styles.writingStatus}>Coach is writing</p>
           </div>
         )}
 
@@ -734,6 +748,30 @@ TRACK EVENT RULES (${raceGoal}):
 - For ${raceGoal}: speciality sessions should target race-specific effort (e.g. 1500m pace for 800m training)
 - Distance field for track sessions: use interval notation ("6 × 400m") not km` : ''
 
+  const improvedTrackRules = isTrackEvent ? `
+TRACK EVENT RULES (${raceGoal}):
+- Hard sessions MUST use actual track interval notation such as "6 x 200m", "4 x 400m", "3 x 600m", "4 x 800m".
+- Always include recovery, such as "with 90s standing recovery" or "with 200m jog recovery".
+- Tempo runs: 1-3 km blocks at comfortably hard effort, not race pace.
+- Easy runs can be 20-30 min; shorter is fine for speed recovery.
+- Week 1 must be smooth and easy, especially for Beginner runners: use easy runs, drills, relaxed strides, or short 100m-200m reps. Do not prescribe hard 300m/400m repeats in week 1 for Beginner runners.
+- Progress reps/volume each week, not intensity.
+- For an 800m goal, beginner and early-plan quality work should prefer 100m-200m reps and relaxed strides before 300m/400m work.
+- For an 800m goal, never imply 300m reps should be run in 30 seconds. If giving split guidance, 30 seconds is a fast 200m reference, not a 300m reference.
+- For ${raceGoal}: speciality sessions should target controlled race-specific effort only after the runner has built tolerance.
+- Distance field for track sessions: use interval notation, not km.` : trackRules
+
+  const workoutRules = `
+HARD WORKOUT QUALITY RULES:
+- Hard workouts must look like what a coach would actually prescribe for this event and level, not random intervals.
+- Choose the workout purpose first: speed mechanics, speed endurance, aerobic power, threshold, race rhythm, hills, or controlled time trial.
+- Match the purpose to the runner: Beginner = relaxed strides, short reps, hills, fartlek, and light tempo only after consistency; Intermediate = one focused controlled workout per week; Advanced/Competitive = event-specific reps, threshold support, and race-rhythm work.
+- Every hard workout must include target speed guidance in the "pace" field and again inside "notes".
+- If the user provided a goal time or recent race/time-trial in notes, convert it to rep targets. Example: goal 800m 2:40 means 200m pace is about 40s and 400m pace is about 80s.
+- If no goal time/recent benchmark is provided, do not invent exact seconds. Use a safe range tied to feel, such as "fast but relaxed, about 7-8/10, last rep same speed as first" and ask for a recent 400m/800m/1 mile time.
+- Rep speed must match rep distance. Never use a 200m split for a 300m or 400m rep.
+- Include recovery long enough to preserve form: short speed reps need full walk/jog recovery; tempo/threshold reps need shorter controlled recovery.`
+
   const paceRules = isCompetitive
     ? `PACING (Competitive/Advanced allowed relative pace refs):
 - Easy: "Conversational — full sentences comfortably"
@@ -760,21 +798,23 @@ JSON structure:
       "title": "Session title",
       "distance": "6 km  OR  6 × 400m  OR  45 min",
       "duration": "35–40 min",
-      "pace": "effort description",
-      "notes": "Warm-up (5 min): [4 dynamic exercises with reps]. Main set: [exact workout]. Cool-down: [2–3 stretches]."
+      "pace": "exact target speed guidance for the session; for intervals include rep split guidance or benchmark-based effort",
+      "notes": "Warm-up (5 min): [4 dynamic exercises with reps]. Main set: [exact workout including how fast to run each rep and recovery]. Cool-down: [2–3 stretches]."
     }
   ],
   "progressionNote": "How volume and intensity build week to week",
   "peakWeeklyVolume": "XX km or total reps"
 }
 
-${trackRules}
+${improvedTrackRules}
 
 ${paceRules}
 
+${workoutRules}
+
 SESSION NOTES — every non-rest day must have all three:
 1. Warm-up (5 min): 4 specific dynamic exercises with reps/distance (leg swings ×10, hip circles ×10, high knees 20m ×2, dynamic lunges 10m ×2)
-2. Main set: exact description with effort cues
+2. Main set: exact description with effort cues, target rep speed, and recovery. For intervals, state how fast to run each rep.
 3. Cool-down: 2–3 named stretches (quad, hamstring, calf, hip flexor)
 
 PROGRAM STRUCTURE:
@@ -784,6 +824,8 @@ PROGRAM STRUCTURE:
 - ${easySessions} easy run(s) at truly conversational effort
 - Cross-training days: specify activity (cycling, swimming, yoga, rowing) with duration
 - Base all distances on current volume: ${currentKm}
+- Week 1 must be smooth and easy: no volume spikes, no race-effort intervals for beginners, and no hard sessions before the runner has adapted
+- Beginner plans must build gradually: week 1 should feel comfortable, weeks 2-4 add small volume or light strides, later weeks can add controlled workouts if recovery is good
 - Goal: ${raceGoal} · Level: ${experience} · Duration: ${weeks} weeks
 - Week 1 must start at or slightly below current volume — no spikes`
 
@@ -796,6 +838,8 @@ PROGRAM STRUCTURE:
 }
 
 async function getCheckinReply(goal, checkins, entries, status, note, todaySession) {
+  if (!isRunningFitnessQuestion(note)) return COACH_REFUSAL
+
   const scores  = entries.slice(0, 5).map(e => `${e.date}: ${computeFeelScore(e.scores || {}).toFixed(1)}/10`).join(', ') || 'none'
   const recent  = [...checkins].slice(-5).reverse().map(c => `${c.date}: ${c.status} — ${c.userNote}`).join('\n') || 'none'
   const session = todaySession ? `Planned: ${todaySession.type} ${todaySession.distance} (${todaySession.duration})` : 'Rest day'
@@ -803,6 +847,7 @@ async function getCheckinReply(goal, checkins, entries, status, note, todaySessi
   return apiCall([
     { role: 'system', content:
 `You are a dedicated running coach. Direct, warm, specific. Max 120 words.
+${RUNNING_SCOPE_RULE}
 Runner: ${goal.raceGoal}, ${goal.experience}, ${goal.daysPerWeek} days/week, ${goal.weeks}-week plan.
 Today's plan: ${session}
 Recent feel scores: ${scores}
@@ -819,7 +864,10 @@ async function getChatReply(goal, checkins, entries, messages) {
   const recentLog = [...checkins].slice(-3).reverse().map(c => `${c.date}: ${c.status}`).join(', ') || 'none'
 
   const lastMsg     = messages[messages.length - 1]?.content?.toLowerCase() || ''
+  if (!isRunningFitnessQuestion(lastMsg)) return COACH_REFUSAL
+
   const isPlanQuery = /(\d+[\s-]*day|week|schedule|plan|program|cross[\s-]?train|gym|workout|session|routine|what.*do|today|tomorrow)/i.test(lastMsg)
+  const isPaceQuery = /(pace|split|time|how fast|seconds|secs|target|effort)/i.test(lastMsg)
 
   const profile = `Runner: ${goal.raceGoal} goal · ${goal.experience} · ${goal.daysPerWeek} days/week · ${goal.weeks}-week plan.
 Weekly template: ${weekInfo}
@@ -831,19 +879,29 @@ You ONLY answer questions about: running, fitness, training, exercise, nutrition
 If the user asks about ANYTHING else (sports trivia, celebrities, news, general knowledge, coding, etc.), respond with exactly: "I'm your running coach — I can only help with training, fitness, and your program. What running question can I answer?"
 Never break this rule regardless of how the question is phrased.`
 
+  const eventRules = goal.raceGoal === '800m' ? `
+800M COACHING RULES:
+- For Beginner runners and early weeks, prefer easy running, drills, strides, and short relaxed 100m-200m reps before 300m/400m repeats.
+- If the user asks for an 800m workout without a race time, give a safe beginner-friendly option first: warm-up, drills, 6-8 x 200m relaxed-fast with full recovery, cool-down.
+- Do not prescribe 6 x 300m as a default 800m workout.
+- Never say 300m should be run in 30 seconds. 30 seconds is a fast 200m split reference. A 300m split must be much slower than the runner's 200m split and should be based on current ability.
+- If target time is known, convert it into rep targets: 200m split = 800m goal time / 4, 300m split = 800m goal time x 0.375, 400m split = 800m goal time / 2, then adjust slightly slower for early-season reps.
+- If target time is unknown, give effort-based guidance and ask for a recent 400m/800m/1 mile time before exact splits.` : ''
+
   const systemPrompt = isPlanQuery
     ? `You are an expert running coach. When asked for a plan or schedule, give COMPLETE details for every single day — no summaries, no "similar to above".
 
-${OFF_TOPIC_RULE}
+${RUNNING_SCOPE_RULE}
 
 ${profile}
+${eventRules}
 
 FORMAT each training day exactly like this:
 📅 [Day name] — [Session type]
 • Distance/Duration: [e.g. 5 km / 30 min]
-• Intensity: [effort description, never a pace number]
+• Target speed: [for intervals, exact split target if goal/recent time is known; otherwise effort + what benchmark is needed]
 • Warm-up (5 min): [list 3–4 specific dynamic exercises with reps, e.g. leg swings ×10, hip circles ×10, high knees 20 m ×2]
-• Main set: [exactly what to do, with effort cues]
+• Main set: [exactly what to do, how fast to run each rep, and the recovery]
 • Cool-down: [2–3 specific stretches]
 
 Session type rules:
@@ -852,14 +910,17 @@ Session type rules:
 - Gym / Strength → list 5–6 exercises with sets × reps (e.g. goblet squats 3×12, single-leg RDL 3×10 each, glute bridges 3×15, calf raises 3×20, plank 3×30 s, side-lying clams 3×15)
 - Rest day → one optional recovery suggestion (foam roll, gentle walk, or full rest)
 
-Use effort levels only (conversational, comfortably hard, hard effort) — never cite min/km pace.
+Easy and recovery days use effort levels. Track interval days must include target rep-speed guidance.
+For Beginner week 1 plans, make the first week smooth and easy: no hard workouts, no race-effort reps, no volume spike.
 Base distances on their current fitness, not race pace.`
     : `You are an expert running coach. Answer questions about running, fitness, training, and this user's program clearly and practically.
 
-${OFF_TOPIC_RULE}
+${RUNNING_SCOPE_RULE}
 
 ${profile}
+${eventRules}
 Program overview: ${goal.overview || 'N/A'}
+${isPaceQuery ? 'If giving track splits, be realistic by rep distance. For 800m training, 30 seconds can describe a fast 200m, never a normal 300m target. If the runner gives an 800m goal time, calculate 200m = goal / 4, 300m = goal x 0.375, 400m = goal / 2, then adjust for workout purpose. If no goal/recent time exists, give effort-based guidance and ask for one benchmark before exact splits.' : ''}
 Be specific and reference their program where relevant. Max 180 words. No fluff.`
 
   return apiCall([

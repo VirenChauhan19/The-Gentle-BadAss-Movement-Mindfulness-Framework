@@ -14,6 +14,13 @@ const QUICK = [
   "How do I get faster?",
 ]
 
+const COACH_REFUSAL = "I'm your running coach - I can only help with running, fitness, training, recovery, and your program. What running question can I answer?"
+const RUNNING_TOPIC_RE = /(run|running|runner|jog|jogging|race|racing|track|800m|1500m|3k|5k|10k|marathon|ultra|pace|pacing|split|splits|workout|training|train|fitness|exercise|strength|gym|mobility|stretch|warm[-\s]?up|cool[-\s]?down|interval|tempo|stride|sprint|hill|endurance|aerobic|recovery|injur|shin|knee|ankle|hamstring|calf|quad|glute|sleep|nutrition|protein|carb|hydration|program|plan|schedule|session|easy day|long run|cross[-\s]?train)/i
+
+function isRunningFitnessQuestion(text) {
+  return RUNNING_TOPIC_RE.test(text || '')
+}
+
 export default function FloatingChat() {
   const [open,    setOpen]    = useState(false)
   const [input,   setInput]   = useState('')
@@ -107,7 +114,7 @@ export default function FloatingChat() {
             <div className={styles.welcome}>
               <div className={styles.welcomeAvatar}><BotFace /></div>
               <p className={styles.welcomeText}>
-                Ask me anything about running, pacing, injuries, indoor training, nutrition, or recovery.
+                Ask me about running, pacing, workouts, injuries, strength, nutrition, or recovery.
               </p>
               {!hasKey && (
                 <p className={styles.noKeyMsg}>
@@ -146,8 +153,9 @@ export default function FloatingChat() {
               {loading && (
                 <div className={`${styles.row} ${styles.rowBot}`}>
                   <div className={styles.msgAvatar}><BotFace /></div>
-                  <div className={`${styles.bubble} ${styles.bubbleBot}`}>
+                  <div className={`${styles.bubble} ${styles.bubbleBot} ${styles.liveBubble}`}>
                     <div className={styles.typingDots}><span /><span /><span /></div>
+                    <p className={styles.writingStatus}>Coach is writing</p>
                   </div>
                 </div>
               )}
@@ -201,6 +209,8 @@ async function callAI(history, coachData) {
   const key   = import.meta.env.VITE_OPENROUTER_API_KEY
   const model = import.meta.env.VITE_OPENROUTER_MODEL || 'openai/gpt-4o-mini'
   const goal  = coachData?.goal
+  const lastMsg = history[history.length - 1]?.content || ''
+  if (!isRunningFitnessQuestion(lastMsg)) return COACH_REFUSAL
 
   const ctx = goal
     ? `The user is following a ${goal.weeks}-week ${goal.raceGoal} running program (${goal.experience} level, ${goal.daysPerWeek} training days/week).`
@@ -211,6 +221,20 @@ async function callAI(history, coachData) {
 Answer questions about: running training, injury prevention and recovery, indoor workouts for rainy days, pacing, nutrition for runners, strength work, recovery, mindfulness, and general fitness.
 
 Rules: Be direct, warm, and practical. Under 140 words unless the question truly needs more. Skip excessive disclaimers — give real advice like a trusted coach would. If something needs medical care, say so briefly.`
+
+  const eventRules = goal?.raceGoal === '800m' ? `
+800m rules: default to beginner-safe 100m-200m reps, drills, strides, and easy running before longer reps. Do not prescribe 6 x 300m as the default 800m workout. Never say a 300m rep should be run in 30 seconds; 30 seconds is a fast 200m reference. If exact splits are requested and an 800m goal time is known, calculate 200m = goal / 4, 300m = goal x 0.375, 400m = goal / 2, then adjust for workout purpose. If no goal/recent time exists, give effort-based guidance and ask for a recent 400m/800m/1 mile benchmark first.` : ''
+
+  const scopedSystem = `${system}
+
+RUNNING FITNESS SCOPE: Only answer questions about running, run training, workouts, pacing, strength for runners, mobility, injury prevention, recovery, sleep for training, athlete nutrition, race preparation, and this user's program.
+If the user asks about anything else, respond exactly: "${COACH_REFUSAL}"
+
+${eventRules}
+
+Hard workout rules: prescribe coach-like sessions for the runner's event and level, not random intervals. State the purpose of the workout, how fast to run each rep, and the recovery. If no benchmark exists, do not invent exact seconds; give controlled effort guidance and ask for a recent race/time-trial.
+
+For beginner plans, start smooth and easy in week 1, then progress gradually.`
 
   const res = await fetch(API_URL, {
     method: 'POST',
@@ -223,7 +247,7 @@ Rules: Be direct, warm, and practical. Under 140 words unless the question truly
     body: JSON.stringify({
       model,
       messages: [
-        { role: 'system', content: system },
+        { role: 'system', content: scopedSystem },
         ...history.slice(-14),
       ],
       max_tokens: 300,
