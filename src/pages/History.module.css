@@ -44,10 +44,15 @@
 }
 
 @media (min-width: 1024px) {
-  .header    { padding: 36px 32px 22px; }
-  .dashboard { padding: 20px 24px 0; }
-  .list      { padding: 0 24px; }
-  .listTitle { padding: 0 28px; }
+  .header    { padding: 36px 48px 22px; }
+  .dashboard {
+    padding: 24px 48px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .list      { padding: 0 48px; }
+  .listTitle { padding: 0 48px; }
 }
 
 /* ── Dashboard charts ────────────────────────────────── */

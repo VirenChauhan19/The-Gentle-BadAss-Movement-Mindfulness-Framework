@@ -256,10 +256,10 @@
 }
 
 @media (min-width: 1024px) {
-  .header   { padding: 36px 32px 22px; }
-  .factors  { padding: 0 24px; }
-  .noteSection { padding: 26px 24px 8px; }
-  .saveSection { padding: 18px 24px 0; }
+  .header      { padding: 36px 48px 22px; }
+  .factors     { padding: 0 48px; max-width: 860px; }
+  .noteSection { padding: 26px 48px 8px; max-width: 860px; }
+  .saveSection { padding: 18px 48px 0; max-width: 860px; }
 }
 
 /* ── Save button ─────────────────────────────────────── */

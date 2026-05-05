@@ -270,10 +270,16 @@
 }
 
 @media (min-width: 1024px) {
-  .header { padding: 40px 32px 28px; }
-  .cards  { padding: 20px 24px; }
-  .principles { padding: 8px 24px 0; }
-  .footer { padding: 28px 32px 8px; }
+  .header { padding: 40px 48px 32px; }
+  .cards  {
+    padding: 24px 48px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .statsRow { max-width: 420px; }
+  .principles { padding: 8px 48px 0; }
+  .footer { padding: 28px 48px 8px; }
 }
 
 /* ── Footer ──────────────────────────────────────────── */

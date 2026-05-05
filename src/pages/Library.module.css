@@ -41,9 +41,14 @@
 }
 
 @media (min-width: 1024px) {
-  .header  { padding: 36px 32px 20px; }
-  .filters { padding: 16px 24px 0; }
-  .grid    { padding: 14px 24px 0; }
+  .header  { padding: 36px 48px 20px; }
+  .filters { padding: 16px 48px 0; }
+  .grid    {
+    padding: 14px 48px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
 }
 
 /* ── Filter pills ────────────────────────────────────── */
