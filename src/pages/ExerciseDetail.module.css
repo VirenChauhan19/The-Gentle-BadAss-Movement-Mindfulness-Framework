@@ -2,6 +2,41 @@
   padding-bottom: 40px;
 }
 
+.pillarBanner {
+  padding: 14px 16px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.pillarTitle {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.pillarChips {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pillarChips::-webkit-scrollbar {
+  display: none;
+}
+
+.pillarChips span {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(99, 127, 95, 0.10);
+  color: var(--sage-dark);
+  border: 1px solid rgba(99, 127, 95, 0.18);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
 .notFound {
   padding: 60px 24px;
   text-align: center;
@@ -57,12 +92,32 @@
   flex-direction: column;
   gap: 22px;
   max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.exerciseHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .name {
   font-size: 1.9rem;
   color: var(--ink);
   line-height: 1.2;
+}
+
+.sequenceBadge {
+  flex: 0 0 auto;
+  padding: 7px 11px;
+  border-radius: var(--r-md);
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .block {
@@ -195,15 +250,16 @@
 }
 
 .metronomeSection {
-  margin: 2rem 0;
+  margin: 0;
 }
 
 .tprTracker {
   background: var(--paper);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
-  padding: 1.5rem;
-  margin: 2rem 0;
+  padding: 16px;
+  margin: 0;
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
 .tprDesc {
@@ -212,28 +268,46 @@
   margin-bottom: 1.5rem;
 }
 
-.tprControl {
+.metricRow {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  margin-bottom: 1rem;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.metricRow label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.metricRow label span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
 .tprSlider {
   flex: 1;
   -webkit-appearance: none;
   height: 8px;
-  background: var(--border);
-  border-radius: 4px;
+  background: linear-gradient(90deg, var(--sage), var(--slate));
+  border-radius: 999px;
 }
 
 .tprSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 24px;
   height: 24px;
-  background: var(--ink);
+  background: var(--paper);
+  border: 6px solid var(--ink);
   border-radius: 50%;
   cursor: pointer;
+  box-shadow: 0 4px 12px var(--shadow-md);
 }
 
 .tprDisplay {
@@ -260,36 +334,147 @@
   color: var(--ink);
 }
 
-.completeSection {
-  margin: 3rem 0;
-  text-align: center;
+.workflowCard {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
-.completeBtn {
-  width: 100%;
-  padding: 1.25rem;
+.workflowBtns {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.startBtn,
+.stopBtn,
+.missedBtn,
+.nextBtn {
+  min-height: 46px;
   border-radius: var(--r-lg);
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--paper);
+  font-size: 0.9rem;
   font-weight: 700;
-  font-size: 1.1rem;
-  border: none;
-  cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
 }
 
-.completeBtn:hover:not(:disabled) {
+.startBtn {
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+  color: var(--paper);
+}
+
+.stopBtn {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.missedBtn {
+  background: rgba(186, 95, 69, 0.12);
+  color: var(--terracotta);
+  border: 1px solid rgba(186, 95, 69, 0.30);
+}
+
+.startBtn:hover:not(:disabled),
+.stopBtn:hover:not(:disabled),
+.missedBtn:hover:not(:disabled),
+.nextBtn:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 22px var(--shadow-md);
 }
 
-.completeBtn.saved {
-  background: #8b9e7e;
+.startBtn:disabled,
+.stopBtn:disabled,
+.missedBtn:disabled {
+  opacity: 0.4;
+  box-shadow: none;
 }
 
-.congrats {
-  margin-top: 1rem;
-  color: #5a6b4f;
-  font-weight: 600;
-  line-height: 1.4;
+.nextWrap {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.nextWrap p {
+  color: var(--sage-dark);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.nextBtn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--ink), #22382d);
+  color: var(--paper);
+}
+
+.detailPanel {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+  overflow: hidden;
+}
+
+.detailPanel summary {
+  list-style: none;
+  padding: 16px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--ink-light);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.detailPanel summary::-webkit-details-marker {
+  display: none;
+}
+
+.detailPanel summary::after {
+  content: '+';
+  float: right;
+  color: var(--ink-faint);
+}
+
+.detailPanel[open] summary::after {
+  content: '-';
+}
+
+.detailContent {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px 16px;
+}
+
+@media (min-width: 1024px) {
+  .pillarBanner {
+    padding: 18px 56px;
+  }
+
+  .pillarChips {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .content {
+    max-width: 1180px;
+    padding: 26px 56px;
+    display: grid;
+    grid-template-columns: minmax(360px, 0.9fr) minmax(440px, 1.1fr);
+    align-items: start;
+  }
+
+  .exerciseHeader,
+  .detailPanel,
+  .antiRotation {
+    grid-column: 1 / -1;
+  }
+
+  .metronomeSection,
+  .workflowCard,
+  .tprTracker {
+    margin: 0;
+  }
 }

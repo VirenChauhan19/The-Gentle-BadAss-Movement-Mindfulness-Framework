@@ -1,79 +1,212 @@
 .container {
-  padding: 1.5rem;
+  padding: 16px;
   background: var(--paper);
-  border-radius: 1.5rem;
-  border: 2px solid var(--border);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.kicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.header h3 {
+  font-size: 1.15rem;
+}
+
+.pulse {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pulse span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sage);
+  opacity: 0.35;
+}
+
+.pulseActive span {
+  animation: beatPulse 1s ease-out infinite;
+}
+
+@keyframes beatPulse {
+  0% { transform: scale(0.75); opacity: 0.45; }
+  18% { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(0.75); opacity: 0.45; }
 }
 
 .tempoGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .tempoBtn {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1rem;
-  border: 2px solid var(--border);
-  border-radius: 1rem;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  padding: 10px 6px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  background: var(--paper-soft);
+  color: var(--ink-light);
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.tempoBtn:hover {
+  transform: translateY(-2px);
+  border-color: var(--sage);
+  box-shadow: 0 8px 18px var(--shadow-xs);
 }
 
 .active {
-  border-color: var(--ink);
-  background: var(--ink);
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
   color: var(--paper);
 }
 
 .bpm {
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 900;
   line-height: 1;
 }
 
 .label {
-  font-size: 0.7rem;
+  font-size: 0.58rem;
   text-transform: uppercase;
-  font-weight: 700;
-  margin-top: 0.25rem;
+  font-weight: 800;
+  margin-top: 3px;
+  letter-spacing: 0.05em;
 }
 
 .info {
-  text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 12px;
 }
 
-.info h3 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1.1rem;
+.info h4 {
+  font-size: 0.92rem;
+  color: var(--ink);
+  margin-bottom: 3px;
 }
 
 .vibe {
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   color: var(--ink-light);
+  line-height: 1.45;
   margin: 0;
 }
 
-.videoWrapper {
-  border-radius: 1rem;
+.metronomeFace {
+  position: relative;
+  min-height: 156px;
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(circle at center, rgba(99, 127, 95, 0.16), transparent 34%),
+    linear-gradient(135deg, var(--cream), var(--paper-soft));
+  border: 1px solid var(--border-light);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  margin-bottom: 1.5rem;
-  background: #000;
-  height: 200px;
+}
+
+.beatRing {
+  position: absolute;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  border: 2px solid rgba(99, 127, 95, 0.40);
+  opacity: 0.35;
+}
+
+.metronomeFaceActive .beatRing {
+  animation: facePulse 1s ease-out infinite;
+}
+
+@keyframes facePulse {
+  0% { transform: scale(0.82); opacity: 0.75; }
+  100% { transform: scale(1.75); opacity: 0; }
+}
+
+.beatNumber {
+  position: relative;
+  z-index: 1;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--ink), #22382d);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 900;
+  box-shadow: 0 14px 28px rgba(24, 23, 19, 0.18);
+}
+
+.beatMarks {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.beatMarks span {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.beatMarkActive {
+  background: var(--sage) !important;
 }
 
 .playBtn {
   width: 100%;
-  padding: 1rem;
-  border-radius: 3rem;
-  background: var(--ink);
+  padding: 13px;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
   color: var(--paper);
-  font-weight: 700;
+  font-weight: 800;
   border: none;
-  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.playBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(63, 95, 62, 0.22);
+}
+
+@media (max-width: 520px) {
+  .tempoGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

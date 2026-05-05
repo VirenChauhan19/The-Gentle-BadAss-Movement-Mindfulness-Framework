@@ -97,6 +97,14 @@ export default function Journal() {
 
 function FactorSlider({ factor, value, onChange }) {
   const hasValue = value !== undefined
+  const currentValue = hasValue ? value : 5
+  const status =
+    !hasValue ? 'Tap or drag' :
+    value <= 3 ? 'Needs care' :
+    value <= 6 ? 'Steady' :
+    value <= 8 ? 'Good' :
+    'Strong'
+
   return (
     <div className={styles.factor}>
       <div className={styles.factorTop}>
@@ -105,7 +113,10 @@ function FactorSlider({ factor, value, onChange }) {
           <span className={styles.factorLabel}>{factor.label}</span>
           <span className={styles.factorQ}>{factor.question}</span>
         </div>
-        <span className={styles.factorValue}>{hasValue ? value : '—'}</span>
+        <div className={styles.valuePill}>
+          <span className={styles.factorValue}>{hasValue ? value : '-'}</span>
+          <span className={styles.valueText}>{status}</span>
+        </div>
       </div>
       <div className={styles.sliderRow}>
         <span className={styles.sliderEdge}>0</span>
@@ -114,19 +125,44 @@ function FactorSlider({ factor, value, onChange }) {
           min="0"
           max="10"
           step="1"
-          value={hasValue ? value : 5}
+          value={currentValue}
           onChange={e => onChange(e.target.value)}
           className={styles.slider}
-          style={hasValue ? { background: `linear-gradient(to right, var(--ink) ${value * 10}%, var(--border) ${value * 10}%)` } : {}}
+          style={{
+            '--slider-fill': `${currentValue * 10}%`,
+            '--slider-color': hasValue ? scoreColor(currentValue) : 'var(--ink-faint)',
+          }}
         />
         <span className={styles.sliderEdge}>10</span>
       </div>
+      <div className={styles.scoreRail} aria-label={`Score ${factor.label}`}>
+        {Array.from({ length: 11 }, (_, score) => (
+          <button
+            key={score}
+            type="button"
+            className={`${styles.scoreChip} ${hasValue && value === score ? styles.scoreChipActive : ''}`}
+            onClick={() => onChange(score)}
+            style={{ '--chip-color': scoreColor(score) }}
+            aria-label={`${factor.label} score ${score}`}
+          >
+            {score}
+          </button>
+        ))}
+      </div>
       <div className={styles.sliderLabels}>
         <span>Not great</span>
+        <span>Okay</span>
         <span>Great</span>
       </div>
     </div>
   )
+}
+
+function scoreColor(value) {
+  if (value <= 3) return '#ba5f45'
+  if (value <= 6) return '#c38b3f'
+  if (value <= 8) return '#637f5f'
+  return '#42697d'
 }
 
 function groupByCategory() {
