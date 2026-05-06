@@ -200,6 +200,12 @@ export default function Admin() {
             [uid]: { ...prev[uid], remarks: [...(prev[uid]?.remarks || []), remark] },
           }))
         }
+        onCoachUpdated={(uid, coach) =>
+          setAllUserData(prev => ({
+            ...prev,
+            [uid]: { ...prev[uid], coach },
+          }))
+        }
       />
     )
   }
@@ -325,7 +331,7 @@ export default function Admin() {
 }
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
-function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent }) {
+function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent, onCoachUpdated }) {
   const [selectedUid, setSelectedUid] = useState(null)
 
   const userMap = useMemo(() => {
@@ -447,12 +453,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
               key={selectedUser.uid}
               user={selectedUser}
               adminUser={adminUser}
-              onCoachUpdated={coach =>
-                setAllUserData(prev => ({
-                  ...prev,
-                  [selectedUser.uid]: { ...prev[selectedUser.uid], coach },
-                }))
-              }
+              onCoachUpdated={coach => onCoachUpdated(selectedUser.uid, coach)}
               onRemarkSent={remark => onRemarkSent(selectedUser.uid, remark)}
             />
           )}

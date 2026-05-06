@@ -1,93 +1,145 @@
 .page {
   min-height: 100vh;
   padding-bottom: 48px;
-  background: var(--cream);
 }
 
+/* ── Header ──────────────────────────────────────────── */
 .header {
-  padding: 52px 24px 22px;
-  background: var(--paper-soft);
-  border-bottom: 1px solid var(--border-light);
-}
-
-:global(html[data-theme="dark"]) .header {
-  background: #151a15;
+  padding: 48px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: fadeUp 360ms var(--ease-out) both;
 }
 
 .label {
-  font-size: 0.64rem;
-  letter-spacing: 0.16em;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  font-weight: 800;
-  margin-bottom: 5px;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 
 .title {
-  font-size: 1.8rem;
-  margin-bottom: 8px;
+  font-family: var(--font-display);
+  font-size: clamp(1.85rem, 6.4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
 }
 
 .subtitle {
+  margin-top: 8px;
   max-width: 620px;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   color: var(--ink-light);
   line-height: 1.55;
 }
 
+/* ── Practice grid ───────────────────────────────────── */
 .practice {
-  padding: 20px 16px;
+  padding: 16px 16px;
   display: grid;
   gap: 14px;
   max-width: 1080px;
   margin: 0 auto;
+  animation: fadeUp 460ms var(--ease-out) both 100ms;
 }
 
 .breathCard {
   background: var(--paper);
   border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  padding: 18px;
-  box-shadow: 0 8px 22px var(--shadow-xs);
+  border-radius: var(--r-2xl);
+  padding: 22px;
+  box-shadow: 0 14px 36px var(--shadow-xs);
 }
 
 :global(html[data-theme="dark"]) .breathCard,
-:global(html[data-theme="dark"]) .stats div {
+:global(html[data-theme="dark"]) .stats div,
+:global(html[data-theme="dark"]) .rhythmControls {
   background: #1b211b;
   border-color: #2d382f;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
 }
 
-:global(html[data-theme="dark"]) .orbWrap {
-  background: linear-gradient(135deg, #151a15, #111711);
-  border-color: #2d382f;
-}
-
+/* ── Orb ─────────────────────────────────────────────── */
 .orbWrap {
   position: relative;
-  min-height: 270px;
+  min-height: 320px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--r-lg);
-  background: linear-gradient(135deg, var(--cream), var(--paper-soft));
+  border-radius: var(--r-2xl);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(99, 127, 95, 0.06), transparent 60%),
+    linear-gradient(135deg, var(--cream), var(--paper-soft));
   border: 1px solid var(--border-light);
   overflow: hidden;
 }
 
+:global(html[data-theme="dark"]) .orbWrap {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(168, 200, 159, 0.08), transparent 60%),
+    linear-gradient(135deg, #151a15, #111711);
+  border-color: #2d382f;
+}
+
+/* Concentric pulse rings */
+.orbWrap::before,
+.orbWrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(99, 127, 95, 0.14);
+  pointer-events: none;
+}
+
+.orbWrap::before {
+  width: 240px;
+  height: 240px;
+  transform: translate(-50%, -50%);
+}
+
+.orbWrap::after {
+  width: 300px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  border-color: rgba(99, 127, 95, 0.08);
+}
+
 .orb {
-  width: 170px;
-  height: 170px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.72), transparent 34%),
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,0.85), transparent 36%),
+    radial-gradient(circle at 70% 78%, rgba(63, 95, 62, 0.42), transparent 50%),
     linear-gradient(135deg, var(--sage-light), var(--sage));
-  box-shadow: 0 18px 42px rgba(63, 95, 62, 0.22);
-  transition: transform 1s linear;
+  box-shadow:
+    0 24px 56px rgba(63, 95, 62, 0.26),
+    0 0 0 1px rgba(255, 255, 255, 0.32) inset,
+    0 -10px 30px rgba(255, 255, 255, 0.30) inset;
+  transition: transform 1s linear, box-shadow 600ms var(--ease-out);
+}
+
+:global(html[data-theme="dark"]) .orb {
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,0.20), transparent 40%),
+    radial-gradient(circle at 70% 78%, rgba(0, 0, 0, 0.32), transparent 55%),
+    linear-gradient(135deg, var(--sage), var(--sage-dark));
+  box-shadow:
+    0 24px 56px rgba(168, 200, 159, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.10) inset;
 }
 
 .orbActive {
-  box-shadow: 0 22px 54px rgba(63, 95, 62, 0.30);
+  box-shadow:
+    0 30px 70px rgba(63, 95, 62, 0.36),
+    0 0 0 1px rgba(255, 255, 255, 0.32) inset,
+    0 -10px 30px rgba(255, 255, 255, 0.30) inset;
 }
 
 .phaseText {
@@ -97,33 +149,48 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: var(--ink);
+  pointer-events: none;
 }
 
 .phaseText span {
   font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
+  font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--sage-dark);
+  margin-bottom: 4px;
+}
+
+:global(html[data-theme="dark"]) .phaseText span {
+  color: var(--on-dark);
+  opacity: 0.85;
 }
 
 .phaseText strong {
   font-family: var(--font-display);
-  font-size: 4rem;
+  font-size: 4.4rem;
   line-height: 1;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+:global(html[data-theme="dark"]) .phaseText strong {
+  color: var(--on-dark);
 }
 
 .phaseText small {
   color: var(--ink-faint);
   font-weight: 700;
+  font-size: 0.78rem;
+  margin-top: 6px;
 }
 
+/* ── Stats ───────────────────────────────────────────── */
 .stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .stats div {
@@ -132,27 +199,35 @@
   background: var(--paper-soft);
   border: 1px solid var(--border-light);
   text-align: center;
+  transition: transform var(--d-base) var(--ease-out);
+}
+
+.stats div:hover {
+  transform: translateY(-2px);
 }
 
 .stats span {
   font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 800;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .stats p {
-  font-size: 0.64rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.12em;
   color: var(--ink-faint);
   font-weight: 800;
+  margin-top: 4px;
 }
 
+/* ── Rhythm controls ─────────────────────────────────── */
 .rhythmControls {
-  margin-top: 14px;
+  margin-top: 16px;
   display: grid;
-  gap: 10px;
-  padding: 14px;
+  gap: 14px;
+  padding: 16px;
   border: 1px solid var(--border-light);
   border-radius: var(--r-md);
   background: var(--paper-soft);
@@ -160,15 +235,15 @@
 
 .rhythmControls label {
   display: grid;
-  grid-template-columns: 66px 1fr 38px;
-  gap: 10px;
+  grid-template-columns: 70px 1fr 44px;
+  gap: 12px;
   align-items: center;
 }
 
 .rhythmControls span {
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   color: var(--ink-faint);
   font-weight: 800;
 }
@@ -176,6 +251,9 @@
 .rhythmControls strong {
   text-align: right;
   color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
 }
 
 .rhythmControls input {
@@ -183,24 +261,32 @@
   accent-color: var(--sage-dark);
 }
 
+/* ── Controls ────────────────────────────────────────── */
 .controls {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 16px;
 }
 
 .controls button,
 .saveBtn {
-  min-height: 46px;
+  min-height: 50px;
   border-radius: var(--r-md);
-  font-weight: 800;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
 }
 
-.controls button {
-  background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+.controls button:first-child {
+  background: var(--sage-gradient);
   color: var(--on-accent);
+  box-shadow: 0 8px 20px rgba(63, 95, 62, 0.26);
+}
+
+.controls button:first-child:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(63, 95, 62, 0.32);
 }
 
 .secondaryBtn {
@@ -209,17 +295,39 @@
   border: 1px solid var(--border-light) !important;
 }
 
-.saveBtn {
-  width: 100%;
-  margin-top: 10px;
-  background: var(--ink);
-  color: var(--on-ink);
+.secondaryBtn:hover {
+  transform: translateY(-2px);
+  background: var(--paper) !important;
+  box-shadow: 0 10px 22px var(--shadow);
 }
 
-.controls button:hover,
+.saveBtn {
+  width: 100%;
+  margin-top: 12px;
+  background: var(--ink);
+  color: var(--on-ink);
+  position: relative;
+  overflow: hidden;
+}
+
+.saveBtn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  transition: left 600ms var(--ease-out);
+}
+
+.saveBtn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
 .saveBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 22px var(--shadow-md);
+  box-shadow: 0 14px 28px var(--shadow-md);
 }
 
 .saveBtn:disabled {
@@ -228,11 +336,11 @@
 
 @media (min-width: 768px) {
   .header {
-    padding: 40px 32px 22px;
+    padding: 52px 28px 22px;
   }
 
   .practice {
-    padding: 24px 32px;
+    padding: 18px 20px;
     grid-template-columns: minmax(320px, 0.9fr) minmax(340px, 1fr);
     align-items: start;
   }
@@ -240,10 +348,10 @@
 
 @media (min-width: 1024px) {
   .header {
-    padding: 40px 56px 24px;
+    padding: 60px 56px 24px;
   }
 
   .practice {
-    padding: 28px 56px;
+    padding: 22px 56px;
   }
 }

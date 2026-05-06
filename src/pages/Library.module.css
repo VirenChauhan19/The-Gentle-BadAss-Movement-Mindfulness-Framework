@@ -3,59 +3,60 @@
   overflow-x: hidden;
 }
 
+/* ── Header ──────────────────────────────────────────── */
 .header {
-  padding: 52px 24px 20px;
-  background:
-    linear-gradient(135deg, rgba(66, 105, 125, 0.16), transparent 58%),
-    linear-gradient(175deg, var(--paper-soft) 0%, var(--cream) 100%);
-  border-bottom: 1px solid var(--border-light);
-}
-
-:global(html[data-theme="dark"]) .header {
-  background: #151a15;
+  padding: 48px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: fadeUp 360ms var(--ease-out) both;
 }
 
 .label {
-  font-size: 0.64rem;
-  letter-spacing: 0.16em;
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-faint);
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: 1.75rem;
+  font-size: clamp(1.85rem, 6.4vw, 2.4rem);
   color: var(--ink);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
 }
 
 .subtitle {
   margin-top: 8px;
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   color: var(--ink-light);
-  line-height: 1.5;
+  line-height: 1.55;
+  max-width: 540px;
 }
 
+/* ── Pillar banner ───────────────────────────────────── */
 .pillarBanner {
-  margin: 14px 16px 0;
-  padding: 12px 14px;
+  margin: 6px 16px 0;
+  padding: 16px 18px;
   background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
-  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.06);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+  animation: fadeUp 420ms var(--ease-out) both 80ms;
 }
 
 .pillarBanner p,
 .principlesTitle {
-  font-size: 0.64rem;
-  letter-spacing: 0.12em;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-faint);
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .pillarBanner div {
@@ -65,26 +66,39 @@
 }
 
 .pillarBanner span {
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
   background: rgba(99, 127, 95, 0.10);
   color: var(--sage-dark);
-  border: 1px solid rgba(99, 127, 95, 0.18);
-  font-size: 0.72rem;
-  font-weight: 800;
+  border: 1px solid rgba(99, 127, 95, 0.20);
+  font-size: 0.74rem;
+  font-weight: 700;
+  transition: transform var(--d-fast) var(--ease-out),
+              background var(--d-fast) var(--ease-out);
 }
 
+.pillarBanner span:hover {
+  transform: translateY(-1px);
+  background: rgba(99, 127, 95, 0.16);
+}
+
+/* ── Weekly module ───────────────────────────────────── */
 .weeklyModule {
-  margin: 14px 16px 0;
-  padding: 14px;
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
+  margin: 12px 16px 0;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 90% 12%, rgba(215, 229, 209, 0.16), transparent 7rem),
+    linear-gradient(135deg, var(--ink) 0%, #243525 60%, #213342 100%);
+  color: var(--on-dark);
+  border-radius: var(--r-2xl);
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
-  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.06);
+  box-shadow: 0 14px 32px var(--shadow-md);
+  animation: fadeUp 460ms var(--ease-out) both 140ms;
+  position: relative;
+  overflow: hidden;
 }
 
 :global(html[data-theme="dark"]) .weeklyModule,
@@ -94,25 +108,28 @@
 :global(html[data-theme="dark"]) .filter {
   background: #1b211b;
   border-color: #2d382f;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
 }
 
-:global(html[data-theme="dark"]) .weeklyIcon {
-  background: linear-gradient(135deg, rgba(131, 168, 120, 0.16), rgba(127, 169, 188, 0.10));
+:global(html[data-theme="dark"]) .weeklyModule {
+  background:
+    radial-gradient(circle at 90% 12%, rgba(168, 200, 159, 0.14), transparent 7rem),
+    linear-gradient(135deg, #0b0f0d 0%, #172718 54%, #172630 100%);
 }
 
 .weeklyIcon {
-  width: 46px;
-  height: 46px;
+  width: 52px;
+  height: 52px;
   border-radius: var(--r-md);
-  background: linear-gradient(135deg, rgba(99, 127, 95, 0.18), rgba(66, 105, 125, 0.12));
-  color: var(--sage-dark);
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(245, 240, 232, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 900;
+  font-size: 1.45rem;
+  font-weight: 700;
 }
 
 .weeklyCopy {
@@ -120,80 +137,62 @@
 }
 
 .weeklyLabel {
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-weight: 800;
-  color: var(--sage-dark);
-  margin-bottom: 5px;
+  font-weight: 700;
+  color: rgba(245, 240, 232, 0.55);
+  margin-bottom: 4px;
 }
 
 .weeklyModule h2 {
-  font-size: 1rem;
-  margin-bottom: 3px;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+  color: var(--on-dark);
 }
 
 .weeklyModule p {
-  font-size: 0.78rem;
-  color: var(--ink-light);
-  line-height: 1.45;
+  font-size: 0.82rem;
+  color: rgba(245, 240, 232, 0.74);
+  line-height: 1.5;
 }
 
 .weeklyModule button {
   grid-column: 1 / -1;
-  min-height: 42px;
+  min-height: 44px;
   border-radius: var(--r-md);
-  background: linear-gradient(135deg, var(--sage), var(--sage-dark));
-  color: var(--on-accent);
-  font-weight: 800;
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--on-dark);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
 }
 
 .weeklyModule button:hover {
+  background: rgba(255, 255, 255, 0.20);
   transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(63, 95, 62, 0.18);
-}
-
-/* ── Responsive ──────────────────────────────────────── */
-@media (min-width: 768px) {
-  .header  { padding: 40px 28px 20px; }
-  .pillarBanner { margin: 16px 20px 0; }
-  .weeklyModule { margin: 16px 20px 0; grid-template-columns: auto 1fr auto; }
-  .weeklyModule button { grid-column: auto; padding: 0 16px; }
-  .filters { padding: 16px 20px 0; }
-  .principlesBanner { margin: 12px 20px 0; }
-  .grid    { padding: 14px 20px 0; }
-}
-
-@media (min-width: 1024px) {
-  .header  { padding: 36px 48px 20px; }
-  .pillarBanner { margin: 18px 48px 0; }
-  .weeklyModule { margin: 18px 48px 0; }
-  .filters { padding: 16px 48px 0; }
-  .principlesBanner { margin: 12px 48px 0; }
-  .principlesGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .grid    {
-    padding: 14px 48px 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 12px;
-  }
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
 }
 
 /* ── Filter pills ────────────────────────────────────── */
 .filters {
   display: flex;
   gap: 8px;
-  padding: 16px 16px 0;
+  padding: 18px 16px 4px;
   overflow-x: auto;
   scrollbar-width: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  animation: fadeUp 480ms var(--ease-out) both 200ms;
 }
 
 .filters::-webkit-scrollbar { display: none; }
 
 .filter {
   flex-shrink: 0;
-  padding: 7px 15px;
+  padding: 8px 16px;
   border-radius: 999px;
   border: 1.5px solid var(--border);
   background: var(--paper);
@@ -201,7 +200,6 @@
   font-size: 0.78rem;
   font-weight: 600;
   box-shadow: 0 4px 14px var(--shadow-xs);
-  transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   white-space: nowrap;
 }
 
@@ -213,25 +211,29 @@
 }
 
 .filterActive {
-  background: var(--brand-gradient);
-  border-color: transparent;
-  color: var(--on-dark);
+  background: var(--brand-gradient) !important;
+  border-color: transparent !important;
+  color: var(--on-dark) !important;
+  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.22) !important;
 }
 
 .categoryDesc {
-  padding: 10px 20px 0;
-  font-size: 0.78rem;
+  padding: 8px 24px 4px;
+  font-size: 0.84rem;
   color: var(--ink-faint);
   font-style: italic;
+  animation: fadeIn var(--d-base) var(--ease-out) both;
 }
 
+/* ── Principles ──────────────────────────────────────── */
 .principlesBanner {
-  margin: 12px 16px 0;
-  padding: 14px;
+  margin: 14px 16px 0;
+  padding: 18px;
   background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
   box-shadow: 0 8px 22px var(--shadow-xs);
+  animation: fadeUp 360ms var(--ease-out) both;
 }
 
 .principlesGrid {
@@ -242,20 +244,27 @@
 .principlesGrid article {
   display: grid;
   gap: 4px;
-  padding: 10px;
+  padding: 12px 14px;
   border-radius: var(--r-md);
   background: var(--paper-soft);
+  border: 1px solid var(--border-light);
+}
+
+:global(html[data-theme="dark"]) .principlesGrid article {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-light);
 }
 
 .principlesGrid strong {
-  font-size: 0.84rem;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
   color: var(--ink);
 }
 
 .principlesGrid span {
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   color: var(--ink-light);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 /* ── Exercise cards ──────────────────────────────────── */
@@ -271,68 +280,114 @@
   background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
-  padding: 18px;
+  padding: 18px 20px;
   position: relative;
   overflow: hidden;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   box-shadow: 0 8px 22px var(--shadow-xs);
+  animation: fadeUp 320ms var(--ease-out) both;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--sage);
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease-out);
 }
 
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-3px);
-    border-color: rgba(66, 105, 125, 0.28);
-    box-shadow: 0 14px 30px var(--shadow);
+    border-color: rgba(99, 127, 95, 0.32);
+    box-shadow: 0 16px 32px var(--shadow);
+  }
+  .card:hover::before {
+    opacity: 1;
+  }
+  .card:hover .arrow {
+    transform: translateX(4px);
+    color: var(--sage-dark);
   }
 }
 
 .card:active {
-  transform: scale(0.98);
-  box-shadow: none;
+  transform: scale(0.985);
 }
 
 .cardCat {
   font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   color: var(--sage-dark);
 }
 
 .cardName {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--ink);
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 6px;
   line-height: 1.25;
 }
 
 .cardPurpose {
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   color: var(--ink-light);
-  line-height: 1.5;
-  padding-right: 28px;
+  line-height: 1.55;
+  padding-right: 32px;
 }
 
 .cadenceBadge {
   display: inline-block;
-  margin-top: 10px;
-  font-size: 0.62rem;
-  letter-spacing: 0.07em;
+  margin-top: 12px;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;
   background: rgba(196, 170, 132, 0.18);
-  color: var(--ink-faint);
-  padding: 3px 9px;
+  color: var(--gold);
+  padding: 4px 10px;
   border-radius: 999px;
+  border: 1px solid rgba(196, 170, 132, 0.28);
 }
 
 .arrow {
   position: absolute;
   bottom: 18px;
   right: 18px;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: var(--border);
+  transition: transform var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out);
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (min-width: 768px) {
+  .header  { padding: 52px 28px 22px; }
+  .pillarBanner { margin: 6px 20px 0; }
+  .weeklyModule { margin: 12px 20px 0; grid-template-columns: auto 1fr auto; gap: 18px; }
+  .weeklyModule button { grid-column: auto; padding: 0 22px; min-height: 44px; }
+  .filters { padding: 18px 20px 4px; }
+  .principlesBanner { margin: 14px 20px 0; }
+  .grid    { padding: 14px 20px 0; }
+}
+
+@media (min-width: 1024px) {
+  .header  { padding: 60px 56px 24px; }
+  .pillarBanner { margin: 6px 56px 0; }
+  .weeklyModule { margin: 12px 56px 0; padding: 22px; }
+  .filters { padding: 18px 56px 4px; }
+  .principlesBanner { margin: 14px 56px 0; }
+  .principlesGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid    {
+    padding: 14px 56px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+  }
 }
