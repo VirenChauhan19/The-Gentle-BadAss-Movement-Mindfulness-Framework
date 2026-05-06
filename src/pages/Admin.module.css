@@ -65,7 +65,7 @@
 .profileHeader {
   background:
     radial-gradient(circle at 82% 12%, rgba(215, 229, 209, 0.20), transparent 8rem),
-    linear-gradient(160deg, var(--ink) 0%, #22382d 100%);
+    var(--brand-gradient);
   padding: 2rem 1.5rem 1.5rem;
   text-align: center;
   position: relative;

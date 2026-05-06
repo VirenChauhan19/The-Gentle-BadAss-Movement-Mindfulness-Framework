@@ -127,34 +127,39 @@
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  text-align: center;
+  gap: 1px;
 }
 
 .ringScore {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: 2.1rem;
   color: var(--on-dark);
   font-weight: 700;
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .ringScoreSlash {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
   color: rgba(245, 240, 232, 0.45);
-  font-weight: 600;
-  margin-left: 2px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .ringCheck {
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 0.88rem;
   color: rgba(245, 240, 232, 0.85);
   font-weight: 700;
   letter-spacing: 0.01em;
-  align-self: center;
+  text-align: center;
+  padding: 0 8px;
+  line-height: 1.3;
 }
 
 .feelMeta {
@@ -484,9 +489,10 @@
   .header { padding: 60px 56px 30px; }
   .feelHero { padding: 0 56px 20px; }
   .feelCard { padding: 32px 32px 32px 28px; gap: 36px; }
-  .ring { width: 168px; height: 168px; }
-  .ringScore { font-size: 3.2rem; }
-  .ringCheck { font-size: 1.2rem; }
+  .ring { width: 160px; height: 160px; }
+  .ringScore { font-size: 2.8rem; }
+  .ringScoreSlash { font-size: 0.75rem; }
+  .ringCheck { font-size: 1rem; }
   .feelHeading { font-size: 1.4rem; }
   .feelSub { font-size: 0.95rem; }
   .progressBlock { margin: 0 56px 20px; padding: 22px 26px; }
@@ -518,9 +524,9 @@
   }
 
   .feelCard {
-    min-height: 218px;
+    min-height: 190px;
     display: grid;
-    grid-template-columns: 116px minmax(0, 1fr);
+    grid-template-columns: 110px minmax(0, 1fr);
     gap: 14px;
     padding: 18px;
     border-radius: 24px;
@@ -532,13 +538,13 @@
   }
 
   .ring {
-    width: 112px;
-    height: 112px;
+    width: 104px;
+    height: 104px;
     align-self: center;
   }
 
   .ringScore {
-    font-size: 2.25rem;
+    font-size: 1.9rem;
   }
 
   .feelHeading {

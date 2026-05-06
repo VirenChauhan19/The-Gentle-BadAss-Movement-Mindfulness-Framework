@@ -1,0 +1,287 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px calc(80px + env(safe-area-inset-bottom));
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px var(--shadow-lg);
+  animation: floatIn 560ms var(--ease-elastic) both;
+}
+
+/* ── Card header (gradient) ────────────────────────────── */
+.cardHeader {
+  background: var(--brand-gradient);
+  padding: 2rem 1.75rem 1.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cardHeader::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(215,229,209,0.18), transparent 60%);
+  pointer-events: none;
+}
+
+.kicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.55);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 6vw, 2.2rem);
+  font-weight: 700;
+  color: var(--on-dark);
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+
+.commitBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(245,240,232,0.9);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ── Price row ─────────────────────────────────────────── */
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1.5rem 1.75rem 1.25rem;
+}
+
+.currency {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink-light);
+  align-self: flex-start;
+  margin-top: 6px;
+}
+
+.price {
+  font-family: var(--font-display);
+  font-size: 3.6rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.priceNote {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 8px;
+  align-self: flex-end;
+  padding-bottom: 6px;
+}
+
+.priceNote span {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ── Divider ───────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 0 1.75rem;
+}
+
+/* ── Features list ─────────────────────────────────────── */
+.features {
+  list-style: none;
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.4;
+}
+
+.featureCheck {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(99,127,95,0.12);
+  color: var(--sage-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  margin-top: 1px;
+}
+
+/* ── CTA button ────────────────────────────────────────── */
+.ctaBtn {
+  display: block;
+  width: calc(100% - 3.5rem);
+  margin: 1.25rem 1.75rem 0;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, var(--sage-dark) 0%, var(--sage) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 0.97rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(63,95,62,0.32);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+.ctaBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(63,95,62,0.38);
+}
+
+.ctaBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.ctaBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  text-align: center;
+  padding: 10px 1.75rem 0;
+}
+
+/* ── Test mode banner ──────────────────────────────────── */
+.testBanner {
+  margin: 14px 1.75rem 0;
+  padding: 10px 14px;
+  background: rgba(195,139,63,0.10);
+  border: 1px solid rgba(195,139,63,0.25);
+  border-radius: 10px;
+  font-size: 0.72rem;
+  color: var(--gold);
+  line-height: 1.5;
+  text-align: center;
+}
+
+.testBanner strong {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+/* ── Skip link ─────────────────────────────────────────── */
+.skipBtn {
+  display: block;
+  width: 100%;
+  padding: 14px 1.75rem 1.5rem;
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.18s ease;
+}
+
+.skipBtn:hover {
+  color: var(--ink-light);
+}
+
+/* ── Success state ─────────────────────────────────────── */
+.successCard {
+  width: 100%;
+  max-width: 380px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: 28px;
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: 0 24px 64px var(--shadow-lg);
+  animation: floatIn 480ms var(--ease-elastic) both;
+}
+
+.successIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 12px 28px rgba(63,95,62,0.30);
+  animation: scaleIn 380ms var(--ease-spring) both 200ms;
+}
+
+.successTitle {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.successSub {
+  font-size: 0.95rem;
+  color: var(--ink-light);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .card {
+    border-radius: 22px;
+  }
+
+  .price {
+    font-size: 3rem;
+  }
+
+  .ctaBtn {
+    font-size: 0.9rem;
+  }
+}

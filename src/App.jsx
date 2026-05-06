@@ -13,6 +13,7 @@ import ExerciseDetail from './pages/ExerciseDetail'
 import Admin from './pages/Admin'
 import Coach from './pages/Coach'
 import Onboarding from './pages/Onboarding'
+import Paywall from './pages/Paywall'
 import styles from './App.module.css'
 
 const THEME_PRESETS = [
@@ -68,6 +69,7 @@ function AppRoutes() {
         <Route path="/library/:id" element={<LockedRoute feature="Move"><ExerciseDetail /></LockedRoute>} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/paywall" element={<Paywall />} />
       </Routes>
     </div>
   )
