@@ -130,20 +130,6 @@
   100% { filter: blur(0); }
 }
 
-:global(html[data-theme="dark"]) .panel,
-:global(html[data-theme="dark"]) .panelFooter,
-:global(html[data-theme="dark"]) .quickBtn {
-  background: #1b211b;
-  border-color: #2d382f;
-}
-
-:global(html[data-theme="dark"]) .bubbleBot,
-:global(html[data-theme="dark"]) .welcomeText,
-:global(html[data-theme="dark"]) .input {
-  background: #151a15;
-  border-color: #2d382f;
-}
-
 @media (max-width: 390px) {
   .panel  { width: calc(100vw - 24px); right: 12px; }
 }
@@ -154,7 +140,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 14px 13px;
-  background: linear-gradient(135deg, var(--sage-dark) 0%, #243525 100%);
+  background: var(--brand-gradient);
   flex-shrink: 0;
 }
 

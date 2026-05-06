@@ -67,14 +67,6 @@
   pointer-events: none;
 }
 
-:global(html[data-theme="dark"]) .breathCard,
-:global(html[data-theme="dark"]) .stats div,
-:global(html[data-theme="dark"]) .rhythmControls {
-  background: #1b211b;
-  border-color: #2d382f;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
-}
-
 /* ── Orb ─────────────────────────────────────────────── */
 .orbWrap {
   position: relative;
@@ -93,13 +85,6 @@
 .orbWrap > * {
   position: relative;
   z-index: 1;
-}
-
-:global(html[data-theme="dark"]) .orbWrap {
-  background:
-    radial-gradient(circle at 50% 50%, rgba(168, 200, 159, 0.08), transparent 60%),
-    linear-gradient(135deg, #151a15, #111711);
-  border-color: #2d382f;
 }
 
 /* Concentric pulse rings */
@@ -202,10 +187,6 @@
   line-height: 1;
   color: var(--ink);
   font-weight: 700;
-}
-
-:global(html[data-theme="dark"]) .phaseText strong {
-  color: var(--on-dark);
 }
 
 .phaseText small {

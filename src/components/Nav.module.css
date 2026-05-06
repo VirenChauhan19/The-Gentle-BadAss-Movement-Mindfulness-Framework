@@ -159,8 +159,8 @@
   overflow: hidden;
 }
 
-:global(html[data-theme="dark"]) .lockDot {
-  border-color: #1b211b;
+.lockDot {
+  border-color: transparent;
 }
 
 .navAvatar {

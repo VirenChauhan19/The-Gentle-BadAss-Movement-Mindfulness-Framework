@@ -69,16 +69,6 @@
   box-shadow: 0 14px 28px var(--shadow);
 }
 
-:global(html[data-theme="dark"]) .summaryCard,
-:global(html[data-theme="dark"]) .chartCard,
-:global(html[data-theme="dark"]) .row,
-:global(html[data-theme="dark"]) .moveRow,
-:global(html[data-theme="dark"]) .empty {
-  background: #1b211b;
-  border-color: #2d382f;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
-}
-
 .summaryCard span {
   font-family: var(--font-display);
   font-size: 1.7rem;

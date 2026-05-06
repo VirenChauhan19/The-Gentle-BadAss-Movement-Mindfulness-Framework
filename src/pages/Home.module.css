@@ -46,9 +46,7 @@
   display: flex;
   align-items: center;
   gap: 22px;
-  background:
-    radial-gradient(circle at 88% 14%, rgba(215, 229, 209, 0.22), transparent 9rem),
-    linear-gradient(135deg, var(--ink) 0%, #243525 52%, #213342 100%);
+  background: var(--brand-gradient);
   color: var(--on-dark);
   border-radius: var(--r-2xl);
   padding: 22px 22px 22px 18px;
@@ -78,12 +76,6 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: calc(var(--r-2xl) - 6px);
   pointer-events: none;
-}
-
-:global(html[data-theme="dark"]) .feelCard {
-  background:
-    radial-gradient(circle at 88% 14%, rgba(168, 200, 159, 0.16), transparent 9rem),
-    linear-gradient(135deg, #0b0f0d 0%, #172718 54%, #172630 100%);
 }
 
 @media (hover: hover) {
@@ -236,12 +228,6 @@
   }
 }
 
-:global(html[data-theme="dark"]) .progressBlock {
-  background: #1b211b;
-  border-color: #2d382f;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
-}
-
 .progressTop {
   display: flex;
   justify-content: space-between;
@@ -372,12 +358,6 @@
   opacity: 0;
   transition: opacity var(--d-base) var(--ease-out);
   pointer-events: none;
-}
-
-:global(html[data-theme="dark"]) .action {
-  background: #1b211b;
-  border-color: #2d382f;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
 }
 
 @media (hover: hover) {
@@ -589,14 +569,7 @@
     margin: 0 12px;
     padding: 20px 16px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.42);
-    border: 1px solid rgba(217, 207, 191, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-
-  :global(html[data-theme="dark"]) .intention {
-    background: rgba(27, 33, 27, 0.58);
-    border-color: rgba(58, 68, 58, 0.72);
+    background: var(--paper);
+    border: 1px solid var(--border-light);
   }
 }

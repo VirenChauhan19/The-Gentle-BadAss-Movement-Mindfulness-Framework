@@ -12,10 +12,6 @@
   animation: floatIn 520ms var(--ease-elastic) both;
 }
 
-:global(html[data-theme="dark"]) .header {
-  background: #151a15;
-}
-
 .label {
   font-size: 0.64rem;
   letter-spacing: 0.16em;
@@ -92,14 +88,6 @@
   border-radius: var(--r-lg);
   padding: 16px;
   box-shadow: 0 8px 22px rgba(24, 23, 19, 0.06);
-}
-
-:global(html[data-theme="dark"]) .section,
-:global(html[data-theme="dark"]) .factor,
-:global(html[data-theme="dark"]) .note {
-  background: #1b211b;
-  border-color: #2d382f;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
 }
 
 .catLabel {
@@ -218,12 +206,6 @@
   align-items: center;
   gap: 1px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
-}
-
-:global(html[data-theme="dark"]) .valuePill,
-:global(html[data-theme="dark"]) .scoreChip {
-  background: #151a15;
-  border-color: #2d382f;
 }
 
 .factorValue {

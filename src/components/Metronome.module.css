@@ -23,19 +23,6 @@
   z-index: 1;
 }
 
-:global(html[data-theme="dark"]) .container,
-:global(html[data-theme="dark"]) .tempoBtn {
-  background: #1b211b;
-  border-color: #2d382f;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
-}
-
-:global(html[data-theme="dark"]) .metronomeFace,
-:global(html[data-theme="dark"]) .pulse {
-  background: linear-gradient(135deg, #151a15, #111711);
-  border-color: #2d382f;
-}
-
 .header {
   display: flex;
   align-items: center;
@@ -165,11 +152,6 @@
   border-radius: var(--r-md);
   background: var(--paper-soft);
   border: 1px solid var(--border-light);
-}
-
-:global(html[data-theme="dark"]) .volumeControl {
-  background: #151a15;
-  border-color: #2d382f;
 }
 
 .volumeControl span {

@@ -11,25 +11,14 @@
   position: relative;
 }
 
-:global(html[data-theme="dark"]) .app {
-  background:
-    radial-gradient(circle at 15% 10%, rgba(131, 168, 120, 0.10), transparent 22rem),
-    radial-gradient(circle at 85% 14%, rgba(127, 169, 188, 0.09), transparent 24rem),
-    linear-gradient(135deg, #090c0a 0%, #10130f 56%, #151a15 100%);
-}
-
-:global(html[data-theme="ember"]) .app {
-  background:
-    radial-gradient(circle at 18% 10%, rgba(255, 115, 88, 0.14), transparent 22rem),
-    radial-gradient(circle at 86% 16%, rgba(224, 160, 74, 0.10), transparent 24rem),
-    linear-gradient(135deg, #0e0808 0%, #160d0d 56%, #24110f 100%);
-}
-
-:global(html[data-theme="ocean"]) .app {
-  background:
-    radial-gradient(circle at 15% 10%, rgba(118, 223, 210, 0.12), transparent 22rem),
-    radial-gradient(circle at 85% 14%, rgba(93, 183, 232, 0.11), transparent 24rem),
-    linear-gradient(135deg, #041014 0%, #071419 56%, #0d2028 100%);
+:global(html[data-theme="dark"]) .app,
+:global(html[data-theme="ember"]) .app,
+:global(html[data-theme="ocean"]) .app,
+:global(html[data-theme="forest"]) .app,
+:global(html[data-theme="violet"]) .app,
+:global(html[data-theme="rose"]) .app,
+:global(html[data-theme="midnight"]) .app {
+  background: var(--cream);
 }
 
 .ambientLayer {
@@ -105,23 +94,19 @@
               color 220ms var(--ease-out);
 }
 
-:global(html[data-theme="dark"]) .themeToggle {
-  background: rgba(27, 33, 27, 0.78);
-  color: var(--ink);
-  border-color: rgba(168, 200, 159, 0.22);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    0 10px 26px rgba(0, 0, 0, 0.36);
-}
-
+:global(html[data-theme="dark"]) .themeToggle,
 :global(html[data-theme="ember"]) .themeToggle,
-:global(html[data-theme="ocean"]) .themeToggle {
-  background: rgba(27, 19, 18, 0.78);
+:global(html[data-theme="ocean"]) .themeToggle,
+:global(html[data-theme="forest"]) .themeToggle,
+:global(html[data-theme="violet"]) .themeToggle,
+:global(html[data-theme="rose"]) .themeToggle,
+:global(html[data-theme="midnight"]) .themeToggle {
+  background: var(--paper);
   color: var(--ink);
   border-color: var(--border);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 10px 26px rgba(0, 0, 0, 0.36);
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 10px 26px var(--shadow-md);
 }
 
 @media (hover: hover) {
@@ -210,9 +195,17 @@
 :global(html[data-theme="dark"]) .signInCard,
 :global(html[data-theme="ember"]) .signInCard,
 :global(html[data-theme="ocean"]) .signInCard,
+:global(html[data-theme="forest"]) .signInCard,
+:global(html[data-theme="violet"]) .signInCard,
+:global(html[data-theme="rose"]) .signInCard,
+:global(html[data-theme="midnight"]) .signInCard,
 :global(html[data-theme="dark"]) .lockedPanel,
 :global(html[data-theme="ember"]) .lockedPanel,
-:global(html[data-theme="ocean"]) .lockedPanel {
+:global(html[data-theme="ocean"]) .lockedPanel,
+:global(html[data-theme="forest"]) .lockedPanel,
+:global(html[data-theme="violet"]) .lockedPanel,
+:global(html[data-theme="rose"]) .lockedPanel,
+:global(html[data-theme="midnight"]) .lockedPanel {
   background: var(--paper);
   border-color: var(--border-light);
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.62);

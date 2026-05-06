@@ -7,9 +7,7 @@
 
 /* ── Header ──────────────────────────────────────────────────── */
 .header {
-  background:
-    radial-gradient(circle at 84% 10%, rgba(215, 229, 209, 0.18), transparent 10rem),
-    linear-gradient(175deg, var(--ink) 0%, #243525 58%, #213342 100%);
+  background: var(--brand-gradient);
   padding: 52px 24px 24px;
   text-align: center;
   position: relative;
@@ -113,12 +111,6 @@
   box-shadow: 0 10px 24px var(--shadow-xs);
 }
 
-:global(html[data-theme="dark"]) .header {
-  background:
-    radial-gradient(circle at 84% 10%, rgba(168, 200, 159, 0.12), transparent 10rem),
-    linear-gradient(175deg, #0b0f0d 0%, #172718 58%, #172630 100%);
-}
-
 .tab {
   flex: 1;
   padding: 10px;
@@ -137,36 +129,6 @@
   background: linear-gradient(135deg, rgba(99, 127, 95, 0.16), rgba(66, 105, 125, 0.08));
   color: var(--ink);
   box-shadow: inset 0 0 0 1px rgba(99, 127, 95, 0.12);
-}
-
-:global(html[data-theme="dark"]) .tabs,
-:global(html[data-theme="dark"]) .overviewCard,
-:global(html[data-theme="dark"]) .todaySessionCard,
-:global(html[data-theme="dark"]) .todayHero,
-:global(html[data-theme="dark"]) .planBoard,
-:global(html[data-theme="dark"]) .upNext,
-:global(html[data-theme="dark"]) .planSummary div,
-:global(html[data-theme="dark"]) .checkinCard,
-:global(html[data-theme="dark"]) .checkinDisplay,
-:global(html[data-theme="dark"]) .completionCard,
-:global(html[data-theme="dark"]) .dailyRemarks,
-:global(html[data-theme="dark"]) .logEntry,
-:global(html[data-theme="dark"]) .suggestion,
-:global(html[data-theme="dark"]) .bubbleCoach {
-  background: #1b211b;
-  border-color: #2d382f;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.22);
-}
-
-:global(html[data-theme="dark"]) .tabActive {
-  background: rgba(131, 168, 120, 0.14);
-}
-
-:global(html[data-theme="dark"]) .planDay,
-:global(html[data-theme="dark"]) .todayMetrics span,
-:global(html[data-theme="dark"]) .planStats span {
-  background: #141a15;
-  border-color: #2d382f;
 }
 
 /* ── Tab content ─────────────────────────────────────────────── */
