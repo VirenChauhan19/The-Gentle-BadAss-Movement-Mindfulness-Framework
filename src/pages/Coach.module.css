@@ -38,7 +38,7 @@
 .title {
   font-family: var(--font-display);
   font-size: 1.9rem;
-  color: var(--cream);
+  color: var(--on-dark);
   margin-bottom: 4px;
   font-weight: 700;
   line-height: 1.2;
@@ -95,6 +95,10 @@
   .tabContent { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; padding: 16px 48px 0; }
   .tabContent .section { padding: 0; }
   .tabContent > .section:first-child { grid-column: 1 / -1; }
+  .runningDashboard, .planBoard { grid-column: 1 / -1; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
+  .runningDashboard { grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr); }
+  .planBoard { padding: 18px; }
+  .upNext { margin-left: 0; margin-right: 0; }
   .chatWrap { max-width: 860px; }
 }
 
@@ -138,6 +142,10 @@
 :global(html[data-theme="dark"]) .tabs,
 :global(html[data-theme="dark"]) .overviewCard,
 :global(html[data-theme="dark"]) .todaySessionCard,
+:global(html[data-theme="dark"]) .todayHero,
+:global(html[data-theme="dark"]) .planBoard,
+:global(html[data-theme="dark"]) .upNext,
+:global(html[data-theme="dark"]) .planSummary div,
 :global(html[data-theme="dark"]) .checkinCard,
 :global(html[data-theme="dark"]) .checkinDisplay,
 :global(html[data-theme="dark"]) .completionCard,
@@ -152,6 +160,13 @@
 
 :global(html[data-theme="dark"]) .tabActive {
   background: rgba(131, 168, 120, 0.14);
+}
+
+:global(html[data-theme="dark"]) .planDay,
+:global(html[data-theme="dark"]) .todayMetrics span,
+:global(html[data-theme="dark"]) .planStats span {
+  background: #141a15;
+  border-color: #2d382f;
 }
 
 /* ── Tab content ─────────────────────────────────────────────── */
@@ -171,6 +186,218 @@
   color: var(--ink-faint);
   font-weight: 700;
   margin-bottom: 10px;
+}
+
+.runningDashboard {
+  display: grid;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.todayHero,
+.planBoard,
+.upNext {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 10px 26px var(--shadow-xs);
+}
+
+.todayHero {
+  border-left: 5px solid var(--sage);
+  padding: 18px;
+}
+
+.todayHeroTop,
+.planBoardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.todayHero h2,
+.planBoardHeader h2 {
+  font-size: 1.08rem;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.sessionChip {
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.todayMetrics,
+.planStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.todayMetrics span,
+.planStats span {
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  color: var(--ink-light);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 5px 10px;
+}
+
+.todayPace {
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.todayNotes {
+  color: var(--ink-light);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+
+.planSummary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.planSummary div {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  padding: 12px 10px;
+  text-align: center;
+}
+
+.planSummary span {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.planSummary p {
+  color: var(--ink-faint);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-top: 5px;
+  text-transform: uppercase;
+}
+
+.planBoard {
+  margin: 0 16px 16px;
+  padding: 16px;
+}
+
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.planDay {
+  min-height: 134px;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--r-md);
+  background: var(--cream);
+  padding: 12px;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.planDay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px var(--shadow-xs);
+}
+
+.planDayToday {
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px rgba(99, 127, 95, 0.2);
+}
+
+.planDaySelected {
+  background: var(--paper);
+}
+
+.planDayNum,
+.planDayDate,
+.planDayType,
+.planDay > span:last-child {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+
+.planDayType {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.planDay strong {
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.upNext {
+  margin: 0 16px 16px;
+  padding: 16px;
+}
+
+.upNextRow {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: none;
+  border-top: 1px solid var(--border-light);
+  background: transparent;
+  padding: 11px 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.upNextRow > span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.upNextRow strong {
+  color: var(--ink);
+  font-size: 0.86rem;
+}
+
+.upNextRow p {
+  color: var(--ink-faint);
+  font-size: 0.76rem;
+  margin-top: 3px;
 }
 
 /* ── Weekly grid ─────────────────────────────────────────────── */
@@ -541,8 +768,8 @@
 .primaryBtn {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--paper);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   border: none;
   border-radius: 13px;
   font-size: 0.97rem;
@@ -750,7 +977,7 @@
   line-height: 1.2;
 }
 
-.goalCardActive .goalName { color: var(--paper); }
+.goalCardActive .goalName { color: var(--on-ink); }
 
 .goalSub {
   font-size: 0.6rem;
@@ -799,7 +1026,7 @@
   margin-bottom: 3px;
 }
 
-.expBigCardActive .expBigTitle { color: var(--paper); }
+.expBigCardActive .expBigTitle { color: var(--on-ink); }
 
 .expBigSub {
   font-size: 0.68rem;
@@ -922,8 +1149,8 @@
 .wizardNext {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--paper);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   border: none;
   border-radius: 14px;
   font-size: 1rem;
@@ -1008,7 +1235,7 @@
 .pillActive {
   background: var(--sage);
   border-color: var(--sage);
-  color: var(--paper);
+  color: var(--on-accent);
   font-weight: 700;
 }
 
@@ -1204,7 +1431,7 @@
   line-height: 1.6;
 }
 
-.bubbleUser .bubbleText { color: var(--paper); }
+.bubbleUser .bubbleText { color: var(--on-ink); }
 .bubbleCoach .bubbleText { color: var(--ink); }
 
 /* Typing indicator */
@@ -1306,7 +1533,7 @@
   border: none;
   border-radius: 12px;
   background: var(--ink);
-  color: var(--paper);
+  color: var(--on-ink);
   cursor: pointer;
   display: flex;
   align-items: center;

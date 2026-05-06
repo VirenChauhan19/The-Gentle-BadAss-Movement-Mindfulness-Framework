@@ -190,7 +190,7 @@
   margin: 18px auto 0;
   padding: 0 18px;
   font-size: 0.88rem;
-  color: var(--paper);
+  color: var(--on-accent);
   font-weight: 700;
   text-decoration: none;
   background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
@@ -200,7 +200,7 @@
 }
 
 .startLink:hover {
-  color: var(--paper);
+  color: var(--on-accent);
   transform: translateY(-2px);
   box-shadow: 0 12px 24px rgba(63, 95, 62, 0.28);
 }

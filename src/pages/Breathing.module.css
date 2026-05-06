@@ -200,7 +200,7 @@
 
 .controls button {
   background: linear-gradient(135deg, var(--sage), var(--sage-dark));
-  color: var(--paper);
+  color: var(--on-accent);
 }
 
 .secondaryBtn {
@@ -213,7 +213,7 @@
   width: 100%;
   margin-top: 10px;
   background: var(--ink);
-  color: var(--paper);
+  color: var(--on-ink);
 }
 
 .controls button:hover,

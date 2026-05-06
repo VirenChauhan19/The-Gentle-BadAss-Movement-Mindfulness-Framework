@@ -97,8 +97,8 @@
 
 .active {
   border-color: transparent;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--paper);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
 }
 
 .bpm {
@@ -174,8 +174,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--ink), #22382d);
-  color: var(--paper);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   font-family: var(--font-display);
   font-size: 2.1rem;
   font-weight: 900;
@@ -207,7 +207,7 @@
   padding: 13px;
   border-radius: var(--r-md);
   background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
-  color: var(--paper);
+  color: var(--on-accent);
   font-weight: 800;
   border: none;
   transition: transform 0.16s ease, box-shadow 0.16s ease;

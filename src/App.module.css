@@ -118,7 +118,7 @@
 
 .googleBtn {
   background: var(--ink);
-  color: var(--paper);
+  color: var(--on-ink);
 }
 
 .guestBtn {

@@ -367,12 +367,12 @@
 
 .startBtn {
   background: linear-gradient(135deg, var(--sage), var(--sage-dark));
-  color: var(--paper);
+  color: var(--on-accent);
 }
 
 .stopBtn {
   background: var(--ink);
-  color: var(--paper);
+  color: var(--on-ink);
 }
 
 .missedBtn {
@@ -410,8 +410,8 @@
 
 .nextBtn {
   width: 100%;
-  background: linear-gradient(135deg, var(--ink), #22382d);
-  color: var(--paper);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
 }
 
 .detailPanel {

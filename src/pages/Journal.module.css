@@ -281,7 +281,7 @@
 .scoreChipActive {
   background: var(--chip-color);
   border-color: var(--chip-color);
-  color: var(--paper);
+  color: var(--on-accent);
   box-shadow: 0 6px 16px rgba(24, 23, 19, 0.16);
 }
 
@@ -484,8 +484,8 @@
 
 .saveBtn {
   width: 100%;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--cream);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   border-radius: var(--r-lg);
   padding: 16px;
   font-size: 0.97rem;

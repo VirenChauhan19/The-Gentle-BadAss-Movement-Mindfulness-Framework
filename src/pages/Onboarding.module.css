@@ -176,7 +176,7 @@
 .pathCheck {
   font-size: 1rem;
   font-weight: 800;
-  color: var(--paper);
+  color: var(--on-accent);
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -190,20 +190,20 @@
 
 .pathActive {
   border-color: var(--ink);
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
+  background: var(--brand-gradient);
   box-shadow: 0 4px 14px var(--shadow-md);
 }
 
-.pathActive .pathTitle { color: var(--paper); }
+.pathActive .pathTitle { color: var(--on-dark); }
 .pathActive .pathDesc  { color: rgba(255, 255, 255, 0.7); }
-.pathActive .pathCheck { background: rgba(255, 255, 255, 0.18); color: var(--paper); }
+.pathActive .pathCheck { background: rgba(255, 255, 255, 0.18); color: var(--on-dark); }
 
 /* ── Commitment card ──────────────────────────────────── */
 .commitmentCard {
   background:
     radial-gradient(circle at 84% 14%, rgba(215, 229, 209, 0.18), transparent 8rem),
-    linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--paper);
+    var(--brand-gradient);
+  color: var(--on-dark);
   border-radius: var(--r-lg);
   padding: 2rem 1.5rem 1.5rem;
   text-align: center;
@@ -216,7 +216,7 @@
   font-size: 4.5rem;
   font-weight: 700;
   line-height: 1;
-  color: var(--cream);
+  color: var(--on-dark);
 }
 
 .commitUnit {
@@ -231,7 +231,7 @@
 .commitLabelText {
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--paper);
+  color: var(--on-dark);
 }
 
 .commitDesc {
@@ -296,8 +296,8 @@
 .primaryBtn {
   width: 100%;
   padding: 1rem;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--paper);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   border: none;
   border-radius: var(--r-lg);
   font-size: 1rem;

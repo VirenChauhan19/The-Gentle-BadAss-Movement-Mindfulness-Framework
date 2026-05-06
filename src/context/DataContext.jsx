@@ -235,6 +235,16 @@ export function DataProvider({ children }) {
     syncCoachToFirestore(next)
   }
 
+  function updateCoachGoal(goal) {
+    const key = coachKey(user?.uid)
+    setCoachData(prev => {
+      const next = { ...(prev || {}), goal }
+      localStorage.setItem(key, JSON.stringify(next))
+      syncCoachToFirestore(next)
+      return next
+    })
+  }
+
   function saveCoachCheckin(checkin) {
     const today = new Date().toISOString().split('T')[0]
     const full = { ...checkin, date: today }
@@ -314,7 +324,7 @@ export function DataProvider({ children }) {
   })()
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks }}>
       {children}
     </DataContext.Provider>
   )

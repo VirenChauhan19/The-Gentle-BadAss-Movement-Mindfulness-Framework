@@ -16,6 +16,70 @@ const SESSION_STYLE = {
   cross:    { color: '#704090', bg: 'rgba(180,138,217,0.14)', border: '#c89ad9', label: 'Cross'    },
 }
 
+function addDaysISO(startDate, offset) {
+  const d = new Date(`${startDate}T00:00:00`)
+  d.setDate(d.getDate() + offset)
+  return d.toISOString().split('T')[0]
+}
+
+function getPlan(goal) {
+  if (Array.isArray(goal?.plan) && goal.plan.length) return goal.plan
+  const template = goal?.weekTemplate || []
+  if (!template.length) return []
+  const startDate = goal.startDate || new Date().toISOString().split('T')[0]
+  const totalDays = goal.commitmentDays || ((goal.weeks || 4) * 7)
+  return Array.from({ length: totalDays }, (_, i) => {
+    const date = addDaysISO(startDate, i)
+    const day = DAYS_FULL[new Date(`${date}T00:00:00`).getDay()]
+    const session = template.find(s => s.day === day) || template[i % template.length] || {}
+    return { ...session, id: `day-${i + 1}`, dayNumber: i + 1, date, day }
+  })
+}
+
+function expandProgramPlan(template, startDate, totalDays) {
+  if (!Array.isArray(template) || !template.length) return []
+  return Array.from({ length: totalDays }, (_, i) => {
+    const date = addDaysISO(startDate, i)
+    const day = DAYS_FULL[new Date(`${date}T00:00:00`).getDay()]
+    const session = template.find(s => s.day === day) || template[i % template.length] || {}
+    const week = Math.floor(i / 7) + 1
+    return {
+      id: `day-${i + 1}`,
+      dayNumber: i + 1,
+      week,
+      date,
+      day,
+      type: session.type || 'rest',
+      title: session.title || 'Rest / Recovery',
+      distance: session.distance || '',
+      duration: session.duration || '',
+      pace: session.pace || '',
+      notes: session.notes || '',
+    }
+  })
+}
+
+function normalizePlan(rawPlan, startDate, totalDays) {
+  if (!Array.isArray(rawPlan) || !rawPlan.length) return []
+  return rawPlan.slice(0, totalDays).map((item, i) => {
+    const date = item.date || addDaysISO(startDate, i)
+    const day = item.day || DAYS_FULL[new Date(`${date}T00:00:00`).getDay()]
+    return {
+      id: item.id || `day-${i + 1}`,
+      dayNumber: item.dayNumber || i + 1,
+      week: item.week || Math.floor(i / 7) + 1,
+      date,
+      day,
+      type: item.type || 'rest',
+      title: item.title || 'Rest / Recovery',
+      distance: item.distance || '',
+      duration: item.duration || '',
+      pace: item.pace || '',
+      notes: item.notes || '',
+    }
+  })
+}
+
 const COACH_REFUSAL = "I'm your running coach - I can only help with running, fitness, training, recovery, and your program. What running question can I answer?"
 
 const RUNNING_SCOPE_RULE = `IMPORTANT - RUNNING FITNESS SCOPE:
@@ -31,19 +95,20 @@ function isRunningFitnessQuestion(text) {
 
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function Coach() {
-  const { coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries, adminRemarks } = useData()
+  const { coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries, adminRemarks, profile } = useData()
   const [tab, setTab] = useState('program')
 
   const goal     = coachData?.goal        || null
   const checkins = coachData?.checkins    || []
   const chat     = coachData?.chatHistory || []
 
-  if (!goal) return <GoalSetup onSave={saveCoachGoal} />
+  if (!goal) return <GoalSetup onSave={saveCoachGoal} defaultCommitment={profile?.commitment || 30} />
 
   const today      = new Date().toISOString().split('T')[0]
   const now        = new Date()
   const startDate  = new Date(goal.startDate)
-  const totalDays  = (goal.weeks || 12) * 7
+  const plan       = getPlan(goal)
+  const totalDays  = goal.commitmentDays || plan.length || ((goal.weeks || 12) * 7)
   const dayNum     = Math.floor((now - startDate) / 86400000) + 1
   const remaining  = Math.max(0, totalDays - dayNum + 1)
   const progress   = Math.min(1, (dayNum - 1) / totalDays)
@@ -51,16 +116,16 @@ export default function Coach() {
   const weekNum    = Math.ceil(dayNum / 7)
 
   const todayDayName = DAYS_FULL[now.getDay()]
-  const todaySession = goal.weekTemplate?.find(s => s.day === todayDayName)
+  const todaySession = plan.find(s => s.date === today) || goal.weekTemplate?.find(s => s.day === todayDayName)
   const todayCheckin = checkins.find(c => c.date === today)
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <p className={styles.label}>Running</p>
-        <h1 className={styles.title}>{goal.raceGoal}</h1>
+        <h1 className={styles.title}>{goal.focus || goal.raceGoal}</h1>
         <p className={styles.headerSub}>
-          {isComplete ? 'Program complete!' : `Week ${weekNum} of ${goal.weeks} · Day ${dayNum}`}
+          {isComplete ? 'Program complete!' : `Week ${weekNum} · Day ${Math.max(1, dayNum)} of ${totalDays}`}
         </p>
         <div className={styles.progressTrack}>
           <div className={styles.progressFill} style={{ width: `${progress * 100}%` }} />
@@ -81,7 +146,7 @@ export default function Coach() {
 
       {tab === 'program'
         ? <ProgramTab
-            goal={goal} todaySession={todaySession} todayCheckin={todayCheckin}
+            goal={goal} plan={plan} todaySession={todaySession} todayCheckin={todayCheckin}
             checkins={checkins} entries={entries} dayNum={dayNum}
             isComplete={isComplete} onCheckin={saveCoachCheckin} onNewGoal={clearCoachGoal}
             adminRemarks={adminRemarks}
@@ -96,16 +161,16 @@ export default function Coach() {
 }
 
 // ── Goal Setup ────────────────────────────────────────────────────────────────
-const RACE_GOALS = [
-  { id: '800m',          label: '800m',          icon: '⚡', sub: 'Speed & track'   },
-  { id: '1500m',         label: '1500m',         icon: '🏃', sub: 'Middle distance' },
-  { id: '3K',            label: '3K',            icon: '🔥', sub: 'Speed endurance' },
-  { id: '5K Race',       label: '5K',            icon: '🌱', sub: 'Short road'      },
-  { id: '10K Race',      label: '10K',           icon: '💪', sub: 'Road classic'    },
-  { id: 'Half Marathon', label: 'Half Marathon', icon: '🏅', sub: '21.1 km'         },
-  { id: 'Marathon',      label: 'Marathon',      icon: '🏆', sub: '42.2 km'         },
-  { id: 'Ultra',         label: 'Ultra',         icon: '🌄', sub: '50K+'            },
-  { id: 'Base Fitness',  label: 'Base Fitness',  icon: '🧘', sub: 'General fitness' },
+const FOCUS_OPTIONS = [
+  { id: 'Start Running', label: 'Start Running', icon: 'S', sub: 'Build the habit' },
+  { id: 'Base Fitness', label: 'Base Fitness', icon: 'B', sub: 'General capacity' },
+  { id: 'Consistency', label: 'Consistency', icon: 'C', sub: 'Steady weekly rhythm' },
+  { id: 'Weight Loss Support', label: 'Weight Loss', icon: 'W', sub: 'Low-risk volume' },
+  { id: 'Speed & Power', label: 'Speed', icon: 'P', sub: 'Strides and mechanics' },
+  { id: '5K Race', label: '5K Race', icon: '5K', sub: 'Optional race goal' },
+  { id: '10K Race', label: '10K Race', icon: '10K', sub: 'Optional race goal' },
+  { id: 'Half Marathon', label: 'Half Marathon', icon: '21K', sub: 'Optional race goal' },
+  { id: 'Ultra', label: 'Ultra', icon: '50K', sub: 'Optional race goal' },
 ]
 
 const EXPERIENCE = [
@@ -116,20 +181,20 @@ const EXPERIENCE = [
 ]
 
 const TOTAL_STEPS = 4
-const STEP_TITLES = ['What\'s your goal?', 'Your experience', 'Your training', 'Anything else?']
+const STEP_TITLES = ['Choose your focus', 'Your experience', 'Your commitment', 'Anything else?']
 const STEP_SUBS   = [
-  'Pick the race or distance you\'re training for.',
+  'This does not have to be a race. Pick what fits your life right now.',
   'Be honest — this shapes every session.',
-  'Type any number — no limits here.',
-  'Injuries, target time, schedule constraints… (optional)',
+  'Use the full number of days you committed to.',
+  'Injuries, schedule constraints, preferences… (optional)',
 ]
 
-function GoalSetup({ onSave }) {
+function GoalSetup({ onSave, defaultCommitment = 30 }) {
   const [step,        setStep]        = useState(1)
-  const [raceGoal,    setRaceGoal]    = useState('')
+  const [focus,       setFocus]       = useState('')
   const [experience,  setExperience]  = useState('')
   const [daysPerWeek, setDaysPerWeek] = useState(4)
-  const [weeks,       setWeeks]       = useState('')
+  const [commitmentDays, setCommitmentDays] = useState(String(defaultCommitment))
   const [currentKm,   setCurrentKm]   = useState('')
   const [notes,       setNotes]       = useState('')
   const [loading,     setLoading]     = useState(false)
@@ -140,15 +205,20 @@ function GoalSetup({ onSave }) {
   async function handleGenerate() {
     setLoading(true)
     setError(null)
-    const weeksNum = Math.max(1, parseInt(weeks) || 12)
+    const totalDays = Math.max(7, parseInt(commitmentDays) || defaultCommitment || 30)
+    const weeksNum = Math.max(1, Math.ceil(totalDays / 7))
     const kmStr    = currentKm ? `${currentKm} km/week` : '20–40 km/week'
     try {
-      const program = await generateProgram({ raceGoal, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, notes })
+      const startDate = new Date().toISOString().split('T')[0]
+      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes })
+      const plan = normalizePlan(program.plan, startDate, totalDays)
+      const fallbackPlan = plan.length ? plan : expandProgramPlan(program.weekTemplate || [], startDate, totalDays)
       onSave({
-        raceGoal, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum,
-        startDate: new Date().toISOString().split('T')[0],
+        focus, raceGoal: focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays,
+        startDate,
         overview:         program.overview,
-        weekTemplate:     program.weekTemplate,
+        weekTemplate:     program.weekTemplate || [],
+        plan:             fallbackPlan,
         progressionNote:  program.progressionNote,
         peakWeeklyVolume: program.peakWeeklyVolume,
       })
@@ -181,7 +251,7 @@ function GoalSetup({ onSave }) {
         <header className={styles.header}>
           <p className={styles.label}>Running</p>
           <h1 className={styles.title}>Building Your Plan</h1>
-          <p className={styles.subtitle}>Designing your {weeks}-week {raceGoal} program…</p>
+          <p className={styles.subtitle}>Designing your {commitmentDays}-day {focus} program…</p>
         </header>
         <div className={styles.generatingWrap}>
           <div className={styles.generatingDots}><span /><span /><span /></div>
@@ -210,15 +280,15 @@ function GoalSetup({ onSave }) {
 
       <div className={styles.wizardBody}>
 
-        {/* ── Step 1: Race Goal ── */}
+        {/* Step 1: Training focus */}
         {step === 1 && (
           <>
             <div className={styles.goalGrid}>
-              {RACE_GOALS.map(g => (
+              {FOCUS_OPTIONS.map(g => (
                 <button
                   key={g.id}
-                  className={`${styles.goalCard} ${raceGoal === g.id ? styles.goalCardActive : ''}`}
-                  onClick={() => setRaceGoal(g.id)}
+                  className={`${styles.goalCard} ${focus === g.id ? styles.goalCardActive : ''}`}
+                  onClick={() => setFocus(g.id)}
                 >
                   <span className={styles.goalIcon}>{g.icon}</span>
                   <span className={styles.goalName}>{g.label}</span>
@@ -227,7 +297,7 @@ function GoalSetup({ onSave }) {
               ))}
             </div>
             <div className={styles.wizardBtns}>
-              <button className={styles.wizardNext} disabled={!raceGoal} onClick={() => setStep(2)}>
+              <button className={styles.wizardNext} disabled={!focus} onClick={() => setStep(2)}>
                 Next →
               </button>
             </div>
@@ -289,16 +359,16 @@ function GoalSetup({ onSave }) {
 
               <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>
-                  Weeks until race <span className={styles.inputSub}>type any number</span>
+                  Commitment length <span className={styles.inputSub}>total days for this plan</span>
                 </label>
                 <input
                   type="number"
-                  min="1"
-                  max="104"
+                  min="7"
+                  max="365"
                   className={styles.numberInput}
-                  value={weeks}
-                  onChange={e => setWeeks(e.target.value)}
-                  placeholder="e.g. 14"
+                  value={commitmentDays}
+                  onChange={e => setCommitmentDays(e.target.value)}
+                  placeholder="e.g. 30"
                 />
               </div>
 
@@ -319,7 +389,7 @@ function GoalSetup({ onSave }) {
             <div className={styles.wizardBtns}>
               <button
                 className={styles.wizardNext}
-                disabled={!weeks || !currentKm}
+                disabled={!commitmentDays || !currentKm}
                 onClick={() => setStep(4)}
               >
                 Next →
@@ -358,52 +428,103 @@ function GoalSetup({ onSave }) {
 }
 
 // ── Program Tab ───────────────────────────────────────────────────────────────
-function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNum, isComplete, onCheckin, onNewGoal, adminRemarks = [] }) {
-  const weekTemplate = goal.weekTemplate || []
+function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, isComplete, onCheckin, onNewGoal, adminRemarks = [] }) {
   const [selectedDay, setSelectedDay] = useState(null)
+  const visiblePlan = plan.length ? plan : getPlan(goal)
+  const currentDay = Math.max(1, dayNum)
+  const nextSessions = visiblePlan.filter(s => s.dayNumber >= currentDay).slice(0, 14)
+  const trainingDays = visiblePlan.filter(s => s.type !== 'rest').length
+  const completedDates = new Set(checkins.map(c => c.date))
+  const todayStyle = SESSION_STYLE[todaySession?.type] || SESSION_STYLE.rest
 
   function toggleDay(s) {
-    setSelectedDay(prev => prev?.day === s.day ? null : s)
+    setSelectedDay(prev => prev?.date === s.date ? null : s)
   }
 
   return (
     <div className={styles.tabContent}>
 
-      {/* Weekly grid */}
-      {weekTemplate.length > 0 && (
-        <div className={styles.section}>
-          <p className={styles.sectionLabel}>Weekly Structure — tap a day</p>
-          <div className={styles.weekGrid}>
-            {weekTemplate.map((s, i) => {
+      <div className={styles.runningDashboard}>
+        {todaySession && !isComplete && (
+          <div className={styles.todayHero} style={{ borderColor: todayStyle.border }}>
+            <div className={styles.todayHeroTop}>
+              <div>
+                <p className={styles.sectionLabel}>Today</p>
+                <h2>{todaySession.title || todayStyle.label}</h2>
+              </div>
+              <span className={styles.sessionChip} style={{ color: todayStyle.color, background: todayStyle.bg }}>
+                {todayStyle.label}
+              </span>
+            </div>
+            <div className={styles.todayMetrics}>
+              <span>{todaySession.distance || 'No distance'}</span>
+              <span>{todaySession.duration || 'Open duration'}</span>
+              <span>Day {todaySession.dayNumber || currentDay}</span>
+            </div>
+            {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
+            {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
+          </div>
+        )}
+
+        <div className={styles.planSummary}>
+          <div>
+            <span>{visiblePlan.length}</span>
+            <p>days mapped</p>
+          </div>
+          <div>
+            <span>{trainingDays}</span>
+            <p>workouts</p>
+          </div>
+          <div>
+            <span>{completedDates.size}</span>
+            <p>logged</p>
+          </div>
+        </div>
+      </div>
+
+      {visiblePlan.length > 0 && (
+        <div className={styles.planBoard}>
+          <div className={styles.planBoardHeader}>
+            <div>
+              <p className={styles.sectionLabel}>Commitment Plan</p>
+              <h2>{goal.commitmentDays || visiblePlan.length} days, fully mapped</h2>
+            </div>
+            <div className={styles.planStats}>
+              <span>{trainingDays} workouts</span>
+              <span>{completedDates.size} logged</span>
+            </div>
+          </div>
+          <div className={styles.planGrid}>
+            {visiblePlan.map((s, i) => {
               const st = SESSION_STYLE[s.type] || SESSION_STYLE.rest
-              const dayIdx = DAYS_FULL.indexOf(s.day)
-              const isToday = s.day === DAYS_FULL[new Date().getDay()]
-              const isSelected = selectedDay?.day === s.day
+              const isToday = s.date === new Date().toISOString().split('T')[0]
+              const isSelected = selectedDay?.date === s.date
+              const isLogged = completedDates.has(s.date)
               return (
-                <div
-                  key={i}
-                  className={`${styles.dayCard} ${isToday ? styles.dayCardToday : ''} ${isSelected ? styles.dayCardSelected : ''}`}
-                  style={{ background: (isToday || isSelected) ? st.bg : undefined, borderColor: (isToday || isSelected) ? st.border : undefined }}
+                <button
+                  key={s.id || s.date || i}
+                  className={`${styles.planDay} ${isToday ? styles.planDayToday : ''} ${isSelected ? styles.planDaySelected : ''}`}
+                  style={{ borderColor: isToday || isSelected ? st.border : undefined }}
                   onClick={() => toggleDay(s)}
                 >
-                  <span className={styles.dayShort}>{DAYS_FULL[dayIdx] ?? s.day}</span>
-                  <span className={styles.dayDot} style={{ background: st.border }} />
-                  <span className={styles.dayLabel} style={{ color: st.color }}>{st.label}</span>
-                  <span className={styles.dayDist}>{s.distance || '—'}</span>
-                </div>
+                  <span className={styles.planDayNum}>Day {s.dayNumber || i + 1}</span>
+                  <span className={styles.planDayDate}>{s.day?.slice(0, 3)} · {s.date?.slice(5)}</span>
+                  <span className={styles.planDayType} style={{ color: st.color }}>{isLogged ? 'Logged' : st.label}</span>
+                  <strong>{s.title || st.label}</strong>
+                  <span>{s.distance || s.duration || 'Recovery'}</span>
+                </button>
               )
             })}
           </div>
 
-          {/* Selected day detail */}
           {selectedDay && (() => {
             const st = SESSION_STYLE[selectedDay.type] || SESSION_STYLE.rest
             return (
-              <div className={styles.dayDetail} style={{ borderLeft: `4px solid ${st.border}`, background: st.bg }}>
+              <div className={styles.dayDetail} style={{ borderLeft: `4px solid ${st.border}` }}>
                 <div className={styles.dayDetailTop}>
                   <div>
                     <span className={styles.dayDetailType} style={{ color: st.color }}>{st.label}</span>
-                    <span className={styles.dayDetailMeta}>{selectedDay.day} · {selectedDay.distance} · {selectedDay.duration}</span>
+                    <span className={styles.dayDetailMeta}>Day {selectedDay.dayNumber} · {selectedDay.date} · {selectedDay.distance || selectedDay.duration}</span>
                   </div>
                   <button className={styles.dayDetailClose} onClick={() => setSelectedDay(null)}>✕</button>
                 </div>
@@ -413,6 +534,24 @@ function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNu
               </div>
             )
           })()}
+        </div>
+      )}
+
+      {nextSessions.length > 0 && (
+        <div className={styles.upNext}>
+          <p className={styles.sectionLabel}>Up next</p>
+          {nextSessions.slice(0, 5).map(s => {
+            const st = SESSION_STYLE[s.type] || SESSION_STYLE.rest
+            return (
+              <button key={s.id || s.date} className={styles.upNextRow} onClick={() => setSelectedDay(s)}>
+                <span style={{ background: st.border }} />
+                <div>
+                  <strong>Day {s.dayNumber}: {s.title}</strong>
+                  <p>{s.date} · {s.distance || s.duration || SESSION_STYLE[s.type]?.label}</p>
+                </div>
+              </button>
+            )
+          })}
         </div>
       )}
 
@@ -448,7 +587,7 @@ function ProgramTab({ goal, todaySession, todayCheckin, checkins, entries, dayNu
       {/* Check-in or completion */}
       {isComplete ? (
         <div className={styles.completionCard}>
-          <p className={styles.completionMsg}>You finished your {goal.weeks}-week {goal.raceGoal} program. That's the work.</p>
+          <p className={styles.completionMsg}>You finished your {goal.commitmentDays || visiblePlan.length}-day {goal.focus || goal.raceGoal} program. That's the work.</p>
           <button className={styles.primaryBtn} onClick={onNewGoal}>Start a New Program</button>
         </div>
       ) : todayCheckin ? (
@@ -729,10 +868,11 @@ async function apiCall(messages, maxTokens = 600) {
   return data.choices?.[0]?.message?.content?.trim() || ''
 }
 
-async function generateProgram({ raceGoal, experience, daysPerWeek, currentKm, weeks, notes }) {
+async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes }) {
   const hardSessions = daysPerWeek >= 5 ? 2 : 1
   const easySessions = Math.max(0, daysPerWeek - hardSessions - 1)
   const restDays     = 7 - daysPerWeek
+  const raceGoal = focus
 
   const isTrackEvent = ['800m', '1500m', '3K'].includes(raceGoal)
   const isCompetitive = experience === 'Competitive' || experience === 'Advanced'
@@ -785,12 +925,24 @@ HARD WORKOUT QUALITY RULES:
 - Hard: "Strong effort — controlled aggression"
 - Long: "Easy conversational — slower than easy days, prioritise time on feet"`
 
-  const system = `You are an expert running coach. Generate a personalised weekly training template.
+  const system = `You are an expert running coach. Generate a personalised running and fitness plan for the user's full commitment. The user does not need to be training for a race.
 Return ONLY valid JSON — no markdown, no explanation, no text outside the JSON.
 
 JSON structure:
 {
   "overview": "2–3 sentence program philosophy and what the runner will achieve",
+  "plan": [
+    {
+      "dayNumber": 1,
+      "week": 1,
+      "type": "easy|moderate|hard|long|rest|cross",
+      "title": "Session title",
+      "distance": "6 km  OR  6 x 400m  OR  45 min",
+      "duration": "35-40 min",
+      "pace": "specific effort or speed guidance",
+      "notes": "Warm-up, main set, and cool-down details"
+    }
+  ],
   "weekTemplate": [
     {
       "day": "Monday",
@@ -818,6 +970,10 @@ SESSION NOTES — every non-rest day must have all three:
 3. Cool-down: 2–3 named stretches (quad, hamstring, calf, hip flexor)
 
 PROGRAM STRUCTURE:
+- The plan is for ${commitmentDays} total days, not only a race build.
+- Return one "plan" item for every day from dayNumber 1 through dayNumber ${commitmentDays}. Do not skip rest days.
+- If the focus is general fitness, consistency, weight-loss support, or starting running, build a sustainable habit-based plan instead of race preparation.
+- Vary the plan across weeks with small progressions and recovery days when appropriate.
 - ${daysPerWeek} training days · ${restDays} rest days
 - ${hardSessions} hard/quality session(s) — NOT adjacent to long run
 - 1 long run on Saturday or Sunday
@@ -831,8 +987,8 @@ PROGRAM STRUCTURE:
 
   const raw = await apiCall([
     { role: 'system', content: system },
-    { role: 'user',   content: `Build my ${weeks}-week ${raceGoal} plan. I'm ${experience} level, currently doing ${currentKm}, training ${daysPerWeek} days/week.${notes ? ` Notes: ${notes}` : ''}` },
-  ], 1500)
+    { role: 'user',   content: `Build my full ${commitmentDays}-day ${raceGoal} plan. I'm ${experience} level, currently doing ${currentKm}, training ${daysPerWeek} days/week.${notes ? ` Notes: ${notes}` : ''}` },
+  ], Math.min(6000, Math.max(2200, commitmentDays * 90)))
 
   return extractJSON(raw)
 }
@@ -848,7 +1004,7 @@ async function getCheckinReply(goal, checkins, entries, status, note, todaySessi
     { role: 'system', content:
 `You are a dedicated running coach. Direct, warm, specific. Max 120 words.
 ${RUNNING_SCOPE_RULE}
-Runner: ${goal.raceGoal}, ${goal.experience}, ${goal.daysPerWeek} days/week, ${goal.weeks}-week plan.
+Runner focus: ${goal.focus || goal.raceGoal}, ${goal.experience}, ${goal.daysPerWeek} days/week, ${goal.commitmentDays || ((goal.weeks || 0) * 7)}-day plan.
 Today's plan: ${session}
 Recent feel scores: ${scores}
 Recent run log:
@@ -869,7 +1025,7 @@ async function getChatReply(goal, checkins, entries, messages) {
   const isPlanQuery = /(\d+[\s-]*day|week|schedule|plan|program|cross[\s-]?train|gym|workout|session|routine|what.*do|today|tomorrow)/i.test(lastMsg)
   const isPaceQuery = /(pace|split|time|how fast|seconds|secs|target|effort)/i.test(lastMsg)
 
-  const profile = `Runner: ${goal.raceGoal} goal · ${goal.experience} · ${goal.daysPerWeek} days/week · ${goal.weeks}-week plan.
+  const profile = `Runner focus: ${goal.focus || goal.raceGoal} · ${goal.experience} · ${goal.daysPerWeek} days/week · ${goal.commitmentDays || ((goal.weeks || 0) * 7)}-day plan.
 Weekly template: ${weekInfo}
 Recent feel scores: ${scores}
 Recent sessions: ${recentLog}`

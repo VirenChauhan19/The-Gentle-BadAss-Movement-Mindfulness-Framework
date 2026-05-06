@@ -60,6 +60,26 @@ export default function Admin() {
     return unsub
   }, [isAdmin])
 
+  useEffect(() => {
+    if (!isAdmin || !db) return
+    const unsub = onSnapshot(query(collectionGroup(db, 'config')), snapshot => {
+      setAllUserData(prev => {
+        const next = { ...prev }
+        snapshot.docs.forEach(d => {
+          const uid = d.ref.parent.parent?.id
+          if (!uid) return
+          const current = next[uid] || {}
+          if (d.id === 'profile') current.userProfile = d.data()
+          if (d.id === 'coach') current.coach = d.data()
+          if (d.id === 'adminRemarks') current.remarks = d.data().remarks || []
+          next[uid] = current
+        })
+        return next
+      })
+    })
+    return unsub
+  }, [isAdmin])
+
   if (user === undefined) {
     return <div className={styles.page}><p className={styles.loading}>Loading…</p></div>
   }
@@ -274,7 +294,14 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
     })
     // Merge in profile / coach / remarks from allUserData
     Object.entries(allUserData).forEach(([uid, data]) => {
-      if (!map[uid]) return
+      if (!map[uid]) {
+        map[uid] = {
+          uid,
+          name: data.userProfile?.displayName || data.coach?.userName || 'Anonymous',
+          email: data.coach?.userEmail || data.userProfile?.email || '',
+          entries: [],
+        }
+      }
       map[uid].userProfile = data.userProfile
       map[uid].coach       = data.coach
       map[uid].remarks     = data.remarks || []
@@ -370,6 +397,12 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
               key={selectedUser.uid}
               user={selectedUser}
               adminUser={adminUser}
+              onCoachUpdated={coach =>
+                setAllUserData(prev => ({
+                  ...prev,
+                  [selectedUser.uid]: { ...prev[selectedUser.uid], coach },
+                }))
+              }
               onRemarkSent={remark => onRemarkSent(selectedUser.uid, remark)}
             />
           )}
@@ -380,7 +413,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
 }
 
 // ── User Detail ───────────────────────────────────────────────────────────────
-function UserDetail({ user, adminUser, onRemarkSent }) {
+function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
   const [tab,           setTab]           = useState('journal')
   const [remarkText,    setRemarkText]    = useState('')
   const [remarkRunDate, setRemarkRunDate] = useState('')
@@ -388,11 +421,22 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
   const [remarkError,   setRemarkError]   = useState(null)
   const [expandedEntry, setExpandedEntry] = useState(null)
   const [localRemarks,  setLocalRemarks]  = useState(user.remarks || [])
+  const [editingPlan,   setEditingPlan]   = useState(false)
+  const [planDraft,     setPlanDraft]     = useState([])
+  const [savingPlan,    setSavingPlan]    = useState(false)
+  const [planError,     setPlanError]     = useState(null)
 
   const userProfile = user.userProfile
   const coach       = user.coach
   const goal        = coach?.goal
   const checkins    = coach?.checkins || []
+  const plan        = goal?.plan || []
+
+  useEffect(() => {
+    setPlanDraft(plan)
+    setEditingPlan(false)
+    setPlanError(null)
+  }, [user.uid, plan])
 
   async function sendRemark() {
     if (!remarkText.trim() || sending) return
@@ -423,6 +467,32 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
     setSending(false)
   }
 
+  function updatePlanDay(index, field, value) {
+    setPlanDraft(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item))
+  }
+
+  async function savePlanEdits() {
+    if (!coach?.goal || savingPlan) return
+    setSavingPlan(true)
+    setPlanError(null)
+    const nextCoach = {
+      ...coach,
+      goal: {
+        ...coach.goal,
+        plan: planDraft.map((item, i) => ({ ...item, dayNumber: item.dayNumber || i + 1 })),
+        updatedByAdminAt: new Date().toISOString(),
+      },
+    }
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'config', 'coach'), nextCoach, { merge: true })
+      onCoachUpdated?.(nextCoach)
+      setEditingPlan(false)
+    } catch (err) {
+      setPlanError('Could not save plan: ' + err.message)
+    }
+    setSavingPlan(false)
+  }
+
   const avgScore = user.avgScore
   const scoreColor = SCORE_COLOR(avgScore || 0)
 
@@ -438,7 +508,7 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
             {userProfile?.path && <span className={styles.tag}>{PATH_NAMES[userProfile.path] || userProfile.path}</span>}
             {userProfile?.commitment && <span className={styles.tag}>{userProfile.commitment}-day commitment</span>}
             <span className={styles.tag}>{user.entries.length} entries logged</span>
-            {goal && <span className={styles.tagCoach}>Training: {goal.raceGoal}</span>}
+            {goal && <span className={styles.tagCoach}>Running: {goal.focus || goal.raceGoal}</span>}
           </div>
         </div>
         <div className={styles.userDetailScoreBig}>
@@ -453,7 +523,7 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
       <div className={styles.detailTabs}>
         {[
           { id: 'journal', label: `Journal (${user.entries.length})` },
-          { id: 'coach',   label: goal ? `Coach · ${goal.raceGoal}` : 'Coach' },
+          { id: 'coach',   label: goal ? `Running · ${goal.focus || goal.raceGoal}` : 'Running' },
           { id: 'remarks', label: `Remarks (${localRemarks.length})` },
         ].map(t => (
           <button
@@ -499,9 +569,9 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
               : <>
                   <div className={styles.coachGoalCard}>
                     {[
-                      ['Goal',         goal.raceGoal],
+                      ['Focus',        goal.focus || goal.raceGoal],
                       ['Level',        goal.experience],
-                      ['Program',      `${goal.weeks} weeks · ${goal.daysPerWeek} days/week`],
+                      ['Program',      `${goal.commitmentDays || ((goal.weeks || 0) * 7)} days · ${goal.daysPerWeek} days/week`],
                       ['Weekly volume', goal.currentKm],
                       ['Started',      goal.startDate],
                     ].map(([label, val]) => (
@@ -522,6 +592,68 @@ function UserDetail({ user, adminUser, onRemarkSent }) {
                     <span style={{ color: '#8b9e7e' }}>✓ {checkins.filter(c => c.status === 'done').length} done</span>
                     <span style={{ color: '#d9b38a' }}>↗ {checkins.filter(c => c.status === 'partial').length} partial</span>
                     <span style={{ color: '#d98a8a' }}>✗ {checkins.filter(c => c.status === 'missed').length} missed</span>
+                  </div>
+
+                  <div className={styles.adminPlanPanel}>
+                    <div className={styles.adminPlanHeader}>
+                      <div>
+                        <p className={styles.runLogTitle}>Full Workout Plan</p>
+                        <p className={styles.adminPlanSub}>{plan.length} scheduled days visible to this user</p>
+                      </div>
+                      <div className={styles.adminPlanActions}>
+                        {editingPlan && (
+                          <button className={styles.cancelPlanBtn} onClick={() => { setPlanDraft(plan); setEditingPlan(false); setPlanError(null) }}>
+                            Cancel
+                          </button>
+                        )}
+                        <button
+                          className={styles.editPlanBtn}
+                          onClick={editingPlan ? savePlanEdits : () => setEditingPlan(true)}
+                          disabled={!planDraft.length || savingPlan}
+                        >
+                          {editingPlan ? (savingPlan ? 'Saving...' : 'Save Plan') : 'Edit Plan'}
+                        </button>
+                      </div>
+                    </div>
+                    {planError && <p className={styles.errorMsg}>{planError}</p>}
+                    {planDraft.length === 0 ? (
+                      <p className={styles.empty}>No day-by-day plan stored for this user yet.</p>
+                    ) : (
+                      <div className={styles.adminPlanList}>
+                        {planDraft.map((day, i) => {
+                          const log = checkins.find(c => c.date === day.date)
+                          return (
+                            <div key={day.id || day.date || i} className={styles.adminPlanDay}>
+                              <div className={styles.adminPlanDayMeta}>
+                                <strong>Day {day.dayNumber || i + 1}</strong>
+                                <span>{day.date || day.day || 'Unscheduled'}</span>
+                                {log && <em>{log.status}</em>}
+                              </div>
+                              {editingPlan ? (
+                                <div className={styles.adminPlanEditGrid}>
+                                  <select value={day.type || 'rest'} onChange={e => updatePlanDay(i, 'type', e.target.value)}>
+                                    {['easy', 'moderate', 'hard', 'long', 'rest', 'cross'].map(type => <option key={type} value={type}>{type}</option>)}
+                                  </select>
+                                  <input value={day.title || ''} onChange={e => updatePlanDay(i, 'title', e.target.value)} placeholder="Title" />
+                                  <input value={day.distance || ''} onChange={e => updatePlanDay(i, 'distance', e.target.value)} placeholder="Distance" />
+                                  <input value={day.duration || ''} onChange={e => updatePlanDay(i, 'duration', e.target.value)} placeholder="Duration" />
+                                  <input value={day.pace || ''} onChange={e => updatePlanDay(i, 'pace', e.target.value)} placeholder="Pace / effort" />
+                                  <textarea value={day.notes || ''} onChange={e => updatePlanDay(i, 'notes', e.target.value)} placeholder="Workout notes" rows={3} />
+                                </div>
+                              ) : (
+                                <div className={styles.adminPlanRead}>
+                                  <span>{day.type || 'rest'}</span>
+                                  <h4>{day.title || 'Untitled session'}</h4>
+                                  <p>{[day.distance, day.duration, day.pace].filter(Boolean).join(' | ')}</p>
+                                  {day.notes && <p>{day.notes}</p>}
+                                  {log?.userNote && <p className={styles.adminPlanLogNote}>User log: {log.userNote}</p>}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   {checkins.length > 0 && (

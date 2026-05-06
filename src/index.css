@@ -26,6 +26,10 @@
   --border:       #d9cfbf;
   --border-light: #ece6dc;
   --focus:        rgba(66, 105, 125, 0.28);
+  --on-dark:      #f7f5ef;
+  --on-ink:       #ffffff;
+  --on-accent:    #ffffff;
+  --brand-gradient: linear-gradient(135deg, #181713 0%, #22382d 100%);
 
   /* Shadows */
   --shadow-xs: rgba(24, 23, 19, 0.05);
@@ -68,6 +72,10 @@
   --border:       #3a443a;
   --border-light: #2a332b;
   --focus:        rgba(127, 169, 188, 0.36);
+  --on-dark:      #f4efe4;
+  --on-ink:       #181713;
+  --on-accent:    #ffffff;
+  --brand-gradient: linear-gradient(135deg, #0b0f0d 0%, #172718 58%, #172630 100%);
 
   --shadow-xs: rgba(0, 0, 0, 0.18);
   --shadow:    rgba(0, 0, 0, 0.28);

@@ -320,7 +320,7 @@
   border-bottom-right-radius: 5px;
 }
 
-.bubbleUser p { color: var(--paper, #faf7f2); }
+.bubbleUser p { color: var(--on-ink, #ffffff); }
 
 .bubbleBot {
   background: var(--cream, #f5f0e8);

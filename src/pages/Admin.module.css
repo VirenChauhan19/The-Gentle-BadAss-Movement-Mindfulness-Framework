@@ -78,7 +78,7 @@
   border-radius: 50%;
   margin: 0 auto 0.75rem;
   background: rgba(255,255,255,0.15);
-  color: var(--paper);
+  color: var(--on-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,7 +90,7 @@
 .name {
   font-size: 1.4rem;
   font-weight: 800;
-  color: var(--paper);
+  color: var(--on-dark);
   margin-bottom: 0.2rem;
 }
 
@@ -254,8 +254,8 @@
   justify-content: center;
   width: 100%;
   padding: 1rem 1.25rem;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--paper);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   border: none;
   border-radius: var(--r-lg);
   font-size: 1rem;
@@ -608,8 +608,8 @@
   gap: 8px;
   margin-bottom: 1.25rem;
   padding: 0.65rem 1.1rem;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--cream);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   border: none;
   border-radius: 0.9rem;
   font-size: 0.82rem;
@@ -686,7 +686,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px 16px;
-  background: linear-gradient(175deg, var(--ink) 0%, #22382d 60%, #213342 100%);
+  background: var(--brand-gradient);
   gap: 16px;
   flex-wrap: wrap;
 }
@@ -724,7 +724,7 @@
 .adminPanelTitle {
   font-family: var(--font-display);
   font-size: 1.5rem;
-  color: var(--cream);
+  color: var(--on-dark);
   font-weight: 700;
   line-height: 1.1;
 }
@@ -786,8 +786,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--cream);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -869,8 +869,8 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--ink) 0%, #22382d 100%);
-  color: var(--cream);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1232,6 +1232,164 @@
 .runLogStatus { font-weight: 700; flex-shrink: 0; width: 16px; }
 .runLogNote   { color: var(--ink-light); line-height: 1.45; flex: 1; }
 
+.adminPlanPanel {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.adminPlanHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.adminPlanHeader .runLogTitle {
+  padding: 0;
+  border-bottom: none;
+}
+
+.adminPlanSub {
+  color: var(--ink-faint);
+  font-size: 0.76rem;
+  margin-top: 4px;
+}
+
+.adminPlanActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.editPlanBtn,
+.cancelPlanBtn {
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 8px 12px;
+}
+
+.editPlanBtn {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.editPlanBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cancelPlanBtn {
+  background: var(--cream);
+  color: var(--ink-light);
+  border: 1px solid var(--border-light);
+}
+
+.adminPlanList {
+  max-height: 540px;
+  overflow-y: auto;
+}
+
+.adminPlanDay {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.adminPlanDay:last-child {
+  border-bottom: none;
+}
+
+.adminPlanDayMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.adminPlanDayMeta strong {
+  color: var(--ink);
+  font-size: 0.86rem;
+}
+
+.adminPlanDayMeta span,
+.adminPlanDayMeta em {
+  color: var(--ink-faint);
+  font-size: 0.74rem;
+  font-style: normal;
+}
+
+.adminPlanRead span {
+  color: var(--sage-dark);
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.adminPlanRead h4 {
+  color: var(--ink);
+  font-size: 0.94rem;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.adminPlanRead p {
+  color: var(--ink-light);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.adminPlanLogNote {
+  background: var(--cream);
+  border-left: 3px solid var(--sage);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.adminPlanEditGrid {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.55fr) minmax(160px, 1.4fr) minmax(110px, 0.7fr) minmax(110px, 0.7fr);
+  gap: 8px;
+}
+
+.adminPlanEditGrid select,
+.adminPlanEditGrid input,
+.adminPlanEditGrid textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 9px 10px;
+}
+
+.adminPlanEditGrid textarea,
+.adminPlanEditGrid input:nth-of-type(4) {
+  grid-column: 1 / -1;
+}
+
+.adminPlanEditGrid select:focus,
+.adminPlanEditGrid input:focus,
+.adminPlanEditGrid textarea:focus {
+  border-color: var(--sage);
+  outline: none;
+}
+
 /* ── Remarks tab ─── */
 .remarkForm {
   background: var(--paper);
@@ -1329,6 +1487,13 @@
   .detailTabs     { padding: 10px 16px 0; overflow-x: auto; scrollbar-width: none; }
   .detailTabs::-webkit-scrollbar { display: none; }
   .adminPanelHeader { padding: 16px; }
+  .adminPlanHeader { flex-direction: column; }
+  .adminPlanActions { width: 100%; }
+  .editPlanBtn, .cancelPlanBtn { flex: 1; }
+  .adminPlanDay { grid-template-columns: 1fr; }
+  .adminPlanEditGrid { grid-template-columns: 1fr; }
+  .adminPlanEditGrid textarea,
+  .adminPlanEditGrid input:nth-of-type(4) { grid-column: auto; }
 }
 
 /* ── Desktop: taller layout ─── */

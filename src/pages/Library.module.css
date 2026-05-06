@@ -144,7 +144,7 @@
   min-height: 42px;
   border-radius: var(--r-md);
   background: linear-gradient(135deg, var(--sage), var(--sage-dark));
-  color: var(--paper);
+  color: var(--on-accent);
   font-weight: 800;
   transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
@@ -213,9 +213,9 @@
 }
 
 .filterActive {
-  background: linear-gradient(135deg, var(--ink) 0%, #263a32 100%);
+  background: var(--brand-gradient);
   border-color: transparent;
-  color: var(--cream);
+  color: var(--on-dark);
 }
 
 .categoryDesc {
