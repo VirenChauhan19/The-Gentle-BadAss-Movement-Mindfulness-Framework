@@ -58,6 +58,13 @@
   font-weight: 700;
 }
 
+.requiredHint {
+  margin-top: 6px;
+  color: var(--terracotta);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 /* ── Factors ─────────────────────────────────────────── */
 .factors {
   padding: 16px;
@@ -480,6 +487,17 @@
   padding: 18px 16px 0;
   width: 100%;
   margin: 0 auto;
+}
+
+.submitError {
+  margin-bottom: 10px;
+  background: rgba(184, 107, 74, 0.1);
+  border: 1px solid rgba(184, 107, 74, 0.34);
+  border-radius: var(--r-md);
+  color: var(--terracotta);
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 10px 12px;
 }
 
 .saveBtn {

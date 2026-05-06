@@ -23,16 +23,30 @@ function addDaysISO(startDate, offset) {
 }
 
 function getPlan(goal) {
-  if (Array.isArray(goal?.plan) && goal.plan.length) return goal.plan
+  if (!goal) return []
   const template = goal?.weekTemplate || []
-  if (!template.length) return []
   const startDate = goal.startDate || new Date().toISOString().split('T')[0]
   const totalDays = goal.commitmentDays || ((goal.weeks || 4) * 7)
+  const storedPlan = normalizePlan(goal.plan, startDate, totalDays)
+  if (storedPlan.length >= totalDays) return storedPlan
+  const templatePlan = expandProgramPlan(template, startDate, totalDays)
   return Array.from({ length: totalDays }, (_, i) => {
+    if (storedPlan[i]) return storedPlan[i]
+    if (templatePlan[i]) return templatePlan[i]
     const date = addDaysISO(startDate, i)
-    const day = DAYS_FULL[new Date(`${date}T00:00:00`).getDay()]
-    const session = template.find(s => s.day === day) || template[i % template.length] || {}
-    return { ...session, id: `day-${i + 1}`, dayNumber: i + 1, date, day }
+    return {
+      id: `day-${i + 1}`,
+      dayNumber: i + 1,
+      week: Math.floor(i / 7) + 1,
+      date,
+      day: DAYS_FULL[new Date(`${date}T00:00:00`).getDay()],
+      type: 'rest',
+      title: 'Rest / Recovery',
+      distance: '',
+      duration: '10-20 min optional walk',
+      pace: 'Very easy',
+      notes: 'Full rest or an easy walk. Keep effort low and prepare for the next planned session.',
+    }
   })
 }
 
@@ -162,15 +176,15 @@ export default function Coach() {
 
 // ── Goal Setup ────────────────────────────────────────────────────────────────
 const FOCUS_OPTIONS = [
-  { id: 'Start Running', label: 'Start Running', icon: 'S', sub: 'Build the habit' },
-  { id: 'Base Fitness', label: 'Base Fitness', icon: 'B', sub: 'General capacity' },
-  { id: 'Consistency', label: 'Consistency', icon: 'C', sub: 'Steady weekly rhythm' },
-  { id: 'Weight Loss Support', label: 'Weight Loss', icon: 'W', sub: 'Low-risk volume' },
-  { id: 'Speed & Power', label: 'Speed', icon: 'P', sub: 'Strides and mechanics' },
-  { id: '5K Race', label: '5K Race', icon: '5K', sub: 'Optional race goal' },
-  { id: '10K Race', label: '10K Race', icon: '10K', sub: 'Optional race goal' },
-  { id: 'Half Marathon', label: 'Half Marathon', icon: '21K', sub: 'Optional race goal' },
-  { id: 'Ultra', label: 'Ultra', icon: '50K', sub: 'Optional race goal' },
+  { id: 'Start Running', label: 'Start Running', meta: 'Walk-run', sub: 'Build the habit safely' },
+  { id: 'Base Fitness', label: 'Base Fitness', meta: 'Aerobic', sub: 'Easy mileage and strength' },
+  { id: 'Consistency', label: 'Consistency', meta: 'Routine', sub: 'Steady weekly rhythm' },
+  { id: 'Weight Loss Support', label: 'Weight Loss', meta: 'Low impact', sub: 'Low-risk volume' },
+  { id: 'Speed & Power', label: 'Speed', meta: 'Strides', sub: 'Mechanics and controlled speed' },
+  { id: '5K Race', label: '5K Race', meta: 'Race', sub: 'Specific 5K preparation' },
+  { id: '10K Race', label: '10K Race', meta: 'Race', sub: 'Specific 10K preparation' },
+  { id: 'Half Marathon', label: 'Half Marathon', meta: '21.1 km', sub: 'Longer endurance build' },
+  { id: 'Ultra', label: 'Ultra', meta: 'Trail/long', sub: 'Durability and time on feet' },
 ]
 
 const EXPERIENCE = [
@@ -212,7 +226,22 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
       const startDate = new Date().toISOString().split('T')[0]
       const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes })
       const plan = normalizePlan(program.plan, startDate, totalDays)
-      const fallbackPlan = plan.length ? plan : expandProgramPlan(program.weekTemplate || [], startDate, totalDays)
+      const templatePlan = expandProgramPlan(program.weekTemplate || [], startDate, totalDays)
+      const fallbackPlan = Array.from({ length: totalDays }, (_, i) =>
+        plan[i] || templatePlan[i] || {
+          id: `day-${i + 1}`,
+          dayNumber: i + 1,
+          week: Math.floor(i / 7) + 1,
+          date: addDaysISO(startDate, i),
+          day: DAYS_FULL[new Date(`${addDaysISO(startDate, i)}T00:00:00`).getDay()],
+          type: 'rest',
+          title: 'Rest / Recovery',
+          distance: '',
+          duration: '10-20 min optional walk',
+          pace: 'Very easy',
+          notes: 'Full rest or an easy walk. Keep effort low and prepare for the next planned session.',
+        }
+      )
       onSave({
         focus, raceGoal: focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays,
         startDate,
@@ -290,7 +319,7 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
                   className={`${styles.goalCard} ${focus === g.id ? styles.goalCardActive : ''}`}
                   onClick={() => setFocus(g.id)}
                 >
-                  <span className={styles.goalIcon}>{g.icon}</span>
+                  <span className={styles.goalMeta}>{g.meta}</span>
                   <span className={styles.goalName}>{g.label}</span>
                   <span className={styles.goalSub}>{g.sub}</span>
                 </button>
@@ -568,7 +597,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
       )}
 
       {/* Today's session */}
-      {todaySession && !isComplete && (
+      {false && todaySession && !isComplete && (
         <div className={styles.todaySessionCard} style={{
           borderLeft: `4px solid ${SESSION_STYLE[todaySession.type]?.border || '#ccc'}`,
         }}>
@@ -980,9 +1009,13 @@ PROGRAM STRUCTURE:
 - ${easySessions} easy run(s) at truly conversational effort
 - Cross-training days: specify activity (cycling, swimming, yoga, rowing) with duration
 - Base all distances on current volume: ${currentKm}
+- Start Running plans should use walk-run intervals, short easy runs, mobility, and rest days before continuous runs.
+- Base Fitness and Weight Loss Support plans should prioritise easy effort, time on feet, cross-training, and strength; do not overload hard workouts.
+- Race-focus plans can include race-specific work, but only after easy volume and recovery are established.
+- Each running session must be realistic for ${currentKm}; avoid sudden distance jumps and make the title match the workout.
 - Week 1 must be smooth and easy: no volume spikes, no race-effort intervals for beginners, and no hard sessions before the runner has adapted
 - Beginner plans must build gradually: week 1 should feel comfortable, weeks 2-4 add small volume or light strides, later weeks can add controlled workouts if recovery is good
-- Goal: ${raceGoal} · Level: ${experience} · Duration: ${weeks} weeks
+- Focus: ${raceGoal} · Level: ${experience} · Duration: ${commitmentDays} days
 - Week 1 must start at or slightly below current volume — no spikes`
 
   const raw = await apiCall([

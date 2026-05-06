@@ -19,6 +19,53 @@ const PATH_NAMES = {
 const SCORE_COLOR = v =>
   v >= 8 ? '#8b9e7e' : v >= 6 ? '#a0b870' : v >= 4 ? '#d9b38a' : '#d98a8a'
 
+const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+
+function addDaysISO(startDate, offset) {
+  const d = new Date(`${startDate}T00:00:00`)
+  d.setDate(d.getDate() + offset)
+  return d.toISOString().split('T')[0]
+}
+
+function getFullCoachPlan(goal) {
+  if (!goal) return []
+  const startDate = goal.startDate || new Date().toISOString().split('T')[0]
+  const totalDays = goal.commitmentDays || ((goal.weeks || 4) * 7)
+  const template = goal.weekTemplate || []
+  const storedPlan = Array.isArray(goal.plan) ? goal.plan : []
+
+  return Array.from({ length: totalDays }, (_, i) => {
+    if (storedPlan[i]) {
+      const date = storedPlan[i].date || addDaysISO(startDate, i)
+      return {
+        ...storedPlan[i],
+        id: storedPlan[i].id || `day-${i + 1}`,
+        dayNumber: storedPlan[i].dayNumber || i + 1,
+        week: storedPlan[i].week || Math.floor(i / 7) + 1,
+        date,
+        day: storedPlan[i].day || DAYS_FULL[new Date(`${date}T00:00:00`).getDay()],
+      }
+    }
+    const date = addDaysISO(startDate, i)
+    const day = DAYS_FULL[new Date(`${date}T00:00:00`).getDay()]
+    const session = template.find(s => s.day === day) || template[i % template.length] || {}
+    return {
+      ...session,
+      id: `day-${i + 1}`,
+      dayNumber: i + 1,
+      week: Math.floor(i / 7) + 1,
+      date,
+      day,
+      type: session.type || 'rest',
+      title: session.title || 'Rest / Recovery',
+      distance: session.distance || '',
+      duration: session.duration || '10-20 min optional walk',
+      pace: session.pace || 'Very easy',
+      notes: session.notes || 'Full rest or an easy walk. Keep effort low and prepare for the next planned session.',
+    }
+  })
+}
+
 export default function Admin() {
   const { user, signInWithGoogle, signOut, authError } = useAuth()
   const { guestName, setGuestName, profile, entries, clearAllData, adminRemarks } = useData()
@@ -430,7 +477,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
   const coach       = user.coach
   const goal        = coach?.goal
   const checkins    = coach?.checkins || []
-  const plan        = goal?.plan || []
+  const plan        = useMemo(() => getFullCoachPlan(goal), [goal])
 
   useEffect(() => {
     setPlanDraft(plan)

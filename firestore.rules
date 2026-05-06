@@ -24,7 +24,12 @@ service cloud.firestore {
                   && request.auth.token.email == 'chauhan.viren08@gmail.com';
     }
 
-    // Admin can write remarks to any user's config/adminRemarks document
+    // Admin can edit any user's running coach plan and write remarks
+    match /users/{userId}/config/coach {
+      allow write: if request.auth != null
+                   && request.auth.token.email == 'chauhan.viren08@gmail.com';
+    }
+
     match /users/{userId}/config/adminRemarks {
       allow write: if request.auth != null
                    && request.auth.token.email == 'chauhan.viren08@gmail.com';
