@@ -34,22 +34,22 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
     return () => window.clearInterval(timerRef.current)
   }, [playing, selectedTempo.bpm, volume])
 
-  function tick() {
+  async function tick() {
     const nextBeat = (beatRef.current + 1) % 4
     beatRef.current = nextBeat
     setBeat(nextBeat)
     try {
       const ctx = ensureAudio()
-      if (ctx.state === 'suspended') ctx.resume()
+      if (ctx.state === 'suspended') await ctx.resume()
       playClick(ctx, nextBeat === 0, volume / 100)
     } catch {}
   }
 
-  function togglePlaying() {
+  async function togglePlaying() {
     if (!playing) {
       try {
         const ctx = ensureAudio()
-        if (ctx.state === 'suspended') ctx.resume()
+        if (ctx.state === 'suspended') await ctx.resume()
       } catch {}
     }
     onPlayingChange?.(!playing)
