@@ -53,7 +53,8 @@
       "Bash(node_modules/.bin/vite --version)",
       "Bash(xargs grep *)",
       "Bash(npx firebase *)",
-      "Bash(firebase deploy *)"
+      "Bash(firebase deploy *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\" -Force | Where-Object { $_.Name -ne \"node_modules\" } | Select-Object Name, PSIsContainer)"
     ]
   }
 }
