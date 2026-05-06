@@ -504,6 +504,17 @@
     background: linear-gradient(180deg, var(--cream) 0%, rgba(247, 245, 239, 0.86) 82%, transparent 100%);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
+    scroll-padding-inline: 12px;
+  }
+
+  :global(html[data-theme="dark"]) .filters,
+  :global(html[data-theme="ember"]) .filters,
+  :global(html[data-theme="ocean"]) .filters,
+  :global(html[data-theme="forest"]) .filters,
+  :global(html[data-theme="violet"]) .filters,
+  :global(html[data-theme="rose"]) .filters,
+  :global(html[data-theme="midnight"]) .filters {
+    background: linear-gradient(180deg, var(--cream) 0%, rgba(16, 19, 15, 0.84) 82%, transparent 100%);
   }
 
   .filter {
@@ -526,6 +537,7 @@
     min-height: 130px;
     border-radius: 20px;
     padding: 18px;
+    transform-origin: center bottom;
   }
 
   .card:active {

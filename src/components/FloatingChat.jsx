@@ -86,8 +86,17 @@ export default function FloatingChat() {
 
   return (
     <>
+      <button
+        className={`${styles.backdrop} ${open ? styles.backdropOpen : ''}`}
+        onClick={() => setOpen(false)}
+        aria-label="Close running chat"
+        tabIndex={open ? 0 : -1}
+      />
+
       {/* ── Panel ─────────────────────────────────────── */}
-      <div className={`${styles.panel} ${open ? styles.panelOpen : ''}`}>
+      <div className={`${styles.panel} ${open ? styles.panelOpen : ''}`} data-swipe-lock>
+
+        <div className={styles.sheetHandle} aria-hidden="true" />
 
         <div className={styles.panelHeader}>
           <div className={styles.headerLeft}>

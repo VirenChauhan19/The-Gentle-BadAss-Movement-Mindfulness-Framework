@@ -21,6 +21,11 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
   const audioRef = useRef(null)
   const timerRef = useRef(null)
   const beatRef = useRef(0)
+  const volumeRef = useRef(volume)
+
+  useEffect(() => {
+    volumeRef.current = volume
+  }, [volume])
 
   useEffect(() => {
     if (!playing) {
@@ -32,7 +37,7 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
     tick()
     timerRef.current = window.setInterval(tick, 60000 / selectedTempo.bpm)
     return () => window.clearInterval(timerRef.current)
-  }, [playing, selectedTempo.bpm, volume])
+  }, [playing, selectedTempo.bpm])
 
   async function tick() {
     const nextBeat = (beatRef.current + 1) % 4
@@ -41,7 +46,7 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
     try {
       const ctx = ensureAudio()
       if (ctx.state === 'suspended') await ctx.resume()
-      playClick(ctx, nextBeat === 0, volume / 100)
+      playClick(ctx, nextBeat === 0, volumeRef.current / 100)
     } catch {}
   }
 

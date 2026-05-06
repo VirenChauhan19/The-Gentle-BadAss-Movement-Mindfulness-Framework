@@ -21,6 +21,7 @@
     0 6px 14px rgba(0, 0, 0, 0.22);
   animation: navIn 480ms var(--ease-spring) both 120ms;
   overflow: hidden;
+  touch-action: pan-x;
 }
 
 .nav::before {
@@ -30,6 +31,17 @@
   background: linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, 0.36) 50%, transparent 66%);
   transform: translateX(-120%);
   animation: navSheen 5.5s var(--ease-out) infinite 1.2s;
+  pointer-events: none;
+}
+
+.nav::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 48%),
+    radial-gradient(80% 120% at 50% 0%, rgba(255, 255, 255, 0.12), transparent 62%);
   pointer-events: none;
 }
 
@@ -68,6 +80,21 @@
   flex: 1;
   -webkit-tap-highlight-color: transparent;
   overflow: hidden;
+  z-index: 1;
+  min-width: 0;
+}
+
+.link::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  transform: scale(0.72);
+  transition: opacity var(--d-base) var(--ease-out),
+              transform var(--d-base) var(--ease-out);
+  pointer-events: none;
 }
 
 .link::after {
@@ -108,13 +135,27 @@
   transform: scale(0.94);
 }
 
+.link:active::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
 /* Active state: filled pill with sage gradient */
 .active {
   color: var(--on-dark);
   background: var(--sage-gradient);
   box-shadow:
     0 6px 14px rgba(63, 95, 62, 0.28),
-    0 1px 0 rgba(255, 255, 255, 0.18) inset;
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.active::before {
+  opacity: 1;
+  transform: scale(1);
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.28), transparent 52%),
+    rgba(255, 255, 255, 0.05);
 }
 
 .active::after {
@@ -248,16 +289,21 @@
 @media (max-width: 767px) {
   .nav {
     bottom: calc(10px + env(safe-area-inset-bottom));
-    width: calc(100% - 16px);
+    width: calc(100% - 14px);
     max-width: none;
     justify-content: flex-start;
     gap: 6px;
-    padding: 7px;
+    padding: 7px 8px;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
     border-radius: 24px;
+    background:
+      linear-gradient(135deg, rgba(24, 23, 19, 0.96), rgba(34, 56, 45, 0.94)),
+      var(--brand-gradient);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
   }
 
   .nav::-webkit-scrollbar {
@@ -265,12 +311,18 @@
   }
 
   .link {
-    flex: 0 0 62px;
-    min-height: 58px;
+    flex: 0 0 61px;
+    min-height: 60px;
     scroll-snap-align: center;
     padding: 8px 6px 7px;
-    font-size: 0.55rem;
+    font-size: 0.53rem;
     border-radius: 18px;
+  }
+
+  .link span:first-of-type {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .link svg,
@@ -280,11 +332,12 @@
   }
 
   .active {
-    flex-basis: 78px;
+    flex-basis: 82px;
     transform: translateY(-2px);
     box-shadow:
       0 10px 20px rgba(63, 95, 62, 0.30),
-      0 1px 0 rgba(255, 255, 255, 0.20) inset;
+      0 1px 0 rgba(255, 255, 255, 0.20) inset,
+      0 0 24px rgba(168, 200, 159, 0.18);
   }
 
   .link:active {

@@ -451,4 +451,29 @@
     min-height: 54px;
     border-radius: 16px;
   }
+
+  .controls {
+    position: sticky;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+    z-index: 12;
+    padding: 8px;
+    margin-left: -8px;
+    margin-right: -8px;
+    background: rgba(247, 245, 239, 0.74);
+    border: 1px solid var(--border-light);
+    border-radius: 22px;
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    box-shadow: 0 14px 32px var(--shadow);
+  }
+
+  :global(html[data-theme="dark"]) .controls,
+  :global(html[data-theme="ember"]) .controls,
+  :global(html[data-theme="ocean"]) .controls,
+  :global(html[data-theme="forest"]) .controls,
+  :global(html[data-theme="violet"]) .controls,
+  :global(html[data-theme="rose"]) .controls,
+  :global(html[data-theme="midnight"]) .controls {
+    background: rgba(16, 19, 15, 0.76);
+  }
 }

@@ -54,6 +54,50 @@ function AppRoutes() {
     }
   }, [user, profile, navigate, location.pathname])
 
+  useEffect(() => {
+    const mobileRoutes = ['/', '/journal', '/breathing', '/history', '/library', '/coach', '/admin']
+    let startX = 0
+    let startY = 0
+    let startTime = 0
+
+    function isEditable(target) {
+      return target?.closest?.('input, textarea, select, button, a, [role="button"], [data-swipe-lock]')
+    }
+
+    function onTouchStart(event) {
+      if (window.innerWidth > 767 || event.touches.length !== 1 || isEditable(event.target)) return
+      startX = event.touches[0].clientX
+      startY = event.touches[0].clientY
+      startTime = Date.now()
+    }
+
+    function onTouchEnd(event) {
+      if (!startTime || window.innerWidth > 767) return
+      const currentIndex = mobileRoutes.indexOf(location.pathname)
+      if (currentIndex === -1) return
+
+      const touch = event.changedTouches[0]
+      const deltaX = touch.clientX - startX
+      const deltaY = touch.clientY - startY
+      const elapsed = Date.now() - startTime
+      startTime = 0
+
+      if (elapsed > 550 || Math.abs(deltaX) < 86 || Math.abs(deltaY) > 62) return
+      const nextIndex = deltaX < 0 ? currentIndex + 1 : currentIndex - 1
+      if (nextIndex < 0 || nextIndex >= mobileRoutes.length) return
+
+      if (navigator.vibrate) navigator.vibrate(8)
+      navigate(mobileRoutes[nextIndex])
+    }
+
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
+    return () => {
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [location.pathname, navigate])
+
   // Gate rendering until we know the Auth and Profile status
   // user === undefined means auth is still resolving
   // profile === undefined means we are logged in but still checking Firestore for a profile

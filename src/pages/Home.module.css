@@ -490,7 +490,8 @@
   }
 
   .header {
-    padding: calc(54px + env(safe-area-inset-top)) 18px 18px;
+    padding: calc(58px + env(safe-area-inset-top)) 18px 18px;
+    position: relative;
   }
 
   .greeting {
@@ -511,6 +512,18 @@
     padding: 18px;
     border-radius: 24px;
     transform-origin: center bottom;
+    isolation: isolate;
+  }
+
+  .feelCard::before {
+    transform: none;
+    animation: mobileFeelSheen 5s var(--ease-out) infinite;
+  }
+
+  @keyframes mobileFeelSheen {
+    0%, 52% { opacity: 0; transform: translateX(-105%); }
+    72% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(105%); }
   }
 
   .feelCard:active {
@@ -535,6 +548,16 @@
     margin: 0 12px 14px;
     border-radius: 18px;
     padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progressBlock::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(99, 127, 95, 0.07), transparent 58%);
+    pointer-events: none;
   }
 
   .actionGrid {
@@ -544,6 +567,9 @@
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
     padding-bottom: 18px;
+    padding-top: 2px;
+    mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 34px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 34px), transparent 100%);
   }
 
   .actionGrid::-webkit-scrollbar {
@@ -555,6 +581,28 @@
     min-height: 104px;
     scroll-snap-align: start;
     border-radius: 18px;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+
+  .action::after {
+    content: 'Tap';
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: var(--sage-dark);
+    background: rgba(99, 127, 95, 0.10);
+    border: 1px solid rgba(99, 127, 95, 0.16);
+    font-size: 0.56rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .actionLocked::after {
+    content: none;
   }
 
   .action:nth-child(2n) {
@@ -571,5 +619,6 @@
     border-radius: 20px;
     background: var(--paper);
     border: 1px solid var(--border-light);
+    box-shadow: 0 10px 24px var(--shadow-xs);
   }
 }

@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import styles from './Nav.module.css'
@@ -15,10 +16,21 @@ const links = [
 
 export default function Nav() {
   const { user, guestName } = useData()
+  const location = useLocation()
+  const navRef = useRef(null)
   const guestLocked = Boolean(guestName && !user)
 
+  useEffect(() => {
+    const active = navRef.current?.querySelector(`.${styles.active}`)
+    active?.scrollIntoView?.({ inline: 'center', block: 'nearest', behavior: 'smooth' })
+  }, [location.pathname])
+
+  function tapFeedback() {
+    if (navigator.vibrate && window.innerWidth <= 767) navigator.vibrate(6)
+  }
+
   return (
-    <nav className={styles.nav}>
+    <nav className={styles.nav} ref={navRef} aria-label="Primary">
       {links.map(({ to, label, icon: Icon, lockedForGuest }) => {
         const locked = guestLocked && lockedForGuest
         return (
@@ -27,6 +39,7 @@ export default function Nav() {
           to={locked ? '/admin' : to}
           end={to === '/'}
           title={locked ? `${label} unlocks after sign-in` : label}
+          onClick={tapFeedback}
           className={({ isActive }) =>
             `${styles.link} ${isActive && !locked ? styles.active : ''} ${locked ? styles.locked : ''}`
           }

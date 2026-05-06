@@ -689,4 +689,23 @@
     min-height: 56px;
     border-radius: 18px;
   }
+
+  .saveSection {
+    position: sticky;
+    bottom: calc(92px + env(safe-area-inset-bottom));
+    z-index: 18;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background:
+      linear-gradient(180deg, transparent, var(--cream) 20%);
+  }
+
+  .saveBtn:not(:disabled) {
+    animation: saveReady 1.8s var(--ease-out) infinite;
+  }
+
+  @keyframes saveReady {
+    0%, 100% { box-shadow: 0 8px 22px var(--shadow-md); }
+    50% { box-shadow: 0 12px 30px var(--shadow-lg); }
+  }
 }
