@@ -165,11 +165,11 @@ function normalizePlan(rawPlan, startDate, totalDays) {
 const COACH_REFUSAL = "I'm your running coach - I can only help with running, fitness, training, recovery, and your program. What running question can I answer?"
 
 const RUNNING_SCOPE_RULE = `IMPORTANT - RUNNING FITNESS SCOPE:
-Only answer from the Running fitness coach role. Allowed topics are running, run training, workouts, pacing, strength for runners, mobility, injury prevention, recovery, sleep for training, athlete nutrition, race preparation, and this user's program.
+Only answer from the Running fitness coach role. Allowed topics are running, run training, indoor/rainy-day workout alternatives, cross-training, workouts, pacing, strength for runners, mobility, injury prevention, recovery, sleep for training, athlete nutrition, race preparation, and this user's program.
 If the user asks about anything else, respond exactly: "${COACH_REFUSAL}"
 Do not answer general trivia, celebrities, news, coding, schoolwork, entertainment, or unrelated general knowledge.`
 
-const RUNNING_TOPIC_RE = /(run|running|runner|jog|jogging|race|racing|track|800m|1500m|3k|5k|10k|marathon|ultra|pace|pacing|split|splits|distance|duration|effort|rpe|workout|training|train|fitness|exercise|strength|gym|mobility|stretch|warm[-\s]?up|cool[-\s]?down|interval|tempo|stride|sprint|hill|endurance|aerobic|recovery|injur|shin|knee|ankle|hamstring|calf|quad|glute|sleep|nutrition|protein|carb|hydration|program|plan|schedule|session|easy day|long run|cross[-\s]?train)/i
+const RUNNING_TOPIC_RE = /(run|running|runner|jog|jogging|race|racing|track|800m|1500m|3k|5k|10k|marathon|ultra|pace|pacing|split|splits|distance|duration|effort|rpe|workout|training|train|fitness|exercise|strength|gym|mobility|stretch|warm[-\s]?up|cool[-\s]?down|interval|tempo|stride|sprint|hill|endurance|aerobic|recovery|injur|shin|knee|ankle|hamstring|calf|quad|glute|sleep|nutrition|protein|carb|hydration|program|plan|schedule|session|easy day|long run|cross[-\s]?train|cross training|indoor|inside|rain|raining|rainy|weather|storm|treadmill|bike|cycling|cycle|swim|swimming|row|rowing|elliptical|stair|yoga|home workout|bodyweight)/i
 
 function isRunningFitnessQuestion(text) {
   return RUNNING_TOPIC_RE.test(text || '')
