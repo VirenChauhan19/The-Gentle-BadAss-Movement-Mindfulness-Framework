@@ -23,10 +23,14 @@ const SCORE_COLOR = v =>
 const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 
 const THEME_OPTIONS = [
-  { id: 'dark', label: 'Dark', description: 'Deep green training cockpit.' },
-  { id: 'ember', label: 'Ember', description: 'Red, warm, high-energy mode.' },
-  { id: 'ocean', label: 'Ocean', description: 'Cool blue focus mode.' },
-  { id: 'light', label: 'Light', description: 'Bright daytime mode.' },
+  { id: 'dark',     label: 'Dark',     description: 'Deep green training cockpit.'     },
+  { id: 'ember',    label: 'Ember',    description: 'Red, warm, high-energy mode.'     },
+  { id: 'ocean',    label: 'Ocean',    description: 'Cool blue focus mode.'            },
+  { id: 'forest',   label: 'Forest',   description: 'Deep forest, alive and grounded.' },
+  { id: 'violet',   label: 'Violet',   description: 'Calm purple focus mode.'          },
+  { id: 'rose',     label: 'Rose',     description: 'Warm rose, soft and energised.'   },
+  { id: 'midnight', label: 'Midnight', description: 'Deep navy for night sessions.'    },
+  { id: 'light',    label: 'Light',    description: 'Bright daytime mode.'             },
 ]
 
 function addDaysISO(startDate, offset) {

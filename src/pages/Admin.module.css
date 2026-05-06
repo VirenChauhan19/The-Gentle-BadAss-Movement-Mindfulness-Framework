@@ -348,6 +348,22 @@
   background: linear-gradient(135deg, #071419 0%, #1aa39d 52%, #5db7e8 100%);
 }
 
+.themeOptionSwatch[data-theme-swatch="forest"] {
+  background: linear-gradient(135deg, #060e05 0%, #2a6824 52%, #7ac870 100%);
+}
+
+.themeOptionSwatch[data-theme-swatch="violet"] {
+  background: linear-gradient(135deg, #0d0818 0%, #5030a8 52%, #c0a8ff 100%);
+}
+
+.themeOptionSwatch[data-theme-swatch="rose"] {
+  background: linear-gradient(135deg, #180810 0%, #8a2040 52%, #ffb0c0 100%);
+}
+
+.themeOptionSwatch[data-theme-swatch="midnight"] {
+  background: linear-gradient(135deg, #050810 0%, #102888 52%, #88b8f8 100%);
+}
+
 /* ─── Actions ─── */
 .accountActions {
   margin-bottom: 3rem;

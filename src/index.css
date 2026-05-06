@@ -165,6 +165,138 @@
   --shadow-xl: rgba(0, 0, 0, 0.64);
 }
 
+:root[data-theme="forest"] {
+  --cream:        #080f07;
+  --cream-dark:   #040a04;
+  --cream-mid:    #10180e;
+  --paper:        #121f10;
+  --paper-soft:   #0d180b;
+  --ink:          #e4f5e0;
+  --ink-light:    #aed4a6;
+  --ink-faint:    #6a9462;
+  --sage:         #52a84a;
+  --sage-dark:    #7ad870;
+  --sage-light:   #182e16;
+  --terracotta:   #d47840;
+  --slate:        #60b870;
+  --slate-light:  #182e1c;
+  --gold:         #c8b040;
+  --sand:         #80a868;
+  --sand-light:   #1a2e18;
+  --border:       #243820;
+  --border-light: #1a2c18;
+  --focus:        rgba(82, 168, 74, 0.38);
+  --on-dark:      #e4f5e0;
+  --on-ink:       #080f07;
+  --on-accent:    #ffffff;
+  --brand-gradient: linear-gradient(135deg, #040a04 0%, #0e2010 52%, #183018 100%);
+  --sage-gradient:  linear-gradient(135deg, #306428 0%, #7ad870 100%);
+  --shadow-xs: rgba(0, 0, 0, 0.20);
+  --shadow:    rgba(0, 0, 0, 0.32);
+  --shadow-md: rgba(0, 0, 0, 0.42);
+  --shadow-lg: rgba(0, 0, 0, 0.52);
+  --shadow-xl: rgba(0, 0, 0, 0.62);
+}
+
+:root[data-theme="violet"] {
+  --cream:        #0e0a18;
+  --cream-dark:   #090614;
+  --cream-mid:    #161024;
+  --paper:        #1c1630;
+  --paper-soft:   #140e28;
+  --ink:          #ede8ff;
+  --ink-light:    #beb0e8;
+  --ink-faint:    #8070b0;
+  --sage:         #9070e0;
+  --sage-dark:    #b8a0ff;
+  --sage-light:   #241840;
+  --terracotta:   #e87878;
+  --slate:        #7098e0;
+  --slate-light:  #182040;
+  --gold:         #e8c870;
+  --sand:         #a088c8;
+  --sand-light:   #201840;
+  --border:       #342458;
+  --border-light: #281c48;
+  --focus:        rgba(144, 112, 224, 0.38);
+  --on-dark:      #ede8ff;
+  --on-ink:       #0e0a18;
+  --on-accent:    #ffffff;
+  --brand-gradient: linear-gradient(135deg, #090614 0%, #1c0e40 52%, #2a1860 100%);
+  --sage-gradient:  linear-gradient(135deg, #5030b0 0%, #b8a0ff 100%);
+  --shadow-xs: rgba(0, 0, 0, 0.22);
+  --shadow:    rgba(0, 0, 0, 0.34);
+  --shadow-md: rgba(0, 0, 0, 0.44);
+  --shadow-lg: rgba(0, 0, 0, 0.54);
+  --shadow-xl: rgba(0, 0, 0, 0.64);
+}
+
+:root[data-theme="rose"] {
+  --cream:        #180a0e;
+  --cream-dark:   #100608;
+  --cream-mid:    #221018;
+  --paper:        #28101c;
+  --paper-soft:   #1e0c14;
+  --ink:          #ffe8f0;
+  --ink-light:    #e0b0c4;
+  --ink-faint:    #b07888;
+  --sage:         #e06888;
+  --sage-dark:    #ffaac0;
+  --sage-light:   #381828;
+  --terracotta:   #ff9860;
+  --slate:        #e090c8;
+  --slate-light:  #2e1830;
+  --gold:         #ffc870;
+  --sand:         #c08098;
+  --sand-light:   #2e1820;
+  --border:       #481828;
+  --border-light: #381420;
+  --focus:        rgba(224, 104, 136, 0.38);
+  --on-dark:      #ffe8f0;
+  --on-ink:       #180a0e;
+  --on-accent:    #ffffff;
+  --brand-gradient: linear-gradient(135deg, #180810 0%, #3c1028 54%, #581840 100%);
+  --sage-gradient:  linear-gradient(135deg, #901848 0%, #ffaac0 100%);
+  --shadow-xs: rgba(0, 0, 0, 0.22);
+  --shadow:    rgba(0, 0, 0, 0.34);
+  --shadow-md: rgba(0, 0, 0, 0.44);
+  --shadow-lg: rgba(0, 0, 0, 0.54);
+  --shadow-xl: rgba(0, 0, 0, 0.64);
+}
+
+:root[data-theme="midnight"] {
+  --cream:        #070a14;
+  --cream-dark:   #040710;
+  --cream-mid:    #0c1220;
+  --paper:        #0e1828;
+  --paper-soft:   #0a1220;
+  --ink:          #e8f0ff;
+  --ink-light:    #a8c0e0;
+  --ink-faint:    #6080a8;
+  --sage:         #4078d8;
+  --sage-dark:    #80b0f8;
+  --sage-light:   #0c1c38;
+  --terracotta:   #f87868;
+  --slate:        #50a0e8;
+  --slate-light:  #0c1e3a;
+  --gold:         #f8d870;
+  --sand:         #70a0c8;
+  --sand-light:   #0e1c30;
+  --border:       #1c2e50;
+  --border-light: #142440;
+  --focus:        rgba(64, 120, 216, 0.38);
+  --on-dark:      #e8f0ff;
+  --on-ink:       #070a14;
+  --on-accent:    #ffffff;
+  --brand-gradient: linear-gradient(135deg, #040710 0%, #0a1838 52%, #102848 100%);
+  --sage-gradient:  linear-gradient(135deg, #1040a8 0%, #80b0f8 100%);
+  --shadow-xs: rgba(0, 0, 0, 0.24);
+  --shadow:    rgba(0, 0, 0, 0.38);
+  --shadow-md: rgba(0, 0, 0, 0.50);
+  --shadow-lg: rgba(0, 0, 0, 0.60);
+  --shadow-xl: rgba(0, 0, 0, 0.70);
+}
+
 html, body {
   height: 100%;
   background:
@@ -218,16 +350,72 @@ html[data-theme="ocean"] #root {
   background-attachment: fixed;
 }
 
+html[data-theme="forest"],
+html[data-theme="forest"] body,
+html[data-theme="forest"] #root {
+  background:
+    radial-gradient(circle at 14% 8%,  rgba(122, 216, 112, 0.14), transparent 22rem),
+    radial-gradient(circle at 88% 15%, rgba(82, 168, 74, 0.10),   transparent 24rem),
+    radial-gradient(circle at 72% 88%, rgba(96, 184, 112, 0.07),  transparent 24rem),
+    linear-gradient(135deg, #040a04 0%, #080f07 52%, #101808 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="violet"],
+html[data-theme="violet"] body,
+html[data-theme="violet"] #root {
+  background:
+    radial-gradient(circle at 14% 8%,  rgba(184, 160, 255, 0.16), transparent 22rem),
+    radial-gradient(circle at 88% 15%, rgba(112, 152, 224, 0.12), transparent 24rem),
+    radial-gradient(circle at 72% 88%, rgba(144, 112, 224, 0.08), transparent 24rem),
+    linear-gradient(135deg, #090614 0%, #0e0a18 52%, #160e28 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="rose"],
+html[data-theme="rose"] body,
+html[data-theme="rose"] #root {
+  background:
+    radial-gradient(circle at 16% 10%, rgba(255, 170, 192, 0.18), transparent 20rem),
+    radial-gradient(circle at 88% 14%, rgba(224, 144, 200, 0.12), transparent 22rem),
+    radial-gradient(circle at 72% 86%, rgba(224, 104, 136, 0.08), transparent 22rem),
+    linear-gradient(135deg, #100608 0%, #180a0e 52%, #22101a 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="midnight"],
+html[data-theme="midnight"] body,
+html[data-theme="midnight"] #root {
+  background:
+    radial-gradient(circle at 14% 8%,  rgba(128, 176, 248, 0.14), transparent 22rem),
+    radial-gradient(circle at 88% 15%, rgba(80, 160, 232, 0.12),  transparent 24rem),
+    radial-gradient(circle at 72% 88%, rgba(64, 120, 216, 0.07),  transparent 24rem),
+    linear-gradient(135deg, #040710 0%, #070a14 52%, #0c1220 100%);
+  background-attachment: fixed;
+}
+
 html[data-theme="dark"] input,
 html[data-theme="ember"] input,
 html[data-theme="ocean"] input,
+html[data-theme="forest"] input,
+html[data-theme="violet"] input,
+html[data-theme="rose"] input,
+html[data-theme="midnight"] input,
 html[data-theme="dark"] textarea,
 html[data-theme="ember"] textarea,
 html[data-theme="ocean"] textarea,
+html[data-theme="forest"] textarea,
+html[data-theme="violet"] textarea,
+html[data-theme="rose"] textarea,
+html[data-theme="midnight"] textarea,
 html[data-theme="dark"] select,
 html[data-theme="ember"] select,
-html[data-theme="ocean"] select {
-  background: #111711;
+html[data-theme="ocean"] select,
+html[data-theme="forest"] select,
+html[data-theme="violet"] select,
+html[data-theme="rose"] select,
+html[data-theme="midnight"] select {
+  background: var(--paper-soft);
   color: var(--ink);
   border-color: var(--border);
 }
@@ -235,21 +423,34 @@ html[data-theme="ocean"] select {
 html[data-theme="dark"] input::placeholder,
 html[data-theme="ember"] input::placeholder,
 html[data-theme="ocean"] input::placeholder,
-html[data-theme="dark"] textarea::placeholder {
-  color: #746d62;
-}
-
+html[data-theme="forest"] input::placeholder,
+html[data-theme="violet"] input::placeholder,
+html[data-theme="rose"] input::placeholder,
+html[data-theme="midnight"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder,
 html[data-theme="ember"] textarea::placeholder,
-html[data-theme="ocean"] textarea::placeholder {
+html[data-theme="ocean"] textarea::placeholder,
+html[data-theme="forest"] textarea::placeholder,
+html[data-theme="violet"] textarea::placeholder,
+html[data-theme="rose"] textarea::placeholder,
+html[data-theme="midnight"] textarea::placeholder {
   color: var(--ink-faint);
 }
 
 html[data-theme="dark"] iframe,
 html[data-theme="ember"] iframe,
 html[data-theme="ocean"] iframe,
+html[data-theme="forest"] iframe,
+html[data-theme="violet"] iframe,
+html[data-theme="rose"] iframe,
+html[data-theme="midnight"] iframe,
 html[data-theme="dark"] img,
 html[data-theme="ember"] img,
-html[data-theme="ocean"] img {
+html[data-theme="ocean"] img,
+html[data-theme="forest"] img,
+html[data-theme="violet"] img,
+html[data-theme="rose"] img,
+html[data-theme="midnight"] img {
   color-scheme: dark;
 }
 

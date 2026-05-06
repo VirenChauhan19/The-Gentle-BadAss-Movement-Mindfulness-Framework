@@ -17,10 +17,14 @@ import Paywall from './pages/Paywall'
 import styles from './App.module.css'
 
 const THEME_PRESETS = [
-  { id: 'dark', label: 'Dark' },
-  { id: 'ember', label: 'Ember' },
-  { id: 'ocean', label: 'Ocean' },
-  { id: 'light', label: 'Light' },
+  { id: 'dark',     label: 'Dark'     },
+  { id: 'ember',    label: 'Ember'    },
+  { id: 'ocean',    label: 'Ocean'    },
+  { id: 'forest',   label: 'Forest'   },
+  { id: 'violet',   label: 'Violet'   },
+  { id: 'rose',     label: 'Rose'     },
+  { id: 'midnight', label: 'Midnight' },
+  { id: 'light',    label: 'Light'    },
 ]
 
 function AppRoutes() {

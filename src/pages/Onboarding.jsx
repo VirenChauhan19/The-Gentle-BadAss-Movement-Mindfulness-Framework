@@ -3,10 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import styles from './Onboarding.module.css'
 
-// ── Swap this one line with your real key when ready ──────────────────────────
-const RAZORPAY_KEY = 'rzp_test_1DP5mmOlF5G5ag'
-// ─────────────────────────────────────────────────────────────────────────────
-
 const paths = [
   {
     id: 'rehab',
@@ -41,49 +37,15 @@ const PLANS = {
 }
 
 export default function Onboarding() {
-  const { saveProfile, user, guestName } = useData()
+  const { saveProfile } = useData()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [data, setData] = useState({ fitnessHistory: '', path: '', commitment: 90 })
-  const [paying, setPaying] = useState(false)
-
   const plan = PLANS[data.commitment] || PLANS[90]
 
-  async function saveAndGo() {
+  async function handleComplete() {
     await saveProfile({ ...data, onboardingComplete: true })
     navigate('/')
-  }
-
-  function handlePay() {
-    if (!window.Razorpay) {
-      alert('Payment could not load. Check your internet connection and try again.')
-      return
-    }
-    setPaying(true)
-
-    const options = {
-      key: RAZORPAY_KEY,
-      amount: plan.price * 100,      // paise
-      currency: 'INR',
-      name: 'The Gentle BadAss',
-      description: plan.label,
-      prefill: {
-        name: user?.displayName || guestName || '',
-        email: user?.email || '',
-      },
-      notes: { commitment: String(data.commitment) },
-      theme: { color: '#3f5f3e' },
-      modal: {
-        ondismiss: () => setPaying(false),
-      },
-      handler: () => {
-        setPaying(false)
-        saveAndGo()
-      },
-    }
-
-    const rzp = new window.Razorpay(options)
-    rzp.open()
   }
 
   return (
@@ -170,37 +132,17 @@ export default function Onboarding() {
         </section>
       )}
 
-      {/* ── Step 3 — Commitment + Payment ── */}
+      {/* ── Step 3 ── */}
       {step === 3 && (
         <section className={styles.section}>
-
-          {/* Commitment card with live price */}
           <div className={styles.commitmentCard}>
-            <div className={styles.commitTop}>
-              <div>
-                <div className={styles.commitDays}>{data.commitment}</div>
-                <div className={styles.commitUnit}>days</div>
-              </div>
-              <div className={styles.commitPriceSide}>
-                <span className={styles.commitPriceCurrency}>₹</span>
-                <span className={styles.commitPriceNum}>
-                  {plan.price.toLocaleString('en-IN')}
-                </span>
-                <span className={styles.commitPriceNote}>one-time</span>
-              </div>
-            </div>
-
-            <div className={styles.commitDivider} />
-
-            <div className={styles.commitBottom}>
-              <span className={styles.commitLabelText}>{plan.label}</span>
-              <span className={styles.commitAccess}>Full access · All features</span>
-            </div>
+            <div className={styles.commitDays}>{data.commitment}</div>
+            <div className={styles.commitUnit}>days</div>
+            <div className={styles.commitLabelText}>{plan.label}</div>
           </div>
 
           <p className={styles.commitDesc}>{plan.desc}</p>
 
-          {/* Slider */}
           <div className={styles.sliderWrap}>
             <input
               type="range"
@@ -219,24 +161,12 @@ export default function Onboarding() {
             </div>
           </div>
 
-          {/* Test mode hint */}
-          <div className={styles.testHint}>
-            Test mode · card 4111 1111 1111 1111 · OTP 1234
-          </div>
-
           <div className={styles.btnStack}>
-            <button
-              className={styles.startBtn}
-              onClick={handlePay}
-              disabled={paying}
-            >
-              {paying
-                ? 'Opening payment…'
-                : `Pay ₹${plan.price.toLocaleString('en-IN')} & Start Journey`}
+            <button className={styles.startBtn} onClick={handleComplete}>
+              Start My Journey
             </button>
             <button className={styles.backLink} onClick={() => setStep(2)}>← Back</button>
           </div>
-
         </section>
       )}
     </div>
