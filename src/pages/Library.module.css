@@ -101,6 +101,24 @@
   overflow: hidden;
 }
 
+.weeklyModule::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, 0.16) 50%, transparent 65%),
+    repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 18px);
+  transform: translateX(-105%);
+  transition: transform 760ms var(--ease-out);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .weeklyModule:hover::before {
+    transform: translateX(105%);
+  }
+}
+
 :global(html[data-theme="dark"]) .weeklyModule,
 :global(html[data-theme="dark"]) .pillarBanner,
 :global(html[data-theme="dark"]) .principlesBanner,
@@ -201,6 +219,27 @@
   font-weight: 600;
   box-shadow: 0 4px 14px var(--shadow-xs);
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--d-base) var(--ease-out),
+              border-color var(--d-base) var(--ease-out),
+              box-shadow var(--d-base) var(--ease-out),
+              color var(--d-base) var(--ease-out);
+}
+
+.filter::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+  transform: scaleX(0.3);
+  transition: opacity var(--d-base) var(--ease-out),
+              transform var(--d-base) var(--ease-out);
 }
 
 .filter:hover {
@@ -215,6 +254,17 @@
   border-color: transparent !important;
   color: var(--on-dark) !important;
   box-shadow: 0 8px 22px rgba(24, 23, 19, 0.22) !important;
+  animation: scorePop 260ms var(--ease-spring) both;
+}
+
+.filterActive::after {
+  opacity: 0.4;
+  transform: scaleX(1);
+}
+
+@keyframes scorePop {
+  from { transform: scale(0.94); }
+  to { transform: scale(1); }
 }
 
 .categoryDesc {
@@ -248,6 +298,17 @@
   border-radius: var(--r-md);
   background: var(--paper-soft);
   border: 1px solid var(--border-light);
+  transition: transform var(--d-base) var(--ease-out),
+              border-color var(--d-base) var(--ease-out),
+              box-shadow var(--d-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .principlesGrid article:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 127, 95, 0.28);
+    box-shadow: 0 10px 20px var(--shadow-xs);
+  }
 }
 
 :global(html[data-theme="dark"]) .principlesGrid article {
@@ -285,6 +346,9 @@
   overflow: hidden;
   box-shadow: 0 8px 22px var(--shadow-xs);
   animation: fadeUp 320ms var(--ease-out) both;
+  transition: transform var(--d-base) var(--ease-out),
+              border-color var(--d-base) var(--ease-out),
+              box-shadow var(--d-base) var(--ease-out);
 }
 
 .card::before {
@@ -299,6 +363,16 @@
   transition: opacity var(--d-base) var(--ease-out);
 }
 
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99, 127, 95, 0.08), rgba(66, 105, 125, 0.05));
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease-out);
+  pointer-events: none;
+}
+
 @media (hover: hover) {
   .card:hover {
     transform: translateY(-3px);
@@ -306,6 +380,9 @@
     box-shadow: 0 16px 32px var(--shadow);
   }
   .card:hover::before {
+    opacity: 1;
+  }
+  .card:hover::after {
     opacity: 1;
   }
   .card:hover .arrow {

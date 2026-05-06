@@ -149,10 +149,31 @@ export default function App() {
     document.documentElement.dataset.theme = theme
   }, [theme])
 
+  useEffect(() => {
+    let frame = 0
+    function handlePointerMove(event) {
+      if (frame) return
+      frame = window.requestAnimationFrame(() => {
+        const x = Math.round((event.clientX / window.innerWidth) * 100)
+        const y = Math.round((event.clientY / window.innerHeight) * 100)
+        document.documentElement.style.setProperty('--pointer-x', `${x}%`)
+        document.documentElement.style.setProperty('--pointer-y', `${y}%`)
+        frame = 0
+      })
+    }
+
+    window.addEventListener('pointermove', handlePointerMove, { passive: true })
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      if (frame) window.cancelAnimationFrame(frame)
+    }
+  }, [])
+
   return (
     <AuthProvider>
       <DataProvider>
         <div className={styles.app}>
+          <div className={styles.ambientLayer} aria-hidden="true" />
           <main className={styles.main}>
             <AppRoutes />
           </main>

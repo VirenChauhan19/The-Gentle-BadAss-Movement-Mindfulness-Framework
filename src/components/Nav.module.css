@@ -22,6 +22,22 @@
     0 18px 40px rgba(24, 23, 19, 0.16),
     0 6px 14px rgba(24, 23, 19, 0.08);
   animation: navIn 480ms var(--ease-spring) both 120ms;
+  overflow: hidden;
+}
+
+.nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, 0.36) 50%, transparent 66%);
+  transform: translateX(-120%);
+  animation: navSheen 5.5s var(--ease-out) infinite 1.2s;
+  pointer-events: none;
+}
+
+@keyframes navSheen {
+  0%, 58% { transform: translateX(-120%); }
+  82%, 100% { transform: translateX(120%); }
 }
 
 @keyframes navIn {
@@ -62,6 +78,20 @@
               transform var(--d-base) var(--ease-out);
   flex: 1;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  inset: auto 18% 4px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+  transform: scaleX(0.35);
+  transition: opacity var(--d-base) var(--ease-out),
+              transform var(--d-base) var(--ease-out);
 }
 
 .link svg {
@@ -77,6 +107,7 @@
 @media (hover: hover) {
   .link:hover:not(.active) {
     color: var(--ink-light);
+    transform: translateY(-1px);
   }
   .link:hover:not(.active) svg {
     opacity: 0.85;
@@ -97,6 +128,11 @@
     0 1px 0 rgba(255, 255, 255, 0.18) inset;
 }
 
+.active::after {
+  opacity: 0.42;
+  transform: scaleX(1);
+}
+
 :global(html[data-theme="dark"]) .active {
   color: var(--on-ink);
   background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
@@ -108,6 +144,13 @@
 .active svg {
   opacity: 1;
   transform: translateY(-1px);
+  animation: activeIcon 520ms var(--ease-spring) both;
+}
+
+@keyframes activeIcon {
+  0% { transform: translateY(2px) scale(0.82); }
+  60% { transform: translateY(-2px) scale(1.08); }
+  100% { transform: translateY(-1px) scale(1); }
 }
 
 .locked {

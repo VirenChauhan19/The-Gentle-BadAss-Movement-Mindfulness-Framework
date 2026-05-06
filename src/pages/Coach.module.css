@@ -1740,6 +1740,125 @@
   .chatInputRow { bottom: 0; }
 }
 
+/* Whole-flow interaction polish */
+.header {
+  animation: floatIn 520ms var(--ease-elastic) both;
+}
+
+.header::before {
+  animation: headerOrbit 9s ease-in-out infinite alternate;
+}
+
+@keyframes headerOrbit {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-20px, 18px, 0) scale(1.08); }
+}
+
+.progressFill {
+  background:
+    linear-gradient(90deg, var(--sage-light), #ffffff),
+    linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, 0.42) 50%, transparent 66%);
+  background-size: 100% 100%, 220% 100%;
+  animation: coachProgress 2.8s var(--ease-out) infinite;
+}
+
+@keyframes coachProgress {
+  from { background-position: 0 0, -120% 0; }
+  to { background-position: 0 0, 120% 0; }
+}
+
+.tabs {
+  animation: floatIn 500ms var(--ease-elastic) both 90ms;
+}
+
+.tab,
+.statusBtn,
+.goalCard,
+.planDay {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab::after,
+.statusBtn::after {
+  content: '';
+  position: absolute;
+  inset: auto 18px 5px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+  transform: scaleX(0.3);
+  transition: opacity var(--d-base) var(--ease-out), transform var(--d-base) var(--ease-out);
+}
+
+.tabActive {
+  animation: tabPop 280ms var(--ease-spring) both;
+}
+
+.tabActive::after,
+.statusBtn:hover::after,
+.statusActive_done::after,
+.statusActive_partial::after,
+.statusActive_missed::after {
+  opacity: 0.42;
+  transform: scaleX(1);
+}
+
+@keyframes tabPop {
+  from { transform: scale(0.96); }
+  to { transform: scale(1); }
+}
+
+.todayHero,
+.planBoard,
+.upNext,
+.overviewCard,
+.todaySessionCard,
+.checkinCard {
+  transition: transform var(--d-base) var(--ease-out),
+              border-color var(--d-base) var(--ease-out),
+              box-shadow var(--d-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .todayHero:hover,
+  .planBoard:hover,
+  .upNext:hover,
+  .overviewCard:hover,
+  .todaySessionCard:hover,
+  .checkinCard:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 127, 95, 0.24);
+    box-shadow: 0 16px 34px var(--shadow);
+  }
+}
+
+.planDay::after,
+.goalCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99, 127, 95, 0.08), rgba(66, 105, 125, 0.06));
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease-out);
+  pointer-events: none;
+}
+
+.planDay:hover::after,
+.goalCard:hover::after {
+  opacity: 1;
+}
+
+.planDaySelected {
+  animation: selectedDay 280ms var(--ease-spring) both;
+}
+
+@keyframes selectedDay {
+  from { transform: scale(0.96); }
+  to { transform: scale(1); }
+}
+
 .chatInput {
   flex: 1;
   background: var(--cream);

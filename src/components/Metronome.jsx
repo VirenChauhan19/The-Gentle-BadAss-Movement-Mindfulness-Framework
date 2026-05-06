@@ -17,8 +17,10 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
       : TEMPOS
   const [selectedTempo, setSelectedTempo] = useState(() => availableTempos[0] || TEMPOS[0])
   const [beat, setBeat] = useState(0)
+  const [volume, setVolume] = useState(85)
   const audioRef = useRef(null)
   const timerRef = useRef(null)
+  const beatRef = useRef(0)
 
   useEffect(() => {
     if (!playing) {
@@ -30,35 +32,69 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
     tick()
     timerRef.current = window.setInterval(tick, 60000 / selectedTempo.bpm)
     return () => window.clearInterval(timerRef.current)
-  }, [playing, selectedTempo.bpm])
+  }, [playing, selectedTempo.bpm, volume])
 
   function tick() {
-    setBeat(prev => (prev + 1) % 4)
+    const nextBeat = (beatRef.current + 1) % 4
+    beatRef.current = nextBeat
+    setBeat(nextBeat)
     try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext
-      if (!audioRef.current) audioRef.current = new AudioContext()
-      const ctx = audioRef.current
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.frequency.value = beat === 0 ? 980 : 720
-      gain.gain.setValueAtTime(0.001, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.01)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07)
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start(ctx.currentTime)
-      osc.stop(ctx.currentTime + 0.08)
+      const ctx = ensureAudio()
+      if (ctx.state === 'suspended') ctx.resume()
+      playClick(ctx, nextBeat === 0, volume / 100)
     } catch {}
   }
 
   function togglePlaying() {
+    if (!playing) {
+      try {
+        const ctx = ensureAudio()
+        if (ctx.state === 'suspended') ctx.resume()
+      } catch {}
+    }
     onPlayingChange?.(!playing)
   }
 
   function selectTempo(tempo) {
     if (fixedBpm) return
     setSelectedTempo(tempo)
+    beatRef.current = 0
     setBeat(0)
+  }
+
+  function ensureAudio() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    if (!audioRef.current) audioRef.current = new AudioContext()
+    return audioRef.current
+  }
+
+  function playClick(ctx, accent, volumeLevel) {
+    const now = ctx.currentTime
+    const peak = Math.max(0.02, volumeLevel) * (accent ? 0.72 : 0.52)
+
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'square'
+    osc.frequency.setValueAtTime(accent ? 1320 : 960, now)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(peak, now + 0.006)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075)
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    osc.start(now)
+    osc.stop(now + 0.085)
+
+    const knock = ctx.createOscillator()
+    const knockGain = ctx.createGain()
+    knock.type = 'triangle'
+    knock.frequency.setValueAtTime(accent ? 220 : 180, now)
+    knockGain.gain.setValueAtTime(0.0001, now)
+    knockGain.gain.exponentialRampToValueAtTime(peak * 0.35, now + 0.004)
+    knockGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045)
+    knock.connect(knockGain)
+    knockGain.connect(ctx.destination)
+    knock.start(now)
+    knock.stop(now + 0.05)
   }
 
   return (
@@ -90,6 +126,19 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
         <h4>{selectedTempo.purpose}</h4>
         <p className={styles.vibe}>{selectedTempo.vibe}</p>
       </div>
+
+      <label className={styles.volumeControl}>
+        <span>Click volume</span>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value={volume}
+          onChange={e => setVolume(Number(e.target.value))}
+        />
+        <strong>{volume}%</strong>
+      </label>
 
       <div className={`${styles.metronomeFace} ${playing ? styles.metronomeFaceActive : ''}`}>
         <div className={styles.beatRing} style={{ animationDuration: `${60000 / selectedTempo.bpm}ms` }} />

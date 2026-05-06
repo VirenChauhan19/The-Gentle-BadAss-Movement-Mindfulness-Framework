@@ -21,6 +21,12 @@
   transition:
     transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.2s ease;
+  animation: fabEntrance 620ms var(--ease-spring) both 300ms;
+}
+
+@keyframes fabEntrance {
+  from { opacity: 0; transform: translateY(18px) scale(0.82); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .fab:hover {
@@ -41,6 +47,11 @@
   justify-content: center;
   position: relative;
   z-index: 1;
+  transition: transform 260ms var(--ease-spring);
+}
+
+.fab:hover .fabInner {
+  transform: rotate(-8deg) scale(1.06);
 }
 
 /* Pulse ring */
@@ -102,12 +113,35 @@
   transition:
     transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1),
     opacity 0.22s ease;
+  border: 1px solid var(--border-light);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
 }
 
 .panelOpen {
   transform: scale(1) translateY(0);
   opacity: 1;
   pointer-events: all;
+  animation: panelSettle 420ms var(--ease-spring) both;
+}
+
+@keyframes panelSettle {
+  0% { filter: blur(4px); }
+  100% { filter: blur(0); }
+}
+
+:global(html[data-theme="dark"]) .panel,
+:global(html[data-theme="dark"]) .panelFooter,
+:global(html[data-theme="dark"]) .quickBtn {
+  background: #1b211b;
+  border-color: #2d382f;
+}
+
+:global(html[data-theme="dark"]) .bubbleBot,
+:global(html[data-theme="dark"]) .welcomeText,
+:global(html[data-theme="dark"]) .input {
+  background: #151a15;
+  border-color: #2d382f;
 }
 
 @media (max-width: 390px) {
@@ -269,12 +303,29 @@
   cursor: pointer;
   line-height: 1.4;
   transition: border-color 0.15s, color 0.15s, background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.quickBtn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99, 127, 95, 0.10), rgba(66, 105, 125, 0.06));
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease-out);
+  pointer-events: none;
 }
 
 .quickBtn:hover {
   border-color: var(--sage);
   color: var(--ink, #2c2a26);
   background: rgba(139, 158, 126, 0.07);
+  transform: translateY(-1px);
+}
+
+.quickBtn:hover::after {
+  opacity: 1;
 }
 
 .quickBtn:disabled { opacity: 0.45; cursor: not-allowed; }
@@ -284,6 +335,12 @@
   display: flex;
   align-items: flex-end;
   gap: 7px;
+  animation: messageIn 260ms var(--ease-elastic) both;
+}
+
+@keyframes messageIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .rowUser { flex-direction: row-reverse; }

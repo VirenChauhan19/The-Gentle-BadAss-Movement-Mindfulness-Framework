@@ -53,6 +53,18 @@
   border-radius: var(--r-2xl);
   padding: 22px;
   box-shadow: 0 14px 36px var(--shadow-xs);
+  position: relative;
+  overflow: hidden;
+  animation: floatIn 560ms var(--ease-elastic) both 80ms;
+}
+
+.breathCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(100deg, rgba(99, 127, 95, 0.035) 0 1px, transparent 1px 20px);
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 :global(html[data-theme="dark"]) .breathCard,
@@ -78,6 +90,11 @@
   overflow: hidden;
 }
 
+.orbWrap > * {
+  position: relative;
+  z-index: 1;
+}
+
 :global(html[data-theme="dark"]) .orbWrap {
   background:
     radial-gradient(circle at 50% 50%, rgba(168, 200, 159, 0.08), transparent 60%),
@@ -101,6 +118,7 @@
   width: 240px;
   height: 240px;
   transform: translate(-50%, -50%);
+  animation: breathRing 4s ease-in-out infinite;
 }
 
 .orbWrap::after {
@@ -108,6 +126,12 @@
   height: 300px;
   transform: translate(-50%, -50%);
   border-color: rgba(99, 127, 95, 0.08);
+  animation: breathRing 4s ease-in-out infinite 600ms;
+}
+
+@keyframes breathRing {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.44; }
+  50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
 }
 
 .orb {
@@ -140,6 +164,12 @@
     0 30px 70px rgba(63, 95, 62, 0.36),
     0 0 0 1px rgba(255, 255, 255, 0.32) inset,
     0 -10px 30px rgba(255, 255, 255, 0.30) inset;
+  animation: breathSurface 8s ease-in-out infinite;
+}
+
+@keyframes breathSurface {
+  0%, 100% { filter: saturate(1) brightness(1); }
+  50% { filter: saturate(1.18) brightness(1.05); }
 }
 
 .phaseText {
@@ -200,10 +230,29 @@
   border: 1px solid var(--border-light);
   text-align: center;
   transition: transform var(--d-base) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats div::after {
+  content: '';
+  position: absolute;
+  inset: auto 12px 0;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--sage);
+  opacity: 0;
+  transform: scaleX(0.4);
+  transition: opacity var(--d-base) var(--ease-out), transform var(--d-base) var(--ease-out);
 }
 
 .stats div:hover {
   transform: translateY(-2px);
+}
+
+.stats div:hover::after {
+  opacity: 0.8;
+  transform: scaleX(1);
 }
 
 .stats span {
@@ -231,6 +280,7 @@
   border: 1px solid var(--border-light);
   border-radius: var(--r-md);
   background: var(--paper-soft);
+  animation: floatIn 500ms var(--ease-elastic) both 180ms;
 }
 
 .rhythmControls label {
@@ -287,6 +337,11 @@
 .controls button:first-child:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 28px rgba(63, 95, 62, 0.32);
+}
+
+.controls button:first-child:active,
+.saveBtn:active {
+  animation: pressGlow 420ms var(--ease-out);
 }
 
 .secondaryBtn {

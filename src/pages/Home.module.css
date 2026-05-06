@@ -9,6 +9,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  animation: floatIn 560ms var(--ease-elastic) both;
 }
 
 .subtitle {
@@ -55,6 +56,28 @@
   overflow: hidden;
   box-shadow: 0 14px 32px var(--shadow-md);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
+  animation: floatIn 620ms var(--ease-elastic) both 80ms;
+}
+
+.feelCard::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background:
+    linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.18) 48%, transparent 62%),
+    repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 18px);
+  transform: translateX(-105%);
+  transition: transform 720ms var(--ease-out);
+  pointer-events: none;
+}
+
+.feelCard::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: calc(var(--r-2xl) - 6px);
+  pointer-events: none;
 }
 
 :global(html[data-theme="dark"]) .feelCard {
@@ -68,6 +91,9 @@
     transform: translateY(-3px);
     box-shadow: 0 20px 40px var(--shadow-md);
   }
+  .feelCard:hover::before {
+    transform: translateX(105%);
+  }
 }
 
 .feelCard:active {
@@ -79,6 +105,7 @@
   width: 132px;
   height: 132px;
   flex-shrink: 0;
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.18));
 }
 
 .ringSvg {
@@ -89,6 +116,11 @@
 
 .ringProgress {
   transition: stroke-dashoffset 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation: ringDraw 950ms var(--ease-elastic) both 260ms;
+}
+
+@keyframes ringDraw {
+  from { stroke-dashoffset: 402; }
 }
 
 .ringCenter {
@@ -185,6 +217,18 @@
   border-radius: var(--r-lg);
   padding: 18px;
   box-shadow: 0 8px 22px var(--shadow-xs);
+  animation: floatIn 560ms var(--ease-elastic) both 160ms;
+  transition: transform var(--d-base) var(--ease-out),
+              box-shadow var(--d-base) var(--ease-out),
+              border-color var(--d-base) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .progressBlock:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 127, 95, 0.22);
+    box-shadow: 0 16px 34px var(--shadow);
+  }
 }
 
 :global(html[data-theme="dark"]) .progressBlock {
@@ -265,9 +309,18 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--sage-dark), var(--sage));
+  background:
+    linear-gradient(90deg, var(--sage-dark), var(--sage)),
+    linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, 0.28) 50%, transparent 66%);
+  background-size: 100% 100%, 220% 100%;
   border-radius: 999px;
   transition: width 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation: progressShine 2.8s var(--ease-out) infinite;
+}
+
+@keyframes progressShine {
+  from { background-position: 0 0, -120% 0; }
+  to { background-position: 0 0, 120% 0; }
 }
 
 .progressFoot {
@@ -297,6 +350,23 @@
   position: relative;
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
   min-height: 84px;
+  animation: floatIn 540ms var(--ease-elastic) both;
+}
+
+.action:nth-child(1) { animation-delay: 220ms; }
+.action:nth-child(2) { animation-delay: 270ms; }
+.action:nth-child(3) { animation-delay: 320ms; }
+.action:nth-child(4) { animation-delay: 370ms; }
+
+.action::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(99, 127, 95, 0.11), rgba(66, 105, 125, 0.08));
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease-out);
+  pointer-events: none;
 }
 
 :global(html[data-theme="dark"]) .action {
@@ -310,6 +380,9 @@
     transform: translateY(-2px);
     border-color: rgba(99, 127, 95, 0.32);
     box-shadow: 0 14px 28px var(--shadow);
+  }
+  .action:hover::before {
+    opacity: 1;
   }
 }
 
@@ -355,6 +428,7 @@
 .intention {
   padding: 18px 24px 8px;
   text-align: center;
+  animation: floatIn 540ms var(--ease-elastic) both 420ms;
 }
 
 .intentionKicker {

@@ -9,6 +9,7 @@
   padding: 52px 24px 22px;
   background: var(--paper-soft);
   border-bottom: 1px solid var(--border-light);
+  animation: floatIn 520ms var(--ease-elastic) both;
 }
 
 :global(html[data-theme="dark"]) .header {
@@ -39,13 +40,23 @@
   border-radius: 999px;
   overflow: hidden;
   margin-bottom: 6px;
+  box-shadow: inset 0 1px 2px rgba(24, 23, 19, 0.08);
 }
 
 .progressBar {
   height: 100%;
-  background: linear-gradient(90deg, var(--sage) 0%, var(--sage-dark) 100%);
+  background:
+    linear-gradient(90deg, var(--sage) 0%, var(--sage-dark) 100%),
+    linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.32) 50%, transparent 66%);
+  background-size: 100% 100%, 220% 100%;
   border-radius: 999px;
   transition: width 0.4s ease;
+  animation: progressShine 2.7s var(--ease-out) infinite;
+}
+
+@keyframes progressShine {
+  from { background-position: 0 0, -120% 0; }
+  to { background-position: 0 0, 120% 0; }
 }
 
 .progressText {
@@ -110,6 +121,34 @@
   box-shadow: 0 8px 22px rgba(24, 23, 19, 0.06);
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  animation: floatIn 500ms var(--ease-elastic) both;
+  transition: transform var(--d-base) var(--ease-out),
+              border-color var(--d-base) var(--ease-out),
+              box-shadow var(--d-base) var(--ease-out);
+}
+
+.factor::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(99, 127, 95, 0.08), rgba(66, 105, 125, 0.06));
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease-out);
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .factor:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 127, 95, 0.28);
+    box-shadow: 0 16px 32px var(--shadow);
+  }
+
+  .factor:hover::before {
+    opacity: 1;
+  }
 }
 
 .factor:last-child {
@@ -121,6 +160,8 @@
   align-items: flex-start;
   gap: 10px;
   margin-bottom: 12px;
+  position: relative;
+  z-index: 1;
 }
 
 .factorIndex {
@@ -208,6 +249,8 @@
   align-items: center;
   gap: 10px;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .sliderEdge {
@@ -264,6 +307,8 @@
   grid-template-columns: repeat(11, minmax(0, 1fr));
   gap: 4px;
   margin-top: 10px;
+  position: relative;
+  z-index: 1;
 }
 
 .scoreChip {
@@ -290,6 +335,12 @@
   border-color: var(--chip-color);
   color: var(--on-accent);
   box-shadow: 0 6px 16px rgba(24, 23, 19, 0.16);
+  animation: scorePop 260ms var(--ease-spring) both;
+}
+
+@keyframes scorePop {
+  from { transform: scale(0.82); }
+  to { transform: scale(1); }
 }
 
 .sliderLabels {
@@ -309,6 +360,9 @@
   padding-top: 12px;
   display: grid;
   gap: 7px;
+  position: relative;
+  z-index: 1;
+  animation: floatIn 320ms var(--ease-elastic) both;
 }
 
 .whyPrompt span {
@@ -511,12 +565,27 @@
   letter-spacing: 0.02em;
   transition: opacity 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 14px var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.saveBtn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0 36%, rgba(255, 255, 255, 0.22) 50%, transparent 64%);
+  transform: translateX(-105%);
+  transition: transform 620ms var(--ease-out);
 }
 
 @media (hover: hover) {
   .saveBtn:hover:not(:disabled) {
     box-shadow: 0 10px 24px var(--shadow-md);
     transform: translateY(-2px);
+  }
+
+  .saveBtn:hover:not(:disabled)::after {
+    transform: translateX(105%);
   }
 }
 

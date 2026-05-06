@@ -7,6 +7,8 @@
     linear-gradient(120deg, rgba(255, 255, 255, 0.45), transparent 42%),
     radial-gradient(circle at 88% 14%, rgba(66, 105, 125, 0.10), transparent 26rem),
     var(--cream);
+  isolation: isolate;
+  position: relative;
 }
 
 :global(html[data-theme="dark"]) .app {
@@ -14,6 +16,35 @@
     radial-gradient(circle at 15% 10%, rgba(131, 168, 120, 0.10), transparent 22rem),
     radial-gradient(circle at 85% 14%, rgba(127, 169, 188, 0.09), transparent 24rem),
     linear-gradient(135deg, #090c0a 0%, #10130f 56%, #151a15 100%);
+}
+
+.ambientLayer {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, 0.28) 49%, transparent 63%),
+    radial-gradient(42rem 32rem at var(--pointer-x, 68%) var(--pointer-y, 28%), rgba(99, 127, 95, 0.16), transparent 62%),
+    repeating-linear-gradient(105deg, rgba(99, 127, 95, 0.035) 0 1px, transparent 1px 18px);
+  background-size: 220% 220%, 100% 100%, 100% 100%;
+  mix-blend-mode: multiply;
+  opacity: 0.82;
+  animation: ambientDrift 16s var(--ease-out) infinite alternate;
+}
+
+:global(html[data-theme="dark"]) .ambientLayer {
+  background:
+    linear-gradient(115deg, transparent 0 35%, rgba(168, 200, 159, 0.08) 49%, transparent 63%),
+    radial-gradient(42rem 32rem at var(--pointer-x, 68%) var(--pointer-y, 28%), rgba(127, 169, 188, 0.12), transparent 62%),
+    repeating-linear-gradient(105deg, rgba(168, 200, 159, 0.04) 0 1px, transparent 1px 18px);
+  mix-blend-mode: screen;
+  opacity: 0.64;
+}
+
+@keyframes ambientDrift {
+  from { background-position: 0% 0%, 50% 50%, 0 0; }
+  to { background-position: 100% 70%, 50% 50%, 42px 24px; }
 }
 
 /* ── Theme toggle ────────────────────────────────────── */
@@ -36,6 +67,10 @@
     0 8px 22px var(--shadow-xs);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
+  transition: transform 240ms var(--ease-spring),
+              box-shadow 220ms var(--ease-out),
+              background 220ms var(--ease-out),
+              color 220ms var(--ease-out);
 }
 
 :global(html[data-theme="dark"]) .themeToggle {
