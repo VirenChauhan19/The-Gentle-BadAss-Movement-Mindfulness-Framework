@@ -16,6 +16,65 @@ const SESSION_STYLE = {
   cross:    { color: '#704090', bg: 'rgba(180,138,217,0.14)', border: '#c89ad9', label: 'Cross'    },
 }
 
+const DEFAULT_MOBILITY = '8-12 min: ankle rocks x10/side, hip flexor stretch 45s/side, hamstring floss x10/side, thoracic rotations x8/side, easy breathing 2 min.'
+const DEFAULT_STRENGTH = '10-15 min: glute bridges 2x12, calf raises 2x15, dead bug 2x8/side, side plank 2x20s/side.'
+
+const BENCHMARK_OPTIONS = [
+  { id: '1 mile', label: '1 mile', km: 1.609 },
+  { id: '3K', label: '3K', km: 3 },
+  { id: '5K', label: '5K', km: 5 },
+  { id: '10K', label: '10K', km: 10 },
+  { id: 'Half Marathon', label: 'Half Marathon', km: 21.097 },
+  { id: 'Marathon', label: 'Marathon', km: 42.195 },
+]
+
+function parseRaceTimeToSeconds(value) {
+  const clean = String(value || '').trim()
+  if (!clean) return null
+  if (!clean.includes(':')) {
+    const mins = Number(clean)
+    return Number.isFinite(mins) && mins > 0 ? mins * 60 : null
+  }
+  const parts = clean.split(':').map(part => Number(part))
+  if (parts.some(part => !Number.isFinite(part) || part < 0)) return null
+  if (parts.length === 2) return parts[0] * 60 + parts[1]
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
+  return null
+}
+
+function formatPace(secondsPerKm) {
+  const safeSeconds = Math.max(150, Math.round(secondsPerKm || 0))
+  const mins = Math.floor(safeSeconds / 60)
+  const secs = String(safeSeconds % 60).padStart(2, '0')
+  return `${mins}:${secs}/km`
+}
+
+function formatPaceRange(fromSeconds, toSeconds) {
+  return `${formatPace(fromSeconds)}-${formatPace(toSeconds)}`
+}
+
+function calculatePaceGuide(distanceId, timeInput) {
+  const option = BENCHMARK_OPTIONS.find(item => item.id === distanceId)
+  const seconds = parseRaceTimeToSeconds(timeInput)
+  if (!option || !seconds) return null
+
+  const predicted5kSeconds = seconds * Math.pow(5 / option.km, 1.06)
+  const fiveKPace = predicted5kSeconds / 5
+  const guide = {
+    benchmark: `${option.label} in ${timeInput.trim()}`,
+    estimated5kPace: formatPace(fiveKPace),
+    recovery: formatPaceRange(fiveKPace + 120, fiveKPace + 180),
+    zone2: formatPaceRange(fiveKPace + 90, fiveKPace + 150),
+    easy: formatPaceRange(fiveKPace + 90, fiveKPace + 150),
+    long: formatPaceRange(fiveKPace + 105, fiveKPace + 165),
+    steady: formatPaceRange(fiveKPace + 60, fiveKPace + 90),
+    tempo: formatPaceRange(fiveKPace + 25, fiveKPace + 45),
+    intervals: formatPaceRange(fiveKPace - 10, fiveKPace + 10),
+  }
+  guide.summary = `Recovery ${guide.recovery}; Zone 2/easy ${guide.zone2}; Long ${guide.long}; Tempo ${guide.tempo}; Intervals around ${guide.intervals}.`
+  return guide
+}
+
 function addDaysISO(startDate, offset) {
   const d = new Date(`${startDate}T00:00:00`)
   d.setDate(d.getDate() + offset)
@@ -46,6 +105,9 @@ function getPlan(goal) {
       duration: '10-20 min optional walk',
       pace: 'Very easy',
       notes: 'Full rest or an easy walk. Keep effort low and prepare for the next planned session.',
+      crossTraining: '',
+      strength: DEFAULT_STRENGTH,
+      mobility: DEFAULT_MOBILITY,
     }
   })
 }
@@ -69,6 +131,9 @@ function expandProgramPlan(template, startDate, totalDays) {
       duration: session.duration || '',
       pace: session.pace || '',
       notes: session.notes || '',
+      crossTraining: session.crossTraining || (session.type === 'cross' ? `${session.duration || '30-45 min'} easy cycling, swimming, elliptical, rowing, or brisk incline walk at conversational effort.` : ''),
+      strength: session.strength || DEFAULT_STRENGTH,
+      mobility: session.mobility || DEFAULT_MOBILITY,
     }
   })
 }
@@ -90,6 +155,9 @@ function normalizePlan(rawPlan, startDate, totalDays) {
       duration: item.duration || '',
       pace: item.pace || '',
       notes: item.notes || '',
+      crossTraining: item.crossTraining || (item.type === 'cross' ? `${item.duration || '30-45 min'} easy cycling, swimming, elliptical, rowing, or brisk incline walk at conversational effort.` : ''),
+      strength: item.strength || DEFAULT_STRENGTH,
+      mobility: item.mobility || DEFAULT_MOBILITY,
     }
   })
 }
@@ -210,11 +278,15 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
   const [daysPerWeek, setDaysPerWeek] = useState(4)
   const [commitmentDays, setCommitmentDays] = useState(String(defaultCommitment))
   const [currentKm,   setCurrentKm]   = useState('')
+  const [benchmarkDistance, setBenchmarkDistance] = useState('')
+  const [benchmarkTime, setBenchmarkTime] = useState('')
   const [notes,       setNotes]       = useState('')
   const [loading,     setLoading]     = useState(false)
   const [error,       setError]       = useState(null)
 
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+  const paceGuide = calculatePaceGuide(benchmarkDistance, benchmarkTime)
+  const shouldAskBenchmark = experience !== 'Beginner' || /race|marathon|ultra|speed/i.test(focus || '')
 
   async function handleGenerate() {
     setLoading(true)
@@ -224,7 +296,7 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
     const kmStr    = currentKm ? `${currentKm} km/week` : '20–40 km/week'
     try {
       const startDate = new Date().toISOString().split('T')[0]
-      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes })
+      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes, paceGuide })
       const plan = normalizePlan(program.plan, startDate, totalDays)
       const templatePlan = expandProgramPlan(program.weekTemplate || [], startDate, totalDays)
       const fallbackPlan = Array.from({ length: totalDays }, (_, i) =>
@@ -240,11 +312,16 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
           duration: '10-20 min optional walk',
           pace: 'Very easy',
           notes: 'Full rest or an easy walk. Keep effort low and prepare for the next planned session.',
+          crossTraining: '',
+          strength: DEFAULT_STRENGTH,
+          mobility: DEFAULT_MOBILITY,
         }
       )
       onSave({
         focus, raceGoal: focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays,
         startDate,
+        benchmark: benchmarkDistance && benchmarkTime ? { distance: benchmarkDistance, time: benchmarkTime } : null,
+        paceGuide,
         overview:         program.overview,
         weekTemplate:     program.weekTemplate || [],
         plan:             fallbackPlan,
@@ -432,6 +509,43 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
         {step === 4 && (
           <>
             <div className={styles.inputsStack}>
+              {shouldAskBenchmark && (
+                <div className={styles.benchmarkCard}>
+                  <div>
+                    <p className={styles.benchmarkTitle}>Recent race or time trial</p>
+                    <p className={styles.benchmarkText}>Optional, but this lets the plan calculate real recovery, Zone 2, tempo, and interval paces.</p>
+                  </div>
+                  <div className={styles.benchmarkGrid}>
+                    <select
+                      className={styles.selectInput}
+                      value={benchmarkDistance}
+                      onChange={e => setBenchmarkDistance(e.target.value)}
+                    >
+                      <option value="">Distance</option>
+                      {BENCHMARK_OPTIONS.map(option => (
+                        <option key={option.id} value={option.id}>{option.label}</option>
+                      ))}
+                    </select>
+                    <input
+                      className={styles.numberInput}
+                      value={benchmarkTime}
+                      onChange={e => setBenchmarkTime(e.target.value)}
+                      placeholder="Time e.g. 25:30"
+                    />
+                  </div>
+                  {paceGuide && (
+                    <div className={styles.pacePreview}>
+                      <span>Calculated paces</span>
+                      <div className={styles.pacePreviewGrid}>
+                        <p><strong>Recovery</strong>{paceGuide.recovery}</p>
+                        <p><strong>Zone 2</strong>{paceGuide.zone2}</p>
+                        <p><strong>Long</strong>{paceGuide.long}</p>
+                        <p><strong>Tempo</strong>{paceGuide.tempo}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               <textarea
                 className={styles.notesInput}
                 placeholder="e.g. recovering from knee injury, want sub-45 min 10K, can only run mornings…"
@@ -482,6 +596,20 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
     <div className={styles.tabContent}>
 
       <div className={styles.runningDashboard}>
+        {goal.paceGuide && (
+          <div className={styles.paceGuideCard}>
+            <div>
+              <span>Personal pace guide</span>
+              <p>{goal.paceGuide.benchmark}</p>
+            </div>
+            <div className={styles.paceGuideGrid}>
+              <p><strong>Recovery</strong>{goal.paceGuide.recovery}</p>
+              <p><strong>Zone 2</strong>{goal.paceGuide.zone2}</p>
+              <p><strong>Long</strong>{goal.paceGuide.long}</p>
+              <p><strong>Tempo</strong>{goal.paceGuide.tempo}</p>
+            </div>
+          </div>
+        )}
         {todaySession && !isComplete && (
           <div className={styles.todayHero} style={{ borderColor: todayStyle.border }}>
             <div className={styles.todayHeroTop}>
@@ -500,6 +628,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             </div>
             {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
             {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
+            <DailyTrainingBlocks session={todaySession} />
             {todayRemarks.length > 0 && <AttachedRemarks remarks={todayRemarks} />}
           </div>
         )}
@@ -571,6 +700,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
                 <p className={styles.dayDetailTitle}>{selectedDay.title}</p>
                 {selectedDay.pace && <p className={styles.dayDetailPace}>Pace: {selectedDay.pace}</p>}
                 {selectedDay.notes && <p className={styles.dayDetailNotes}>{selectedDay.notes}</p>}
+                <DailyTrainingBlocks session={selectedDay} />
                 {(remarksByDate[selectedDay.date] || []).length > 0 && (
                   <AttachedRemarks remarks={remarksByDate[selectedDay.date]} />
                 )}
@@ -698,6 +828,26 @@ function AttachedRemarks({ remarks }) {
             <span>{r.runDate || r.date}</span>
           </div>
           <p className={styles.dailyRemarkText}>{r.text}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function DailyTrainingBlocks({ session }) {
+  const blocks = [
+    session.crossTraining && { label: 'Cross-training', text: session.crossTraining },
+    session.strength && { label: 'Strength', text: session.strength },
+    session.mobility && { label: 'Mobility', text: session.mobility },
+  ].filter(Boolean)
+  if (!blocks.length) return null
+
+  return (
+    <div className={styles.dailyBlocks}>
+      {blocks.map(block => (
+        <div key={block.label} className={styles.dailyBlock}>
+          <span>{block.label}</span>
+          <p>{block.text}</p>
         </div>
       ))}
     </div>
@@ -1000,7 +1150,7 @@ async function apiCall(messages, maxTokens = 600) {
   return data.choices?.[0]?.message?.content?.trim() || ''
 }
 
-async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes }) {
+async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes, paceGuide }) {
   const hardSessions = daysPerWeek >= 5 ? 2 : 1
   const easySessions = Math.max(0, daysPerWeek - hardSessions - 1)
   const restDays     = 7 - daysPerWeek
@@ -1057,6 +1207,23 @@ HARD WORKOUT QUALITY RULES:
 - Hard: "Strong effort — controlled aggression"
 - Long: "Easy conversational — slower than easy days, prioritise time on feet"`
 
+  const benchmarkPaceRules = paceGuide ? `
+BENCHMARK-BASED PACE GUIDE:
+- The user provided this benchmark: ${paceGuide.benchmark}.
+- Estimated current 5K pace: ${paceGuide.estimated5kPace}.
+- Recovery runs must use this pace range: ${paceGuide.recovery}.
+- Zone 2 and easy runs must use this pace range: ${paceGuide.zone2}.
+- Long runs must use this pace range: ${paceGuide.long}.
+- Steady aerobic runs should use this pace range: ${paceGuide.steady}.
+- Tempo/threshold work should use this pace range: ${paceGuide.tempo}.
+- Intervals should use ${paceGuide.intervals} unless the rep distance requires a split conversion.
+- Every running day must include the correct calculated pace range in the "pace" field. Do not replace it with vague effort only.
+- Still include feel cues next to the pace, because sleep, soreness, heat, hills, and terrain can require adjustment.` : `
+BENCHMARK-BASED PACE GUIDE:
+- No recent race or time-trial benchmark was provided.
+- Do not invent exact min/km numbers. Use effort-based guidance and ask the runner for a recent 1 mile, 5K, 10K, half marathon, or marathon time if they want exact paces.
+- Every running day must still have a useful "pace" field, such as conversational Zone 2, relaxed recovery, steady RPE 5-6/10, or controlled tempo RPE 7/10.`
+
   const system = `You are an expert running coach. Generate a personalised running and fitness plan for the user's full commitment. The user does not need to be training for a race.
 Return ONLY valid JSON — no markdown, no explanation, no text outside the JSON.
 
@@ -1072,7 +1239,10 @@ JSON structure:
       "distance": "6 km  OR  6 x 400m  OR  45 min",
       "duration": "35-40 min",
       "pace": "specific effort or speed guidance",
-      "notes": "Warm-up, main set, and cool-down details"
+      "notes": "Warm-up, main set, and cool-down details",
+      "crossTraining": "For cross days: exact modality, duration, and intensity. Empty string on non-cross days unless useful.",
+      "strength": "Daily strength prescription with exercises, sets, reps, and duration",
+      "mobility": "Daily mobility prescription with exercises and duration"
     }
   ],
   "weekTemplate": [
@@ -1094,6 +1264,8 @@ ${improvedTrackRules}
 
 ${paceRules}
 
+${benchmarkPaceRules}
+
 ${workoutRules}
 
 SESSION NOTES — every non-rest day must have all three:
@@ -1111,6 +1283,11 @@ PROGRAM STRUCTURE:
 - 1 long run on Saturday or Sunday
 - ${easySessions} easy run(s) at truly conversational effort
 - Cross-training days: specify activity (cycling, swimming, yoga, rowing) with duration
+- Every cross-training day must say exactly how long to do it and what intensity to use, e.g. "35-45 min easy cycling, RPE 3-4/10".
+- Every single day, including rest days, must include a "strength" field and a "mobility" field.
+- Strength should be realistic daily work: 8-20 minutes, 3-6 movements, sets/reps, and adjusted to the day. Hard run days get lighter activation; easy/rest days can carry more strength.
+- Mobility should be 8-15 minutes daily with named drills and durations/reps. Include hips, calves/ankles, hamstrings, thoracic spine, and breathing as appropriate.
+- Do not hide strength or mobility only inside notes. Use the dedicated JSON fields.
 - Base all distances on current volume: ${currentKm}
 - Start Running plans should use walk-run intervals, short easy runs, mobility, and rest days before continuous runs.
 - Base Fitness and Weight Loss Support plans should prioritise easy effort, time on feet, cross-training, and strength; do not overload hard workouts.

@@ -267,6 +267,35 @@
   margin-top: 8px;
 }
 
+.dailyBlocks {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.dailyBlock {
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 11px 12px;
+}
+
+.dailyBlock span {
+  display: block;
+  color: var(--sage-dark);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.dailyBlock p {
+  color: var(--ink-light);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
 .planSummary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1190,6 +1219,103 @@
 .numberInput:focus { outline: none; border-color: var(--sage); }
 
 .numberInput::placeholder { font-weight: 400; color: var(--ink-faint); font-size: 0.95rem; }
+
+.selectInput {
+  width: 100%;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: 13px;
+  padding: 15px 16px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  box-sizing: border-box;
+}
+
+.selectInput:focus { outline: none; border-color: var(--sage); }
+
+.benchmarkCard,
+.paceGuideCard {
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 10px 24px var(--shadow);
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.benchmarkTitle {
+  color: var(--ink);
+  font-size: 0.98rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.benchmarkText {
+  color: var(--ink-faint);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.benchmarkGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 10px;
+}
+
+.pacePreview,
+.paceGuideGrid {
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: 13px;
+  padding: 12px;
+}
+
+.pacePreview > span,
+.paceGuideCard span {
+  color: var(--sage-dark);
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.pacePreviewGrid,
+.paceGuideGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pacePreviewGrid p,
+.paceGuideGrid p {
+  color: var(--ink-light);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.pacePreviewGrid strong,
+.paceGuideGrid strong {
+  color: var(--ink);
+  display: block;
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+}
+
+.paceGuideCard {
+  margin-bottom: 16px;
+}
+
+.paceGuideCard > div:first-child p {
+  color: var(--ink-light);
+  font-size: 0.85rem;
+}
 
 /* Days stepper */
 .stepper {

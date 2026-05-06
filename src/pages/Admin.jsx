@@ -62,6 +62,9 @@ function getFullCoachPlan(goal) {
       duration: session.duration || '10-20 min optional walk',
       pace: session.pace || 'Very easy',
       notes: session.notes || 'Full rest or an easy walk. Keep effort low and prepare for the next planned session.',
+      crossTraining: session.crossTraining || (session.type === 'cross' ? `${session.duration || '30-45 min'} easy cycling, swimming, elliptical, rowing, or brisk incline walk at conversational effort.` : ''),
+      strength: session.strength || '10-15 min: glute bridges 2x12, calf raises 2x15, dead bug 2x8/side, side plank 2x20s/side.',
+      mobility: session.mobility || '8-12 min: ankle rocks x10/side, hip flexor stretch 45s/side, hamstring floss x10/side, thoracic rotations x8/side, easy breathing 2 min.',
     }
   })
 }
@@ -685,6 +688,9 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
                                   <input value={day.distance || ''} onChange={e => updatePlanDay(i, 'distance', e.target.value)} placeholder="Distance" />
                                   <input value={day.duration || ''} onChange={e => updatePlanDay(i, 'duration', e.target.value)} placeholder="Duration" />
                                   <input value={day.pace || ''} onChange={e => updatePlanDay(i, 'pace', e.target.value)} placeholder="Pace / effort" />
+                                  <input value={day.crossTraining || ''} onChange={e => updatePlanDay(i, 'crossTraining', e.target.value)} placeholder="Cross-training duration + modality" />
+                                  <textarea value={day.strength || ''} onChange={e => updatePlanDay(i, 'strength', e.target.value)} placeholder="Daily strength" rows={2} />
+                                  <textarea value={day.mobility || ''} onChange={e => updatePlanDay(i, 'mobility', e.target.value)} placeholder="Daily mobility" rows={2} />
                                   <textarea value={day.notes || ''} onChange={e => updatePlanDay(i, 'notes', e.target.value)} placeholder="Workout notes" rows={3} />
                                 </div>
                               ) : (
@@ -693,6 +699,9 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
                                   <h4>{day.title || 'Untitled session'}</h4>
                                   <p>{[day.distance, day.duration, day.pace].filter(Boolean).join(' | ')}</p>
                                   {day.notes && <p>{day.notes}</p>}
+                                  {day.crossTraining && <p><strong>Cross-training:</strong> {day.crossTraining}</p>}
+                                  {day.strength && <p><strong>Strength:</strong> {day.strength}</p>}
+                                  {day.mobility && <p><strong>Mobility:</strong> {day.mobility}</p>}
                                   {log?.userNote && <p className={styles.adminPlanLogNote}>User log: {log.userNote}</p>}
                                 </div>
                               )}
