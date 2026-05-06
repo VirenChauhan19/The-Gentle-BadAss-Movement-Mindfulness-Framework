@@ -3,47 +3,18 @@ import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
 import styles from './Home.module.css'
 
-const PROGRAM_AUDIENCES = [
-  {
-    title: 'Women 35+',
-    text: 'For women who have spent years caring for everyone else and now need a system that respects their body.',
-  },
-  {
-    title: 'Older Adults',
-    text: 'For people who want strength, confidence, and better daily movement without performative toughness.',
-  },
-  {
-    title: 'Recovering Bodies',
-    text: 'For anyone returning from injury, chronic aches, surgery, or a long season away from movement.',
-  },
-  {
-    title: 'Fresh Starters',
-    text: 'For beginners who want to run and move without angry landings or punishment-based training.',
-  },
-  {
-    title: 'Chronic Warriors',
-    text: 'For people managing chronic disease who need movement as medicine, not another stressor.',
-  },
-  {
-    title: 'Experienced Runners',
-    text: 'For runners ready to relearn form, cadence, breath, and control from the ground up.',
-  },
+const DAILY_INTENTIONS = [
+  'Move with awareness, not aggression.',
+  'Breath before pace. Posture before speed.',
+  'The right scale today is honest, not heroic.',
+  'Listen to your body. It is not the enemy.',
+  'Run quietly. Land softly. Move kindly.',
+  'Strength is the absence of unnecessary effort.',
+  'Today is a session, not a verdict.',
 ]
 
-const PHILOSOPHY = [
-  {
-    term: 'I',
-    text: 'Your identity as a runner: the person who chooses to show up at the right scale today.',
-  },
-  {
-    term: 'MY',
-    text: 'Your body and biological engine: maintained, listened to, and respected.',
-  },
-  {
-    term: 'ME',
-    text: 'The felt experience of movement: the quiet awareness that appears when breath, posture, and rhythm align.',
-  },
-]
+const RING_R = 64
+const RING_C = 2 * Math.PI * RING_R
 
 export default function Home() {
   const { entries, getTodayEntry, profile, user, guestName } = useData()
@@ -52,6 +23,18 @@ export default function Home() {
   const streak = computeStreak(entries)
   const feelScore = today ? computeFeelScore(today.scores || {}) : null
   const dayOfJourney = entries.length
+  const commitment = profile?.commitment || 270
+  const daysToGo = Math.max(0, commitment - dayOfJourney)
+  const progressPct = Math.min(100, Math.round((dayOfJourney / commitment) * 100))
+
+  const rawName = user?.displayName || guestName || profile?.name || ''
+  const firstName = rawName.split(' ')[0]
+  const hour = new Date().getHours()
+  const greetingTime =
+    hour < 5 ? 'Hello' :
+    hour < 12 ? 'Good morning' :
+    hour < 17 ? 'Good afternoon' : 'Good evening'
+  const greeting = firstName ? `${greetingTime}, ${firstName}` : greetingTime
 
   const dateStr = new Date().toLocaleDateString('en-GB', {
     weekday: 'long',
@@ -59,99 +42,134 @@ export default function Home() {
     month: 'long',
   })
 
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  )
+  const intention = DAILY_INTENTIONS[dayOfYear % DAILY_INTENTIONS.length]
+
+  const ringPct = feelScore !== null ? feelScore / 10 : 0
+  const ringOffset = RING_C * (1 - ringPct)
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <div className={styles.titleBlock}>
-          <p className={styles.subtitle}>La Ultra: Run &amp; Bee</p>
-          <h1 className={styles.title}>Mountains Within</h1>
-          <p className={styles.heroCopy}>Distance and toughness are relative. Your mountain is the honest edge of your body today.</p>
-          <p className={styles.date}>{dateStr}</p>
-        </div>
+        <p className={styles.subtitle}>La Ultra: Run &amp; Bee</p>
+        <h1 className={styles.greeting}>{greeting}</h1>
+        <p className={styles.date}>{dateStr}</p>
       </header>
 
-      <section className={styles.cards}>
-        <Link to={guestLocked ? '/admin' : '/journal'} className={styles.card + ' ' + styles.cardPrimary + (guestLocked ? ' ' + styles.cardLocked : '')}>
-          <div className={styles.cardTop}>
-            <span className={styles.cardLabel}>Today's Feel</span>
-            {guestLocked && <span className={styles.lockBadge}>Locked</span>}
-            {feelScore !== null && (
-              <span className={styles.score}>{feelScore.toFixed(1)}</span>
-            )}
+      <section className={styles.feelHero}>
+        <Link
+          to={guestLocked ? '/admin' : '/journal'}
+          className={styles.feelCard + (guestLocked ? ' ' + styles.feelCardLocked : '')}
+        >
+          <div className={styles.ring}>
+            <svg viewBox="0 0 160 160" className={styles.ringSvg}>
+              <defs>
+                <linearGradient id="feelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#a8c89f" />
+                  <stop offset="100%" stopColor="#d7e5d1" />
+                </linearGradient>
+              </defs>
+              <circle
+                cx="80"
+                cy="80"
+                r={RING_R}
+                fill="none"
+                stroke="rgba(255,255,255,0.10)"
+                strokeWidth="8"
+              />
+              <circle
+                cx="80"
+                cy="80"
+                r={RING_R}
+                fill="none"
+                stroke="url(#feelGrad)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={RING_C}
+                strokeDashoffset={ringOffset}
+                transform="rotate(-90 80 80)"
+                className={styles.ringProgress}
+              />
+            </svg>
+            <div className={styles.ringCenter}>
+              {feelScore !== null ? (
+                <>
+                  <span className={styles.ringScore}>{feelScore.toFixed(1)}</span>
+                  <span className={styles.ringScoreSlash}>/10</span>
+                </>
+              ) : (
+                <span className={styles.ringCheck}>Check in</span>
+              )}
+            </div>
           </div>
-          {today ? (
-            <p className={styles.cardBody}>Entry logged. Tap to review.</p>
-          ) : (
-            <p className={styles.cardBody}>How does your body feel today?</p>
-          )}
-          <span className={styles.cardArrow}>-&gt;</span>
-        </Link>
-
-        <div className={styles.statsRow}>
-          <div className={styles.stat}>
-            <span className={styles.statNum}>{dayOfJourney}</span>
-            <span className={styles.statLabel}>Days logged</span>
+          <div className={styles.feelMeta}>
+            <p className={styles.feelKicker}>Today's Feel</p>
+            <p className={styles.feelHeading}>
+              {today ? 'Logged for today' : 'How does your body feel?'}
+            </p>
+            <p className={styles.feelSub}>
+              {today
+                ? 'Tap to review or update your check-in.'
+                : 'A two-minute check-in tunes your day.'}
+            </p>
+            {guestLocked && <span className={styles.lockBadge}>Sign in to log</span>}
           </div>
-          <div className={styles.statDivider} />
-          <div className={styles.stat}>
-            <span className={styles.statNum}>{streak}</span>
-            <span className={styles.statLabel}>Day streak</span>
-          </div>
-          <div className={styles.statDivider} />
-          <div className={styles.stat}>
-            <span className={styles.statNum}>{Math.max(0, (profile?.commitment || 270) - dayOfJourney)}</span>
-            <span className={styles.statLabel}>Days to go</span>
-          </div>
-        </div>
-
-        <Link to={guestLocked ? '/admin' : '/library'} className={styles.card + ' ' + styles.cardMove + (guestLocked ? ' ' + styles.cardLocked : '')}>
-          <div className={styles.cardTop}>
-            <span className={styles.cardLabel}>Movement Library</span>
-            {guestLocked && <span className={styles.lockBadge}>Locked</span>}
-          </div>
-          <p className={styles.cardBody}>{guestLocked ? 'Sign in to unlock TPR, quality scoring, and exercise flow.' : 'Functional tests, strength tools, and running drills.'}</p>
-          <span className={styles.cardArrow}>-&gt;</span>
-        </Link>
-
-        <Link to={guestLocked ? '/admin' : '/history'} className={styles.card + ' ' + styles.cardHistory + (guestLocked ? ' ' + styles.cardLocked : '')}>
-          <div className={styles.cardTop}>
-            <span className={styles.cardLabel}>History</span>
-            {guestLocked && <span className={styles.lockBadge}>Locked</span>}
-          </div>
-          <p className={styles.cardBody}>{guestLocked ? 'Sign in to view and sync long-term progress.' : 'Track Feel, Move quality, TPR, and clean movement over time.'}</p>
-          <span className={styles.cardArrow}>-&gt;</span>
         </Link>
       </section>
 
-      <section className={styles.fitSection}>
-        <div className={styles.fitIntro}>
-          <p className={styles.sectionKicker}>Who this is for</p>
-          <h2 className={styles.fitTitle}>A movement framework for people whose starting line is personal.</h2>
-        </div>
-
-        <div className={styles.audienceGrid}>
-          {PROGRAM_AUDIENCES.map(item => (
-            <article key={item.title} className={styles.audienceCard}>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
-            </article>
-          ))}
-        </div>
-
-        <div className={styles.philosophy}>
-          <div className={styles.philosophyIntro}>
-            <p className={styles.sectionKicker}>Core framework</p>
-            <h2>The I - My - Me Philosophy</h2>
+      <section className={styles.progressBlock}>
+        <div className={styles.progressTop}>
+          <div className={styles.progressLeft}>
+            <p className={styles.progressKicker}>Journey</p>
+            <p className={styles.progressDays}>
+              Day {dayOfJourney} <span>of {commitment}</span>
+            </p>
           </div>
-          <div className={styles.philosophyGrid}>
-            {PHILOSOPHY.map(item => (
-              <article key={item.term} className={styles.philosophyItem}>
-                <span>{item.term}</span>
-                <p>{item.text}</p>
-              </article>
-            ))}
+          <div className={styles.streakBadge}>
+            <span className={styles.streakNum}>{streak}</span>
+            <span className={styles.streakLabel}>day streak</span>
           </div>
         </div>
+        <div className={styles.progressTrack} aria-hidden="true">
+          <div className={styles.progressFill} style={{ width: `${progressPct}%` }} />
+        </div>
+        <p className={styles.progressFoot}>
+          {progressPct}% complete · {daysToGo} days to go
+        </p>
+      </section>
+
+      <section className={styles.actionGrid}>
+        <Link
+          to={guestLocked ? '/admin' : '/library'}
+          className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
+        >
+          <span className={styles.actionTitle}>Movement Library</span>
+          <span className={styles.actionSub}>Tests · drills · strength</span>
+          {guestLocked && <span className={styles.actionLock}>Locked</span>}
+        </Link>
+        <Link
+          to={guestLocked ? '/admin' : '/history'}
+          className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
+        >
+          <span className={styles.actionTitle}>History</span>
+          <span className={styles.actionSub}>Trends &amp; progress</span>
+          {guestLocked && <span className={styles.actionLock}>Locked</span>}
+        </Link>
+        <Link to="/breathing" className={styles.action}>
+          <span className={styles.actionTitle}>Breathing</span>
+          <span className={styles.actionSub}>Cadence &amp; ease</span>
+        </Link>
+        <Link to="/coach" className={styles.action}>
+          <span className={styles.actionTitle}>Coach</span>
+          <span className={styles.actionSub}>Goals &amp; check-ins</span>
+        </Link>
+      </section>
+
+      <section className={styles.intention}>
+        <p className={styles.intentionKicker}>Today's intention</p>
+        <p className={styles.intentionText}>&ldquo;{intention}&rdquo;</p>
       </section>
 
       <footer className={styles.footer}>
