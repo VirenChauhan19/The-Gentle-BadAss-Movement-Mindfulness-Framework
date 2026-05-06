@@ -99,6 +99,72 @@
   --shadow-xl: rgba(0, 0, 0, 0.62);
 }
 
+:root[data-theme="ember"] {
+  --cream:        #160d0d;
+  --cream-dark:   #0e0808;
+  --cream-mid:    #241111;
+  --paper:        #261616;
+  --paper-soft:   #1d1111;
+  --ink:          #fff1e8;
+  --ink-light:    #e0b9a8;
+  --ink-faint:    #a57f73;
+  --sage:         #c4533f;
+  --sage-dark:    #ff8f6f;
+  --sage-light:   #3a1714;
+  --terracotta:   #ff7358;
+  --slate:        #e0a04a;
+  --slate-light:  #34211a;
+  --gold:         #ffc46b;
+  --sand:         #d38c54;
+  --sand-light:   #342116;
+  --border:       #4a2824;
+  --border-light: #38201d;
+  --focus:        rgba(255, 143, 111, 0.38);
+  --on-dark:      #fff5ef;
+  --on-ink:       #180d0b;
+  --on-accent:    #ffffff;
+  --brand-gradient: linear-gradient(135deg, #2b0f0d 0%, #7d2219 54%, #d95735 100%);
+  --sage-gradient: linear-gradient(135deg, #a63126 0%, #ff7b55 100%);
+  --shadow-xs: rgba(0, 0, 0, 0.24);
+  --shadow:    rgba(0, 0, 0, 0.38);
+  --shadow-md: rgba(0, 0, 0, 0.48);
+  --shadow-lg: rgba(0, 0, 0, 0.58);
+  --shadow-xl: rgba(0, 0, 0, 0.68);
+}
+
+:root[data-theme="ocean"] {
+  --cream:        #071419;
+  --cream-dark:   #041014;
+  --cream-mid:    #0d2028;
+  --paper:        #102a33;
+  --paper-soft:   #0b2028;
+  --ink:          #ecfbff;
+  --ink-light:    #b7dbe4;
+  --ink-faint:    #7ea6b2;
+  --sage:         #1aa39d;
+  --sage-dark:    #76dfd2;
+  --sage-light:   #123a3c;
+  --terracotta:   #ff8b74;
+  --slate:        #5db7e8;
+  --slate-light:  #123244;
+  --gold:         #f4c96a;
+  --sand:         #8eb7c4;
+  --sand-light:   #172d35;
+  --border:       #284a55;
+  --border-light: #1d3c46;
+  --focus:        rgba(118, 223, 210, 0.38);
+  --on-dark:      #f1fdff;
+  --on-ink:       #061419;
+  --on-accent:    #ffffff;
+  --brand-gradient: linear-gradient(135deg, #061419 0%, #0d4c58 52%, #158f95 100%);
+  --sage-gradient: linear-gradient(135deg, #12857f 0%, #76dfd2 100%);
+  --shadow-xs: rgba(0, 0, 0, 0.22);
+  --shadow:    rgba(0, 0, 0, 0.34);
+  --shadow-md: rgba(0, 0, 0, 0.44);
+  --shadow-lg: rgba(0, 0, 0, 0.54);
+  --shadow-xl: rgba(0, 0, 0, 0.64);
+}
+
 html, body {
   height: 100%;
   background:
@@ -116,7 +182,11 @@ html, body {
 }
 
 html[data-theme="dark"],
+html[data-theme="ember"],
+html[data-theme="ocean"],
 html[data-theme="dark"] body,
+html[data-theme="ember"] body,
+html[data-theme="ocean"] body,
 html[data-theme="dark"] #root {
   background:
     radial-gradient(circle at 14% 8%, rgba(131, 168, 120, 0.13), transparent 22rem),
@@ -126,21 +196,60 @@ html[data-theme="dark"] #root {
   background-attachment: fixed;
 }
 
+html[data-theme="ember"],
+html[data-theme="ember"] body,
+html[data-theme="ember"] #root {
+  background:
+    radial-gradient(circle at 16% 10%, rgba(255, 115, 88, 0.20), transparent 20rem),
+    radial-gradient(circle at 88% 12%, rgba(224, 160, 74, 0.14), transparent 22rem),
+    radial-gradient(circle at 72% 86%, rgba(196, 83, 63, 0.10), transparent 22rem),
+    linear-gradient(135deg, #0e0808 0%, #160d0d 52%, #25100e 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="ocean"],
+html[data-theme="ocean"] body,
+html[data-theme="ocean"] #root {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(118, 223, 210, 0.16), transparent 22rem),
+    radial-gradient(circle at 88% 15%, rgba(93, 183, 232, 0.16), transparent 24rem),
+    radial-gradient(circle at 72% 90%, rgba(26, 163, 157, 0.08), transparent 24rem),
+    linear-gradient(135deg, #041014 0%, #071419 52%, #0b2028 100%);
+  background-attachment: fixed;
+}
+
 html[data-theme="dark"] input,
+html[data-theme="ember"] input,
+html[data-theme="ocean"] input,
 html[data-theme="dark"] textarea,
-html[data-theme="dark"] select {
+html[data-theme="ember"] textarea,
+html[data-theme="ocean"] textarea,
+html[data-theme="dark"] select,
+html[data-theme="ember"] select,
+html[data-theme="ocean"] select {
   background: #111711;
   color: var(--ink);
   border-color: var(--border);
 }
 
 html[data-theme="dark"] input::placeholder,
+html[data-theme="ember"] input::placeholder,
+html[data-theme="ocean"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder {
   color: #746d62;
 }
 
+html[data-theme="ember"] textarea::placeholder,
+html[data-theme="ocean"] textarea::placeholder {
+  color: var(--ink-faint);
+}
+
 html[data-theme="dark"] iframe,
-html[data-theme="dark"] img {
+html[data-theme="ember"] iframe,
+html[data-theme="ocean"] iframe,
+html[data-theme="dark"] img,
+html[data-theme="ember"] img,
+html[data-theme="ocean"] img {
   color-scheme: dark;
 }
 

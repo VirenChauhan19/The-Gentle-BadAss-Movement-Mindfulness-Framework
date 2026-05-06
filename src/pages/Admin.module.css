@@ -220,6 +220,10 @@
     padding: 1rem;
   }
 
+  .themeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .journeyStats {
     padding: 1rem;
   }
@@ -253,6 +257,76 @@
   background: var(--cream-dark);
   padding: 0.35rem 0.75rem;
   border-radius: 2rem;
+}
+
+.themeSetting {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.themeOption {
+  min-height: 70px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-light);
+  background: var(--paper-soft);
+  color: var(--ink-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  transition: transform var(--d-base) var(--ease-out),
+              border-color var(--d-base) var(--ease-out),
+              box-shadow var(--d-base) var(--ease-out),
+              background var(--d-base) var(--ease-out);
+}
+
+.themeOption:hover {
+  transform: translateY(-2px);
+  border-color: var(--sage);
+  box-shadow: 0 10px 22px var(--shadow-xs);
+}
+
+.themeOptionActive {
+  background: var(--brand-gradient);
+  border-color: transparent;
+  color: var(--on-dark);
+  box-shadow: 0 12px 26px var(--shadow);
+}
+
+.themeOptionSwatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.24) inset,
+    0 5px 12px var(--shadow);
+}
+
+.themeOptionSwatch[data-theme-swatch="light"] {
+  background: linear-gradient(135deg, #f7f5ef 0%, #637f5f 52%, #42697d 100%);
+}
+
+.themeOptionSwatch[data-theme-swatch="dark"] {
+  background: linear-gradient(135deg, #10130f 0%, #83a878 52%, #7fa9bc 100%);
+}
+
+.themeOptionSwatch[data-theme-swatch="ember"] {
+  background: linear-gradient(135deg, #2b0f0d 0%, #c4533f 52%, #ffc46b 100%);
+}
+
+.themeOptionSwatch[data-theme-swatch="ocean"] {
+  background: linear-gradient(135deg, #071419 0%, #1aa39d 52%, #5db7e8 100%);
 }
 
 /* ─── Actions ─── */

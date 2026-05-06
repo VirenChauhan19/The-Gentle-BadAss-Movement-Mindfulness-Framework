@@ -21,6 +21,13 @@ const SCORE_COLOR = v =>
 
 const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 
+const THEME_OPTIONS = [
+  { id: 'dark', label: 'Dark', description: 'Deep green training cockpit.' },
+  { id: 'ember', label: 'Ember', description: 'Red, warm, high-energy mode.' },
+  { id: 'ocean', label: 'Ocean', description: 'Cool blue focus mode.' },
+  { id: 'light', label: 'Light', description: 'Bright daytime mode.' },
+]
+
 function addDaysISO(startDate, offset) {
   const d = new Date(`${startDate}T00:00:00`)
   d.setDate(d.getDate() + offset)
@@ -81,8 +88,16 @@ export default function Admin() {
   const [namePending,  setNamePending]  = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
   const [clearing,     setClearing]     = useState(false)
+  const [theme,        setTheme]        = useState(() => localStorage.getItem('gb_theme') || 'dark')
 
   const isAdmin = user?.email === ADMIN_EMAIL
+
+  function changeTheme(nextTheme) {
+    setTheme(nextTheme)
+    localStorage.setItem('gb_theme', nextTheme)
+    document.documentElement.dataset.theme = nextTheme
+    window.dispatchEvent(new CustomEvent('gb-theme-change', { detail: { theme: nextTheme } }))
+  }
 
   // Live listener for all users' journal entries (admin only)
   useEffect(() => {
@@ -274,6 +289,26 @@ export default function Admin() {
       <div className={styles.settingsSection}>
         <h2 className={styles.sectionTitle}>Journey Settings</h2>
         <div className={styles.settingsList}>
+          <div className={`${styles.settingItem} ${styles.themeSetting}`}>
+            <div className={styles.settingInfo}>
+              <span className={styles.settingLabel}>App Theme</span>
+              <span className={styles.settingDesc}>Choose a full color system for the app.</span>
+            </div>
+            <div className={styles.themeGrid}>
+              {THEME_OPTIONS.map(option => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={`${styles.themeOption} ${theme === option.id ? styles.themeOptionActive : ''}`}
+                  onClick={() => changeTheme(option.id)}
+                  title={option.description}
+                >
+                  <span className={styles.themeOptionSwatch} data-theme-swatch={option.id} />
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           <div className={styles.settingItem}>
             <div className={styles.settingInfo}>
               <span className={styles.settingLabel}>Daily Reminders</span>

@@ -18,6 +18,20 @@
     linear-gradient(135deg, #090c0a 0%, #10130f 56%, #151a15 100%);
 }
 
+:global(html[data-theme="ember"]) .app {
+  background:
+    radial-gradient(circle at 18% 10%, rgba(255, 115, 88, 0.14), transparent 22rem),
+    radial-gradient(circle at 86% 16%, rgba(224, 160, 74, 0.10), transparent 24rem),
+    linear-gradient(135deg, #0e0808 0%, #160d0d 56%, #24110f 100%);
+}
+
+:global(html[data-theme="ocean"]) .app {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(118, 223, 210, 0.12), transparent 22rem),
+    radial-gradient(circle at 85% 14%, rgba(93, 183, 232, 0.11), transparent 24rem),
+    linear-gradient(135deg, #041014 0%, #071419 56%, #0d2028 100%);
+}
+
 .ambientLayer {
   position: fixed;
   inset: 0;
@@ -40,6 +54,24 @@
     repeating-linear-gradient(105deg, rgba(168, 200, 159, 0.04) 0 1px, transparent 1px 18px);
   mix-blend-mode: screen;
   opacity: 0.64;
+}
+
+:global(html[data-theme="ember"]) .ambientLayer {
+  background:
+    linear-gradient(115deg, transparent 0 35%, rgba(255, 143, 111, 0.10) 49%, transparent 63%),
+    radial-gradient(42rem 32rem at var(--pointer-x, 68%) var(--pointer-y, 28%), rgba(255, 115, 88, 0.16), transparent 62%),
+    repeating-linear-gradient(105deg, rgba(255, 143, 111, 0.045) 0 1px, transparent 1px 18px);
+  mix-blend-mode: screen;
+  opacity: 0.72;
+}
+
+:global(html[data-theme="ocean"]) .ambientLayer {
+  background:
+    linear-gradient(115deg, transparent 0 35%, rgba(118, 223, 210, 0.10) 49%, transparent 63%),
+    radial-gradient(42rem 32rem at var(--pointer-x, 68%) var(--pointer-y, 28%), rgba(93, 183, 232, 0.14), transparent 62%),
+    repeating-linear-gradient(105deg, rgba(118, 223, 210, 0.04) 0 1px, transparent 1px 18px);
+  mix-blend-mode: screen;
+  opacity: 0.70;
 }
 
 @keyframes ambientDrift {
@@ -82,6 +114,16 @@
     0 10px 26px rgba(0, 0, 0, 0.36);
 }
 
+:global(html[data-theme="ember"]) .themeToggle,
+:global(html[data-theme="ocean"]) .themeToggle {
+  background: rgba(27, 19, 18, 0.78);
+  color: var(--ink);
+  border-color: var(--border);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 10px 26px rgba(0, 0, 0, 0.36);
+}
+
 @media (hover: hover) {
   .themeToggle:hover {
     transform: translateY(-2px) rotate(-12deg);
@@ -96,6 +138,33 @@
   align-items: center;
   justify-content: center;
   animation: themeIconIn 360ms var(--ease-spring) both;
+}
+
+.themeSwatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: block;
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.20) inset,
+    0 4px 10px var(--shadow);
+}
+
+.themeSwatch[data-theme-swatch="light"] {
+  background: linear-gradient(135deg, #f7f5ef 0%, #637f5f 52%, #42697d 100%);
+}
+
+.themeSwatch[data-theme-swatch="dark"] {
+  background: linear-gradient(135deg, #10130f 0%, #83a878 52%, #7fa9bc 100%);
+}
+
+.themeSwatch[data-theme-swatch="ember"] {
+  background: linear-gradient(135deg, #2b0f0d 0%, #c4533f 52%, #ffc46b 100%);
+}
+
+.themeSwatch[data-theme-swatch="ocean"] {
+  background: linear-gradient(135deg, #071419 0%, #1aa39d 52%, #5db7e8 100%);
 }
 
 @keyframes themeIconIn {
@@ -139,9 +208,13 @@
 }
 
 :global(html[data-theme="dark"]) .signInCard,
-:global(html[data-theme="dark"]) .lockedPanel {
-  background: #1b211b;
-  border-color: #2d382f;
+:global(html[data-theme="ember"]) .signInCard,
+:global(html[data-theme="ocean"]) .signInCard,
+:global(html[data-theme="dark"]) .lockedPanel,
+:global(html[data-theme="ember"]) .lockedPanel,
+:global(html[data-theme="ocean"]) .lockedPanel {
+  background: var(--paper);
+  border-color: var(--border-light);
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.62);
 }
 
