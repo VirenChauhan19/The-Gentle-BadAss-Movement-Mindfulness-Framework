@@ -101,7 +101,7 @@ Only answer from the Running fitness coach role. Allowed topics are running, run
 If the user asks about anything else, respond exactly: "${COACH_REFUSAL}"
 Do not answer general trivia, celebrities, news, coding, schoolwork, entertainment, or unrelated general knowledge.`
 
-const RUNNING_TOPIC_RE = /(run|running|runner|jog|jogging|race|racing|track|800m|1500m|3k|5k|10k|marathon|ultra|pace|pacing|split|splits|workout|training|train|fitness|exercise|strength|gym|mobility|stretch|warm[-\s]?up|cool[-\s]?down|interval|tempo|stride|sprint|hill|endurance|aerobic|recovery|injur|shin|knee|ankle|hamstring|calf|quad|glute|sleep|nutrition|protein|carb|hydration|program|plan|schedule|session|easy day|long run|cross[-\s]?train)/i
+const RUNNING_TOPIC_RE = /(run|running|runner|jog|jogging|race|racing|track|800m|1500m|3k|5k|10k|marathon|ultra|pace|pacing|split|splits|distance|duration|effort|rpe|workout|training|train|fitness|exercise|strength|gym|mobility|stretch|warm[-\s]?up|cool[-\s]?down|interval|tempo|stride|sprint|hill|endurance|aerobic|recovery|injur|shin|knee|ankle|hamstring|calf|quad|glute|sleep|nutrition|protein|carb|hydration|program|plan|schedule|session|easy day|long run|cross[-\s]?train)/i
 
 function isRunningFitnessQuestion(text) {
   return RUNNING_TOPIC_RE.test(text || '')
@@ -465,6 +465,14 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
   const trainingDays = visiblePlan.filter(s => s.type !== 'rest').length
   const completedDates = new Set(checkins.map(c => c.date))
   const todayStyle = SESSION_STYLE[todaySession?.type] || SESSION_STYLE.rest
+  const remarksByDate = adminRemarks.reduce((map, remark) => {
+    const key = remark.runDate || remark.date
+    if (!key) return map
+    map[key] = [...(map[key] || []), remark]
+    return map
+  }, {})
+  const generalRemarks = adminRemarks.filter(r => !r.runDate)
+  const todayRemarks = todaySession?.date ? (remarksByDate[todaySession.date] || []) : []
 
   function toggleDay(s) {
     setSelectedDay(prev => prev?.date === s.date ? null : s)
@@ -492,6 +500,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             </div>
             {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
             {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
+            {todayRemarks.length > 0 && <AttachedRemarks remarks={todayRemarks} />}
           </div>
         )}
 
@@ -529,6 +538,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
               const isToday = s.date === new Date().toISOString().split('T')[0]
               const isSelected = selectedDay?.date === s.date
               const isLogged = completedDates.has(s.date)
+              const hasRemark = (remarksByDate[s.date] || []).length > 0
               return (
                 <button
                   key={s.id || s.date || i}
@@ -541,6 +551,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
                   <span className={styles.planDayType} style={{ color: st.color }}>{isLogged ? 'Logged' : st.label}</span>
                   <strong>{s.title || st.label}</strong>
                   <span>{s.distance || s.duration || 'Recovery'}</span>
+                  {hasRemark && <em className={styles.planRemarkDot}>Coach note</em>}
                 </button>
               )
             })}
@@ -560,6 +571,9 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
                 <p className={styles.dayDetailTitle}>{selectedDay.title}</p>
                 {selectedDay.pace && <p className={styles.dayDetailPace}>Pace: {selectedDay.pace}</p>}
                 {selectedDay.notes && <p className={styles.dayDetailNotes}>{selectedDay.notes}</p>}
+                {(remarksByDate[selectedDay.date] || []).length > 0 && (
+                  <AttachedRemarks remarks={remarksByDate[selectedDay.date]} />
+                )}
               </div>
             )
           })()}
@@ -620,7 +634,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
           <button className={styles.primaryBtn} onClick={onNewGoal}>Start a New Program</button>
         </div>
       ) : todayCheckin ? (
-        <CheckinDisplay checkin={todayCheckin} />
+        <CheckinDisplay checkin={todayCheckin} remarks={remarksByDate[todayCheckin.date] || []} />
       ) : (
         <CheckinForm
           goal={goal} checkins={checkins} entries={entries}
@@ -628,15 +642,15 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
         />
       )}
 
-      {adminRemarks.length > 0 && (
-        <DailyRemarks remarks={adminRemarks} checkins={checkins} />
+      {generalRemarks.length > 0 && (
+        <DailyRemarks remarks={generalRemarks} checkins={checkins} />
       )}
 
       {/* Run log */}
       {checkins.length > 0 && (
         <div className={styles.section}>
           <p className={styles.sectionLabel}>Run Log</p>
-          {[...checkins].reverse().map(c => <RunLogEntry key={c.date} checkin={c} />)}
+          {[...checkins].reverse().map(c => <RunLogEntry key={c.date} checkin={c} remarks={remarksByDate[c.date] || []} />)}
         </div>
       )}
 
@@ -674,7 +688,23 @@ function DailyRemarks({ remarks, checkins }) {
 }
 
 // ── Already logged today ───────────────────────────────────────────────────────
-function CheckinDisplay({ checkin }) {
+function AttachedRemarks({ remarks }) {
+  return (
+    <div className={styles.attachedRemarks}>
+      {remarks.map(r => (
+        <div key={r.id} className={styles.attachedRemark}>
+          <div className={styles.dailyRemarkTop}>
+            <span>{r.from || 'Coach'}</span>
+            <span>{r.runDate || r.date}</span>
+          </div>
+          <p className={styles.dailyRemarkText}>{r.text}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function CheckinDisplay({ checkin, remarks = [] }) {
   return (
     <div className={styles.checkinDisplay}>
       <div className={styles.checkinDisplayTop}>
@@ -683,7 +713,16 @@ function CheckinDisplay({ checkin }) {
         </span>
         <span className={styles.loggedLabel}>Today logged</span>
       </div>
+      {(checkin.distance || checkin.duration || checkin.pace || checkin.effort) && (
+        <div className={styles.checkinFacts}>
+          {checkin.distance && <span>{checkin.distance} km</span>}
+          {checkin.duration && <span>{checkin.duration} min</span>}
+          {checkin.pace && <span>{checkin.pace}</span>}
+          {checkin.effort && <span>RPE {checkin.effort}/10</span>}
+        </div>
+      )}
       <p className={styles.checkinNote}>{checkin.userNote}</p>
+      {remarks.length > 0 && <AttachedRemarks remarks={remarks} />}
       {checkin.aiReply && (
         <div className={styles.coachReply}>
           <p className={styles.coachLabel}>Running</p>
@@ -697,23 +736,51 @@ function CheckinDisplay({ checkin }) {
 // ── Daily check-in form ───────────────────────────────────────────────────────
 function CheckinForm({ goal, checkins, entries, todaySession, onSubmit }) {
   const [status,  setStatus]  = useState(null)
+  const [distance, setDistance] = useState('')
+  const [duration, setDuration] = useState('')
+  const [pace, setPace] = useState('')
+  const [effort, setEffort] = useState('')
+  const [surface, setSurface] = useState('')
   const [note,    setNote]    = useState('')
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(null)
+  const needsRunDetails = status === 'done' || status === 'partial'
+  const canSubmit = status && (
+    needsRunDetails
+      ? distance.trim() && duration.trim() && effort
+      : note.trim()
+  )
 
   async function handleSubmit() {
-    if (!status || !note.trim()) return
+    if (!canSubmit) return
     setLoading(true)
     setError(null)
+    const structuredNote = [
+      needsRunDetails ? `Distance: ${distance.trim()} km` : null,
+      needsRunDetails ? `Duration: ${duration.trim()} min` : null,
+      pace.trim() ? `Pace/speed: ${pace.trim()}` : null,
+      effort ? `Effort: ${effort}/10` : null,
+      surface.trim() ? `Surface: ${surface.trim()}` : null,
+      note.trim() ? `Notes: ${note.trim()}` : null,
+    ].filter(Boolean).join('\n')
     let aiReply = ''
     try {
-      aiReply = await getCheckinReply(goal, checkins, entries, status, note, todaySession)
+      aiReply = await getCheckinReply(goal, checkins, entries, status, structuredNote, todaySession)
     } catch (err) {
       setError(err.message)
       setLoading(false)
       return
     }
-    onSubmit({ status, userNote: note.trim(), aiReply })
+    onSubmit({
+      status,
+      distance: distance.trim(),
+      duration: duration.trim(),
+      pace: pace.trim(),
+      effort,
+      surface: surface.trim(),
+      userNote: structuredNote,
+      aiReply,
+    })
   }
 
   return (
@@ -734,9 +801,36 @@ function CheckinForm({ goal, checkins, entries, todaySession, onSubmit }) {
           </button>
         ))}
       </div>
+      {needsRunDetails && (
+        <div className={styles.runDetailGrid}>
+          <label>
+            <span>Distance</span>
+            <input value={distance} onChange={e => setDistance(e.target.value)} placeholder="e.g. 5.2" inputMode="decimal" disabled={loading} />
+          </label>
+          <label>
+            <span>Duration</span>
+            <input value={duration} onChange={e => setDuration(e.target.value)} placeholder="e.g. 32" inputMode="decimal" disabled={loading} />
+          </label>
+          <label>
+            <span>Pace / speed</span>
+            <input value={pace} onChange={e => setPace(e.target.value)} placeholder="e.g. 6:10/km or easy" disabled={loading} />
+          </label>
+          <label>
+            <span>Effort</span>
+            <select value={effort} onChange={e => setEffort(e.target.value)} disabled={loading}>
+              <option value="">RPE 1-10</option>
+              {Array.from({ length: 10 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}/10</option>)}
+            </select>
+          </label>
+          <label className={styles.fullField}>
+            <span>Surface / route</span>
+            <input value={surface} onChange={e => setSurface(e.target.value)} placeholder="Road, trail, treadmill, track..." disabled={loading} />
+          </label>
+        </div>
+      )}
       <textarea
         className={styles.checkinInput}
-        placeholder="Describe your run — distance, pace, how you felt, any notes…"
+        placeholder={needsRunDetails ? 'How did it feel? Any pain, breathing, energy, or form notes?' : 'Why did you miss it? What should tomorrow account for?'}
         value={note}
         onChange={e => setNote(e.target.value)}
         rows={4}
@@ -746,7 +840,7 @@ function CheckinForm({ goal, checkins, entries, todaySession, onSubmit }) {
       <button
         className={styles.primaryBtn}
         onClick={handleSubmit}
-        disabled={!status || !note.trim() || loading}
+        disabled={!canSubmit || loading}
       >
         {loading ? 'Getting coach feedback…' : 'Log Run'}
       </button>
@@ -755,7 +849,7 @@ function CheckinForm({ goal, checkins, entries, todaySession, onSubmit }) {
 }
 
 // ── Run log entry ─────────────────────────────────────────────────────────────
-function RunLogEntry({ checkin }) {
+function RunLogEntry({ checkin, remarks = [] }) {
   const [open, setOpen] = useState(false)
   const color = checkin.status === 'done' ? '#8b9e7e' : checkin.status === 'partial' ? '#d9b38a' : '#d98a8a'
   const symbol = checkin.status === 'done' ? '✓' : checkin.status === 'partial' ? '↗' : '✗'
@@ -767,7 +861,16 @@ function RunLogEntry({ checkin }) {
       </div>
       {open && (
         <div className={styles.logExpanded}>
+          {(checkin.distance || checkin.duration || checkin.pace || checkin.effort) && (
+            <div className={styles.checkinFacts}>
+              {checkin.distance && <span>{checkin.distance} km</span>}
+              {checkin.duration && <span>{checkin.duration} min</span>}
+              {checkin.pace && <span>{checkin.pace}</span>}
+              {checkin.effort && <span>RPE {checkin.effort}/10</span>}
+            </div>
+          )}
           <p className={styles.logNote}>{checkin.userNote}</p>
+          {remarks.length > 0 && <AttachedRemarks remarks={remarks} />}
           {checkin.aiReply && (
             <div className={styles.coachReply} style={{ marginTop: 10 }}>
               <p className={styles.coachLabel}>Running</p>
@@ -1013,6 +1116,9 @@ PROGRAM STRUCTURE:
 - Base Fitness and Weight Loss Support plans should prioritise easy effort, time on feet, cross-training, and strength; do not overload hard workouts.
 - Race-focus plans can include race-specific work, but only after easy volume and recovery are established.
 - Each running session must be realistic for ${currentKm}; avoid sudden distance jumps and make the title match the workout.
+- Weekly mileage must progress across the commitment when recovery allows: build most weeks by about 5-10%, include a lighter recovery week every 3-4 weeks, and never increase both intensity and long-run distance sharply in the same week.
+- For every week, make the total planned running volume coherent with the individual daily sessions. Later weeks should clearly show increased volume, longer long runs, or slightly more quality work compared with week 1 unless the focus is recovery.
+- Put the weekly progression logic into actual day-by-day workouts, not just the overview text.
 - Week 1 must be smooth and easy: no volume spikes, no race-effort intervals for beginners, and no hard sessions before the runner has adapted
 - Beginner plans must build gradually: week 1 should feel comfortable, weeks 2-4 add small volume or light strides, later weeks can add controlled workouts if recovery is good
 - Focus: ${raceGoal} · Level: ${experience} · Duration: ${commitmentDays} days

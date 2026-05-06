@@ -351,6 +351,20 @@
   color: var(--ink-faint);
 }
 
+.planRemarkDot {
+  align-self: flex-start;
+  background: rgba(66, 105, 125, 0.12);
+  border: 1px solid rgba(66, 105, 125, 0.2);
+  border-radius: 999px;
+  color: var(--slate);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  text-transform: uppercase;
+}
+
 .planDayType {
   font-weight: 800;
   text-transform: uppercase;
@@ -665,6 +679,48 @@
 
 .checkinInput:focus { outline: none; border-color: var(--sage); }
 
+.runDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.runDetailGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.runDetailGrid span {
+  color: var(--ink-faint);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.runDetailGrid input,
+.runDetailGrid select {
+  min-height: 42px;
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: 11px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  padding: 0 12px;
+  outline: none;
+}
+
+.runDetailGrid input:focus,
+.runDetailGrid select:focus {
+  border-color: var(--sage);
+}
+
+.fullField {
+  grid-column: 1 / -1;
+}
+
 /* ── Today's log display ─────────────────────────────────────── */
 .checkinDisplay {
   margin: 0 16px 16px;
@@ -705,6 +761,24 @@
   color: var(--ink-light);
   line-height: 1.55;
   margin-bottom: 14px;
+  white-space: pre-line;
+}
+
+.checkinFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+
+.checkinFacts span {
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  color: var(--ink-light);
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 5px 9px;
 }
 
 /* ── Coach reply block ───────────────────────────────────────── */
@@ -843,6 +917,21 @@
   font-size: 0.86rem;
   color: var(--ink);
   line-height: 1.58;
+}
+
+.attachedRemarks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.attachedRemark {
+  background: rgba(66, 105, 125, 0.08);
+  border: 1px solid rgba(66, 105, 125, 0.16);
+  border-left: 3px solid var(--slate);
+  border-radius: 12px;
+  padding: 11px 12px;
 }
 
 /* ── Completion ──────────────────────────────────────────────── */
