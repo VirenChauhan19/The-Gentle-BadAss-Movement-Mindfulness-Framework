@@ -468,3 +468,94 @@
     gap: 14px;
   }
 }
+
+@media (max-width: 767px) {
+  .page {
+    padding-bottom: 30px;
+  }
+
+  .header {
+    padding: calc(54px + env(safe-area-inset-top)) 18px 18px;
+  }
+
+  .pillarBanner,
+  .weeklyModule,
+  .principlesBanner {
+    margin-left: 12px;
+    margin-right: 12px;
+    border-radius: 20px;
+  }
+
+  .pillarBanner div {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .pillarBanner div::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pillarBanner span {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .weeklyModule {
+    grid-template-columns: 48px minmax(0, 1fr);
+    padding: 16px;
+  }
+
+  .weeklyIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .weeklyModule button {
+    min-height: 50px;
+    border-radius: 16px;
+  }
+
+  .filters {
+    top: 0;
+    padding: 14px 12px 8px;
+    background: linear-gradient(180deg, var(--cream) 0%, rgba(247, 245, 239, 0.86) 82%, transparent 100%);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  :global(html[data-theme="dark"]) .filters {
+    background: linear-gradient(180deg, var(--cream) 0%, rgba(16, 19, 15, 0.86) 82%, transparent 100%);
+  }
+
+  .filter {
+    min-height: 42px;
+    padding: 10px 16px;
+    border-radius: 16px;
+    font-weight: 800;
+  }
+
+  .categoryDesc {
+    padding: 8px 16px 2px;
+  }
+
+  .grid {
+    padding: 12px 12px 0;
+    gap: 10px;
+  }
+
+  .card {
+    min-height: 130px;
+    border-radius: 20px;
+    padding: 18px;
+  }
+
+  .card:active {
+    transform: scale(0.97);
+  }
+}

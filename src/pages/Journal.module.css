@@ -622,3 +622,89 @@
     padding-right: 56px;
   }
 }
+
+@media (max-width: 767px) {
+  .page {
+    padding-bottom: 30px;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: calc(48px + env(safe-area-inset-top)) 18px 16px;
+    box-shadow: 0 10px 24px var(--shadow-xs);
+  }
+
+  .title {
+    font-size: clamp(1.45rem, 7vw, 1.9rem);
+    margin-bottom: 12px;
+  }
+
+  .factors {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .factor {
+    min-height: 0;
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .factorTop {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 64px;
+    gap: 8px;
+  }
+
+  .factorQ {
+    font-size: 0.74rem;
+  }
+
+  .slider {
+    height: 12px;
+  }
+
+  .slider::-webkit-slider-thumb {
+    width: 30px;
+    height: 30px;
+    border-width: 8px;
+  }
+
+  .scoreRail {
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 2px 2px 7px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .scoreRail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scoreChip {
+    flex: 0 0 34px;
+    height: 34px;
+    scroll-snap-align: center;
+    border-radius: 12px;
+  }
+
+  .noteSection,
+  .saveSection {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .note {
+    border-radius: 20px;
+    min-height: 150px;
+  }
+
+  .saveBtn {
+    min-height: 56px;
+    border-radius: 18px;
+  }
+}

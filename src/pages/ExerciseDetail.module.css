@@ -529,3 +529,76 @@
     margin: 0;
   }
 }
+
+@media (max-width: 767px) {
+  .page {
+    padding-bottom: 28px;
+  }
+
+  .topBar {
+    padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
+  }
+
+  .back {
+    min-height: 42px;
+    border-radius: 15px;
+  }
+
+  .pillarBanner {
+    padding: 14px 12px;
+  }
+
+  .animSection {
+    padding: 16px 0 22px;
+  }
+
+  .content {
+    padding: 18px 12px;
+    gap: 14px;
+  }
+
+  .exerciseHeader {
+    display: grid;
+    gap: 10px;
+  }
+
+  .name {
+    font-size: clamp(1.55rem, 8vw, 2rem);
+  }
+
+  .sequenceBadge,
+  .block,
+  .cue,
+  .antiRotation,
+  .cadenceBlock,
+  .workflowCard,
+  .detailPanel {
+    border-radius: 20px;
+  }
+
+  .step {
+    padding: 14px 0;
+  }
+
+  .workflowBtns {
+    grid-template-columns: 1fr;
+  }
+
+  .startBtn,
+  .stopBtn,
+  .missedBtn,
+  .nextBtn {
+    min-height: 52px;
+    border-radius: 16px;
+  }
+
+  .metricRow,
+  .tprRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tprDisplay {
+    min-width: 0;
+  }
+}

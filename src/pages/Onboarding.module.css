@@ -281,6 +281,41 @@
   z-index: 1;
 }
 
+@media (max-width: 767px) {
+  .page {
+    padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(118px + env(safe-area-inset-bottom));
+    max-width: none;
+  }
+
+  .progressBar {
+    margin-bottom: 2rem;
+  }
+
+  .header {
+    margin-bottom: 1.4rem;
+  }
+
+  .section {
+    animation: floatIn 420ms var(--ease-elastic) both 80ms;
+  }
+
+  .pathCard,
+  .commitmentCard,
+  .textarea {
+    border-radius: 22px;
+  }
+
+  .pathCard {
+    min-height: 94px;
+  }
+
+  .primaryBtn,
+  .startBtn {
+    min-height: 56px;
+    border-radius: 18px;
+  }
+}
+
 @keyframes commitmentSweep {
   0%, 58% { transform: translateX(-105%); }
   86%, 100% { transform: translateX(105%); }

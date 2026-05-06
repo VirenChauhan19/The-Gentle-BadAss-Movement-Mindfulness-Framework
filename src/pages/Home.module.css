@@ -497,3 +497,100 @@
   .intentionText { font-size: 1.15rem; }
   .footer { padding: 32px 56px 8px; }
 }
+
+@media (max-width: 767px) {
+  .page {
+    padding-bottom: 18px;
+  }
+
+  .header {
+    padding: calc(54px + env(safe-area-inset-top)) 18px 18px;
+  }
+
+  .greeting {
+    font-size: clamp(2rem, 10vw, 2.7rem);
+  }
+
+  .feelHero,
+  .actionGrid {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .feelCard {
+    min-height: 218px;
+    display: grid;
+    grid-template-columns: 116px minmax(0, 1fr);
+    gap: 14px;
+    padding: 18px;
+    border-radius: 24px;
+    transform-origin: center bottom;
+  }
+
+  .feelCard:active {
+    transform: scale(0.975) translateY(1px);
+  }
+
+  .ring {
+    width: 112px;
+    height: 112px;
+    align-self: center;
+  }
+
+  .ringScore {
+    font-size: 2.25rem;
+  }
+
+  .feelHeading {
+    font-size: 1.2rem;
+  }
+
+  .progressBlock {
+    margin: 0 12px 14px;
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .actionGrid {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 18px;
+  }
+
+  .actionGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .action {
+    flex: 0 0 72%;
+    min-height: 104px;
+    scroll-snap-align: start;
+    border-radius: 18px;
+  }
+
+  .action:nth-child(2n) {
+    flex-basis: 64%;
+  }
+
+  .action:active {
+    transform: scale(0.965);
+  }
+
+  .intention {
+    margin: 0 12px;
+    padding: 20px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(217, 207, 191, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  :global(html[data-theme="dark"]) .intention {
+    background: rgba(27, 33, 27, 0.58);
+    border-color: rgba(58, 68, 58, 0.72);
+  }
+}

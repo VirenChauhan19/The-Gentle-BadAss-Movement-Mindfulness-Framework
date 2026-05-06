@@ -1891,3 +1891,145 @@
 }
 
 .sendBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+@media (max-width: 767px) {
+  .page {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+
+  .header {
+    padding: calc(54px + env(safe-area-inset-top)) 18px 22px;
+    border-radius: 0 0 26px 26px;
+  }
+
+  .tabs {
+    margin: -16px 12px 14px;
+    position: relative;
+    z-index: 3;
+    border-radius: 18px;
+  }
+
+  .tab {
+    min-height: 46px;
+    border-radius: 15px;
+    font-weight: 800;
+  }
+
+  .runningDashboard,
+  .section,
+  .planBoard,
+  .upNext,
+  .overviewCard,
+  .todaySessionCard,
+  .checkinCard,
+  .checkinDisplay,
+  .completionCard,
+  .dailyRemarks {
+    margin-left: 12px;
+    margin-right: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-radius: 20px;
+  }
+
+  .runningDashboard,
+  .section {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .planSummary {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .planSummary::-webkit-scrollbar {
+    display: none;
+  }
+
+  .planSummary div {
+    flex: 0 0 34%;
+    scroll-snap-align: start;
+    border-radius: 16px;
+  }
+
+  .planGrid {
+    display: flex;
+    overflow-x: auto;
+    max-height: none;
+    gap: 10px;
+    padding: 2px 2px 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .planGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .planDay {
+    flex: 0 0 72%;
+    min-height: 148px;
+    scroll-snap-align: start;
+    border-radius: 18px;
+  }
+
+  .weekGrid {
+    grid-template-columns: repeat(7, minmax(82px, 1fr));
+  }
+
+  .statusRow {
+    gap: 7px;
+  }
+
+  .statusBtn {
+    min-height: 46px;
+    border-radius: 15px;
+    font-weight: 800;
+  }
+
+  .runDetailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .goalGrid,
+  .expGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .goalCard,
+  .expBigCard,
+  .benchmarkCard,
+  .paceGuideCard {
+    border-radius: 20px;
+  }
+
+  .wizardTop {
+    padding: calc(54px + env(safe-area-inset-top)) 18px 20px;
+    border-radius: 0 0 26px 26px;
+  }
+
+  .wizardBody {
+    padding: 16px 12px 0;
+  }
+
+  .chatInputRow {
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    padding: 10px 12px;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -10px 26px var(--shadow-xs);
+  }
+
+  .chatInput {
+    min-height: 46px;
+    border-radius: 16px;
+  }
+
+  .sendBtn {
+    height: 46px;
+    border-radius: 15px;
+  }
+}

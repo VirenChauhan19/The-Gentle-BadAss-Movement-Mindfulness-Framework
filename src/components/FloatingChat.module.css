@@ -501,3 +501,61 @@
   cursor: not-allowed;
   box-shadow: none;
 }
+
+@media (max-width: 767px) {
+  .fab {
+    right: 14px;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+  }
+
+  .panel {
+    left: 10px;
+    right: 10px;
+    bottom: calc(154px + env(safe-area-inset-bottom));
+    width: auto;
+    max-height: min(68dvh, 580px);
+    border-radius: 24px;
+    transform-origin: bottom right;
+  }
+
+  .panelHeader {
+    padding: 15px;
+  }
+
+  .messages {
+    padding: 14px 12px 10px;
+  }
+
+  .quickGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .quickBtn {
+    min-height: 42px;
+    border-radius: 15px;
+  }
+
+  .bubble {
+    max-width: 86%;
+    border-radius: 20px;
+    padding: 10px 13px;
+  }
+
+  .panelFooter {
+    padding: 10px 10px 12px;
+  }
+
+  .input {
+    min-height: 44px;
+    border-radius: 16px;
+  }
+
+  .sendBtn {
+    width: 44px;
+    height: 44px;
+    border-radius: 15px;
+  }
+}

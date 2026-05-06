@@ -404,3 +404,60 @@
     max-width: 1180px;
   }
 }
+
+@media (max-width: 767px) {
+  .header {
+    padding: calc(54px + env(safe-area-inset-top)) 18px 18px;
+  }
+
+  .summaryGrid {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 4px 12px 8px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+
+  .summaryGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .summaryCard {
+    flex: 0 0 34%;
+    min-height: 96px;
+    border-radius: 18px;
+    scroll-snap-align: start;
+  }
+
+  .dashboard,
+  .list,
+  .moveArchive {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .chartCard,
+  .row,
+  .moveRow,
+  .empty {
+    border-radius: 20px;
+  }
+
+  .chartContainer {
+    height: 220px;
+  }
+
+  .row {
+    padding: 16px;
+  }
+
+  .moveRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .moveMetrics {
+    justify-content: flex-start;
+  }
+}
