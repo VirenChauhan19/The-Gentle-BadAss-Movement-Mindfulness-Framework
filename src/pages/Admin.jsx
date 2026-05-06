@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { db } from '../firebase'
 import { collectionGroup, onSnapshot, query, doc, getDoc, setDoc } from 'firebase/firestore'
 import { arrayUnion } from 'firebase/firestore'
@@ -79,6 +80,7 @@ function getFullCoachPlan(goal) {
 export default function Admin() {
   const { user, signInWithGoogle, signOut, authError } = useAuth()
   const { guestName, setGuestName, profile, entries, clearAllData, adminRemarks } = useData()
+  const navigate = useNavigate()
 
   const [adminMode,    setAdminMode]    = useState(false)
   const [allEntries,   setAllEntries]   = useState([])
@@ -323,6 +325,21 @@ export default function Admin() {
                 {user ? 'Cloud syncing is active.' : 'Sign in to enable cloud sync.'}
               </span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.settingsSection}>
+        <h2 className={styles.sectionTitle}>Membership</h2>
+        <div className={styles.settingsList}>
+          <div className={styles.settingItem}>
+            <div className={styles.settingInfo}>
+              <span className={styles.settingLabel}>Unlock Full Access</span>
+              <span className={styles.settingDesc}>One-time payment · {profile?.commitment || 90}-day journey</span>
+            </div>
+            <button className={styles.paywallPreviewBtn} onClick={() => navigate('/paywall')}>
+              View plans
+            </button>
           </div>
         </div>
       </div>

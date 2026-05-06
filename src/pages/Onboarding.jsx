@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import styles from './Onboarding.module.css'
 
+// ── Swap this one line with your real key when ready ──────────────────────────
+const RAZORPAY_KEY = 'rzp_test_1DP5mmOlF5G5ag'
+// ─────────────────────────────────────────────────────────────────────────────
+
 const paths = [
   {
     id: 'rehab',
@@ -24,30 +28,63 @@ const paths = [
   },
 ]
 
-const commitmentLabels = {
-  30: { label: '30-Day Reset', desc: 'A focused month to reset your movement habits.' },
-  60: { label: '60-Day Foundation', desc: 'Build a real movement foundation.' },
-  90: { label: '90-Day Transformation', desc: 'Three months of consistent progress.' },
-  120: { label: '120-Day Deep Dive', desc: 'A full season of intentional movement.' },
-  150: { label: '150-Day Journey', desc: 'Half a year of building strength.' },
-  180: { label: '180-Day Commitment', desc: 'Six months of dedicated practice.' },
-  210: { label: '210-Day Challenge', desc: 'A serious commitment to change.' },
-  240: { label: '240-Day Quest', desc: 'Eight months of sustained effort.' },
-  270: { label: '270-Day Transformation', desc: 'The full La Ultra journey.' },
+const PLANS = {
+  30:  { label: '30-Day Reset',          desc: 'A focused month to reset your movement habits.',         price: 499  },
+  60:  { label: '60-Day Foundation',     desc: 'Build a real movement foundation.',                      price: 799  },
+  90:  { label: '90-Day Transformation', desc: 'Three months of consistent progress.',                   price: 1199 },
+  120: { label: '120-Day Deep Dive',     desc: 'A full season of intentional movement.',                 price: 1499 },
+  150: { label: '150-Day Journey',       desc: 'Half a year of building strength.',                      price: 1699 },
+  180: { label: '180-Day Commitment',    desc: 'Six months of dedicated practice.',                      price: 1999 },
+  210: { label: '210-Day Challenge',     desc: 'A serious commitment to change.',                        price: 2299 },
+  240: { label: '240-Day Quest',         desc: 'Eight months of sustained effort.',                      price: 2499 },
+  270: { label: '270-Day La Ultra',      desc: 'The full La Ultra journey — the ultimate commitment.',   price: 2999 },
 }
 
 export default function Onboarding() {
-  const { saveProfile } = useData()
+  const { saveProfile, user, guestName } = useData()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [data, setData] = useState({ fitnessHistory: '', path: '', commitment: 90 })
+  const [paying, setPaying] = useState(false)
 
-  async function handleComplete() {
+  const plan = PLANS[data.commitment] || PLANS[90]
+
+  async function saveAndGo() {
     await saveProfile({ ...data, onboardingComplete: true })
     navigate('/')
   }
 
-  const commitInfo = commitmentLabels[data.commitment] || { label: `${data.commitment}-Day Journey`, desc: '' }
+  function handlePay() {
+    if (!window.Razorpay) {
+      alert('Payment could not load. Check your internet connection and try again.')
+      return
+    }
+    setPaying(true)
+
+    const options = {
+      key: RAZORPAY_KEY,
+      amount: plan.price * 100,      // paise
+      currency: 'INR',
+      name: 'The Gentle BadAss',
+      description: plan.label,
+      prefill: {
+        name: user?.displayName || guestName || '',
+        email: user?.email || '',
+      },
+      notes: { commitment: String(data.commitment) },
+      theme: { color: '#3f5f3e' },
+      modal: {
+        ondismiss: () => setPaying(false),
+      },
+      handler: () => {
+        setPaying(false)
+        saveAndGo()
+      },
+    }
+
+    const rzp = new window.Razorpay(options)
+    rzp.open()
+  }
 
   return (
     <div className={styles.page}>
@@ -74,7 +111,7 @@ export default function Onboarding() {
         <p className={styles.subtitle}>
           {step === 1 && 'Tell us where you are right now.'}
           {step === 2 && 'Pick the focus that fits your current state.'}
-          {step === 3 && 'How long are you committing to this journey?'}
+          {step === 3 && 'Slide to choose your journey length.'}
         </p>
       </header>
 
@@ -133,16 +170,37 @@ export default function Onboarding() {
         </section>
       )}
 
-      {/* ── Step 3 ── */}
+      {/* ── Step 3 — Commitment + Payment ── */}
       {step === 3 && (
         <section className={styles.section}>
-          <div className={styles.commitmentCard}>
-            <div className={styles.commitDays}>{data.commitment}</div>
-            <div className={styles.commitUnit}>days</div>
-            <div className={styles.commitLabelText}>{commitInfo.label}</div>
-          </div>
-          <p className={styles.commitDesc}>{commitInfo.desc}</p>
 
+          {/* Commitment card with live price */}
+          <div className={styles.commitmentCard}>
+            <div className={styles.commitTop}>
+              <div>
+                <div className={styles.commitDays}>{data.commitment}</div>
+                <div className={styles.commitUnit}>days</div>
+              </div>
+              <div className={styles.commitPriceSide}>
+                <span className={styles.commitPriceCurrency}>₹</span>
+                <span className={styles.commitPriceNum}>
+                  {plan.price.toLocaleString('en-IN')}
+                </span>
+                <span className={styles.commitPriceNote}>one-time</span>
+              </div>
+            </div>
+
+            <div className={styles.commitDivider} />
+
+            <div className={styles.commitBottom}>
+              <span className={styles.commitLabelText}>{plan.label}</span>
+              <span className={styles.commitAccess}>Full access · All features</span>
+            </div>
+          </div>
+
+          <p className={styles.commitDesc}>{plan.desc}</p>
+
+          {/* Slider */}
           <div className={styles.sliderWrap}>
             <input
               type="range"
@@ -154,19 +212,31 @@ export default function Onboarding() {
               className={styles.slider}
             />
             <div className={styles.sliderTicks}>
-              <span>30</span>
-              <span>90</span>
-              <span>180</span>
-              <span>270</span>
+              <span>30d</span>
+              <span>90d</span>
+              <span>180d</span>
+              <span>270d</span>
             </div>
           </div>
 
+          {/* Test mode hint */}
+          <div className={styles.testHint}>
+            Test mode · card 4111 1111 1111 1111 · OTP 1234
+          </div>
+
           <div className={styles.btnStack}>
-            <button className={styles.startBtn} onClick={handleComplete}>
-              Start My Journey
+            <button
+              className={styles.startBtn}
+              onClick={handlePay}
+              disabled={paying}
+            >
+              {paying
+                ? 'Opening payment…'
+                : `Pay ₹${plan.price.toLocaleString('en-IN')} & Start Journey`}
             </button>
             <button className={styles.backLink} onClick={() => setStep(2)}>← Back</button>
           </div>
+
         </section>
       )}
     </div>

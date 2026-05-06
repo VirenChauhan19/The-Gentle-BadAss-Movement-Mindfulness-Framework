@@ -259,6 +259,25 @@
   border-radius: 2rem;
 }
 
+.paywallPreviewBtn {
+  flex-shrink: 0;
+  padding: 0.4rem 1rem;
+  background: linear-gradient(135deg, var(--sage-dark), var(--sage));
+  color: #fff;
+  border: none;
+  border-radius: 2rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(63,95,62,0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.paywallPreviewBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(63,95,62,0.36);
+}
+
 .themeSetting {
   align-items: stretch;
   flex-direction: column;
