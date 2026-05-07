@@ -54,7 +54,8 @@
       "Bash(xargs grep *)",
       "Bash(npx firebase *)",
       "Bash(firebase deploy *)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\" -Force | Where-Object { $_.Name -ne \"node_modules\" } | Select-Object Name, PSIsContainer)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\chauh\\\\OneDrive\\\\Documents\\\\GitHub\\\\The-Gentle-BadAss-Movement-Mindfulness-Framework\" -Force | Where-Object { $_.Name -ne \"node_modules\" } | Select-Object Name, PSIsContainer)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const p='src/pages/Coach.jsx';const lines=fs.readFileSync\\(p,'utf8'\\).split\\('\\\\n'\\);const start=lines.findIndex\\(l=>l.startsWith\\('async function generateProgramLegacy'\\)\\);const end=lines.findIndex\\(\\(l,i\\)=>i>start && l.startsWith\\('async function getCheckinReply'\\)\\);console.log\\('start:',start+1,'end:',end+1\\);if\\(start>=0 && end>start\\){const newLines=[...lines.slice\\(0,start\\),...lines.slice\\(end\\)];fs.writeFileSync\\(p,newLines.join\\('\\\\n'\\)\\);console.log\\('removed',end-start,'lines'\\);}\")"
     ]
   }
 }

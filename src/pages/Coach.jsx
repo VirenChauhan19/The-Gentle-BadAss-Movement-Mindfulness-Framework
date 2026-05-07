@@ -287,6 +287,7 @@ function expandProgramPlan(template, startDate, totalDays, weeklyTargets) {
       day,
       type: session.type || 'rest',
       title: session.title || 'Rest / Recovery',
+      purpose: session.purpose || (target?.qualityFocus && (session.type === 'hard' || session.type === 'long') ? target.qualityFocus : ''),
       distance: distanceField,
       duration: durationField,
       pace: session.pace || '',
@@ -311,6 +312,7 @@ function normalizePlan(rawPlan, startDate, totalDays) {
       day,
       type: item.type || 'rest',
       title: item.title || 'Rest / Recovery',
+      purpose: item.purpose || '',
       distance: item.distance || '',
       duration: item.duration || '',
       pace: item.pace || '',
@@ -576,6 +578,10 @@ export default function Coach() {
         paceGuide: goal.paceGuide,
         goalPace: goal.goalPace,
         prefix,
+        onProgress: (update) => {
+          if (update.status === 'active' && update.label) setRetuneNotice(update.label + '…')
+          else if (update.status === 'done' && update.key === 'macro') setRetuneNotice('Macrocycle ready, writing weeks…')
+        },
       })
       const newStart = today
       const fresh = normalizePlan(program.plan, newStart, remainingDays)
@@ -689,6 +695,115 @@ function formatPath(path) {
   return path.charAt(0).toUpperCase() + path.slice(1)
 }
 
+function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, currentKm, benchmarkDistance, benchmarkTime, goalPace, paceGuide, progressStages = [] }) {
+  const totalWeeks = Math.ceil(commitmentDays / 7)
+  const expectedChunks = Math.ceil(commitmentDays / 28)
+  const totalStages = 1 + expectedChunks
+  const taglines = [
+    'Each chunk is written with the previous weeks in context — workouts vary on purpose.',
+    'Macrocycle first, then four-week mesocycles. The way real coaches build programs.',
+    goalPace ? `Working backwards from your ${goalPace.targetPace} race pace.` : 'Effort-based progression with recovery weeks every 3-4 weeks.',
+    'Every workout gets a stated purpose: threshold, race-pace, hills, fartlek, progression.',
+    'Hard days follow easy days. No back-to-back race-effort intervals.',
+    `${daysPerWeek} training days a week, periodised across ${totalWeeks} weeks.`,
+  ]
+  const [taglineIndex, setTaglineIndex] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
+  const expectedSeconds = Math.max(20, Math.min(180, 8 + expectedChunks * 12))
+
+  useEffect(() => {
+    const start = Date.now()
+    const tick = setInterval(() => setElapsed(Math.round((Date.now() - start) / 100) / 10), 200)
+    const taglineTimer = setInterval(() => {
+      setTaglineIndex(i => (i + 1) % taglines.length)
+    }, 4500)
+    return () => { clearInterval(tick); clearInterval(taglineTimer) }
+  }, [])
+
+  const stagesDone = progressStages.filter(s => s.status === 'done').length
+  const progress = Math.min(0.96, Math.max(elapsed / expectedSeconds, stagesDone / Math.max(1, totalStages)))
+
+  const renderedStages = (() => {
+    const out = []
+    const macroStage = progressStages.find(s => s.key === 'macro')
+    out.push({
+      key: 'macro',
+      label: macroStage?.label || `Designing the ${totalWeeks}-week macrocycle blueprint`,
+      status: macroStage?.status || (progressStages.length === 0 ? 'active' : 'pending'),
+    })
+    for (let i = 1; i <= expectedChunks; i++) {
+      const stage = progressStages.find(s => s.key === `chunk-${i}`)
+      const startWeek = (i - 1) * 4 + 1
+      const endWeek = Math.min(totalWeeks, i * 4)
+      out.push({
+        key: `chunk-${i}`,
+        label: stage?.label || `Writing weeks ${startWeek}-${endWeek} workouts`,
+        status: stage?.status || 'pending',
+      })
+    }
+    return out
+  })()
+
+  const inputs = [
+    focus && { label: 'Focus', value: focus },
+    experience && { label: 'Level', value: experience },
+    daysPerWeek && { label: 'Days/week', value: `${daysPerWeek}` },
+    currentKm && { label: 'Current', value: currentKm },
+    goalPace && { label: 'Goal', value: `${goalPace.distance} · ${goalPace.targetTime}` },
+    goalPace && { label: 'Race pace', value: goalPace.targetPace },
+    !goalPace && benchmarkDistance && benchmarkTime && { label: 'Benchmark', value: `${benchmarkDistance} ${benchmarkTime}` },
+    !goalPace && paceGuide && { label: 'Zone 2', value: paceGuide.zone2 },
+    { label: 'Plan length', value: `${commitmentDays} days` },
+  ].filter(Boolean)
+
+  return (
+    <div className={styles.page}>
+      <header className={styles.header}>
+        <p className={styles.label}>Running</p>
+        <h1 className={styles.title}>Building Your Plan</h1>
+        <p className={styles.subtitle}>Macrocycle + {expectedChunks} mesocycle{expectedChunks > 1 ? 's' : ''} for your {commitmentDays}-day {focus || 'running'} program</p>
+      </header>
+      <div className={styles.genCard}>
+        <div className={styles.genProgress}>
+          <div className={styles.genProgressFill} style={{ width: `${progress * 100}%` }} />
+        </div>
+        <p className={styles.genElapsed}>{elapsed.toFixed(1)}s · about {expectedSeconds}s expected · {stagesDone}/{totalStages} stages</p>
+
+        <div className={styles.genInputsBlock}>
+          <span className={styles.genSectionLabel}>What the coach is reading</span>
+          <div className={styles.genInputs}>
+            {inputs.map((item, i) => (
+              <div key={item.label} className={styles.genChip} style={{ animationDelay: `${i * 0.08}s` }}>
+                <strong>{item.label}</strong>
+                <span>{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.genStagesBlock}>
+          <span className={styles.genSectionLabel}>Building your program</span>
+          <ul className={styles.genStages}>
+            {renderedStages.map(s => {
+              const status = s.status
+              return (
+                <li key={s.key} className={`${styles.genStage} ${status === 'done' ? styles.genStageDone : ''} ${status === 'active' ? styles.genStageActive : ''}`}>
+                  <span className={styles.genStageIcon}>
+                    {status === 'done' ? '✓' : status === 'active' ? <span className={styles.genSpinner} /> : status === 'error' ? '!' : ''}
+                  </span>
+                  <span className={styles.genStageLabel}>{s.label}</span>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+
+        <p className={styles.genTagline} key={taglineIndex}>{taglines[taglineIndex]}</p>
+      </div>
+    </div>
+  )
+}
+
 function defaultGoalDistanceFor(focus) {
   if (!focus) return ''
   if (focus === '5K Race') return '5K'
@@ -710,7 +825,20 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
   const [goalTime, setGoalTime] = useState('')
   const [notes,       setNotes]       = useState('')
   const [loading,     setLoading]     = useState(false)
+  const [progressStages, setProgressStages] = useState([])
   const [error,       setError]       = useState(null)
+
+  function handleProgress(update) {
+    setProgressStages(prev => {
+      const idx = prev.findIndex(s => s.key === update.key)
+      if (idx >= 0) {
+        const next = [...prev]
+        next[idx] = { ...next[idx], ...update }
+        return next
+      }
+      return [...prev, update]
+    })
+  }
 
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
   const commitmentDays = Math.max(7, Number(defaultCommitment) || 30)
@@ -740,8 +868,9 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
       notes ? `Runner notes: ${notes}` : null,
     ].filter(Boolean).join('\n')
     try {
+      setProgressStages([])
       const startDate = new Date().toISOString().split('T')[0]
-      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes: profileNotes, paceGuide, goalPace })
+      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes: profileNotes, paceGuide, goalPace, onProgress: handleProgress })
       const plan = normalizePlan(program.plan, startDate, totalDays)
       const weeklyTargets = Array.isArray(program.weeklyTargets) ? program.weeklyTargets : []
       const templatePlan = expandProgramPlan(program.weekTemplate || [], startDate, totalDays, weeklyTargets)
@@ -802,17 +931,18 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
 
   if (loading) {
     return (
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <p className={styles.label}>Running</p>
-          <h1 className={styles.title}>Building Your Plan</h1>
-          <p className={styles.subtitle}>Designing your {commitmentDays}-day {focus} program…</p>
-        </header>
-        <div className={styles.generatingWrap}>
-          <div className={styles.generatingDots}><span /><span /><span /></div>
-          <p className={styles.generatingNote}>Analysing your fitness, goal, and schedule</p>
-        </div>
-      </div>
+      <GeneratingPlan
+        commitmentDays={commitmentDays}
+        focus={focus}
+        experience={experience}
+        daysPerWeek={daysPerWeek}
+        currentKm={currentKm}
+        benchmarkDistance={benchmarkDistance}
+        benchmarkTime={benchmarkTime}
+        goalPace={goalPace}
+        paceGuide={paceGuide}
+        progressStages={progressStages}
+      />
     )
   }
 
@@ -1181,6 +1311,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
               <span>{todaySession.duration || 'Open duration'}</span>
               <span>Day {todaySession.dayNumber || currentDay}</span>
             </div>
+            {todaySession.purpose && <p className={styles.todayPurpose}>Why: {todaySession.purpose}</p>}
             {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
             {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
             <DailyTrainingBlocks session={todaySession} />
@@ -1299,6 +1430,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
                   <button className={styles.dayDetailClose} onClick={() => setSelectedDay(null)}>✕</button>
                 </div>
                 <p className={styles.dayDetailTitle}>{selectedDay.title}</p>
+                {selectedDay.purpose && <p className={styles.dayDetailPurpose}>Why: {selectedDay.purpose}</p>}
                 {selectedDay.pace && <p className={styles.dayDetailPace}>Pace: {selectedDay.pace}</p>}
                 {selectedDay.notes && <p className={styles.dayDetailNotes}>{selectedDay.notes}</p>}
                 <DailyTrainingBlocks session={selectedDay} />
@@ -1894,7 +2026,7 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
 async function apiCall(messages, maxTokens = 600) {
   const key = import.meta.env.VITE_OPENROUTER_API_KEY
   if (!key) throw new Error('OpenRouter API key not configured')
-  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'openai/gpt-4o-mini'
+  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'anthropic/claude-sonnet-4.5'
 
   const res = await fetch(API_URL, {
     method: 'POST',
@@ -1915,195 +2047,239 @@ async function apiCall(messages, maxTokens = 600) {
   return data.choices?.[0]?.message?.content?.trim() || ''
 }
 
-async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes, paceGuide, goalPace, prefix }) {
+function buildSharedCoachingRules({ focus, experience, daysPerWeek, currentKm, paceGuide, goalPace }) {
+  const restDays     = 7 - daysPerWeek
   const hardSessions = daysPerWeek >= 5 ? 2 : 1
   const easySessions = Math.max(0, daysPerWeek - hardSessions - 1)
-  const restDays     = 7 - daysPerWeek
   const raceGoal = focus
-  const totalWeeks = Math.max(1, Math.ceil((commitmentDays || (weeks * 7)) / 7))
-
   const isTrackEvent = ['800m', '1500m', '3K'].includes(raceGoal)
   const isCompetitive = experience === 'Competitive' || experience === 'Advanced'
 
   const trackRules = isTrackEvent ? `
 TRACK EVENT RULES (${raceGoal}):
-- Hard sessions MUST use actual track interval notation: "6 × 400m", "4 × 800m", "3 × 1200m", "2 × 1500m"
-- Always include recovery: "with 90s standing recovery", "with 200m jog recovery"
-- Tempo runs: 1–3 km blocks at comfortably hard effort (NOT race pace)
-- Easy runs can be 20–30 min — shorter is fine for speed recovery
-- Week 1: introduce track conservatively (e.g. 6 × 300m with full recovery)
-- Progress reps/volume each week, not intensity
-- For ${raceGoal}: speciality sessions should target race-specific effort (e.g. 1500m pace for 800m training)
-- Distance field for track sessions: use interval notation ("6 × 400m") not km` : ''
-
-  const improvedTrackRules = isTrackEvent ? `
-TRACK EVENT RULES (${raceGoal}):
 - Hard sessions MUST use actual track interval notation such as "6 x 200m", "4 x 400m", "3 x 600m", "4 x 800m".
 - Always include recovery, such as "with 90s standing recovery" or "with 200m jog recovery".
 - Tempo runs: 1-3 km blocks at comfortably hard effort, not race pace.
 - Easy runs can be 20-30 min; shorter is fine for speed recovery.
-- Week 1 must be smooth and easy, especially for Beginner runners: use easy runs, drills, relaxed strides, or short 100m-200m reps. Do not prescribe hard 300m/400m repeats in week 1 for Beginner runners.
-- Progress reps/volume each week, not intensity.
-- For an 800m goal, beginner and early-plan quality work should prefer 100m-200m reps and relaxed strides before 300m/400m work.
-- For an 800m goal, never imply 300m reps should be run in 30 seconds. If giving split guidance, 30 seconds is a fast 200m reference, not a 300m reference.
 - For ${raceGoal}: speciality sessions should target controlled race-specific effort only after the runner has built tolerance.
-- Distance field for track sessions: use interval notation, not km.` : trackRules
+- Distance field for track sessions: use interval notation, not km.` : ''
 
   const workoutRules = `
 HARD WORKOUT QUALITY RULES:
-- Hard workouts must look like what a coach would actually prescribe for this event and level, not random intervals.
-- Choose the workout purpose first: speed mechanics, speed endurance, aerobic power, threshold, race rhythm, hills, or controlled time trial.
-- Match the purpose to the runner: Beginner = relaxed strides, short reps, hills, fartlek, and light tempo only after consistency; Intermediate = one focused controlled workout per week; Advanced/Competitive = event-specific reps, threshold support, and race-rhythm work.
-- Every hard workout must include target speed guidance in the "pace" field and again inside "notes".
-- If the user provided a goal time or recent race/time-trial in notes, convert it to rep targets. Example: goal 800m 2:40 means 200m pace is about 40s and 400m pace is about 80s.
-- If no goal time/recent benchmark is provided, do not invent exact seconds. Use a safe range tied to feel, such as "fast but relaxed, about 7-8/10, last rep same speed as first" and ask for a recent 400m/800m/1 mile time.
-- Rep speed must match rep distance. Never use a 200m split for a 300m or 400m rep.
-- Include recovery long enough to preserve form: short speed reps need full walk/jog recovery; tempo/threshold reps need shorter controlled recovery.`
+- Every hard workout MUST be a real coach-prescribed session, not a generic "interval day".
+- Pick one purpose per workout from: speed mechanics, speed endurance, aerobic power, threshold/lactate, race rhythm, hills, fartlek, progression, controlled time trial.
+- The "purpose" field MUST state that intent in plain English (e.g. "Lactate threshold tolerance", "Race-pace specificity", "Top-end speed mechanics").
+- Match the menu to the runner's level — Beginner: relaxed strides, short reps, hills, fartlek; Intermediate: one focused workout/wk; Advanced/Competitive: event-specific reps, threshold support, race-rhythm work.
+- Vary the menu across weeks: hill repeats, fartlek, progression runs, threshold blocks, race-pace cruise intervals, broken-tempo, time-trial — never repeat the same menu twice in a 4-week block.
+- Every running day's "pace" must be CONCRETE (a min/km range or rep split), not just "easy" — only fall back to RPE if no benchmark is available.
+- Rep speed must match rep distance. Recovery duration matches the rep purpose (full walk on speed, jog on threshold).`
 
   const paceRules = isCompetitive
     ? `PACING (Competitive/Advanced allowed relative pace refs):
-- Easy: "Conversational — full sentences comfortably"
-- Tempo: "Comfortably hard — short phrases only, sustainable for 20–30 min"
-- Intervals: "Race effort — controlled and sharp"
-- Long: "Easy conversational — 60–90 s/km slower than tempo"
+- Easy: "Conversational, full sentences"
+- Tempo: "Comfortably hard, 20-30 min sustainable"
+- Intervals: "Race effort, controlled and sharp"
+- Long: "Easy conversational, 60-90 s/km slower than tempo"
 - MAY reference "10K race effort", "5K pace", "slightly faster than half marathon pace"`
-    : `PACING (effort descriptions only — no min/km numbers):
-- Easy: "Conversational pace — full sentences comfortably"
-- Moderate: "Comfortably hard — short phrases only"
-- Hard: "Strong effort — controlled aggression"
-- Long: "Easy conversational — slower than easy days, prioritise time on feet"`
+    : `PACING (effort + numbers preferred, never just RPE if a benchmark exists):
+- Easy: "Conversational pace, full sentences"
+- Moderate: "Comfortably hard, short phrases"
+- Hard: "Strong effort, controlled aggression"
+- Long: "Easy conversational, prioritise time on feet"`
 
   const benchmarkPaceRules = paceGuide ? `
 BENCHMARK-BASED PACE GUIDE:
 - The user provided this benchmark: ${paceGuide.benchmark}.
 - Estimated current 5K pace: ${paceGuide.estimated5kPace}.
-- Recovery runs must use this pace range: ${paceGuide.recovery}.
-- Zone 2 and easy runs must use this pace range: ${paceGuide.zone2}.
-- Long runs must use this pace range: ${paceGuide.long}.
-- Steady aerobic runs should use this pace range: ${paceGuide.steady}.
-- Tempo/threshold work should use this pace range: ${paceGuide.tempo}.
-- Intervals should use ${paceGuide.intervals} unless the rep distance requires a split conversion.
-- Every running day must include the correct calculated pace range in the "pace" field. Do not replace it with vague effort only.
-- Still include feel cues next to the pace, because sleep, soreness, heat, hills, and terrain can require adjustment.` : `
+- Recovery runs: ${paceGuide.recovery}.
+- Zone 2 / easy runs: ${paceGuide.zone2}.
+- Long runs: ${paceGuide.long}.
+- Steady aerobic: ${paceGuide.steady}.
+- Tempo / threshold: ${paceGuide.tempo}.
+- Intervals: ${paceGuide.intervals}.
+- Every running day MUST include the correct calculated pace range in the "pace" field. Do not replace it with vague effort only.
+- Still include feel cues next to the pace.` : `
 BENCHMARK-BASED PACE GUIDE:
-- No recent race or time-trial benchmark was provided.
-- Do not invent exact min/km numbers. Use effort-based guidance and ask the runner for a recent 1 mile, 5K, 10K, half marathon, or marathon time if they want exact paces.
-- Every running day must still have a useful "pace" field, such as conversational Zone 2, relaxed recovery, steady RPE 5-6/10, or controlled tempo RPE 7/10.`
+- No benchmark — use effort-based guidance with numerical RPE cues (RPE 5-6/10 etc.).`
 
   const goalPaceRules = goalPace ? `
 GOAL TIME (the runner is chasing this):
 - Target: ${goalPace.distance} in ${goalPace.targetTime} (race pace ~${goalPace.targetPace}).
-- Build the entire program backwards from this target. Mention the target time in the overview.
-- Tempo/threshold work should sit roughly 15-25 s/km slower than race pace.
-- Race-pace work should be at or near ${goalPace.targetPace}, in controlled chunks (not full distance every time).
-- VO2/intervals should be 5-10 s/km faster than race pace, with full recovery, only after base is established.
-- Each week's quality session must move the runner closer to that target — show a clear arc (early: aerobic + strides; mid: threshold + race-pace blocks; late: race-pace specificity; final week: taper).
-- The peakWeeklyVolume and weeklyTargets must reflect the demands of ${goalPace.distance}.` : ''
+- Build everything backwards from this target.
+- Tempo/threshold = race pace + 15-25 s/km.
+- Race-pace work = at or near ${goalPace.targetPace}, in chunks (4-6x1km, 3x2km, 6x800m at race pace).
+- VO2/intervals = race pace - 5-10 s/km, full recovery, only after base.
+- Final 1-2 weeks = taper.` : ''
 
-  const system = `You are an expert running coach. Generate a personalised running and fitness plan for the user's full commitment. The user does not need to be training for a race.
-Return ONLY valid JSON — no markdown, no explanation, no text outside the JSON.
-
-JSON structure:
-{
-  "overview": "2–3 sentence program philosophy and what the runner will achieve. If a goal time exists, name it.",
-  "weeklyTargets": [
-    {
-      "week": 1,
-      "totalKm": 30,
-      "longRunKm": 8,
-      "qualityFocus": "what the quality session of this week emphasises (e.g. 'strides + short tempo', 'race-pace 4x1km', 'taper')",
-      "intensityTier": "base|build|peak|taper"
-    }
-  ],
-  "plan": [
-    {
-      "dayNumber": 1,
-      "week": 1,
-      "type": "easy|moderate|hard|long|rest|cross",
-      "title": "Session title — must vary across weeks",
-      "distance": "6 km  OR  6 x 400m  OR  45 min",
-      "duration": "35-40 min",
-      "pace": "specific effort or speed guidance",
-      "notes": "Warm-up, main set, and cool-down details",
-      "crossTraining": "For cross days: exact modality, duration, and intensity. Empty string on non-cross days unless useful.",
-      "strength": "Daily strength prescription with exercises, sets, reps, and duration",
-      "mobility": "Daily mobility prescription with exercises and duration"
-    }
-  ],
-  "weekTemplate": [
-    {
-      "day": "Monday",
-      "type": "easy|moderate|hard|long|rest|cross",
-      "title": "Session title",
-      "distance": "6 km  OR  6 × 400m  OR  45 min",
-      "duration": "35–40 min",
-      "pace": "exact target speed guidance for the session; for intervals include rep split guidance or benchmark-based effort",
-      "notes": "Warm-up (5 min): [4 dynamic exercises with reps]. Main set: [exact workout including how fast to run each rep and recovery]. Cool-down: [2–3 stretches]."
-    }
-  ],
-  "progressionNote": "How volume and intensity build week to week. Be specific about which week peaks and which weeks are recovery.",
-  "peakWeeklyVolume": "XX km or total reps"
+  return {
+    raceGoal, isTrackEvent, isCompetitive,
+    daysPerWeek, restDays, hardSessions, easySessions,
+    trackRules, workoutRules, paceRules, benchmarkPaceRules, goalPaceRules,
+  }
 }
 
-WEEKLY UNIQUENESS RULES (CRITICAL):
-- Return exactly ${totalWeeks} entries in weeklyTargets, one per week.
-- Every week MUST be different from week 1: different totalKm, different long-run length, different quality focus, or different rep menu.
-- Never copy the same Monday/Tuesday/etc workout across all weeks. Vary distances, intervals, hills, fartlek, tempo blocks. Workouts within a week should have purpose; the same purpose across weeks should still be EXECUTED differently (e.g. 4x1km @ pace → 5x1km @ pace → 3x2km @ pace).
-- Long-run distance should grow over the build phase, then drop in recovery and taper weeks.
-- Recovery weeks (every 3-4 weeks) should clearly drop totalKm by 15-25%.
-- The plan[] entries' distances must roughly add up to that week's totalKm (±20%).
+async function generateMacrocycle({ focus, experience, daysPerWeek, currentKm, commitmentDays, notes, paceGuide, goalPace, prefix }) {
+  const totalWeeks = Math.max(1, Math.ceil(commitmentDays / 7))
+  const r = buildSharedCoachingRules({ focus, experience, daysPerWeek, currentKm, paceGuide, goalPace })
 
-${improvedTrackRules}
+  const system = `You are an expert running coach designing the MACROCYCLE blueprint for a ${commitmentDays}-day program. Return ONLY valid JSON.
 
-${paceRules}
+JSON shape:
+{
+  "overview": "2-3 sentences of program philosophy. Name the goal time if one exists.",
+  "weeklyTargets": [
+    { "week": 1, "totalKm": 30, "longRunKm": 8, "qualityFocus": "what the hard session emphasises this week", "intensityTier": "base|build|peak|taper", "phaseGoal": "one-line week intent" }
+  ],
+  "weekTemplate": [
+    { "day": "Monday", "type": "easy|moderate|hard|long|rest|cross", "title": "session theme", "distance": "", "duration": "", "pace": "", "notes": "" }
+  ],
+  "progressionNote": "How volume and intensity build across the program. Name peak week and recovery weeks.",
+  "peakWeeklyVolume": "XX km"
+}
 
-${benchmarkPaceRules}
-${goalPaceRules}
+MACROCYCLE STRUCTURE RULES:
+- Return EXACTLY ${totalWeeks} entries in weeklyTargets, one per week (week 1 through week ${totalWeeks}).
+- Periodise into phases: base → build → peak → taper. The intensityTier field must reflect the phase.
+- Recovery week every 3-4 weeks: drop totalKm by 15-25%.
+- Long-run distance grows in the build phase, drops in recovery weeks and the taper.
+- qualityFocus must EVOLVE: early weeks = strides + aerobic; mid weeks = threshold + tempo blocks; late weeks = race-pace specificity; final 1-2 weeks = taper / sharpening.
+- weekTemplate is just the 7-day skeleton (which days are run/long/quality/rest/cross). Distances/durations there can be empty — the daily plan is generated separately.
+- Base everything on current volume: ${currentKm}. Week 1 totalKm should be at or slightly below ${currentKm}.
 
-${workoutRules}
-
-SESSION NOTES — every non-rest day must have all three:
-1. Warm-up (5 min): 4 specific dynamic exercises with reps/distance (leg swings ×10, hip circles ×10, high knees 20m ×2, dynamic lunges 10m ×2)
-2. Main set: exact description with effort cues, target rep speed, and recovery. For intervals, state how fast to run each rep.
-3. Cool-down: 2–3 named stretches (quad, hamstring, calf, hip flexor)
-
-PROGRAM STRUCTURE:
-- The plan is for ${commitmentDays} total days, not only a race build.
-- Return one "plan" item for every day from dayNumber 1 through dayNumber ${commitmentDays}. Do not skip rest days.
-- If the focus is general fitness, consistency, weight-loss support, or starting running, build a sustainable habit-based plan instead of race preparation.
-- Vary the plan across weeks with small progressions and recovery days when appropriate.
-- ${daysPerWeek} training days · ${restDays} rest days
-- ${hardSessions} hard/quality session(s) — NOT adjacent to long run
-- 1 long run on Saturday or Sunday
-- ${easySessions} easy run(s) at truly conversational effort
-- Cross-training days: specify activity (cycling, swimming, yoga, rowing) with duration
-- Every cross-training day must say exactly how long to do it and what intensity to use, e.g. "35-45 min easy cycling, RPE 3-4/10".
-- Every single day, including rest days, must include a "strength" field and a "mobility" field.
-- Strength should be realistic daily work: 8-20 minutes, 3-6 movements, sets/reps, and adjusted to the day. Hard run days get lighter activation; easy/rest days can carry more strength.
-- Mobility should be 8-15 minutes daily with named drills and durations/reps. Include hips, calves/ankles, hamstrings, thoracic spine, and breathing as appropriate.
-- Do not hide strength or mobility only inside notes. Use the dedicated JSON fields.
-- Base all distances on current volume: ${currentKm}
-- Start Running plans should use walk-run intervals, short easy runs, mobility, and rest days before continuous runs.
-- Base Fitness and Weight Loss Support plans should prioritise easy effort, time on feet, cross-training, and strength; do not overload hard workouts.
-- Race-focus plans can include race-specific work, but only after easy volume and recovery are established.
-- Each running session must be realistic for ${currentKm}; avoid sudden distance jumps and make the title match the workout.
-- Weekly mileage must progress across the commitment when recovery allows: build most weeks by about 5-10%, include a lighter recovery week every 3-4 weeks, and never increase both intensity and long-run distance sharply in the same week.
-- For every week, make the total planned running volume coherent with the individual daily sessions. Later weeks should clearly show increased volume, longer long runs, or slightly more quality work compared with week 1 unless the focus is recovery.
-- Put the weekly progression logic into actual day-by-day workouts, not just the overview text.
-- Week 1 must be smooth and easy: no volume spikes, no race-effort intervals for beginners, and no hard sessions before the runner has adapted
-- Beginner plans must build gradually: week 1 should feel comfortable, weeks 2-4 add small volume or light strides, later weeks can add controlled workouts if recovery is good
-- Focus: ${raceGoal} · Level: ${experience} · Duration: ${commitmentDays} days
-- Week 1 must start at or slightly below current volume — no spikes`
+Focus: ${r.raceGoal} · Level: ${experience} · ${daysPerWeek} training days · ${r.restDays} rest days
+${r.goalPaceRules}
+${r.benchmarkPaceRules}
+${r.trackRules}`
 
   const goalLine = goalPace ? ` Goal: ${goalPace.distance} in ${goalPace.targetTime} (race pace ~${goalPace.targetPace}).` : ''
   const prefixLine = prefix ? ` ${prefix}` : ''
 
   const raw = await apiCall([
     { role: 'system', content: system },
-    { role: 'user',   content: `Build my full ${commitmentDays}-day ${raceGoal} plan. I'm ${experience} level, currently doing ${currentKm}, training ${daysPerWeek} days/week.${goalLine}${prefixLine}${notes ? ` Notes: ${notes}` : ''}` },
-  ], Math.min(12000, Math.max(2800, commitmentDays * 110)))
+    { role: 'user', content: `Design my ${totalWeeks}-week macrocycle for a ${commitmentDays}-day ${r.raceGoal} program. I'm ${experience}, currently doing ${currentKm}, training ${daysPerWeek} days/week.${goalLine}${prefixLine}${notes ? ` Notes: ${notes}` : ''}` },
+  ], 3500)
 
   return extractJSON(raw)
+}
+
+async function generateMesocycleChunk({ focus, experience, daysPerWeek, currentKm, notes, paceGuide, goalPace, macro, chunkStart, chunkEnd, chunkTargets, priorTitles }) {
+  const r = buildSharedCoachingRules({ focus, experience, daysPerWeek, currentKm, paceGuide, goalPace })
+  const chunkDays = chunkEnd - chunkStart + 1
+  const startWeek = Math.ceil(chunkStart / 7)
+  const endWeek = Math.ceil(chunkEnd / 7)
+
+  const targetsBlock = (chunkTargets || []).map(t =>
+    `Week ${t.week}: ${t.totalKm || '?'} km · long run ${t.longRunKm || '?'} km · ${t.intensityTier || 'base'} · focus: ${t.qualityFocus || 'general aerobic'}${t.phaseGoal ? ` (${t.phaseGoal})` : ''}`
+  ).join('\n') || 'No specific targets — apply default progression.'
+
+  const priorBlock = priorTitles
+    ? `\nPRIOR WORKOUTS (do NOT repeat these — vary the menu):\n${priorTitles}`
+    : ''
+
+  const system = `You are an expert running coach writing the daily plan for days ${chunkStart}-${chunkEnd} (weeks ${startWeek}-${endWeek}) of a longer program. Return ONLY valid JSON.
+
+JSON shape:
+{
+  "plan": [
+    {
+      "dayNumber": ${chunkStart},
+      "week": ${startWeek},
+      "type": "easy|moderate|hard|long|rest|cross",
+      "title": "Specific session title that names the workout (e.g. '6 x 800m at threshold', 'Hill repeats — 8 x 60s', 'Progression long run')",
+      "purpose": "One short sentence: why this workout exists in the plan (e.g. 'Lactate threshold tolerance to support race pace')",
+      "distance": "6 km  OR  6 x 400m  OR  45 min",
+      "duration": "35-40 min",
+      "pace": "Concrete numerical pace range with feel cue (e.g. '5:30-5:45/km, comfortably hard')",
+      "notes": "Warm-up: [4 named drills with reps]. Main set: [exact workout, rep splits, recovery]. Cool-down: [2-3 named stretches].",
+      "crossTraining": "Cross days only: modality + duration + intensity. Empty otherwise.",
+      "strength": "8-20 min: 3-6 movements with sets x reps. Lighter on hard run days.",
+      "mobility": "8-15 min: named drills with reps/duration."
+    }
+  ]
+}
+
+THIS CHUNK COVERS:
+${targetsBlock}
+
+PROGRAM CONTEXT (DO NOT VIOLATE):
+- Overview: ${macro?.overview || 'Build sustainable running fitness.'}
+- Macrocycle progression: ${macro?.progressionNote || 'Standard progressive overload with recovery weeks.'}
+- Peak target: ${macro?.peakWeeklyVolume || 'TBD'}
+- Plan focus: ${r.raceGoal} · Level: ${experience} · ${daysPerWeek} training days/week, ${r.restDays} rest days
+- ${r.hardSessions} hard/quality session(s) per week — never adjacent to the long run
+- 1 long run on Saturday or Sunday
+- ${r.easySessions} easy run(s) at truly conversational effort
+${priorBlock}
+
+CHUNK RULES:
+- Output EXACTLY ${chunkDays} plan entries, one per day, dayNumber ${chunkStart} through ${chunkEnd}.
+- Each week's running distances must roughly add to that week's totalKm (±15%).
+- Each week's quality session must reflect its qualityFocus from the targets above.
+- Hard workout MENUS must vary across these weeks AND must not repeat the prior workouts listed above. Rotate among: hill repeats, fartlek, progression, threshold cruise, race-pace cruise, broken tempo, time trial, long-run-with-finish.
+- Every non-rest day must have title, purpose, distance, duration, pace, notes (warm-up + main + cool-down), strength, mobility.
+- Rest days still need strength (light) and mobility fields populated.
+
+${r.goalPaceRules}
+${r.benchmarkPaceRules}
+${r.paceRules}
+${r.workoutRules}
+${r.trackRules}`
+
+  const tokenBudget = Math.min(7000, Math.max(2200, chunkDays * 220))
+
+  const raw = await apiCall([
+    { role: 'system', content: system },
+    { role: 'user', content: `Write days ${chunkStart}-${chunkEnd} as instructed. Make every workout feel like a real coach wrote it.` },
+  ], tokenBudget)
+
+  const parsed = extractJSON(raw)
+  return Array.isArray(parsed?.plan) ? parsed.plan : []
+}
+
+async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes, paceGuide, goalPace, prefix, onProgress }) {
+  const totalWeeks = Math.max(1, Math.ceil((commitmentDays || (weeks * 7)) / 7))
+
+  onProgress?.({ key: 'macro', label: `Designing the ${totalWeeks}-week macrocycle blueprint`, status: 'active' })
+  const macro = await generateMacrocycle({ focus, experience, daysPerWeek, currentKm, commitmentDays, notes, paceGuide, goalPace, prefix })
+  onProgress?.({ key: 'macro', status: 'done' })
+
+  const chunkSize = 28
+  const allDays = []
+  let cursor = 1
+  let chunkNum = 0
+  while (cursor <= commitmentDays) {
+    chunkNum++
+    const chunkEnd = Math.min(cursor + chunkSize - 1, commitmentDays)
+    const startWeek = Math.ceil(cursor / 7)
+    const endWeek = Math.ceil(chunkEnd / 7)
+    const chunkTargets = (macro.weeklyTargets || []).filter(w => w.week >= startWeek && w.week <= endWeek)
+    const priorTitles = allDays.slice(-21).map(d => `D${d.dayNumber} ${d.day || ''} ${d.type}: ${d.title}`).join(' · ')
+
+    onProgress?.({ key: `chunk-${chunkNum}`, label: `Writing weeks ${startWeek}-${endWeek} workouts`, status: 'active' })
+    let chunkDays = []
+    try {
+      chunkDays = await generateMesocycleChunk({
+        focus, experience, daysPerWeek, currentKm, notes,
+        paceGuide, goalPace, macro,
+        chunkStart: cursor, chunkEnd, chunkTargets, priorTitles,
+      })
+    } catch (err) {
+      onProgress?.({ key: `chunk-${chunkNum}`, status: 'error', label: `Weeks ${startWeek}-${endWeek} failed: ${err.message}` })
+      throw err
+    }
+    allDays.push(...chunkDays)
+    onProgress?.({ key: `chunk-${chunkNum}`, status: 'done' })
+    cursor = chunkEnd + 1
+  }
+
+  return {
+    overview: macro.overview,
+    weeklyTargets: macro.weeklyTargets,
+    weekTemplate: macro.weekTemplate,
+    progressionNote: macro.progressionNote,
+    peakWeeklyVolume: macro.peakWeeklyVolume,
+    plan: allDays,
+  }
 }
 
 async function getCheckinReply(goal, checkins, entries, status, note, todaySession) {

@@ -217,7 +217,7 @@ export default function FloatingChat() {
 // ── AI call ────────────────────────────────────────────────────────────────────
 async function callAI(history, coachData) {
   const key   = import.meta.env.VITE_OPENROUTER_API_KEY
-  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'openai/gpt-4o-mini'
+  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'anthropic/claude-sonnet-4.5'
   const goal  = coachData?.goal
   const lastMsg = history[history.length - 1]?.content || ''
   if (!isRunningFitnessQuestion(lastMsg)) return COACH_REFUSAL

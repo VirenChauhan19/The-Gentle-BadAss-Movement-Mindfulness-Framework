@@ -347,6 +347,20 @@
   padding: 5px 10px;
 }
 
+.todayPurpose,
+.dayDetailPurpose {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(139,158,126,0.12);
+  border-left: 3px solid var(--sage);
+  border-radius: 8px;
+  color: var(--sage-dark);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.4;
+}
+
 .todayPace {
   color: var(--ink);
   font-size: 0.86rem;
@@ -2099,6 +2113,214 @@
   font-size: 0.85rem;
   color: var(--ink-faint);
   text-align: center;
+}
+
+/* ── Rich generating screen ──────────────────────────────────── */
+.genCard {
+  margin: 18px 16px 32px;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 14px 32px var(--shadow);
+  padding: 22px;
+  display: grid;
+  gap: 20px;
+}
+
+.genProgress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border-light);
+  overflow: hidden;
+  position: relative;
+}
+
+.genProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sage) 0%, var(--sage-dark) 100%);
+  border-radius: 999px;
+  transition: width 0.4s ease-out;
+  box-shadow: 0 0 12px rgba(139,158,126,0.5);
+}
+
+.genProgressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: genShimmer 1.6s linear infinite;
+}
+
+@keyframes genShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.genElapsed {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.04em;
+  margin-top: -8px;
+}
+
+.genSectionLabel {
+  display: block;
+  color: var(--sage-dark);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.genInputsBlock { display: grid; gap: 4px; }
+
+.genInputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.genChip {
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: 11px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: genChipIn 0.4s ease-out forwards;
+}
+
+@keyframes genChipIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.genChip strong {
+  color: var(--ink-faint);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.genChip span {
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.genStagesBlock { display: grid; gap: 4px; }
+
+.genStages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.genStage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  background: var(--cream);
+  transition: all 0.25s ease;
+  opacity: 0.55;
+}
+
+.genStageDone {
+  opacity: 1;
+  background: rgba(139,158,126,0.12);
+  border-color: rgba(139,158,126,0.4);
+}
+
+.genStageActive {
+  opacity: 1;
+  background: var(--paper);
+  border-color: var(--sage);
+  box-shadow: 0 6px 18px rgba(139,158,126,0.18);
+  transform: translateY(-1px);
+}
+
+.genStageIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--border);
+  color: var(--sage-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.genStageDone .genStageIcon {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: var(--paper);
+  animation: genCheckPop 0.35s ease-out;
+}
+
+.genStageActive .genStageIcon {
+  border-color: var(--sage);
+  background: var(--paper);
+}
+
+@keyframes genCheckPop {
+  0%   { transform: scale(0.4); }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.genSpinner {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid rgba(139,158,126,0.25);
+  border-top-color: var(--sage);
+  animation: genSpin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes genSpin {
+  to { transform: rotate(360deg); }
+}
+
+.genStageLabel {
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.genStageDone .genStageLabel { color: var(--ink-light); }
+
+.genTagline {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  font-style: italic;
+  line-height: 1.5;
+  padding: 0 8px;
+  animation: genTaglineIn 0.5s ease-out;
+}
+
+@keyframes genTaglineIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── API key warning ─────────────────────────────────────────── */
