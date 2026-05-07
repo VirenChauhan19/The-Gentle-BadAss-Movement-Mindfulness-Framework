@@ -699,29 +699,9 @@ function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, curren
   const totalWeeks = Math.ceil(commitmentDays / 7)
   const expectedChunks = Math.ceil(commitmentDays / 28)
   const totalStages = 1 + expectedChunks
-  const taglines = [
-    'Each chunk is written with the previous weeks in context — workouts vary on purpose.',
-    'Macrocycle first, then four-week mesocycles. The way real coaches build programs.',
-    goalPace ? `Working backwards from your ${goalPace.targetPace} race pace.` : 'Effort-based progression with recovery weeks every 3-4 weeks.',
-    'Every workout gets a stated purpose: threshold, race-pace, hills, fartlek, progression.',
-    'Hard days follow easy days. No back-to-back race-effort intervals.',
-    `${daysPerWeek} training days a week, periodised across ${totalWeeks} weeks.`,
-  ]
-  const [taglineIndex, setTaglineIndex] = useState(0)
   const [elapsed, setElapsed] = useState(0)
+  const [thoughtIndex, setThoughtIndex] = useState(0)
   const expectedSeconds = Math.max(20, Math.min(180, 8 + expectedChunks * 12))
-
-  useEffect(() => {
-    const start = Date.now()
-    const tick = setInterval(() => setElapsed(Math.round((Date.now() - start) / 100) / 10), 200)
-    const taglineTimer = setInterval(() => {
-      setTaglineIndex(i => (i + 1) % taglines.length)
-    }, 4500)
-    return () => { clearInterval(tick); clearInterval(taglineTimer) }
-  }, [])
-
-  const stagesDone = progressStages.filter(s => s.status === 'done').length
-  const progress = Math.min(0.96, Math.max(elapsed / expectedSeconds, stagesDone / Math.max(1, totalStages)))
 
   const renderedStages = (() => {
     const out = []
@@ -744,6 +724,50 @@ function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, curren
     return out
   })()
 
+  const activeStage = renderedStages.find(s => s.status === 'active') || renderedStages[0]
+  const thoughtsForStage = (() => {
+    if (activeStage.key === 'macro') {
+      return [
+        `Sketching the ${totalWeeks}-week arc: base → build → peak${commitmentDays >= 56 ? ' → taper' : ''}`,
+        `Placing recovery weeks every 3-4 weeks`,
+        currentKm ? `Anchoring week 1 at ${currentKm} so there's no spike` : `Anchoring week 1 to your current volume`,
+        goalPace ? `Calibrating threshold pace from your ${goalPace.targetTime} ${goalPace.distance} target` : `Calibrating effort zones from your benchmark`,
+        `Distributing quality focus: aerobic strides → threshold → race-pace → sharpening`,
+        `Setting peak weekly volume`,
+      ]
+    }
+    const chunkNum = Number(activeStage.key.replace('chunk-', '')) || 1
+    const startWeek = (chunkNum - 1) * 4 + 1
+    const endWeek = Math.min(totalWeeks, chunkNum * 4)
+    return [
+      `Picking the workout menu for week ${startWeek}: ${chunkNum === 1 ? 'easy aerobic + strides' : 'rotating from prior weeks'}`,
+      `Choosing long-run distance for week ${startWeek}`,
+      `Setting concrete pace ranges, not vague RPE`,
+      goalPace ? `Folding ${goalPace.targetPace} race-pace cruise into week ${Math.min(endWeek, startWeek + 1)}` : `Slotting tempo blocks into the build`,
+      `Naming warm-up drills with reps`,
+      `Pairing lighter strength on hard run days`,
+      `Cross-checking: hard days never adjacent to long run`,
+      `Writing day-by-day notes for week ${startWeek} through ${endWeek}`,
+    ]
+  })()
+
+  useEffect(() => {
+    const start = Date.now()
+    const tick = setInterval(() => setElapsed(Math.round((Date.now() - start) / 100) / 10), 200)
+    return () => clearInterval(tick)
+  }, [])
+
+  useEffect(() => {
+    setThoughtIndex(0)
+    const t = setInterval(() => {
+      setThoughtIndex(i => (i + 1) % thoughtsForStage.length)
+    }, 2400)
+    return () => clearInterval(t)
+  }, [activeStage.key])
+
+  const stagesDone = progressStages.filter(s => s.status === 'done').length
+  const progress = Math.min(0.96, Math.max(elapsed / expectedSeconds, stagesDone / Math.max(1, totalStages)))
+
   const inputs = [
     focus && { label: 'Focus', value: focus },
     experience && { label: 'Level', value: experience },
@@ -764,10 +788,31 @@ function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, curren
         <p className={styles.subtitle}>Macrocycle + {expectedChunks} mesocycle{expectedChunks > 1 ? 's' : ''} for your {commitmentDays}-day {focus || 'running'} program</p>
       </header>
       <div className={styles.genCard}>
+        <div className={styles.genRunnerWrap}>
+          <svg className={styles.genRunner} width="56" height="56" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="38" cy="12" r="4.5" />
+            <path d="M22 26 L34 22 L42 30 L50 30" />
+            <path d="M34 22 L36 38 L30 50" />
+            <path d="M36 38 L46 44" />
+            <path d="M30 50 L24 56" />
+            <path d="M46 44 L52 50" />
+          </svg>
+          <div className={styles.genRunnerTrail}>
+            <span /><span /><span />
+          </div>
+        </div>
+
         <div className={styles.genProgress}>
           <div className={styles.genProgressFill} style={{ width: `${progress * 100}%` }} />
         </div>
         <p className={styles.genElapsed}>{elapsed.toFixed(1)}s · about {expectedSeconds}s expected · {stagesDone}/{totalStages} stages</p>
+
+        <div className={styles.genThinkingBox}>
+          <div className={styles.genThinkingDots}><span /><span /><span /></div>
+          <p key={`${activeStage.key}-${thoughtIndex}`} className={styles.genThought}>
+            {thoughtsForStage[thoughtIndex]}
+          </p>
+        </div>
 
         <div className={styles.genInputsBlock}>
           <span className={styles.genSectionLabel}>What the coach is reading</span>
@@ -797,8 +842,6 @@ function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, curren
             })}
           </ul>
         </div>
-
-        <p className={styles.genTagline} key={taglineIndex}>{taglines[taglineIndex]}</p>
       </div>
     </div>
   )

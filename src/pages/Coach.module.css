@@ -2323,6 +2323,142 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Animated runner icon + trail ───────────────────────────── */
+.genRunnerWrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 64px;
+  margin-bottom: -4px;
+}
+
+.genRunner {
+  color: var(--sage-dark);
+  animation: genBob 0.7s ease-in-out infinite alternate;
+  filter: drop-shadow(0 4px 12px rgba(139,158,126,0.35));
+  z-index: 1;
+}
+
+@keyframes genBob {
+  from { transform: translateY(-2px) rotate(-3deg); }
+  to   { transform: translateY(2px) rotate(3deg); }
+}
+
+.genRunnerTrail {
+  position: absolute;
+  left: calc(50% - 64px);
+  top: 50%;
+  display: flex;
+  gap: 6px;
+  opacity: 0.6;
+}
+
+.genRunnerTrail span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sage);
+  animation: genTrail 1.2s ease-in-out infinite;
+}
+
+.genRunnerTrail span:nth-child(2) { animation-delay: 0.15s; }
+.genRunnerTrail span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes genTrail {
+  0%   { transform: translateX(0)   scale(1);   opacity: 0.6; }
+  60%  { transform: translateX(20px) scale(0.6); opacity: 0;   }
+  61%  { transform: translateX(-30px) scale(0.4); opacity: 0;   }
+  100% { transform: translateX(0)   scale(1);   opacity: 0.6; }
+}
+
+/* ── Live coach thinking line ──────────────────────────────── */
+.genThinkingBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(139,158,126,0.10), rgba(139,158,126,0.04));
+  border: 1px solid rgba(139,158,126,0.3);
+  border-radius: 14px;
+  min-height: 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.genThinkingBox::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(139,158,126,0.08), transparent);
+  animation: genShimmer 2.4s linear infinite;
+  pointer-events: none;
+}
+
+.genThinkingDots {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.genThinkingDots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sage);
+  animation: genThinkPulse 1.4s ease-in-out infinite;
+}
+
+.genThinkingDots span:nth-child(2) { animation-delay: 0.2s; }
+.genThinkingDots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes genThinkPulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.45; }
+  40%           { transform: scale(1);   opacity: 1;    }
+}
+
+.genThought {
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.45;
+  animation: genThoughtIn 0.5s ease-out;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+}
+
+.genThought::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--sage-dark);
+  margin-left: 4px;
+  vertical-align: -2px;
+  animation: genCaret 0.9s steps(1) infinite;
+}
+
+@keyframes genCaret {
+  50% { opacity: 0; }
+}
+
+@keyframes genThoughtIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Stronger active-stage pulse ───────────────────────────── */
+.genStageActive {
+  animation: genActivePulse 2s ease-in-out infinite;
+}
+
+@keyframes genActivePulse {
+  0%, 100% { box-shadow: 0 6px 18px rgba(139,158,126,0.18); }
+  50%      { box-shadow: 0 8px 26px rgba(139,158,126,0.35); }
+}
+
 /* ── API key warning ─────────────────────────────────────────── */
 .warnCard {
   margin: 20px 16px;
