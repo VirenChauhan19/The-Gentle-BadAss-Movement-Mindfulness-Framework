@@ -115,6 +115,8 @@
   transition: transform var(--d-base) var(--ease-out),
               border-color var(--d-base) var(--ease-out),
               box-shadow var(--d-base) var(--ease-out);
+  --factor-color: var(--sage);
+  --factor-fill: 50%;
 }
 
 .factor::before {
@@ -141,6 +143,10 @@
 
 .factor:last-child {
   border-bottom: 1px solid var(--border-light);
+}
+
+.mobileBloom {
+  display: none;
 }
 
 .factorTop {
@@ -630,8 +636,19 @@
 
   .factor {
     min-height: 0;
-    padding: 14px;
-    border-radius: 20px;
+    padding: 14px 14px 16px;
+    border-radius: 24px;
+    border-color: color-mix(in srgb, var(--factor-color) 24%, var(--border-light));
+    box-shadow:
+      0 12px 28px var(--shadow-xs),
+      0 0 0 1px color-mix(in srgb, var(--factor-color) 7%, transparent) inset;
+  }
+
+  .factor::before {
+    opacity: 1;
+    background:
+      radial-gradient(circle at 80% 18%, color-mix(in srgb, var(--factor-color) 18%, transparent), transparent 32%),
+      linear-gradient(135deg, color-mix(in srgb, var(--factor-color) 8%, transparent), transparent 58%);
   }
 
   .factorTop {
@@ -642,6 +659,193 @@
 
   .factorQ {
     font-size: 0.74rem;
+  }
+
+  .valuePill {
+    display: none;
+  }
+
+  .mobileBloom {
+    display: grid;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+    margin-top: 2px;
+  }
+
+  .bloomTop {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) 48px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nudgeBtn {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    border-radius: 18px;
+    background: var(--paper-soft);
+    color: var(--ink);
+    border: 1px solid color-mix(in srgb, var(--factor-color) 22%, var(--border-light));
+    font-size: 1.35rem;
+    font-weight: 900;
+    box-shadow: 0 8px 18px var(--shadow-xs);
+  }
+
+  .nudgeBtn:disabled {
+    opacity: 0.34;
+    box-shadow: none;
+  }
+
+  .bloomOrb {
+    min-height: 112px;
+    border-radius: 26px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 4px;
+    background:
+      radial-gradient(circle at 34% 22%, rgba(255, 255, 255, 0.72), transparent 34%),
+      radial-gradient(circle at 68% 78%, color-mix(in srgb, var(--factor-color) 38%, transparent), transparent 54%),
+      linear-gradient(135deg, color-mix(in srgb, var(--factor-color) 18%, var(--paper)), var(--paper-soft));
+    border: 1px solid color-mix(in srgb, var(--factor-color) 28%, var(--border-light));
+    box-shadow:
+      0 16px 34px color-mix(in srgb, var(--factor-color) 20%, transparent),
+      0 1px 0 rgba(255, 255, 255, 0.62) inset;
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .bloomOrb::before,
+  .bloomOrb::after {
+    content: '';
+    position: absolute;
+    inset: 16px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--factor-color) 24%, transparent);
+    opacity: 0.42;
+    transform: scale(var(--bloom-scale));
+    pointer-events: none;
+  }
+
+  .bloomOrb::after {
+    inset: 27px;
+    opacity: 0.30;
+    transform: scale(calc(var(--bloom-scale) + 0.12));
+  }
+
+  .bloomOrb span {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 16vw, 4.2rem);
+    line-height: 0.92;
+    color: var(--ink);
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
+  .bloomOrb small {
+    position: relative;
+    z-index: 1;
+    color: var(--ink-light);
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .bloomOrb[data-tone="strong"] {
+    animation: bloomGlow 1.9s var(--ease-out) infinite;
+  }
+
+  @keyframes bloomGlow {
+    0%, 100% { box-shadow: 0 16px 34px color-mix(in srgb, var(--factor-color) 20%, transparent); }
+    50% { box-shadow: 0 18px 42px color-mix(in srgb, var(--factor-color) 34%, transparent); }
+  }
+
+  .touchMeter {
+    position: relative;
+    min-height: 64px;
+    display: grid;
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+    align-items: center;
+    gap: 4px;
+    padding: 10px;
+    border-radius: 22px;
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--factor-color) 20%, transparent) var(--factor-fill), var(--paper-soft) var(--factor-fill)),
+      var(--paper-soft);
+    border: 1px solid var(--border-light);
+    touch-action: none;
+    overflow: hidden;
+  }
+
+  .touchMeter:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  .touchFill {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 5px;
+    width: var(--factor-fill);
+    max-width: 100%;
+    min-width: 0;
+    border-radius: 999px;
+    background: var(--factor-color);
+    transform: translateY(-50%);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--factor-color) 42%, transparent);
+    pointer-events: none;
+  }
+
+  .touchDot {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--paper) 86%, var(--factor-color));
+    border: 1px solid color-mix(in srgb, var(--factor-color) 16%, var(--border-light));
+    color: var(--ink-faint);
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 0.72rem;
+    transition: transform 120ms var(--ease-out),
+                background 160ms var(--ease-out),
+                color 160ms var(--ease-out),
+                box-shadow 160ms var(--ease-out);
+  }
+
+  .touchDotFilled {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--factor-color) 18%, var(--paper));
+  }
+
+  .touchDotActive {
+    background: var(--factor-color);
+    color: var(--on-accent);
+    transform: translateY(-5px) scale(1.08);
+    box-shadow:
+      0 10px 20px color-mix(in srgb, var(--factor-color) 30%, transparent),
+      0 1px 0 rgba(255, 255, 255, 0.32) inset;
+  }
+
+  .feelWords {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 6px;
+    color: var(--ink-faint);
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
   .slider {
@@ -655,23 +859,12 @@
   }
 
   .scoreRail {
-    display: flex;
-    overflow-x: auto;
-    gap: 6px;
-    padding: 2px 2px 7px;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-  }
-
-  .scoreRail::-webkit-scrollbar {
     display: none;
   }
 
-  .scoreChip {
-    flex: 0 0 34px;
-    height: 34px;
-    scroll-snap-align: center;
-    border-radius: 12px;
+  .sliderRow,
+  .sliderLabels {
+    display: none;
   }
 
   .noteSection,

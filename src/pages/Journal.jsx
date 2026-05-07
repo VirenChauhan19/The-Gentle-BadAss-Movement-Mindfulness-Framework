@@ -132,9 +132,49 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
     value <= 6 ? 'Steady' :
     value <= 8 ? 'Good' :
     'Strong'
+  const tone = scoreTone(currentValue)
+
+  function commitScore(next) {
+    const clamped = Math.max(0, Math.min(10, Number(next)))
+    if (navigator.vibrate && window.innerWidth <= 767 && clamped !== value) navigator.vibrate(7)
+    onChange(clamped)
+  }
+
+  function setFromPointer(event) {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const pct = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width))
+    commitScore(Math.round(pct * 10))
+  }
+
+  function onMeterKey(event) {
+    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      commitScore(currentValue + 1)
+    }
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+      event.preventDefault()
+      commitScore(currentValue - 1)
+    }
+    if (event.key === 'Home') {
+      event.preventDefault()
+      commitScore(0)
+    }
+    if (event.key === 'End') {
+      event.preventDefault()
+      commitScore(10)
+    }
+  }
 
   return (
-    <div className={styles.factor}>
+    <div
+      className={styles.factor}
+      style={{
+        '--factor-color': hasValue ? scoreColor(currentValue) : cat.color,
+        '--factor-fill': `${currentValue * 10}%`,
+        '--bloom-scale': 0.78 + currentValue * 0.04,
+      }}
+      data-swipe-lock
+    >
       <div className={styles.factorTop}>
         <span className={styles.factorIndex}>{String(index + 1).padStart(2, '0')}</span>
         <div className={styles.factorInfo}>
@@ -145,6 +185,70 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
         <div className={styles.valuePill}>
           <span className={styles.factorValue}>{hasValue ? value : '-'}</span>
           <span className={styles.valueText}>{status}</span>
+        </div>
+      </div>
+      <div className={styles.mobileBloom}>
+        <div className={styles.bloomTop}>
+          <button
+            type="button"
+            className={styles.nudgeBtn}
+            onClick={() => commitScore(currentValue - 1)}
+            disabled={currentValue <= 0}
+            aria-label={`Decrease ${factor.label}`}
+          >
+            -
+          </button>
+          <div className={styles.bloomOrb} data-tone={tone}>
+            <span>{hasValue ? currentValue : '?'}</span>
+            <small>{status}</small>
+          </div>
+          <button
+            type="button"
+            className={styles.nudgeBtn}
+            onClick={() => commitScore(currentValue + 1)}
+            disabled={currentValue >= 10}
+            aria-label={`Increase ${factor.label}`}
+          >
+            +
+          </button>
+        </div>
+        <div
+          className={styles.touchMeter}
+          role="slider"
+          tabIndex={0}
+          aria-label={`${factor.label} score`}
+          aria-valuemin={0}
+          aria-valuemax={10}
+          aria-valuenow={hasValue ? value : currentValue}
+          onPointerDown={event => {
+            event.currentTarget.setPointerCapture?.(event.pointerId)
+            setFromPointer(event)
+          }}
+          onPointerMove={event => {
+            if (event.buttons === 1) setFromPointer(event)
+          }}
+          onKeyDown={onMeterKey}
+        >
+          <div className={styles.touchFill} />
+          {Array.from({ length: 11 }, (_, score) => (
+            <button
+              key={score}
+              type="button"
+              className={`${styles.touchDot} ${hasValue && value === score ? styles.touchDotActive : ''} ${score <= currentValue ? styles.touchDotFilled : ''}`}
+              onClick={event => {
+                event.stopPropagation()
+                commitScore(score)
+              }}
+              aria-label={`${factor.label} score ${score}`}
+            >
+              <span>{score}</span>
+            </button>
+          ))}
+        </div>
+        <div className={styles.feelWords}>
+          <span>Care</span>
+          <span>Steady</span>
+          <span>Ready</span>
         </div>
       </div>
       <div className={styles.sliderRow}>
@@ -203,6 +307,13 @@ function scoreColor(value) {
   if (value <= 6) return '#c38b3f'
   if (value <= 8) return '#637f5f'
   return '#42697d'
+}
+
+function scoreTone(value) {
+  if (value <= 3) return 'care'
+  if (value <= 6) return 'steady'
+  if (value <= 8) return 'ready'
+  return 'strong'
 }
 
 function pickCurrentFactors(values) {
