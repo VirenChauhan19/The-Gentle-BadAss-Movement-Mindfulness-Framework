@@ -75,6 +75,145 @@ function calculatePaceGuide(distanceId, timeInput) {
   return guide
 }
 
+function calculateGoalPace(distanceId, timeInput) {
+  const option = BENCHMARK_OPTIONS.find(item => item.id === distanceId)
+  const seconds = parseRaceTimeToSeconds(timeInput)
+  if (!option || !seconds) return null
+  const pacePerKm = seconds / option.km
+  return {
+    distance: option.label,
+    distanceKm: option.km,
+    targetTime: timeInput.trim(),
+    targetPace: formatPace(pacePerKm),
+    targetPaceSeconds: Math.round(pacePerKm),
+    summary: `${option.label} target ${timeInput.trim()} (~${formatPace(pacePerKm)})`,
+  }
+}
+
+function parseLoggedPaceSeconds(value) {
+  const text = String(value || '').trim().toLowerCase()
+  if (!text) return null
+  const match = text.match(/(\d{1,2}):(\d{2})/)
+  if (!match) return null
+  const mins = Number(match[1])
+  const secs = Number(match[2])
+  if (!Number.isFinite(mins) || !Number.isFinite(secs)) return null
+  return mins * 60 + secs
+}
+
+function parseDistanceKm(distance) {
+  const text = String(distance || '').trim().toLowerCase()
+  if (!text) return null
+  const intervalMatch = text.match(/(\d+)\s*[x×]\s*(\d+(?:\.\d+)?)\s*(m|km)?/)
+  if (intervalMatch) {
+    const reps = Number(intervalMatch[1])
+    const repDistance = Number(intervalMatch[2])
+    const unit = intervalMatch[3] || 'm'
+    const km = unit === 'km' ? reps * repDistance : (reps * repDistance) / 1000
+    return Number.isFinite(km) ? km : null
+  }
+  const kmMatch = text.match(/(\d+(?:\.\d+)?)\s*km/)
+  if (kmMatch) return Number(kmMatch[1])
+  const minMatch = text.match(/(\d+(?:\.\d+)?)\s*min/)
+  if (minMatch) return null
+  const lone = text.match(/(\d+(?:\.\d+)?)/)
+  return lone ? Number(lone[1]) : null
+}
+
+function scaleNumericField(value, scale, suffix) {
+  const text = String(value || '').trim()
+  if (!text || !Number.isFinite(scale) || scale <= 0) return text
+  return text.replace(/(\d+(?:\.\d+)?)/, (match) => {
+    const n = Number(match)
+    if (!Number.isFinite(n)) return match
+    const scaled = n * scale
+    if (suffix === 'km') return scaled < 5 ? scaled.toFixed(1).replace(/\.0$/, '') : Math.round(scaled).toString()
+    if (suffix === 'min') return Math.round(scaled).toString()
+    return Math.round(scaled).toString()
+  })
+}
+
+function defaultWeekScale(week) {
+  if (week <= 1) return 1
+  const cyclePos = (week - 1) % 4
+  const cycleIndex = Math.floor((week - 1) / 4)
+  const baseGrowth = 1 + 0.08 * cycleIndex
+  const offsets = [0, 0.06, 0.12, -0.18]
+  return Math.max(0.6, Math.min(1.6, baseGrowth + offsets[cyclePos]))
+}
+
+function getWeeklyTarget(weeklyTargets, week) {
+  if (!Array.isArray(weeklyTargets) || !weeklyTargets.length) return null
+  return weeklyTargets.find(t => Number(t.week) === Number(week))
+    || weeklyTargets[Math.min(week - 1, weeklyTargets.length - 1)]
+    || null
+}
+
+function computeWeekScale(weeklyTargets, week) {
+  const baseTarget = getWeeklyTarget(weeklyTargets, 1)
+  const target = getWeeklyTarget(weeklyTargets, week)
+  if (baseTarget?.totalKm && target?.totalKm) {
+    const ratio = Number(target.totalKm) / Number(baseTarget.totalKm)
+    if (Number.isFinite(ratio) && ratio > 0) return Math.max(0.5, Math.min(1.8, ratio))
+  }
+  return defaultWeekScale(week)
+}
+
+function isLongRunSession(session) {
+  return session?.type === 'long'
+}
+
+function getRecentCheckinsWithin(checkins, days) {
+  const cutoff = new Date()
+  cutoff.setDate(cutoff.getDate() - days)
+  const cutoffISO = cutoff.toISOString().split('T')[0]
+  return (checkins || []).filter(c => c.date && c.date >= cutoffISO)
+}
+
+function computeActuals(checkins) {
+  const list = Array.isArray(checkins) ? checkins : []
+  const last7 = getRecentCheckinsWithin(list, 7)
+  const last28 = getRecentCheckinsWithin(list, 28)
+  const sumKm = (arr) => arr.reduce((sum, c) => {
+    const km = parseDistanceKm(c.distance)
+    return sum + (Number.isFinite(km) ? km : 0)
+  }, 0)
+  const km7 = sumKm(last7)
+  const km28 = sumKm(last28)
+  const weeklyKm28 = last28.length ? km28 * (7 / 28) : 0
+
+  const recentRuns = list.filter(c => c.status === 'done' || c.status === 'partial').slice(-10)
+  const paceSamples = recentRuns
+    .map(c => parseLoggedPaceSeconds(c.pace))
+    .filter(Number.isFinite)
+  const avgPaceSeconds = paceSamples.length ? paceSamples.reduce((a, b) => a + b, 0) / paceSamples.length : null
+  const bestPaceSeconds = paceSamples.length ? Math.min(...paceSamples) : null
+
+  const completed = list.filter(c => c.status === 'done').length
+  const partial = list.filter(c => c.status === 'partial').length
+  const missed = list.filter(c => c.status === 'missed').length
+  const total = completed + partial + missed
+  const completionRate = total ? (completed + partial * 0.5) / total : null
+
+  const effortSamples = recentRuns.map(c => Number(c.effort)).filter(Number.isFinite)
+  const avgEffort = effortSamples.length ? effortSamples.reduce((a, b) => a + b, 0) / effortSamples.length : null
+
+  return {
+    km7,
+    km28,
+    weeklyKm28,
+    runsLast7: last7.length,
+    runsLast28: last28.length,
+    avgPaceSeconds,
+    bestPaceSeconds,
+    avgPace: avgPaceSeconds ? formatPace(avgPaceSeconds) : null,
+    bestPace: bestPaceSeconds ? formatPace(bestPaceSeconds) : null,
+    completionRate,
+    avgEffort,
+    totalLogged: total,
+  }
+}
+
 function addDaysISO(startDate, offset) {
   const d = new Date(`${startDate}T00:00:00`)
   d.setDate(d.getDate() + offset)
@@ -93,11 +232,12 @@ function formatDateShort(iso) {
 function getPlan(goal) {
   if (!goal) return []
   const template = goal?.weekTemplate || []
+  const weeklyTargets = goal?.weeklyTargets || []
   const startDate = goal.startDate || new Date().toISOString().split('T')[0]
   const totalDays = goal.commitmentDays || ((goal.weeks || 4) * 7)
   const storedPlan = normalizePlan(goal.plan, startDate, totalDays)
   if (storedPlan.length >= totalDays) return storedPlan
-  const templatePlan = expandProgramPlan(template, startDate, totalDays)
+  const templatePlan = expandProgramPlan(template, startDate, totalDays, weeklyTargets)
   return Array.from({ length: totalDays }, (_, i) => {
     if (storedPlan[i]) return storedPlan[i]
     if (templatePlan[i]) return templatePlan[i]
@@ -121,13 +261,24 @@ function getPlan(goal) {
   })
 }
 
-function expandProgramPlan(template, startDate, totalDays) {
+function expandProgramPlan(template, startDate, totalDays, weeklyTargets) {
   if (!Array.isArray(template) || !template.length) return []
   return Array.from({ length: totalDays }, (_, i) => {
     const date = addDaysISO(startDate, i)
     const day = DAYS_FULL[new Date(`${date}T00:00:00`).getDay()]
     const session = template.find(s => s.day === day) || template[i % template.length] || {}
     const week = Math.floor(i / 7) + 1
+    const scale = computeWeekScale(weeklyTargets, week)
+    const target = getWeeklyTarget(weeklyTargets, week)
+    const isRunning = session.type && session.type !== 'rest'
+    const distanceField = isRunning ? scaleNumericField(session.distance, scale, 'km') : (session.distance || '')
+    const durationField = isRunning ? scaleNumericField(session.duration, Math.min(scale, 1.4), 'min') : (session.duration || '')
+    const focusNote = target?.qualityFocus
+      ? ` Week ${week} focus: ${target.qualityFocus}.`
+      : (week > 1 && isRunning ? ` Week ${week}: progressing on week 1 by about ${Math.round((scale - 1) * 100)}%.` : '')
+    const composedNotes = session.notes
+      ? `${session.notes}${focusNote}`
+      : (isRunning ? `Week ${week} ${session.type || 'session'}.${focusNote}` : '')
     return {
       id: `day-${i + 1}`,
       dayNumber: i + 1,
@@ -136,11 +287,11 @@ function expandProgramPlan(template, startDate, totalDays) {
       day,
       type: session.type || 'rest',
       title: session.title || 'Rest / Recovery',
-      distance: session.distance || '',
-      duration: session.duration || '',
+      distance: distanceField,
+      duration: durationField,
       pace: session.pace || '',
-      notes: session.notes || '',
-      crossTraining: session.crossTraining || (session.type === 'cross' ? `${session.duration || '30-45 min'} easy cycling, swimming, elliptical, rowing, or brisk incline walk at conversational effort.` : ''),
+      notes: composedNotes,
+      crossTraining: session.crossTraining || (session.type === 'cross' ? `${durationField || '30-45 min'} easy cycling, swimming, elliptical, rowing, or brisk incline walk at conversational effort.` : ''),
       strength: session.strength || DEFAULT_STRENGTH,
       mobility: session.mobility || DEFAULT_MOBILITY,
     }
@@ -288,14 +439,96 @@ function getTrendInsight(entries, checkins) {
   return { headline, summary, action, avgFeel, completed, partial, missed, breathingSessions, avgQuality }
 }
 
+function CoachIntelligenceCard({ goal, actuals, weekTarget, weekIndex, totalWeeks, avgFeel, onRetune, retuning, retuneNotice }) {
+  const goalPace = goal?.goalPace
+  const observedKm = actuals?.weeklyKm28 ? Math.round(actuals.weeklyKm28) : null
+  const storedKm = Number(String(goal?.currentKm || '').match(/[\d.]+/)?.[0]) || null
+  const drift = observedKm && storedKm
+    ? Math.round(((observedKm - storedKm) / storedKm) * 100)
+    : null
+  const showRetune = typeof onRetune === 'function' && actuals?.runsLast28 >= 3 && weekIndex < totalWeeks
+  const targetKm = weekTarget?.totalKm
+  const targetFocus = weekTarget?.qualityFocus || weekTarget?.intensityTier
+
+  return (
+    <div className={styles.paceGuideCard}>
+      <div>
+        <span>What the coach is using</span>
+        <p>{goal?.focus || goal?.raceGoal || 'Running plan'}{goalPace ? ` · target ${goalPace.distance} ${goalPace.targetTime}` : ''}</p>
+      </div>
+      <div className={styles.paceGuideGrid}>
+        <p>
+          <strong>Goal pace</strong>
+          {goalPace ? goalPace.targetPace : 'Set a target time on next setup'}
+        </p>
+        <p>
+          <strong>Your weekly km</strong>
+          {observedKm != null
+            ? `${observedKm} km (last 28d)${storedKm && drift != null ? ` vs ${storedKm} stored${Math.abs(drift) >= 5 ? ` (${drift > 0 ? '+' : ''}${drift}%)` : ''}` : ''}`
+            : 'Log a few runs and the coach will compute it'}
+        </p>
+        <p>
+          <strong>Recent pace</strong>
+          {actuals?.avgPace ? `${actuals.avgPace} avg${actuals.bestPace && actuals.bestPace !== actuals.avgPace ? `, best ${actuals.bestPace}` : ''}` : 'No pace data yet'}
+        </p>
+        <p>
+          <strong>Recent feel</strong>
+          {avgFeel ? `${avgFeel.toFixed(1)}/10` : 'Not enough Feel logs'}
+        </p>
+        <p>
+          <strong>This week target</strong>
+          {targetKm ? `${targetKm} km${targetFocus ? ` · ${targetFocus}` : ''}` : `Week ${weekIndex} of ${totalWeeks}`}
+        </p>
+        <p>
+          <strong>Completion</strong>
+          {actuals?.completionRate != null ? `${Math.round(actuals.completionRate * 100)}%` : 'New runner'}
+        </p>
+      </div>
+      {showRetune && (
+        <div style={{ display: 'grid', gap: 8 }}>
+          <button
+            className={styles.primaryBtn}
+            onClick={onRetune}
+            disabled={retuning}
+            style={{ marginTop: 4 }}
+          >
+            {retuning ? 'Re-tuning…' : 'Re-tune the remaining weeks from my actual training'}
+          </button>
+          {retuneNotice && <p className={styles.progressionNote} style={{ margin: 0 }}>{retuneNotice}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function Coach() {
-  const { coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries, adminRemarks, profile } = useData()
+  const { coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries, adminRemarks, profile } = useData()
   const [tab, setTab] = useState('program')
+  const [retuning, setRetuning] = useState(false)
+  const [retuneNotice, setRetuneNotice] = useState(null)
 
   const goal     = coachData?.goal        || null
   const checkins = coachData?.checkins    || []
   const chat     = coachData?.chatHistory || []
+
+  const actuals = computeActuals(checkins)
+
+  useEffect(() => {
+    if (!goal || !updateCoachGoal) return
+    if (actuals.runsLast28 < 4) return
+    const observed = Math.round(actuals.weeklyKm28)
+    if (observed <= 0) return
+    const stored = Number(String(goal.currentKm || '').match(/[\d.]+/)?.[0]) || 0
+    if (!stored) {
+      updateCoachGoal({ ...goal, currentKm: `${observed} km/week`, observedWeeklyKm: observed })
+      return
+    }
+    const drift = Math.abs(observed - stored) / Math.max(1, stored)
+    if (drift > 0.2) {
+      updateCoachGoal({ ...goal, currentKm: `${observed} km/week`, observedWeeklyKm: observed })
+    }
+  }, [actuals.runsLast28, actuals.weeklyKm28])
 
   if (!goal) return <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={profile?.commitment || 30} />
 
@@ -313,6 +546,72 @@ export default function Coach() {
   const todayDayName = DAYS_FULL[now.getDay()]
   const todaySession = plan.find(s => s.date === today) || goal.weekTemplate?.find(s => s.day === todayDayName)
   const todayCheckin = checkins.find(c => c.date === today)
+
+  async function handleRetune() {
+    if (retuning || !updateCoachGoal) return
+    setRetuning(true)
+    setRetuneNotice(null)
+    try {
+      const remainingDays = Math.max(7, totalDays - dayNum + 1)
+      const observedKm = Math.max(1, Math.round(actuals.weeklyKm28 || Number(String(goal.currentKm || '').match(/[\d.]+/)?.[0]) || 30))
+      const recentCheckins = [...checkins].slice(-8).reverse()
+      const checkinSummary = recentCheckins.map(c => {
+        const parts = [c.date, c.status]
+        if (c.distance) parts.push(`${c.distance}km`)
+        if (c.pace) parts.push(c.pace)
+        if (c.effort) parts.push(`RPE${c.effort}`)
+        return parts.join(' ')
+      }).join(' · ') || 'no recent runs logged'
+      const recentFeel = entries.slice(0, 5).map(e => `${e.date}: ${computeFeelScore(e.scores || {}).toFixed(1)}/10`).join(', ') || 'none'
+      const prefix = `RE-TUNING from week ${weekNum} of ${Math.ceil(totalDays / 7)}. Recent actual avg: ${observedKm} km/week. ${actuals.avgPace ? `Recent avg pace: ${actuals.avgPace}.` : ''} Recent runs: ${checkinSummary}. Recent feel scores: ${recentFeel}. Build a fresh ${remainingDays}-day continuation that respects what the runner is actually doing.`
+
+      const program = await generateProgram({
+        focus: goal.focus || goal.raceGoal,
+        experience: goal.experience,
+        daysPerWeek: goal.daysPerWeek,
+        currentKm: `${observedKm} km/week`,
+        weeks: Math.ceil(remainingDays / 7),
+        commitmentDays: remainingDays,
+        notes: goal.notes || '',
+        paceGuide: goal.paceGuide,
+        goalPace: goal.goalPace,
+        prefix,
+      })
+      const newStart = today
+      const fresh = normalizePlan(program.plan, newStart, remainingDays)
+      const weeklyTargets = Array.isArray(program.weeklyTargets) ? program.weeklyTargets : []
+      const expanded = expandProgramPlan(program.weekTemplate || [], newStart, remainingDays, weeklyTargets)
+      const continuation = Array.from({ length: remainingDays }, (_, i) =>
+        fresh[i] || expanded[i] || null
+      ).filter(Boolean)
+
+      const past = (goal.plan || []).filter(p => p.date && p.date < today)
+      const merged = [
+        ...past,
+        ...continuation.map((day, i) => ({
+          ...day,
+          dayNumber: past.length + i + 1,
+          week: Math.floor((past.length + i) / 7) + 1,
+        })),
+      ]
+
+      updateCoachGoal({
+        ...goal,
+        currentKm: `${observedKm} km/week`,
+        observedWeeklyKm: observedKm,
+        plan: merged,
+        weekTemplate: program.weekTemplate || goal.weekTemplate,
+        weeklyTargets: weeklyTargets.length ? weeklyTargets : goal.weeklyTargets,
+        progressionNote: program.progressionNote || goal.progressionNote,
+        peakWeeklyVolume: program.peakWeeklyVolume || goal.peakWeeklyVolume,
+        lastRetunedAt: new Date().toISOString(),
+      })
+      setRetuneNotice('Plan re-tuned from your recent training data.')
+    } catch (err) {
+      setRetuneNotice(`Re-tune failed: ${err.message}`)
+    }
+    setRetuning(false)
+  }
 
   return (
     <div className={styles.page}>
@@ -343,6 +642,7 @@ export default function Coach() {
         ? <ProgramTab
             goal={goal} plan={plan} todaySession={todaySession} todayCheckin={todayCheckin}
             checkins={checkins} entries={entries} dayNum={dayNum}
+            actuals={actuals} onRetune={handleRetune} retuning={retuning} retuneNotice={retuneNotice}
             isComplete={isComplete} onCheckin={saveCoachCheckin} onNewGoal={clearCoachGoal}
             adminRemarks={adminRemarks}
           />
@@ -389,6 +689,15 @@ function formatPath(path) {
   return path.charAt(0).toUpperCase() + path.slice(1)
 }
 
+function defaultGoalDistanceFor(focus) {
+  if (!focus) return ''
+  if (focus === '5K Race') return '5K'
+  if (focus === '10K Race') return '10K'
+  if (focus === 'Half Marathon') return 'Half Marathon'
+  if (focus === 'Ultra' || /marathon/i.test(focus)) return 'Marathon'
+  return ''
+}
+
 function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
   const [step,        setStep]        = useState(1)
   const [focus,       setFocus]       = useState('')
@@ -397,6 +706,8 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
   const [currentKm,   setCurrentKm]   = useState('')
   const [benchmarkDistance, setBenchmarkDistance] = useState('')
   const [benchmarkTime, setBenchmarkTime] = useState('')
+  const [goalDistance, setGoalDistance] = useState('')
+  const [goalTime, setGoalTime] = useState('')
   const [notes,       setNotes]       = useState('')
   const [loading,     setLoading]     = useState(false)
   const [error,       setError]       = useState(null)
@@ -406,7 +717,16 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
   const profilePath = profile?.path || 'not set'
   const profileStory = profile?.fitnessHistory || ''
   const paceGuide = calculatePaceGuide(benchmarkDistance, benchmarkTime)
+  const goalPace = calculateGoalPace(goalDistance, goalTime)
   const shouldAskBenchmark = experience !== 'Beginner' || /race|marathon|ultra|speed/i.test(focus || '')
+  const isRaceFocus = /race|marathon|ultra|speed/i.test(focus || '')
+
+  useEffect(() => {
+    if (isRaceFocus && !goalDistance) {
+      const suggested = defaultGoalDistanceFor(focus)
+      if (suggested) setGoalDistance(suggested)
+    }
+  }, [focus, isRaceFocus, goalDistance])
 
   async function handleGenerate() {
     setLoading(true)
@@ -421,9 +741,10 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
     ].filter(Boolean).join('\n')
     try {
       const startDate = new Date().toISOString().split('T')[0]
-      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes: profileNotes, paceGuide })
+      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes: profileNotes, paceGuide, goalPace })
       const plan = normalizePlan(program.plan, startDate, totalDays)
-      const templatePlan = expandProgramPlan(program.weekTemplate || [], startDate, totalDays)
+      const weeklyTargets = Array.isArray(program.weeklyTargets) ? program.weeklyTargets : []
+      const templatePlan = expandProgramPlan(program.weekTemplate || [], startDate, totalDays, weeklyTargets)
       const fallbackPlan = Array.from({ length: totalDays }, (_, i) =>
         plan[i] || templatePlan[i] || {
           id: `day-${i + 1}`,
@@ -446,9 +767,12 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
         focus, raceGoal: focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays,
         startDate,
         benchmark: benchmarkDistance && benchmarkTime ? { distance: benchmarkDistance, time: benchmarkTime } : null,
+        goalTarget: goalPace ? { distance: goalDistance, time: goalTime } : null,
+        goalPace,
         paceGuide,
         overview:         program.overview,
         weekTemplate:     program.weekTemplate || [],
+        weeklyTargets,
         plan:             fallbackPlan,
         progressionNote:  program.progressionNote,
         peakWeeklyVolume: program.peakWeeklyVolume,
@@ -644,6 +968,41 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
         {step === 4 && (
           <>
             <div className={styles.inputsStack}>
+              {isRaceFocus && (
+                <div className={styles.benchmarkCard}>
+                  <div>
+                    <p className={styles.benchmarkTitle}>Target performance</p>
+                    <p className={styles.benchmarkText}>What time are you chasing? The coach builds every workout backwards from this.</p>
+                  </div>
+                  <div className={styles.benchmarkGrid}>
+                    <select
+                      className={styles.selectInput}
+                      value={goalDistance}
+                      onChange={e => setGoalDistance(e.target.value)}
+                    >
+                      <option value="">Distance</option>
+                      {BENCHMARK_OPTIONS.map(option => (
+                        <option key={option.id} value={option.id}>{option.label}</option>
+                      ))}
+                    </select>
+                    <input
+                      className={styles.numberInput}
+                      value={goalTime}
+                      onChange={e => setGoalTime(e.target.value)}
+                      placeholder="Goal time e.g. 15:59"
+                    />
+                  </div>
+                  {goalPace && (
+                    <div className={styles.pacePreview}>
+                      <span>Target pace</span>
+                      <div className={styles.pacePreviewGrid}>
+                        <p><strong>{goalPace.distance}</strong>{goalPace.targetTime}</p>
+                        <p><strong>Race pace</strong>{goalPace.targetPace}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               {shouldAskBenchmark && (
                 <div className={styles.benchmarkCard}>
                   <div>
@@ -706,7 +1065,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
 }
 
 // ── Program Tab ───────────────────────────────────────────────────────────────
-function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, isComplete, onCheckin, onNewGoal, adminRemarks = [] }) {
+function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, actuals, onRetune, retuning, retuneNotice, isComplete, onCheckin, onNewGoal, adminRemarks = [] }) {
   const visiblePlan = plan.length ? plan : getPlan(goal)
   const currentDay = Math.max(1, dayNum)
   const currentWeek = Math.max(1, Math.ceil(currentDay / 7))
@@ -727,15 +1086,23 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
   const todayRemarks = todaySession?.date ? (remarksByDate[todaySession.date] || []) : []
   const readinessInsight = getReadinessInsight(entries, todaySession)
   const trendInsight = getTrendInsight(entries, checkins)
+  const fallbackActuals = actuals || computeActuals(checkins)
+  const recentFeelEntries = entries
+    .filter(e => e?.date)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .slice(0, 5)
+  const recentFeelScores = recentFeelEntries.map(e => computeFeelScore(e?.scores || {})).filter(n => Number.isFinite(n))
+  const avgRecentFeel = recentFeelScores.length ? recentFeelScores.reduce((a, b) => a + b, 0) / recentFeelScores.length : null
 
   // Days for the visible week
   const weekDays = visiblePlan.filter(s => (s.week || Math.ceil((s.dayNumber || 1) / 7)) === weekIndex)
   const weekStart = weekDays[0]?.date
   const weekEnd = weekDays[weekDays.length - 1]?.date
   const weekKm = weekDays.reduce((sum, d) => {
-    const match = (d.distance || '').match(/[\d.]+/)
-    return sum + (match ? parseFloat(match[0]) : 0)
+    const km = parseDistanceKm(d.distance)
+    return sum + (Number.isFinite(km) ? km : 0)
   }, 0)
+  const weekTarget = getWeeklyTarget(goal?.weeklyTargets, weekIndex)
   const weekWorkouts = weekDays.filter(d => d.type !== 'rest').length
   const weekLogged = weekDays.filter(d => completedDates.has(d.date)).length
   const isCurrentWeek = weekIndex === currentWeek
@@ -773,6 +1140,17 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
           tone={readinessInsight.tone}
         />
         <TrendIntelligence insight={trendInsight} />
+        <CoachIntelligenceCard
+          goal={goal}
+          actuals={fallbackActuals}
+          weekTarget={weekTarget}
+          weekIndex={weekIndex}
+          totalWeeks={totalWeeks}
+          avgFeel={avgRecentFeel}
+          onRetune={onRetune}
+          retuning={retuning}
+          retuneNotice={retuneNotice}
+        />
         {goal.paceGuide && (
           <div className={styles.paceGuideCard}>
             <div>
@@ -1537,11 +1915,12 @@ async function apiCall(messages, maxTokens = 600) {
   return data.choices?.[0]?.message?.content?.trim() || ''
 }
 
-async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes, paceGuide }) {
+async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes, paceGuide, goalPace, prefix }) {
   const hardSessions = daysPerWeek >= 5 ? 2 : 1
   const easySessions = Math.max(0, daysPerWeek - hardSessions - 1)
   const restDays     = 7 - daysPerWeek
   const raceGoal = focus
+  const totalWeeks = Math.max(1, Math.ceil((commitmentDays || (weeks * 7)) / 7))
 
   const isTrackEvent = ['800m', '1500m', '3K'].includes(raceGoal)
   const isCompetitive = experience === 'Competitive' || experience === 'Advanced'
@@ -1611,18 +1990,37 @@ BENCHMARK-BASED PACE GUIDE:
 - Do not invent exact min/km numbers. Use effort-based guidance and ask the runner for a recent 1 mile, 5K, 10K, half marathon, or marathon time if they want exact paces.
 - Every running day must still have a useful "pace" field, such as conversational Zone 2, relaxed recovery, steady RPE 5-6/10, or controlled tempo RPE 7/10.`
 
+  const goalPaceRules = goalPace ? `
+GOAL TIME (the runner is chasing this):
+- Target: ${goalPace.distance} in ${goalPace.targetTime} (race pace ~${goalPace.targetPace}).
+- Build the entire program backwards from this target. Mention the target time in the overview.
+- Tempo/threshold work should sit roughly 15-25 s/km slower than race pace.
+- Race-pace work should be at or near ${goalPace.targetPace}, in controlled chunks (not full distance every time).
+- VO2/intervals should be 5-10 s/km faster than race pace, with full recovery, only after base is established.
+- Each week's quality session must move the runner closer to that target — show a clear arc (early: aerobic + strides; mid: threshold + race-pace blocks; late: race-pace specificity; final week: taper).
+- The peakWeeklyVolume and weeklyTargets must reflect the demands of ${goalPace.distance}.` : ''
+
   const system = `You are an expert running coach. Generate a personalised running and fitness plan for the user's full commitment. The user does not need to be training for a race.
 Return ONLY valid JSON — no markdown, no explanation, no text outside the JSON.
 
 JSON structure:
 {
-  "overview": "2–3 sentence program philosophy and what the runner will achieve",
+  "overview": "2–3 sentence program philosophy and what the runner will achieve. If a goal time exists, name it.",
+  "weeklyTargets": [
+    {
+      "week": 1,
+      "totalKm": 30,
+      "longRunKm": 8,
+      "qualityFocus": "what the quality session of this week emphasises (e.g. 'strides + short tempo', 'race-pace 4x1km', 'taper')",
+      "intensityTier": "base|build|peak|taper"
+    }
+  ],
   "plan": [
     {
       "dayNumber": 1,
       "week": 1,
       "type": "easy|moderate|hard|long|rest|cross",
-      "title": "Session title",
+      "title": "Session title — must vary across weeks",
       "distance": "6 km  OR  6 x 400m  OR  45 min",
       "duration": "35-40 min",
       "pace": "specific effort or speed guidance",
@@ -1643,15 +2041,24 @@ JSON structure:
       "notes": "Warm-up (5 min): [4 dynamic exercises with reps]. Main set: [exact workout including how fast to run each rep and recovery]. Cool-down: [2–3 stretches]."
     }
   ],
-  "progressionNote": "How volume and intensity build week to week",
+  "progressionNote": "How volume and intensity build week to week. Be specific about which week peaks and which weeks are recovery.",
   "peakWeeklyVolume": "XX km or total reps"
 }
+
+WEEKLY UNIQUENESS RULES (CRITICAL):
+- Return exactly ${totalWeeks} entries in weeklyTargets, one per week.
+- Every week MUST be different from week 1: different totalKm, different long-run length, different quality focus, or different rep menu.
+- Never copy the same Monday/Tuesday/etc workout across all weeks. Vary distances, intervals, hills, fartlek, tempo blocks. Workouts within a week should have purpose; the same purpose across weeks should still be EXECUTED differently (e.g. 4x1km @ pace → 5x1km @ pace → 3x2km @ pace).
+- Long-run distance should grow over the build phase, then drop in recovery and taper weeks.
+- Recovery weeks (every 3-4 weeks) should clearly drop totalKm by 15-25%.
+- The plan[] entries' distances must roughly add up to that week's totalKm (±20%).
 
 ${improvedTrackRules}
 
 ${paceRules}
 
 ${benchmarkPaceRules}
+${goalPaceRules}
 
 ${workoutRules}
 
@@ -1688,10 +2095,13 @@ PROGRAM STRUCTURE:
 - Focus: ${raceGoal} · Level: ${experience} · Duration: ${commitmentDays} days
 - Week 1 must start at or slightly below current volume — no spikes`
 
+  const goalLine = goalPace ? ` Goal: ${goalPace.distance} in ${goalPace.targetTime} (race pace ~${goalPace.targetPace}).` : ''
+  const prefixLine = prefix ? ` ${prefix}` : ''
+
   const raw = await apiCall([
     { role: 'system', content: system },
-    { role: 'user',   content: `Build my full ${commitmentDays}-day ${raceGoal} plan. I'm ${experience} level, currently doing ${currentKm}, training ${daysPerWeek} days/week.${notes ? ` Notes: ${notes}` : ''}` },
-  ], Math.min(6000, Math.max(2200, commitmentDays * 90)))
+    { role: 'user',   content: `Build my full ${commitmentDays}-day ${raceGoal} plan. I'm ${experience} level, currently doing ${currentKm}, training ${daysPerWeek} days/week.${goalLine}${prefixLine}${notes ? ` Notes: ${notes}` : ''}` },
+  ], Math.min(12000, Math.max(2800, commitmentDays * 110)))
 
   return extractJSON(raw)
 }
