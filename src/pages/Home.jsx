@@ -2,6 +2,20 @@ import { Link } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
 import styles from './Home.module.css'
+import PillarVideoCard from '../components/PillarVideoCard'
+
+const PILLAR_VIDEOS = [
+  {
+    title: 'Smile & Relax',
+    subtitle: 'Release tension — face first',
+    url: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Smile%20-%20Relax%20Ms%20WebApp.mp4?alt=media&token=069005ef-9089-4892-9821-66563788280a',
+  },
+  {
+    title: 'Orange Squeeze',
+    subtitle: 'Activate without gripping',
+    url: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Orange%20Squeeze%20WebApp.mp4?alt=media&token=b75ed566-013c-4eb1-9aee-6c09aa117465',
+  },
+]
 
 const DAILY_INTENTIONS = [
   'Move with awareness, not aggression.',
@@ -166,6 +180,15 @@ export default function Home() {
           <span className={styles.actionTitle}>Coach</span>
           <span className={styles.actionSub}>Goals &amp; check-ins</span>
         </Link>
+      </section>
+
+      <section className={styles.pillarVideos}>
+        <p className={styles.pillarVideosKicker}>5 Pillars · Technique</p>
+        <div className={styles.pillarVideosRow}>
+          {PILLAR_VIDEOS.map(v => (
+            <PillarVideoCard key={v.title} title={v.title} subtitle={v.subtitle} url={v.url} />
+          ))}
+        </div>
       </section>
 
       <section className={styles.intention}>

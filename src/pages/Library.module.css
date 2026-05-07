@@ -256,10 +256,10 @@
 }
 
 .filterActive {
-  background: var(--brand-gradient) !important;
-  border-color: transparent !important;
-  color: var(--on-dark) !important;
-  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.22) !important;
+  background: var(--brand-gradient);
+  border-color: transparent;
+  color: var(--on-dark);
+  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.22);
   animation: scorePop 260ms var(--ease-spring) both;
 }
 
@@ -396,13 +396,36 @@
   transform: scale(0.985);
 }
 
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
 .cardCat {
   font-size: 0.6rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-weight: 700;
-  margin-bottom: 6px;
   color: var(--sage-dark);
+}
+
+.videoBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(66, 105, 125, 0.12);
+  color: var(--slate);
+  border: 1px solid rgba(66, 105, 125, 0.22);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
 }
 
 .cardName {
@@ -439,8 +462,10 @@
   position: absolute;
   bottom: 18px;
   right: 18px;
-  font-size: 0.95rem;
   color: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: transform var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out);
 }
 

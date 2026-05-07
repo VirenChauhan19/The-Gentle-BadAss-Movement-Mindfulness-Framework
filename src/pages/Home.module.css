@@ -409,6 +409,41 @@
   text-transform: uppercase;
 }
 
+/* ── Pillar Videos ───────────────────────────────────── */
+.pillarVideos {
+  padding: 0 16px 16px;
+  animation: floatIn 540ms var(--ease-elastic) both 400ms;
+}
+
+.pillarVideosKicker {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.pillarVideosRow {
+  display: flex;
+  gap: 12px;
+}
+
+@media (min-width: 768px) {
+  .pillarVideos {
+    padding: 0 20px 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pillarVideos {
+    padding: 0 56px 20px;
+  }
+  .pillarVideosRow {
+    max-width: 420px;
+  }
+}
+
 /* ── Intention ──────────────────────────────────────── */
 .intention {
   padding: 18px 24px 8px;

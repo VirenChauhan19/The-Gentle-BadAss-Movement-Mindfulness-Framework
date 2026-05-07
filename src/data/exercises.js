@@ -7,6 +7,7 @@ export const EXERCISES = [
     purpose: 'Assess hip mobility and lumbar stability under load.',
     cue: 'Hinge at the hip first — your knees follow, they do not lead. Keep the lumbar neutral throughout.',
     animation: 'squat',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Squats%20WebApp.mp4?alt=media&token=756557c6-a0ad-4102-a301-d2947b890cf9',
     steps: [
       'Stand feet shoulder-width, toes slightly out.',
       'Push your hips back and down — not your knees forward.',
@@ -115,6 +116,7 @@ export const EXERCISES = [
     purpose: 'Build posterior chain strength — the hip engine in its most powerful expression.',
     cue: 'Push the floor away from you. The bar travels in a straight line. The back never rounds.',
     animation: 'deadlift',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20DeadLift%20WebApp%205.mp4?alt=media&token=5243f2c6-c3cc-417f-8a3b-6c14e82d209e',
     steps: [
       'Stand over the bar, feet hip-width, shins close to it.',
       'Hinge from the hips to grip the bar — back flat, chest proud.',
@@ -132,6 +134,7 @@ export const EXERCISES = [
     purpose: 'Train anti-lateral-flexion — core as the bridge under asymmetric load.',
     cue: 'Walk tall as if a thread is pulling the crown of your head up. Do NOT lean toward the weight.',
     animation: 'suitcaseCarry',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Suitcase%20Carry%20WebApp%209.mp4?alt=media&token=ce1e18e5-2d26-4d62-b7ae-2b4932b532fa',
     steps: [
       'Hold a kettlebell or dumbbell in one hand at your side.',
       'Stand tall — shoulder blades back and down, lumbar neutral.',
@@ -148,6 +151,7 @@ export const EXERCISES = [
     purpose: 'Integrate hip power with shoulder stability — the full kinetic chain.',
     cue: 'The power comes from the hip snap, not the arms. The press is a shoulder movement — the lumbar does not arch.',
     animation: 'cleanToPress',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Clean%20to%20Press%20WebApp%208.mp4?alt=media&token=2245258b-1399-4e59-ae18-26df6c0a83ea',
     steps: [
       'Start with kettlebell at hip level, hinge slightly.',
       'Drive hips forward explosively — this momentum brings the bell to rack position (shoulder).',
@@ -165,6 +169,7 @@ export const EXERCISES = [
     purpose: 'Upper-body push strength with a stable, grounded base.',
     cue: 'Press the floor with your feet. The upper back stays pinned to the bench. No excessive arch.',
     animation: 'benchPress',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20BenchPress%20WebApp%202.mp4?alt=media&token=322b4946-36d8-4225-8b03-8c0d6034017e',
     steps: [
       'Lie on the bench, feet flat on the floor.',
       'Retract shoulder blades — they are pinned to the bench.',
@@ -181,6 +186,7 @@ export const EXERCISES = [
     purpose: 'Upper-back pulling strength while maintaining the hip-hinge.',
     cue: 'You are in a hinge — the same position as a deadlift. The back is flat. Pull with your elbows, not your hands.',
     animation: 'bentOverRow',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Row%20WebApp%203.mp4?alt=media&token=a2c8d0d0-cd1c-49b9-b27b-4eb623f1f706',
     steps: [
       'Hinge forward until torso is roughly parallel to the floor, back flat.',
       'Let the barbell hang at arm\'s length.',
@@ -197,6 +203,7 @@ export const EXERCISES = [
     purpose: 'Total-body stability under bilateral load.',
     cue: 'Walk tall, like the Puppet. Two weights pulling you down — your spine resists by growing taller.',
     animation: 'farmersCarry',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Farmers%20Walk%20WebApp%204.mp4?alt=media&token=35984225-a3e7-41ca-a5d7-0b77dc2bbd59',
     steps: [
       'Hold a weight in each hand, standing tall.',
       'Shoulders back and down, lumbar neutral.',
@@ -229,6 +236,7 @@ export const EXERCISES = [
     purpose: 'Shoulder strength with the lumbar as the stable pillar.',
     cue: 'Before you press, brace your core. The ribs stay down — do not let them flare.',
     animation: 'overheadPress',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Overhead%20Press%20App%207.mp4?alt=media&token=9ef1e232-fdd3-4b7e-8c66-659d0f2b0730',
     steps: [
       'Stand tall, bar at shoulder height, elbows in front.',
       'Take a breath, brace the core (the bridge).',
@@ -246,6 +254,7 @@ export const EXERCISES = [
     purpose: 'Elbow flexor strength with strict technique — no momentum.',
     cue: 'The elbows stay pinned at your sides. The only thing moving is the forearm.',
     animation: 'bicepCurl',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Biceps%20Curl%20WebApp%206.mp4?alt=media&token=8dc69dc0-795f-41e4-abbb-b52b6407aab9',
     steps: [
       'Stand tall, dumbbells at your sides, palms facing forward.',
       'Curl in 5 counts — elbows stay against your torso.',
@@ -262,6 +271,7 @@ export const EXERCISES = [
     purpose: 'Build lower-body strength with the hip as the primary engine.',
     cue: 'Sit back into the squat — your hips reach behind your heels. The knees follow the hips, not the other way around.',
     animation: 'squat',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Squats%20WebApp%201.mp4?alt=media&token=f14fc920-a107-4b2a-a616-c08938d390da',
     steps: [
       'Bar across upper back, feet shoulder-width.',
       'Sit back and down in 5 counts — hips back first, then knees track out.',
@@ -269,6 +279,40 @@ export const EXERCISES = [
       'Drive through heels to rise in 5 counts.'
     ],
     antiRotationNote: 'The lumbar spine is the stable pillar from start to finish.'
+  },
+
+  // MOBILITY
+  {
+    id: 'cat-camel',
+    category: 'functional',
+    name: 'Cat Camel',
+    purpose: 'Restore fluid motion through the full spine — from tailbone to skull.',
+    cue: 'Move slowly and with control. The spine is a wave, not a hinge.',
+    animation: 'default',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Cat%20Camel%20WebApp.mp4?alt=media&token=bec83c50-6b74-4fba-920f-05fd0f4452fa',
+    steps: [
+      'Begin on all fours — wrists under shoulders, knees under hips.',
+      'Inhale: let the belly drop toward the floor, lift the tailbone and head (Camel).',
+      'Exhale: round the spine toward the ceiling, tuck the tailbone and chin (Cat).',
+      'Move through the full range slowly — 8 to 10 breath cycles.'
+    ],
+    antiRotationNote: null
+  },
+  {
+    id: 'arm-rotation',
+    category: 'functional',
+    name: 'Arm Rotation',
+    purpose: 'Open the thoracic spine and shoulder girdle — the foundation of upper-body freedom.',
+    cue: 'The rotation comes from the mid-back. The lower back stays still.',
+    animation: 'default',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Arm%20Rotation%20WebApp.mp4?alt=media&token=a2ef0fd2-1a63-4e0d-b053-9b8ac2e9573e',
+    steps: [
+      'Stand tall, arms extended out to the side at shoulder height.',
+      'Slowly rotate both arms in large circles — forward 5 times, then backward 5 times.',
+      'Keep the spine tall throughout — no leaning.',
+      'Breathe out on each rotation.'
+    ],
+    antiRotationNote: null
   },
 
   // RUNNING DRILLS
@@ -294,6 +338,7 @@ export const EXERCISES = [
     purpose: 'Find the tall running posture and feel the hip drive without forward movement.',
     cue: 'Run tall. You are a Puppet — a string from the crown of your head pulling you upward. Feel the hip flexors driving the knees forward.',
     animation: 'spotJogging',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Spot%20Jog%20WebApp.mp4?alt=media&token=4cdac2bd-599b-4a1a-83e9-5518f6b0bab7',
     steps: [
       'Jog on the spot at an easy pace.',
       'Feel the string at the crown of your head — grow tall with each step.',

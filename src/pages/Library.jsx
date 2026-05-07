@@ -44,7 +44,6 @@ export default function Library() {
           <button
             key={id}
             className={styles.filter + (activeCategory === id ? ' ' + styles.filterActive : '')}
-            style={activeCategory === id ? { background: cat.color, borderColor: cat.color, color: '#fff' } : {}}
             onClick={() => setActiveCategory(id)}
           >
             {cat.label}
@@ -81,15 +80,25 @@ function ExerciseCard({ exercise }) {
   const cat = CATEGORIES[exercise.category]
   return (
     <Link to={`/library/${exercise.id}`} className={styles.card}>
-      <div className={styles.cardCat} style={{ color: cat.color }}>
-        {cat.label}
+      <div className={styles.cardTop}>
+        <div className={styles.cardCat} style={{ color: cat.color }}>{cat.label}</div>
+        {exercise.video && (
+          <span className={styles.videoBadge}>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M8 5v14l11-7z"/></svg>
+            Video
+          </span>
+        )}
       </div>
       <h3 className={styles.cardName}>{exercise.name}</h3>
       <p className={styles.cardPurpose}>{exercise.purpose}</p>
       {exercise.cadence && (
         <span className={styles.cadenceBadge}>{exercise.cadence}</span>
       )}
-      <span className={styles.arrow}>-&gt;</span>
+      <span className={styles.arrow}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </span>
     </Link>
   )
 }
