@@ -1247,6 +1247,28 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(null)
   const bottomRef = useRef(null)
+  const recentCheckins = [...(checkins || [])].slice(-6).reverse()
+  const latestCheckin = recentCheckins[0]
+  const recentEntries = [...(entries || [])]
+    .filter(entry => entry?.date)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+    .slice(0, 5)
+  const recentFeelScores = recentEntries
+    .map(entry => computeFeelScore(entry))
+    .filter(score => typeof score === 'number' && Number.isFinite(score))
+  const averageFeel = recentFeelScores.length
+    ? recentFeelScores.reduce((sum, score) => sum + score, 0) / recentFeelScores.length
+    : null
+  const completedRuns = (checkins || []).filter(item => item.status === 'done').length
+  const partialRuns = (checkins || []).filter(item => item.status === 'partial').length
+  const missedRuns = (checkins || []).filter(item => item.status === 'missed').length
+  const planLength = goal?.commitmentDays || ((goal?.weeks || 0) * 7) || getPlan(goal).length || 0
+  const chatPrompts = [
+    'Read my recent training and tell me what pattern you see.',
+    'Should I do the full session today or adjust it?',
+    'Explain my last run like a Strava-style coach insight.',
+    'What should I change next session based on my recent Feel scores?',
+  ]
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -1274,6 +1296,7 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
 
   return (
     <div className={styles.chatWrap}>
+      <section className={styles.chatPanel}>
       <div className={styles.chatMessages}>
         {history.length === 0 && !loading && (
           <div className={styles.chatEmpty}>
@@ -1329,6 +1352,71 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
           </svg>
         </button>
       </div>
+      </section>
+
+      <aside className={styles.chatSide} aria-label="Coach context">
+        <div className={styles.coachContextCard}>
+          <span className={styles.sideEyebrow}>Live context</span>
+          <h3>{goal?.focus || goal?.raceGoal || 'Running plan'}</h3>
+          <p>
+            {goal?.experience || 'Runner'} level
+            {goal?.daysPerWeek ? `, ${goal.daysPerWeek} days/week` : ''}
+            {planLength ? `, ${planLength}-day plan` : ''}
+          </p>
+          <div className={styles.contextGrid}>
+            <div>
+              <strong>{completedRuns}</strong>
+              <span>Done</span>
+            </div>
+            <div>
+              <strong>{partialRuns}</strong>
+              <span>Partial</span>
+            </div>
+            <div>
+              <strong>{missedRuns}</strong>
+              <span>Missed</span>
+            </div>
+            <div>
+              <strong>{averageFeel ? averageFeel.toFixed(1) : '-'}</strong>
+              <span>Feel</span>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.coachPromptCard}>
+          <span className={styles.sideEyebrow}>Ask faster</span>
+          {chatPrompts.map(prompt => (
+            <button key={prompt} className={styles.sidePrompt} onClick={() => setInput(prompt)}>
+              {prompt}
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.coachRecentCard}>
+          <span className={styles.sideEyebrow}>Recent signal</span>
+          {latestCheckin ? (
+            <div className={styles.recentSignal}>
+              <strong>{latestCheckin.status || 'Logged'}</strong>
+              <p>
+                {latestCheckin.date || 'Recent'}
+                {latestCheckin.distance ? ` - ${latestCheckin.distance} km` : ''}
+                {latestCheckin.effort ? ` - RPE ${latestCheckin.effort}` : ''}
+              </p>
+            </div>
+          ) : (
+            <p className={styles.sideMuted}>Log a run and the coach will use it here.</p>
+          )}
+          {recentEntries.length > 0 && (
+            <div className={styles.miniList}>
+              {recentEntries.slice(0, 3).map(entry => (
+                <span key={entry.id || entry.date}>
+                  {entry.date}: Feel {computeFeelScore(entry)?.toFixed?.(1) || '-'}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </aside>
     </div>
   )
 }
