@@ -314,6 +314,22 @@ export const EXERCISES = [
     ],
     antiRotationNote: null
   },
+  {
+    id: 'orange-squeeze',
+    category: 'functional',
+    name: 'Orange Squeeze',
+    purpose: 'Activate the hands without gripping — release tension that travels up the arm into the neck and shoulders.',
+    cue: 'Imagine holding a ripe orange. Squeeze just enough to feel it — never enough to crush it.',
+    animation: 'default',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Orange%20Squeeze%20WebApp.mp4?alt=media&token=b75ed566-013c-4eb1-9aee-6c09aa117465',
+    steps: [
+      'Stand or sit tall, arms relaxed at your sides.',
+      'Imagine an orange in each hand — soft and ripe.',
+      'Squeeze gently for 2 seconds, then release fully for 2 seconds.',
+      'Repeat 8–10 times. Feel the tension drop from forearms, shoulders, and jaw.'
+    ],
+    antiRotationNote: 'A clenched fist locks the shoulder and neck. Soft hands keep the upper body free.'
+  },
 
   // RUNNING DRILLS
   {
