@@ -9,7 +9,7 @@ const TEMPOS = [
   { bpm: 190, purpose: 'Running drills', vibe: 'High-turnover drill work.' },
 ]
 
-export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null, allowedBpms = null }) {
+export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null, allowedBpms = null, compact = false }) {
   const availableTempos = fixedBpm
     ? TEMPOS.filter(t => t.bpm === fixedBpm)
     : allowedBpms
@@ -103,7 +103,7 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${compact ? styles.compact : ''}`}>
       <div className={styles.header}>
         <div>
           <p className={styles.kicker}>Metronome Engine</p>
