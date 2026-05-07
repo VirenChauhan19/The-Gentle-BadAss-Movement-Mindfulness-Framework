@@ -29,6 +29,12 @@
   --on-dark:      #f7f5ef;
   --on-ink:       #ffffff;
   --on-accent:    #ffffff;
+  --ambient-sheen: rgba(255, 255, 255, 0.28);
+  --ambient-glow:  rgba(99, 127, 95, 0.16);
+  --ambient-glow-2: rgba(66, 105, 125, 0.12);
+  --ambient-line:  rgba(99, 127, 95, 0.035);
+  --ambient-mix: multiply;
+  --ambient-opacity: 0.82;
   --brand-gradient: linear-gradient(135deg, #181713 0%, #22382d 100%);
   --sage-gradient: linear-gradient(135deg, var(--sage-dark) 0%, var(--sage) 100%);
 
@@ -89,6 +95,12 @@
   --on-dark:      #f4efe4;
   --on-ink:       #181713;
   --on-accent:    #ffffff;
+  --ambient-sheen: rgba(168, 200, 159, 0.08);
+  --ambient-glow:  rgba(127, 169, 188, 0.14);
+  --ambient-glow-2: rgba(168, 200, 159, 0.11);
+  --ambient-line:  rgba(168, 200, 159, 0.045);
+  --ambient-mix: screen;
+  --ambient-opacity: 0.72;
   --brand-gradient: linear-gradient(135deg, #0b0f0d 0%, #172718 58%, #172630 100%);
   --sage-gradient: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
 
@@ -123,6 +135,12 @@
   --on-dark:      #fff5ef;
   --on-ink:       #180d0b;
   --on-accent:    #ffffff;
+  --ambient-sheen: rgba(255, 143, 111, 0.11);
+  --ambient-glow:  rgba(255, 115, 88, 0.18);
+  --ambient-glow-2: rgba(255, 196, 107, 0.12);
+  --ambient-line:  rgba(255, 143, 111, 0.052);
+  --ambient-mix: screen;
+  --ambient-opacity: 0.76;
   --brand-gradient: linear-gradient(135deg, #2b0f0d 0%, #7d2219 54%, #d95735 100%);
   --sage-gradient: linear-gradient(135deg, #a63126 0%, #ff7b55 100%);
   --shadow-xs: rgba(0, 0, 0, 0.24);
@@ -156,6 +174,12 @@
   --on-dark:      #f1fdff;
   --on-ink:       #061419;
   --on-accent:    #ffffff;
+  --ambient-sheen: rgba(118, 223, 210, 0.11);
+  --ambient-glow:  rgba(93, 183, 232, 0.16);
+  --ambient-glow-2: rgba(26, 163, 157, 0.13);
+  --ambient-line:  rgba(118, 223, 210, 0.045);
+  --ambient-mix: screen;
+  --ambient-opacity: 0.74;
   --brand-gradient: linear-gradient(135deg, #061419 0%, #0d4c58 52%, #158f95 100%);
   --sage-gradient: linear-gradient(135deg, #12857f 0%, #76dfd2 100%);
   --shadow-xs: rgba(0, 0, 0, 0.22);
@@ -189,6 +213,12 @@
   --on-dark:      #e4f5e0;
   --on-ink:       #080f07;
   --on-accent:    #ffffff;
+  --ambient-sheen: rgba(122, 216, 112, 0.09);
+  --ambient-glow:  rgba(82, 168, 74, 0.17);
+  --ambient-glow-2: rgba(200, 176, 64, 0.10);
+  --ambient-line:  rgba(122, 216, 112, 0.044);
+  --ambient-mix: screen;
+  --ambient-opacity: 0.73;
   --brand-gradient: linear-gradient(135deg, #040a04 0%, #0e2010 52%, #183018 100%);
   --sage-gradient:  linear-gradient(135deg, #306428 0%, #7ad870 100%);
   --shadow-xs: rgba(0, 0, 0, 0.20);
@@ -222,6 +252,12 @@
   --on-dark:      #ede8ff;
   --on-ink:       #0e0a18;
   --on-accent:    #ffffff;
+  --ambient-sheen: rgba(184, 160, 255, 0.10);
+  --ambient-glow:  rgba(144, 112, 224, 0.18);
+  --ambient-glow-2: rgba(112, 152, 224, 0.12);
+  --ambient-line:  rgba(184, 160, 255, 0.042);
+  --ambient-mix: screen;
+  --ambient-opacity: 0.74;
   --brand-gradient: linear-gradient(135deg, #090614 0%, #1c0e40 52%, #2a1860 100%);
   --sage-gradient:  linear-gradient(135deg, #5030b0 0%, #b8a0ff 100%);
   --shadow-xs: rgba(0, 0, 0, 0.22);
@@ -255,6 +291,12 @@
   --on-dark:      #ffe8f0;
   --on-ink:       #180a0e;
   --on-accent:    #ffffff;
+  --ambient-sheen: rgba(255, 170, 192, 0.10);
+  --ambient-glow:  rgba(224, 104, 136, 0.18);
+  --ambient-glow-2: rgba(224, 144, 200, 0.12);
+  --ambient-line:  rgba(255, 170, 192, 0.044);
+  --ambient-mix: screen;
+  --ambient-opacity: 0.75;
   --brand-gradient: linear-gradient(135deg, #180810 0%, #3c1028 54%, #581840 100%);
   --sage-gradient:  linear-gradient(135deg, #901848 0%, #ffaac0 100%);
   --shadow-xs: rgba(0, 0, 0, 0.22);
@@ -288,6 +330,12 @@
   --on-dark:      #e8f0ff;
   --on-ink:       #070a14;
   --on-accent:    #ffffff;
+  --ambient-sheen: rgba(128, 176, 248, 0.10);
+  --ambient-glow:  rgba(64, 120, 216, 0.18);
+  --ambient-glow-2: rgba(80, 160, 232, 0.12);
+  --ambient-line:  rgba(128, 176, 248, 0.045);
+  --ambient-mix: screen;
+  --ambient-opacity: 0.76;
   --brand-gradient: linear-gradient(135deg, #040710 0%, #0a1838 52%, #102848 100%);
   --sage-gradient:  linear-gradient(135deg, #1040a8 0%, #80b0f8 100%);
   --shadow-xs: rgba(0, 0, 0, 0.24);
