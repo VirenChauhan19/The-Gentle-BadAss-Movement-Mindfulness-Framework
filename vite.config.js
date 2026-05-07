@@ -15,7 +15,14 @@ export default defineConfig({
         theme_color: '#f5f0e8',
         background_color: '#f5f0e8',
         display: 'standalone',
-        icons: []
+        icons: [
+          {
+            src: '/la-ultra-icon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          }
+        ]
       }
     })
   ]
