@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { EXERCISES, CATEGORIES } from '../data/exercises'
 import styles from './Library.module.css'
@@ -13,6 +13,14 @@ const PRINCIPLES = [
 export default function Library() {
   const [activeCategory, setActiveCategory] = useState('functional')
   const filtered = EXERCISES.filter(e => e.category === activeCategory)
+
+  const stats = useMemo(() => {
+    const total = EXERCISES.length
+    const withVideo = EXERCISES.filter(e => e.video).length
+    const inCategory = filtered.length
+    const categoryWithVideo = filtered.filter(e => e.video).length
+    return { total, withVideo, inCategory, categoryWithVideo }
+  }, [filtered])
 
   return (
     <div className={styles.page}>
@@ -51,7 +59,18 @@ export default function Library() {
         ))}
       </div>
 
-      <p className={styles.categoryDesc}>{CATEGORIES[activeCategory]?.description}</p>
+      <div className={styles.categoryHeader}>
+        <p className={styles.categoryDesc}>{CATEGORIES[activeCategory]?.description}</p>
+        <div className={styles.categoryStats}>
+          <span><strong>{stats.inCategory}</strong> exercises</span>
+          {stats.categoryWithVideo > 0 && (
+            <span className={styles.statsVideoCount}>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M8 5v14l11-7z"/></svg>
+              {stats.categoryWithVideo} with video
+            </span>
+          )}
+        </div>
+      </div>
 
       {activeCategory === 'running' && (
         <section className={styles.principlesBanner}>
@@ -67,19 +86,24 @@ export default function Library() {
         </section>
       )}
 
-      <div className={styles.grid}>
-        {filtered.map(exercise => (
-          <ExerciseCard key={exercise.id} exercise={exercise} />
+      <div className={styles.grid} key={activeCategory}>
+        {filtered.map((exercise, i) => (
+          <ExerciseCard key={exercise.id} exercise={exercise} index={i} />
         ))}
       </div>
     </div>
   )
 }
 
-function ExerciseCard({ exercise }) {
+function ExerciseCard({ exercise, index = 0 }) {
   const cat = CATEGORIES[exercise.category]
   return (
-    <Link to={`/library/${exercise.id}`} className={styles.card}>
+    <Link
+      to={`/library/${exercise.id}`}
+      className={styles.card}
+      style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
+    >
+      <div className={styles.cardAccent} style={{ background: cat.color }} aria-hidden="true" />
       <div className={styles.cardTop}>
         <div className={styles.cardCat} style={{ color: cat.color }}>{cat.label}</div>
         {exercise.video && (
@@ -91,14 +115,17 @@ function ExerciseCard({ exercise }) {
       </div>
       <h3 className={styles.cardName}>{exercise.name}</h3>
       <p className={styles.cardPurpose}>{exercise.purpose}</p>
-      {exercise.cadence && (
-        <span className={styles.cadenceBadge}>{exercise.cadence}</span>
-      )}
-      <span className={styles.arrow}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
-          <path d="M5 12h14M12 5l7 7-7 7"/>
-        </svg>
-      </span>
+      <div className={styles.cardFooter}>
+        {exercise.cadence
+          ? <span className={styles.cadenceBadge}>{exercise.cadence}</span>
+          : <span className={styles.cardOpenLabel}>Tap to begin</span>
+        }
+        <span className={styles.arrow}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </span>
+      </div>
     </Link>
   )
 }

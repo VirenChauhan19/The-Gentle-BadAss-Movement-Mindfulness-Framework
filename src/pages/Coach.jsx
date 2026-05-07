@@ -81,6 +81,15 @@ function addDaysISO(startDate, offset) {
   return d.toISOString().split('T')[0]
 }
 
+function formatDateShort(iso) {
+  if (!iso) return ''
+  try {
+    return new Date(`${iso}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  } catch {
+    return iso
+  }
+}
+
 function getPlan(goal) {
   if (!goal) return []
   const template = goal?.weekTemplate || []
@@ -698,9 +707,12 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
 
 // ── Program Tab ───────────────────────────────────────────────────────────────
 function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, isComplete, onCheckin, onNewGoal, adminRemarks = [] }) {
-  const [selectedDay, setSelectedDay] = useState(null)
   const visiblePlan = plan.length ? plan : getPlan(goal)
   const currentDay = Math.max(1, dayNum)
+  const currentWeek = Math.max(1, Math.ceil(currentDay / 7))
+  const totalWeeks = Math.max(1, Math.ceil(visiblePlan.length / 7))
+  const [weekIndex, setWeekIndex] = useState(currentWeek)
+  const [selectedDay, setSelectedDay] = useState(null)
   const nextSessions = visiblePlan.filter(s => s.dayNumber >= currentDay).slice(0, 14)
   const trainingDays = visiblePlan.filter(s => s.type !== 'rest').length
   const completedDates = new Set(checkins.map(c => c.date))
@@ -716,8 +728,37 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
   const readinessInsight = getReadinessInsight(entries, todaySession)
   const trendInsight = getTrendInsight(entries, checkins)
 
+  // Days for the visible week
+  const weekDays = visiblePlan.filter(s => (s.week || Math.ceil((s.dayNumber || 1) / 7)) === weekIndex)
+  const weekStart = weekDays[0]?.date
+  const weekEnd = weekDays[weekDays.length - 1]?.date
+  const weekKm = weekDays.reduce((sum, d) => {
+    const match = (d.distance || '').match(/[\d.]+/)
+    return sum + (match ? parseFloat(match[0]) : 0)
+  }, 0)
+  const weekWorkouts = weekDays.filter(d => d.type !== 'rest').length
+  const weekLogged = weekDays.filter(d => completedDates.has(d.date)).length
+  const isCurrentWeek = weekIndex === currentWeek
+  const isPastWeek = weekIndex < currentWeek
+  const isFutureWeek = weekIndex > currentWeek
+
   function toggleDay(s) {
     setSelectedDay(prev => prev?.date === s.date ? null : s)
+  }
+
+  function goToPrevWeek() {
+    setSelectedDay(null)
+    setWeekIndex(w => Math.max(1, w - 1))
+  }
+
+  function goToNextWeek() {
+    setSelectedDay(null)
+    setWeekIndex(w => Math.min(totalWeeks, w + 1))
+  }
+
+  function goToCurrentWeek() {
+    setSelectedDay(null)
+    setWeekIndex(currentWeek)
   }
 
   return (
@@ -786,19 +827,62 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
       </div>
 
       {visiblePlan.length > 0 && (
-        <div className={styles.planBoard}>
-          <div className={styles.planBoardHeader}>
-            <div>
-              <p className={styles.sectionLabel}>Commitment Plan</p>
-              <h2>{goal.commitmentDays || visiblePlan.length} days, fully mapped</h2>
+        <div className={styles.weekBoard}>
+          <div className={styles.weekNav}>
+            <button
+              className={styles.weekNavBtn}
+              onClick={goToPrevWeek}
+              disabled={weekIndex <= 1}
+              aria-label="Previous week"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+            <div className={styles.weekHeading}>
+              <p className={styles.weekKicker}>
+                {isCurrentWeek ? 'This week' : isPastWeek ? 'Past week' : 'Upcoming week'}
+              </p>
+              <h2 className={styles.weekTitle}>Week {weekIndex} <span>of {totalWeeks}</span></h2>
+              {weekStart && weekEnd && (
+                <p className={styles.weekRange}>{formatDateShort(weekStart)} — {formatDateShort(weekEnd)}</p>
+              )}
             </div>
-            <div className={styles.planStats}>
-              <span>{trainingDays} workouts</span>
-              <span>{completedDates.size} logged</span>
+            <button
+              className={styles.weekNavBtn}
+              onClick={goToNextWeek}
+              disabled={weekIndex >= totalWeeks}
+              aria-label="Next week"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+          </div>
+
+          {!isCurrentWeek && (
+            <button className={styles.jumpToCurrentBtn} onClick={goToCurrentWeek}>
+              Jump to current week
+            </button>
+          )}
+
+          <div className={styles.weekStats}>
+            <div>
+              <span>{weekWorkouts}</span>
+              <p>workouts</p>
+            </div>
+            <div>
+              <span>{weekKm > 0 ? weekKm.toFixed(1) : '—'}</span>
+              <p>km planned</p>
+            </div>
+            <div>
+              <span>{weekLogged}<small>/7</small></span>
+              <p>logged</p>
             </div>
           </div>
-          <div className={styles.planGrid}>
-            {visiblePlan.map((s, i) => {
+
+          <div className={styles.weekGrid}>
+            {weekDays.map((s, i) => {
               const st = SESSION_STYLE[s.type] || SESSION_STYLE.rest
               const isToday = s.date === new Date().toISOString().split('T')[0]
               const isSelected = selectedDay?.date === s.date
@@ -807,16 +891,19 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
               return (
                 <button
                   key={s.id || s.date || i}
-                  className={`${styles.planDay} ${isToday ? styles.planDayToday : ''} ${isSelected ? styles.planDaySelected : ''}`}
-                  style={{ borderColor: isToday || isSelected ? st.border : undefined }}
+                  className={`${styles.weekDay} ${isToday ? styles.weekDayToday : ''} ${isSelected ? styles.weekDaySelected : ''} ${isLogged ? styles.weekDayLogged : ''}`}
+                  style={{ '--type-color': st.color, '--type-border': st.border, '--type-bg': st.bg }}
                   onClick={() => toggleDay(s)}
                 >
-                  <span className={styles.planDayNum}>Day {s.dayNumber || i + 1}</span>
-                  <span className={styles.planDayDate}>{s.day?.slice(0, 3)} · {s.date?.slice(5)}</span>
-                  <span className={styles.planDayType} style={{ color: st.color }}>{isLogged ? 'Logged' : st.label}</span>
-                  <strong>{s.title || st.label}</strong>
-                  <span>{s.distance || s.duration || 'Recovery'}</span>
-                  {hasRemark && <em className={styles.planRemarkDot}>Coach note</em>}
+                  <div className={styles.weekDayHeader}>
+                    <span className={styles.weekDayName}>{s.day?.slice(0, 3) || DAYS_SHORT[i]}</span>
+                    <span className={styles.weekDayDate}>{s.date?.slice(8)}</span>
+                  </div>
+                  <span className={styles.weekDayType}>{isLogged ? '✓ Logged' : st.label}</span>
+                  <strong className={styles.weekDayTitle}>{s.title || st.label}</strong>
+                  <span className={styles.weekDayMeta}>{s.distance || s.duration || 'Recovery'}</span>
+                  {hasRemark && <em className={styles.weekDayRemarkDot}>Coach note</em>}
+                  {isToday && <span className={styles.weekDayTodayBadge}>Today</span>}
                 </button>
               )
             })}
@@ -843,6 +930,10 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
               </div>
             )
           })()}
+
+          <p className={styles.weekProgressText}>
+            {goal.commitmentDays || visiblePlan.length} days mapped · {trainingDays} workouts · {completedDates.size} logged
+          </p>
         </div>
       )}
 

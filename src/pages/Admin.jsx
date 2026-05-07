@@ -701,73 +701,18 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
                     <span style={{ color: '#d98a8a' }}>✗ {checkins.filter(c => c.status === 'missed').length} missed</span>
                   </div>
 
-                  <div className={styles.adminPlanPanel}>
-                    <div className={styles.adminPlanHeader}>
-                      <div>
-                        <p className={styles.runLogTitle}>Full Workout Plan</p>
-                        <p className={styles.adminPlanSub}>{plan.length} scheduled days visible to this user</p>
-                      </div>
-                      <div className={styles.adminPlanActions}>
-                        {editingPlan && (
-                          <button className={styles.cancelPlanBtn} onClick={() => { setPlanDraft(plan); setEditingPlan(false); setPlanError(null) }}>
-                            Cancel
-                          </button>
-                        )}
-                        <button
-                          className={styles.editPlanBtn}
-                          onClick={editingPlan ? savePlanEdits : () => setEditingPlan(true)}
-                          disabled={!planDraft.length || savingPlan}
-                        >
-                          {editingPlan ? (savingPlan ? 'Saving...' : 'Save Plan') : 'Edit Plan'}
-                        </button>
-                      </div>
-                    </div>
-                    {planError && <p className={styles.errorMsg}>{planError}</p>}
-                    {planDraft.length === 0 ? (
-                      <p className={styles.empty}>No day-by-day plan stored for this user yet.</p>
-                    ) : (
-                      <div className={styles.adminPlanList}>
-                        {planDraft.map((day, i) => {
-                          const log = checkins.find(c => c.date === day.date)
-                          return (
-                            <div key={day.id || day.date || i} className={styles.adminPlanDay}>
-                              <div className={styles.adminPlanDayMeta}>
-                                <strong>Day {day.dayNumber || i + 1}</strong>
-                                <span>{day.date || day.day || 'Unscheduled'}</span>
-                                {log && <em>{log.status}</em>}
-                              </div>
-                              {editingPlan ? (
-                                <div className={styles.adminPlanEditGrid}>
-                                  <select value={day.type || 'rest'} onChange={e => updatePlanDay(i, 'type', e.target.value)}>
-                                    {['easy', 'moderate', 'hard', 'long', 'rest', 'cross'].map(type => <option key={type} value={type}>{type}</option>)}
-                                  </select>
-                                  <input value={day.title || ''} onChange={e => updatePlanDay(i, 'title', e.target.value)} placeholder="Title" />
-                                  <input value={day.distance || ''} onChange={e => updatePlanDay(i, 'distance', e.target.value)} placeholder="Distance" />
-                                  <input value={day.duration || ''} onChange={e => updatePlanDay(i, 'duration', e.target.value)} placeholder="Duration" />
-                                  <input value={day.pace || ''} onChange={e => updatePlanDay(i, 'pace', e.target.value)} placeholder="Pace / effort" />
-                                  <input value={day.crossTraining || ''} onChange={e => updatePlanDay(i, 'crossTraining', e.target.value)} placeholder="Cross-training duration + modality" />
-                                  <textarea value={day.strength || ''} onChange={e => updatePlanDay(i, 'strength', e.target.value)} placeholder="Daily strength" rows={2} />
-                                  <textarea value={day.mobility || ''} onChange={e => updatePlanDay(i, 'mobility', e.target.value)} placeholder="Daily mobility" rows={2} />
-                                  <textarea value={day.notes || ''} onChange={e => updatePlanDay(i, 'notes', e.target.value)} placeholder="Workout notes" rows={3} />
-                                </div>
-                              ) : (
-                                <div className={styles.adminPlanRead}>
-                                  <span>{day.type || 'rest'}</span>
-                                  <h4>{day.title || 'Untitled session'}</h4>
-                                  <p>{[day.distance, day.duration, day.pace].filter(Boolean).join(' | ')}</p>
-                                  {day.notes && <p>{day.notes}</p>}
-                                  {day.crossTraining && <p><strong>Cross-training:</strong> {day.crossTraining}</p>}
-                                  {day.strength && <p><strong>Strength:</strong> {day.strength}</p>}
-                                  {day.mobility && <p><strong>Mobility:</strong> {day.mobility}</p>}
-                                  {log?.userNote && <p className={styles.adminPlanLogNote}>User log: {log.userNote}</p>}
-                                </div>
-                              )}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
+                  <AdminPlanEditor
+                    plan={plan}
+                    planDraft={planDraft}
+                    editingPlan={editingPlan}
+                    savingPlan={savingPlan}
+                    planError={planError}
+                    checkins={checkins}
+                    onUpdateDay={updatePlanDay}
+                    onSave={savePlanEdits}
+                    onCancel={() => { setPlanDraft(plan); setEditingPlan(false); setPlanError(null) }}
+                    onStartEdit={() => setEditingPlan(true)}
+                  />
 
                   {checkins.length > 0 && (
                     <div className={styles.runLogFull}>
@@ -845,6 +790,162 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
             }
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ── Admin Plan Editor (week-grouped) ─────────────────────────────────────────
+function AdminPlanEditor({ plan, planDraft, editingPlan, savingPlan, planError, checkins, onUpdateDay, onSave, onCancel, onStartEdit }) {
+  const today = new Date().toISOString().split('T')[0]
+  const checkinByDate = useMemo(() => Object.fromEntries(checkins.map(c => [c.date, c])), [checkins])
+
+  // Group plan by week
+  const weekGroups = useMemo(() => {
+    const groups = {}
+    planDraft.forEach((day, idx) => {
+      const w = day.week || Math.ceil((day.dayNumber || idx + 1) / 7)
+      if (!groups[w]) groups[w] = []
+      groups[w].push({ day, idx })
+    })
+    return groups
+  }, [planDraft])
+
+  const weekNumbers = Object.keys(weekGroups).map(Number).sort((a, b) => a - b)
+  const currentWeek = useMemo(() => {
+    const todayItem = planDraft.find(d => d.date === today)
+    return todayItem ? (todayItem.week || Math.ceil((todayItem.dayNumber || 1) / 7)) : 1
+  }, [planDraft, today])
+
+  const [openWeek, setOpenWeek] = useState(currentWeek)
+
+  // Reset open week when week numbers shift
+  useEffect(() => {
+    if (!weekNumbers.includes(openWeek) && weekNumbers.length) {
+      setOpenWeek(currentWeek)
+    }
+  }, [weekNumbers, openWeek, currentWeek])
+
+  if (!planDraft.length) {
+    return (
+      <div className={styles.adminPlanPanel}>
+        <p className={styles.empty}>No day-by-day plan stored for this user yet.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className={styles.adminPlanPanel}>
+      <div className={styles.adminPlanHeader}>
+        <div>
+          <p className={styles.runLogTitle}>Workout Plan</p>
+          <p className={styles.adminPlanSub}>
+            {planDraft.length} days · {weekNumbers.length} weeks · current week is {currentWeek}
+          </p>
+        </div>
+        <div className={styles.adminPlanActions}>
+          {editingPlan && (
+            <button className={styles.cancelPlanBtn} onClick={onCancel}>
+              Cancel
+            </button>
+          )}
+          <button
+            className={styles.editPlanBtn}
+            onClick={editingPlan ? onSave : onStartEdit}
+            disabled={savingPlan}
+          >
+            {editingPlan ? (savingPlan ? 'Saving...' : 'Save Plan') : 'Edit Plan'}
+          </button>
+        </div>
+      </div>
+      {planError && <p className={styles.errorMsg}>{planError}</p>}
+
+      <div className={styles.adminWeekList}>
+        {weekNumbers.map(w => {
+          const weekItems = weekGroups[w]
+          const weekDays = weekItems.map(item => item.day)
+          const isOpen = openWeek === w
+          const isPast = w < currentWeek
+          const isCurrent = w === currentWeek
+          const weekKm = weekDays.reduce((sum, d) => {
+            const m = (d.distance || '').match(/[\d.]+/)
+            return sum + (m ? parseFloat(m[0]) : 0)
+          }, 0)
+          const workouts = weekDays.filter(d => d.type !== 'rest').length
+          const logged = weekDays.filter(d => checkinByDate[d.date]).length
+
+          return (
+            <div
+              key={w}
+              className={`${styles.adminWeekGroup} ${isOpen ? styles.adminWeekGroupOpen : ''} ${isPast ? styles.adminWeekGroupPast : ''} ${isCurrent ? styles.adminWeekGroupCurrent : ''}`}
+            >
+              <button
+                type="button"
+                className={styles.adminWeekHeader}
+                onClick={() => setOpenWeek(isOpen ? null : w)}
+              >
+                <div className={styles.adminWeekHeaderTitle}>
+                  <span className={styles.adminWeekTag}>
+                    {isCurrent ? 'Current' : isPast ? 'Past' : 'Future'}
+                  </span>
+                  <strong>Week {w}</strong>
+                  <span className={styles.adminWeekDates}>
+                    {weekDays[0]?.date} → {weekDays[weekDays.length - 1]?.date}
+                  </span>
+                </div>
+                <div className={styles.adminWeekHeaderStats}>
+                  <span>{workouts} workouts</span>
+                  {weekKm > 0 && <span>{weekKm.toFixed(1)} km</span>}
+                  <span>{logged}/{weekDays.length} logged</span>
+                  <span className={styles.adminWeekChevron}>{isOpen ? '▾' : '▸'}</span>
+                </div>
+              </button>
+
+              {isOpen && (
+                <div className={styles.adminWeekBody}>
+                  {weekItems.map(({ day, idx }) => {
+                    const log = checkinByDate[day.date]
+                    return (
+                      <div key={day.id || day.date || idx} className={styles.adminPlanDay}>
+                        <div className={styles.adminPlanDayMeta}>
+                          <strong>Day {day.dayNumber || idx + 1}</strong>
+                          <span>{day.day || ''} · {day.date || 'Unscheduled'}</span>
+                          {log && <em>{log.status}</em>}
+                        </div>
+                        {editingPlan ? (
+                          <div className={styles.adminPlanEditGrid}>
+                            <select value={day.type || 'rest'} onChange={e => onUpdateDay(idx, 'type', e.target.value)}>
+                              {['easy', 'moderate', 'hard', 'long', 'rest', 'cross'].map(type => <option key={type} value={type}>{type}</option>)}
+                            </select>
+                            <input value={day.title || ''} onChange={e => onUpdateDay(idx, 'title', e.target.value)} placeholder="Title" />
+                            <input value={day.distance || ''} onChange={e => onUpdateDay(idx, 'distance', e.target.value)} placeholder="Distance" />
+                            <input value={day.duration || ''} onChange={e => onUpdateDay(idx, 'duration', e.target.value)} placeholder="Duration" />
+                            <input value={day.pace || ''} onChange={e => onUpdateDay(idx, 'pace', e.target.value)} placeholder="Pace / effort" />
+                            <input value={day.crossTraining || ''} onChange={e => onUpdateDay(idx, 'crossTraining', e.target.value)} placeholder="Cross-training" />
+                            <textarea value={day.strength || ''} onChange={e => onUpdateDay(idx, 'strength', e.target.value)} placeholder="Daily strength" rows={2} />
+                            <textarea value={day.mobility || ''} onChange={e => onUpdateDay(idx, 'mobility', e.target.value)} placeholder="Daily mobility" rows={2} />
+                            <textarea value={day.notes || ''} onChange={e => onUpdateDay(idx, 'notes', e.target.value)} placeholder="Workout notes" rows={3} />
+                          </div>
+                        ) : (
+                          <div className={styles.adminPlanRead}>
+                            <span>{day.type || 'rest'}</span>
+                            <h4>{day.title || 'Untitled session'}</h4>
+                            <p>{[day.distance, day.duration, day.pace].filter(Boolean).join(' | ')}</p>
+                            {day.notes && <p>{day.notes}</p>}
+                            {day.crossTraining && <p><strong>Cross-training:</strong> {day.crossTraining}</p>}
+                            {day.strength && <p><strong>Strength:</strong> {day.strength}</p>}
+                            {day.mobility && <p><strong>Mobility:</strong> {day.mobility}</p>}
+                            {log?.userNote && <p className={styles.adminPlanLogNote}>User log: {log.userNote}</p>}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

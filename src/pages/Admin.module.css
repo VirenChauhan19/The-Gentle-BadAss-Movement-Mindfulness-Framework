@@ -1468,6 +1468,154 @@
   overflow-y: auto;
 }
 
+/* ── Week-grouped editor ─────────────────────────────── */
+.adminWeekList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 12px 14px;
+  max-height: 720px;
+  overflow-y: auto;
+}
+
+.adminWeekGroup {
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  background: var(--paper-soft);
+  overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.adminWeekGroup:hover {
+  border-color: var(--border);
+}
+
+.adminWeekGroupOpen {
+  background: var(--paper);
+  border-color: var(--border);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.adminWeekGroupCurrent {
+  border-color: rgba(99, 127, 95, 0.42);
+}
+
+.adminWeekGroupCurrent.adminWeekGroupOpen {
+  box-shadow: 0 12px 28px rgba(99, 127, 95, 0.18);
+}
+
+.adminWeekGroupPast {
+  opacity: 0.78;
+}
+
+.adminWeekGroupPast.adminWeekGroupOpen {
+  opacity: 1;
+}
+
+.adminWeekHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+.adminWeekHeader:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.adminWeekHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.adminWeekHeaderTitle strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.adminWeekTag {
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink-light);
+  border: 1px solid var(--border-light);
+}
+
+.adminWeekGroupCurrent .adminWeekTag {
+  background: rgba(99, 127, 95, 0.14);
+  color: var(--sage-dark);
+  border-color: rgba(99, 127, 95, 0.32);
+}
+
+.adminWeekGroupPast .adminWeekTag {
+  background: rgba(186, 95, 69, 0.10);
+  color: var(--terracotta);
+  border-color: rgba(186, 95, 69, 0.22);
+}
+
+.adminWeekDates {
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.adminWeekHeaderStats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.adminWeekHeaderStats span {
+  font-size: 0.72rem;
+  color: var(--ink-light);
+  font-weight: 700;
+}
+
+.adminWeekChevron {
+  font-size: 0.95rem;
+  color: var(--ink-faint);
+  margin-left: 4px;
+}
+
+.adminWeekBody {
+  border-top: 1px solid var(--border-light);
+  background: var(--paper-soft);
+  animation: floatIn 280ms var(--ease-out) both;
+}
+
+@media (max-width: 767px) {
+  .adminWeekHeader {
+    flex-wrap: wrap;
+  }
+  .adminWeekHeaderStats {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .adminWeekHeaderStats span {
+    font-size: 0.66rem;
+  }
+}
+
 .adminPlanDay {
   display: grid;
   grid-template-columns: 116px minmax(0, 1fr);

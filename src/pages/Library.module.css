@@ -273,12 +273,60 @@
   to { transform: scale(1); }
 }
 
-.categoryDesc {
+.categoryHeader {
   padding: 8px 24px 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  animation: fadeIn var(--d-base) var(--ease-out) both;
+}
+
+.categoryDesc {
   font-size: 0.84rem;
   color: var(--ink-faint);
   font-style: italic;
-  animation: fadeIn var(--d-base) var(--ease-out) both;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.categoryStats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.categoryStats strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.96rem;
+  font-weight: 700;
+  margin-right: 3px;
+}
+
+.statsVideoCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(66, 105, 125, 0.10);
+  color: var(--slate);
+  border: 1px solid rgba(66, 105, 125, 0.20);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 767px) {
+  .categoryHeader {
+    padding: 8px 16px 4px;
+  }
 }
 
 /* ── Principles ──────────────────────────────────────── */
@@ -342,33 +390,33 @@
   background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
-  padding: 18px 20px;
+  padding: 18px 20px 16px 22px;
   position: relative;
   overflow: hidden;
   box-shadow: 0 8px 22px var(--shadow-xs);
-  animation: fadeUp 320ms var(--ease-out) both;
+  animation: floatIn 480ms var(--ease-elastic) both;
   transition: transform var(--d-base) var(--ease-out),
               border-color var(--d-base) var(--ease-out),
               box-shadow var(--d-base) var(--ease-out);
 }
 
-.card::before {
-  content: '';
+.cardAccent {
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
-  background: var(--sage);
-  opacity: 0;
-  transition: opacity var(--d-base) var(--ease-out);
+  width: 4px;
+  opacity: 0.55;
+  transition: opacity var(--d-base) var(--ease-out), width var(--d-base) var(--ease-out);
 }
 
 .card::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(99, 127, 95, 0.08), rgba(66, 105, 125, 0.05));
+  background:
+    radial-gradient(80% 60% at 100% 0%, rgba(99, 127, 95, 0.10), transparent 70%),
+    linear-gradient(135deg, rgba(99, 127, 95, 0.06), rgba(66, 105, 125, 0.04));
   opacity: 0;
   transition: opacity var(--d-base) var(--ease-out);
   pointer-events: none;
@@ -376,12 +424,13 @@
 
 @media (hover: hover) {
   .card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(99, 127, 95, 0.32);
-    box-shadow: 0 16px 32px var(--shadow);
+    transform: translateY(-4px);
+    border-color: rgba(99, 127, 95, 0.36);
+    box-shadow: 0 18px 36px var(--shadow);
   }
-  .card:hover::before {
+  .card:hover .cardAccent {
     opacity: 1;
+    width: 6px;
   }
   .card:hover::after {
     opacity: 1;
@@ -389,6 +438,9 @@
   .card:hover .arrow {
     transform: translateX(4px);
     color: var(--sage-dark);
+  }
+  .card:hover .cardName {
+    color: var(--ink);
   }
 }
 
@@ -441,16 +493,24 @@
   font-size: 0.84rem;
   color: var(--ink-light);
   line-height: 1.55;
-  padding-right: 32px;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-light);
 }
 
 .cadenceBadge {
   display: inline-block;
-  margin-top: 12px;
   font-size: 0.6rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 800;
   background: rgba(196, 170, 132, 0.18);
   color: var(--gold);
   padding: 4px 10px;
@@ -458,14 +518,20 @@
   border: 1px solid rgba(196, 170, 132, 0.28);
 }
 
+.cardOpenLabel {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
 .arrow {
-  position: absolute;
-  bottom: 18px;
-  right: 18px;
-  color: var(--border);
+  color: var(--ink-faint);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: transform var(--d-base) var(--ease-out), color var(--d-base) var(--ease-out);
 }
 
