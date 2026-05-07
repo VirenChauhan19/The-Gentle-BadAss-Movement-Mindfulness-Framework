@@ -29,9 +29,8 @@
   background:
     linear-gradient(115deg, transparent 0 35%, var(--ambient-sheen) 49%, transparent 63%),
     radial-gradient(46rem 34rem at var(--pointer-x, 68%) var(--pointer-y, 28%), var(--ambient-glow), transparent 62%),
-    radial-gradient(30rem 28rem at calc(100% - var(--pointer-x, 68%)) calc(100% - var(--pointer-y, 28%)), var(--ambient-glow-2), transparent 68%),
     repeating-linear-gradient(105deg, var(--ambient-line) 0 1px, transparent 1px 18px);
-  background-size: 220% 220%, 100% 100%, 100% 100%, 100% 100%;
+  background-size: 220% 220%, 100% 100%, 100% 100%;
   mix-blend-mode: var(--ambient-mix);
   opacity: var(--ambient-opacity);
   animation: ambientDrift 15s var(--ease-out) infinite alternate,
@@ -64,8 +63,8 @@
 }
 
 @keyframes ambientDrift {
-  from { background-position: 0% 0%, 50% 50%, 50% 50%, 0 0; }
-  to { background-position: 100% 70%, 50% 50%, 50% 50%, 42px 24px; }
+  from { background-position: 0% 0%, 50% 50%, 0 0; }
+  to { background-position: 100% 70%, 50% 50%, 42px 24px; }
 }
 
 @keyframes ambientBreath {
@@ -516,7 +515,6 @@
     background:
       linear-gradient(115deg, transparent 0 28%, var(--ambient-sheen) 47%, transparent 64%),
       radial-gradient(22rem 22rem at var(--pointer-x, 82%) var(--pointer-y, 8%), var(--ambient-glow), transparent 72%),
-      radial-gradient(18rem 20rem at calc(100% - var(--pointer-x, 82%)) calc(100% - var(--pointer-y, 8%)), var(--ambient-glow-2), transparent 72%),
       repeating-linear-gradient(105deg, var(--ambient-line) 0 1px, transparent 1px 16px);
   }
 
