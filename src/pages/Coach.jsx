@@ -175,6 +175,110 @@ function isRunningFitnessQuestion(text) {
   return RUNNING_TOPIC_RE.test(text || '')
 }
 
+function recentDateCutoff(days = 30) {
+  const d = new Date()
+  d.setDate(d.getDate() - days)
+  return d.toISOString().split('T')[0]
+}
+
+function getReadinessInsight(entries, todaySession) {
+  const today = new Date().toISOString().split('T')[0]
+  const todayEntry = entries.find(e => e.date === today)
+  const scores = todayEntry?.scores || {}
+  const feel = todayEntry ? computeFeelScore(scores) : null
+  const sessionType = todaySession?.type || 'rest'
+  const hardDay = ['hard', 'long', 'moderate'].includes(sessionType)
+
+  if (feel === null) {
+    return {
+      tone: 'neutral',
+      title: 'Readiness not checked yet',
+      summary: todaySession
+        ? `Log Feel first, then decide whether to run the full ${SESSION_STYLE[sessionType]?.label || sessionType} session.`
+        : 'Log Feel first so the coach can read today more clearly.',
+      action: 'Do the two-minute Feel check before training.',
+    }
+  }
+
+  const lowSignals = [
+    scores.sleep <= 4 && 'sleep',
+    scores.energy <= 4 && 'energy',
+    scores.pain <= 4 && 'pain',
+    scores.movementReadiness <= 4 && 'movement readiness',
+    scores.stress <= 4 && 'stress',
+  ].filter(Boolean)
+
+  if (feel <= 4.2 || (hardDay && lowSignals.length >= 2)) {
+    return {
+      tone: 'caution',
+      title: 'Swap or reduce today',
+      summary: `Feel is ${feel.toFixed(1)}/10${lowSignals.length ? ` with low ${lowSignals.join(', ')}` : ''}. A full ${SESSION_STYLE[sessionType]?.label || sessionType} session is not the best bet.`,
+      action: 'Cut volume 30-50%, keep it easy, or replace with mobility and walking.',
+    }
+  }
+
+  if (feel < 6.5 || lowSignals.length) {
+    return {
+      tone: 'steady',
+      title: 'Run, but cap the ambition',
+      summary: `Feel is ${feel.toFixed(1)}/10. You can train, but today should stay controlled rather than heroic.`,
+      action: hardDay ? 'Keep the workout, but stop if form or breathing degrades.' : 'Stay conversational and finish fresher than you started.',
+    }
+  }
+
+  return {
+    tone: 'ready',
+    title: 'Green light for the plan',
+    summary: `Feel is ${feel.toFixed(1)}/10. Today supports the planned ${SESSION_STYLE[sessionType]?.label || sessionType} session.`,
+    action: 'Execute the warm-up properly and keep the first third patient.',
+  }
+}
+
+function getTrendInsight(entries, checkins) {
+  const cutoff = recentDateCutoff(30)
+  const recentEntries = entries.filter(e => e.date >= cutoff)
+  const recentCheckins = checkins.filter(c => c.date >= cutoff)
+  const completed = recentCheckins.filter(c => c.status === 'done').length
+  const partial = recentCheckins.filter(c => c.status === 'partial').length
+  const missed = recentCheckins.filter(c => c.status === 'missed').length
+  const runDays = completed + partial + missed
+  const feelScores = recentEntries.map(e => computeFeelScore(e.scores || {})).filter(Boolean)
+  const avgFeel = feelScores.length ? feelScores.reduce((a, b) => a + b, 0) / feelScores.length : null
+  const lowSleep = recentEntries.filter(e => e.scores?.sleep <= 4).length
+  const lowEnergy = recentEntries.filter(e => e.scores?.energy <= 4).length
+  const highEffort = recentCheckins.filter(c => Number(c.effort) >= 8).length
+  const breathingSessions = recentEntries.flatMap(e => e.sessions || []).filter(s => s.type === 'breathing').length
+  const moveQuality = recentEntries.flatMap(e => e.sessions || []).filter(s => typeof s.qualityScore === 'number')
+  const avgQuality = moveQuality.length ? moveQuality.reduce((sum, s) => sum + s.qualityScore, 0) / moveQuality.length : null
+
+  let headline = 'Building the training picture'
+  let summary = 'Log a few more Feel checks and runs so the coach can spot stronger 30-day patterns.'
+  let action = 'Keep logging runs, Feel, and recovery work.'
+
+  if (runDays >= 4 && missed <= Math.max(1, runDays * 0.25)) {
+    headline = 'Your consistency is improving'
+    summary = `${completed + partial}/${runDays} planned sessions were completed or partially completed in the last 30 days.`
+    action = 'Protect the habit: keep easy days easy and avoid chasing every session.'
+  }
+  if (lowSleep + lowEnergy >= 4) {
+    headline = 'Recovery is limiting the upside'
+    summary = `Sleep or energy showed low signals ${lowSleep + lowEnergy} times recently, which can drag down hard days.`
+    action = 'Move hard sessions after better sleep when possible.'
+  }
+  if (highEffort >= 3 && missed >= 2) {
+    headline = 'Intensity may be stacking up'
+    summary = `${highEffort} recent sessions were RPE 8+ and ${missed} were missed. That pattern often means load is outrunning recovery.`
+    action = 'Use one clear hard day, then make the next run easy or cross-training.'
+  }
+  if (breathingSessions >= 3 && avgFeel && avgFeel >= 6.5) {
+    headline = 'Recovery days are working'
+    summary = `${breathingSessions} breathing sessions pair with an average Feel of ${avgFeel.toFixed(1)}/10.`
+    action = 'Keep breathing on recovery days and before harder workouts.'
+  }
+
+  return { headline, summary, action, avgFeel, completed, partial, missed, breathingSessions, avgQuality }
+}
+
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function Coach() {
   const { coachData, saveCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries, adminRemarks, profile } = useData()
@@ -184,7 +288,7 @@ export default function Coach() {
   const checkins = coachData?.checkins    || []
   const chat     = coachData?.chatHistory || []
 
-  if (!goal) return <GoalSetup onSave={saveCoachGoal} defaultCommitment={profile?.commitment || 30} />
+  if (!goal) return <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={profile?.commitment || 30} />
 
   const today      = new Date().toISOString().split('T')[0]
   const now        = new Date()
@@ -263,20 +367,24 @@ const EXPERIENCE = [
 ]
 
 const TOTAL_STEPS = 4
-const STEP_TITLES = ['Choose your focus', 'Your experience', 'Your commitment', 'Anything else?']
+const STEP_TITLES = ['Pick the mission', 'Runner profile', 'Weekly rhythm', 'Final tuning']
 const STEP_SUBS   = [
-  'This does not have to be a race. Pick what fits your life right now.',
-  'Be honest — this shapes every session.',
-  'Use the full number of days you committed to.',
-  'Injuries, schedule constraints, preferences… (optional)',
+  'Choose the outcome you want the plan to serve.',
+  'Your earlier onboarding context is already included here.',
+  'Tell the coach what a normal training week can hold.',
+  'Add pace evidence, constraints, and anything the coach should respect.',
 ]
 
-function GoalSetup({ onSave, defaultCommitment = 30 }) {
+function formatPath(path) {
+  if (!path || path === 'not set') return 'Not set'
+  return path.charAt(0).toUpperCase() + path.slice(1)
+}
+
+function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
   const [step,        setStep]        = useState(1)
   const [focus,       setFocus]       = useState('')
   const [experience,  setExperience]  = useState('')
   const [daysPerWeek, setDaysPerWeek] = useState(4)
-  const [commitmentDays, setCommitmentDays] = useState(String(defaultCommitment))
   const [currentKm,   setCurrentKm]   = useState('')
   const [benchmarkDistance, setBenchmarkDistance] = useState('')
   const [benchmarkTime, setBenchmarkTime] = useState('')
@@ -285,18 +393,26 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
   const [error,       setError]       = useState(null)
 
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+  const commitmentDays = Math.max(7, Number(defaultCommitment) || 30)
+  const profilePath = profile?.path || 'not set'
+  const profileStory = profile?.fitnessHistory || ''
   const paceGuide = calculatePaceGuide(benchmarkDistance, benchmarkTime)
   const shouldAskBenchmark = experience !== 'Beginner' || /race|marathon|ultra|speed/i.test(focus || '')
 
   async function handleGenerate() {
     setLoading(true)
     setError(null)
-    const totalDays = Math.max(7, parseInt(commitmentDays) || defaultCommitment || 30)
+    const totalDays = commitmentDays
     const weeksNum = Math.max(1, Math.ceil(totalDays / 7))
     const kmStr    = currentKm ? `${currentKm} km/week` : '20–40 km/week'
+    const profileNotes = [
+      profileStory ? `Onboarding fitness history: ${profileStory}` : null,
+      profilePath && profilePath !== 'not set' ? `Onboarding path: ${profilePath}` : null,
+      notes ? `Runner notes: ${notes}` : null,
+    ].filter(Boolean).join('\n')
     try {
       const startDate = new Date().toISOString().split('T')[0]
-      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes, paceGuide })
+      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes: profileNotes, paceGuide })
       const plan = normalizePlan(program.plan, startDate, totalDays)
       const templatePlan = expandProgramPlan(program.weekTemplate || [], startDate, totalDays)
       const fallbackPlan = Array.from({ length: totalDays }, (_, i) =>
@@ -374,6 +490,10 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
         <p className={styles.wizardStepLabel}>Step {step} of {TOTAL_STEPS}</p>
         <h1 className={styles.wizardTitle}>{STEP_TITLES[step - 1]}</h1>
         <p className={styles.wizardSub}>{STEP_SUBS[step - 1]}</p>
+        <div className={styles.commitmentRibbon}>
+          <span>{commitmentDays}</span>
+          <small>days from onboarding</small>
+        </div>
         <div className={styles.wizardDots}>
           {Array.from({ length: TOTAL_STEPS }, (_, i) => (
             <div
@@ -413,6 +533,22 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
         {/* ── Step 2: Experience ── */}
         {step === 2 && (
           <>
+            <div className={styles.profileDeck}>
+              <div className={styles.profileTile}>
+                <span>Path</span>
+                <strong>{formatPath(profilePath)}</strong>
+              </div>
+              <div className={styles.profileTile}>
+                <span>Commitment</span>
+                <strong>{commitmentDays} days</strong>
+              </div>
+              {profileStory && (
+                <div className={styles.profileStory}>
+                  <span>Your story</span>
+                  <p>{profileStory}</p>
+                </div>
+              )}
+            </div>
             <div className={styles.expGrid}>
               {EXPERIENCE.map(e => (
                 <button
@@ -441,6 +577,11 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
         {step === 3 && (
           <>
             <div className={styles.inputsStack}>
+              <div className={styles.planHorizon}>
+                <span>Plan horizon</span>
+                <strong>{commitmentDays} days</strong>
+                <p>This comes from onboarding, so Running will not ask you to choose it again.</p>
+              </div>
               <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>
                   Days per week <span className={styles.inputSub}>how many days you can train</span>
@@ -465,21 +606,6 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
 
               <div className={styles.inputGroup}>
                 <label className={styles.inputLabel}>
-                  Commitment length <span className={styles.inputSub}>total days for this plan</span>
-                </label>
-                <input
-                  type="number"
-                  min="7"
-                  max="365"
-                  className={styles.numberInput}
-                  value={commitmentDays}
-                  onChange={e => setCommitmentDays(e.target.value)}
-                  placeholder="e.g. 30"
-                />
-              </div>
-
-              <div className={styles.inputGroup}>
-                <label className={styles.inputLabel}>
                   Current weekly km <span className={styles.inputSub}>your average right now</span>
                 </label>
                 <input
@@ -495,7 +621,7 @@ function GoalSetup({ onSave, defaultCommitment = 30 }) {
             <div className={styles.wizardBtns}>
               <button
                 className={styles.wizardNext}
-                disabled={!commitmentDays || !currentKm}
+                disabled={!currentKm}
                 onClick={() => setStep(4)}
               >
                 Next →
@@ -587,6 +713,8 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
   }, {})
   const generalRemarks = adminRemarks.filter(r => !r.runDate)
   const todayRemarks = todaySession?.date ? (remarksByDate[todaySession.date] || []) : []
+  const readinessInsight = getReadinessInsight(entries, todaySession)
+  const trendInsight = getTrendInsight(entries, checkins)
 
   function toggleDay(s) {
     setSelectedDay(prev => prev?.date === s.date ? null : s)
@@ -596,6 +724,14 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
     <div className={styles.tabContent}>
 
       <div className={styles.runningDashboard}>
+        <InsightCard
+          label="Today readiness"
+          title={readinessInsight.title}
+          summary={readinessInsight.summary}
+          action={readinessInsight.action}
+          tone={readinessInsight.tone}
+        />
+        <TrendIntelligence insight={trendInsight} />
         {goal.paceGuide && (
           <div className={styles.paceGuideCard}>
             <div>
@@ -817,6 +953,53 @@ function DailyRemarks({ remarks, checkins }) {
   )
 }
 
+function InsightCard({ label, title, summary, action, tone = 'neutral', details }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`${styles.insightCard} ${styles[`insight_${tone}`] || ''}`}>
+      <div className={styles.insightTop}>
+        <span>{label}</span>
+        {details && (
+          <button type="button" onClick={() => setOpen(v => !v)}>
+            {open ? 'Less' : 'Say more'}
+          </button>
+        )}
+      </div>
+      <h3>{title}</h3>
+      <p>{summary}</p>
+      {action && <strong>{action}</strong>}
+      {open && details && (
+        <div className={styles.insightDetails}>
+          {details.pacing && <p><span>Pacing</span>{details.pacing}</p>}
+          {details.effort && <p><span>Effort</span>{details.effort}</p>}
+          {details.trainingLoad && <p><span>Load</span>{details.trainingLoad}</p>}
+          {details.nextSession && <p><span>Next</span>{details.nextSession}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TrendIntelligence({ insight }) {
+  return (
+    <div className={styles.trendCard}>
+      <div className={styles.trendHeader}>
+        <span>30-day intelligence</span>
+        {insight.avgFeel && <strong>{insight.avgFeel.toFixed(1)} Feel</strong>}
+      </div>
+      <h3>{insight.headline}</h3>
+      <p>{insight.summary}</p>
+      <div className={styles.trendStats}>
+        <span>{insight.completed} done</span>
+        <span>{insight.partial} partial</span>
+        <span>{insight.missed} missed</span>
+        <span>{insight.breathingSessions} breath</span>
+      </div>
+      <strong className={styles.trendAction}>{insight.action}</strong>
+    </div>
+  )
+}
+
 // ── Already logged today ───────────────────────────────────────────────────────
 function AttachedRemarks({ remarks }) {
   return (
@@ -855,6 +1038,7 @@ function DailyTrainingBlocks({ session }) {
 }
 
 function CheckinDisplay({ checkin, remarks = [] }) {
+  const insight = normalizeInsight(checkin.insight)
   return (
     <div className={styles.checkinDisplay}>
       <div className={styles.checkinDisplayTop}>
@@ -873,6 +1057,16 @@ function CheckinDisplay({ checkin, remarks = [] }) {
       )}
       <p className={styles.checkinNote}>{checkin.userNote}</p>
       {remarks.length > 0 && <AttachedRemarks remarks={remarks} />}
+      {insight && (
+        <InsightCard
+          label="Post-session insight"
+          title={insight.title}
+          summary={insight.summary}
+          action={insight.action}
+          tone={insight.tone || 'ready'}
+          details={insight.details}
+        />
+      )}
       {checkin.aiReply && (
         <div className={styles.coachReply}>
           <p className={styles.coachLabel}>Running</p>
@@ -914,8 +1108,10 @@ function CheckinForm({ goal, checkins, entries, todaySession, onSubmit }) {
       note.trim() ? `Notes: ${note.trim()}` : null,
     ].filter(Boolean).join('\n')
     let aiReply = ''
+    let insight = null
     try {
-      aiReply = await getCheckinReply(goal, checkins, entries, status, structuredNote, todaySession)
+      insight = await getPostSessionInsight(goal, checkins, entries, status, structuredNote, todaySession)
+      aiReply = insight?.summary || await getCheckinReply(goal, checkins, entries, status, structuredNote, todaySession)
     } catch (err) {
       setError(err.message)
       setLoading(false)
@@ -930,6 +1126,7 @@ function CheckinForm({ goal, checkins, entries, todaySession, onSubmit }) {
       surface: surface.trim(),
       userNote: structuredNote,
       aiReply,
+      insight,
     })
   }
 
@@ -1001,6 +1198,7 @@ function CheckinForm({ goal, checkins, entries, todaySession, onSubmit }) {
 // ── Run log entry ─────────────────────────────────────────────────────────────
 function RunLogEntry({ checkin, remarks = [] }) {
   const [open, setOpen] = useState(false)
+  const insight = normalizeInsight(checkin.insight)
   const color = checkin.status === 'done' ? '#8b9e7e' : checkin.status === 'partial' ? '#d9b38a' : '#d98a8a'
   const symbol = checkin.status === 'done' ? '✓' : checkin.status === 'partial' ? '↗' : '✗'
   return (
@@ -1021,6 +1219,16 @@ function RunLogEntry({ checkin, remarks = [] }) {
           )}
           <p className={styles.logNote}>{checkin.userNote}</p>
           {remarks.length > 0 && <AttachedRemarks remarks={remarks} />}
+          {insight && (
+            <InsightCard
+              label="Post-session insight"
+              title={insight.title}
+              summary={insight.summary}
+              action={insight.action}
+              tone={insight.tone || 'ready'}
+              details={insight.details}
+            />
+          )}
           {checkin.aiReply && (
             <div className={styles.coachReply} style={{ marginTop: 10 }}>
               <p className={styles.coachLabel}>Running</p>
@@ -1328,6 +1536,72 @@ ${recent}
 Respond: 1) Acknowledge specifically what they said. 2) One concrete action for tomorrow's session. 3) One brief motivational note. If missed: recovery plan not guilt. If done: validate then push slightly. If partial: focus on improvement.` },
     { role: 'user', content: `Status: ${status}\n\n${note}` },
   ], 220)
+}
+
+function normalizeInsight(insight) {
+  if (!insight || typeof insight !== 'object') return null
+  return {
+    title: insight.title || 'Coach insight',
+    summary: insight.summary || '',
+    action: insight.action || '',
+    tone: insight.tone || 'neutral',
+    details: insight.details || null,
+  }
+}
+
+async function getPostSessionInsight(goal, checkins, entries, status, note, todaySession) {
+  if (!isRunningFitnessQuestion(note)) {
+    return {
+      title: 'Logged',
+      summary: COACH_REFUSAL,
+      action: 'Ask a running-specific question for coaching feedback.',
+      tone: 'neutral',
+      details: null,
+    }
+  }
+
+  const recentFeel = entries.slice(0, 10).map(e => `${e.date}: Feel ${computeFeelScore(e.scores || {}).toFixed(1)}/10`).join('\n') || 'none'
+  const recentRuns = [...checkins].slice(-8).reverse().map(c => `${c.date}: ${c.status}${c.distance ? `, ${c.distance} km` : ''}${c.duration ? `, ${c.duration} min` : ''}${c.effort ? `, RPE ${c.effort}` : ''}`).join('\n') || 'none'
+  const session = todaySession ? `${todaySession.type} - ${todaySession.title}; ${todaySession.distance || ''}; ${todaySession.duration || ''}; pace ${todaySession.pace || 'not specified'}` : 'No planned session'
+
+  const raw = await apiCall([
+    { role: 'system', content: `You are a Strava-style running intelligence coach for this app. Return ONLY valid JSON.
+Analyze the completed check-in against today's planned session and recent 30-day context.
+
+JSON shape:
+{
+  "title": "short insight headline",
+  "summary": "2 short sentences max: what went well and what the data suggests",
+  "action": "one concrete change or recovery cue",
+  "tone": "ready|steady|caution|neutral",
+  "details": {
+    "pacing": "pacing feedback or 'Not enough pace data yet'",
+    "effort": "effort interpretation",
+    "trainingLoad": "recent load pattern",
+    "nextSession": "what to change next session"
+  }
+}
+
+Be specific. Do not overpraise. If data is missing, say what would improve the insight next time. Keep it practical and under 120 words total.
+Today's planned session: ${session}
+Recent Feel:
+${recentFeel}
+Recent runs:
+${recentRuns}` },
+    { role: 'user', content: `Status: ${status}\n${note}` },
+  ], 420)
+
+  try {
+    return normalizeInsight(extractJSON(raw))
+  } catch {
+    return {
+      title: 'Coach read',
+      summary: raw.slice(0, 280),
+      action: 'Use this feedback to adjust the next session.',
+      tone: 'neutral',
+      details: null,
+    }
+  }
 }
 
 async function getChatReply(goal, checkins, entries, messages) {

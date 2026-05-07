@@ -1,5 +1,6 @@
 .page {
   padding-bottom: 40px;
+  color: var(--ink);
 }
 
 .pillarBanner {
@@ -63,6 +64,16 @@
   z-index: 20;
 }
 
+:global(html[data-theme="dark"]) .topBar,
+:global(html[data-theme="ember"]) .topBar,
+:global(html[data-theme="ocean"]) .topBar,
+:global(html[data-theme="forest"]) .topBar,
+:global(html[data-theme="violet"]) .topBar,
+:global(html[data-theme="rose"]) .topBar,
+:global(html[data-theme="midnight"]) .topBar {
+  background: color-mix(in srgb, var(--paper) 76%, transparent);
+}
+
 .back {
   font-size: 0.85rem;
   color: var(--ink-light);
@@ -86,7 +97,8 @@
   font-size: 0.65rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 800;
+  filter: saturate(1.18) brightness(1.08);
 }
 
 .animSection {
@@ -165,6 +177,16 @@
   transition: transform var(--d-base) var(--ease-out),
               border-color var(--d-base) var(--ease-out),
               box-shadow var(--d-base) var(--ease-out);
+}
+
+:global(html[data-theme="dark"]) .block,
+:global(html[data-theme="ember"]) .block,
+:global(html[data-theme="ocean"]) .block,
+:global(html[data-theme="forest"]) .block,
+:global(html[data-theme="violet"]) .block,
+:global(html[data-theme="rose"]) .block,
+:global(html[data-theme="midnight"]) .block {
+  background: var(--paper);
 }
 
 .block:hover,
@@ -364,6 +386,7 @@
 .tprDisplay {
   text-align: center;
   min-width: 80px;
+  color: var(--ink);
 }
 
 .tprValue {
@@ -371,6 +394,7 @@
   font-size: 2rem;
   font-weight: 800;
   line-height: 1;
+  color: var(--ink);
 }
 
 .tprUnit {

@@ -94,7 +94,7 @@
   .tabContent .section { padding: 0; }
   .tabContent > .section:first-child { grid-column: 1 / -1; }
   .runningDashboard, .planBoard { grid-column: 1 / -1; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
-  .runningDashboard { grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr); }
+  .runningDashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .planBoard { padding: 18px; }
   .upNext { margin-left: 0; margin-right: 0; }
   .chatWrap { max-width: 860px; }
@@ -159,11 +159,143 @@
 
 .todayHero,
 .planBoard,
-.upNext {
+.upNext,
+.insightCard,
+.trendCard {
   background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
   box-shadow: 0 10px 26px var(--shadow-xs);
+}
+
+.insightCard,
+.trendCard {
+  padding: 17px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.insightCard::before,
+.trendCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(115deg, transparent 0 35%, rgba(255, 255, 255, 0.18) 50%, transparent 65%),
+    radial-gradient(circle at 86% 12%, color-mix(in srgb, var(--sage) 16%, transparent), transparent 42%);
+  pointer-events: none;
+}
+
+.insightCard > *,
+.trendCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.insight_ready { border-left: 5px solid var(--sage); }
+.insight_steady { border-left: 5px solid var(--gold); }
+.insight_caution { border-left: 5px solid var(--terracotta); }
+.insight_neutral { border-left: 5px solid var(--slate); }
+
+.insightTop,
+.trendHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+
+.insightTop span,
+.trendHeader span {
+  color: var(--ink-faint);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.trendHeader strong {
+  color: var(--sage-dark);
+  font-size: 0.72rem;
+}
+
+.insightTop button {
+  min-height: 32px;
+  border-radius: 999px;
+  background: var(--paper-soft);
+  border: 1px solid var(--border-light);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 0 11px;
+}
+
+.insightCard h3,
+.trendCard h3 {
+  color: var(--ink);
+  font-size: 1.08rem;
+  margin-bottom: 7px;
+}
+
+.insightCard p,
+.trendCard p {
+  color: var(--ink-light);
+  font-size: 0.86rem;
+  line-height: 1.58;
+}
+
+.insightCard > strong,
+.trendAction {
+  display: block;
+  color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  margin-top: 10px;
+}
+
+.insightDetails {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+  animation: fadeSlideIn 220ms var(--ease-out) both;
+}
+
+.insightDetails p {
+  background: var(--paper-soft);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.insightDetails span {
+  color: var(--sage-dark);
+  display: block;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.trendStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.trendStats span {
+  background: var(--paper-soft);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  color: var(--ink-light);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 5px 9px;
 }
 
 .todayHero {
@@ -778,6 +910,7 @@
   border-radius: 12px;
   padding: 13px 15px;
   border-left: 3px solid var(--sage);
+  margin-top: 12px;
 }
 
 .coachLabel {
@@ -950,40 +1083,77 @@
   display: flex;
   flex-direction: column;
   padding-bottom: 100px;
-  background: var(--cream);
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--sage) 18%, transparent), transparent 22rem),
+    radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--slate) 13%, transparent), transparent 24rem),
+    var(--cream);
 }
 
 .wizardTop {
   background:
-    linear-gradient(135deg, rgba(99, 127, 95, 0.16), transparent 60%),
-    linear-gradient(160deg, var(--paper-soft) 0%, var(--cream) 100%);
+    linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.16) 50%, transparent 66%),
+    radial-gradient(circle at 18% 22%, color-mix(in srgb, var(--sage) 24%, transparent), transparent 18rem),
+    var(--brand-gradient);
   padding: 52px 24px 20px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .wizardStepLabel {
   font-size: 0.64rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: rgba(245, 240, 232, 0.62);
   margin-bottom: 8px;
 }
 
 .wizardTitle {
   font-family: var(--font-display);
   font-size: 1.75rem;
-  color: var(--ink);
-  font-weight: 600;
+  color: var(--on-dark);
+  font-weight: 800;
   line-height: 1.2;
   margin-bottom: 6px;
 }
 
 .wizardSub {
   font-size: 0.84rem;
-  color: var(--ink-faint);
+  color: rgba(245, 240, 232, 0.70);
   line-height: 1.5;
   max-width: 280px;
   margin: 0 auto;
+}
+
+.commitmentRibbon {
+  width: min(100%, 260px);
+  margin: 16px auto 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--on-dark);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
+}
+
+.commitmentRibbon span {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.commitmentRibbon small {
+  color: rgba(245, 240, 232, 0.72);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
 }
 
 .wizardDots {
@@ -998,23 +1168,26 @@
   height: 6px;
   width: 6px;
   border-radius: 3px;
-  background: var(--border);
+  background: rgba(245, 240, 232, 0.24);
   transition: all 0.3s ease;
 }
 
 .wizardDotDone {
-  background: var(--ink-faint);
+  background: rgba(245, 240, 232, 0.56);
   width: 6px;
 }
 
 .wizardDotCurrent {
-  background: var(--ink);
+  background: var(--on-dark);
   width: 22px;
 }
 
 .wizardBody {
   flex: 1;
   padding: 22px 16px 0;
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 /* Race goal grid — 3 columns */
@@ -1032,21 +1205,28 @@
   gap: 7px;
   min-height: 122px;
   padding: 15px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 82% 16%, color-mix(in srgb, var(--sage) 10%, transparent), transparent 48%),
+    var(--paper);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.18s var(--ease-out);
   text-align: left;
+  box-shadow: 0 12px 28px var(--shadow-xs);
+  isolation: isolate;
 }
 
 .goalCard:hover { border-color: var(--ink-faint); transform: translateY(-3px); box-shadow: 0 10px 22px var(--shadow); }
 .goalCard:active { transform: scale(0.95); }
 
 .goalCardActive {
-  border-color: var(--ink);
-  background: var(--ink);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  border-color: transparent;
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.16), transparent 42%),
+    var(--brand-gradient);
+  box-shadow: 0 18px 36px var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .goalMeta {
@@ -1061,13 +1241,14 @@
 }
 
 .goalName {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  font-weight: 800;
   color: var(--ink);
   line-height: 1.2;
 }
 
-.goalCardActive .goalName { color: var(--on-ink); }
+.goalCardActive .goalName { color: var(--on-dark); }
 .goalCardActive .goalMeta {
   border-color: rgba(255,255,255,0.2);
   color: rgba(255,255,255,0.8);
@@ -1082,6 +1263,64 @@
 .goalCardActive .goalSub { color: rgba(255,255,255,0.55); }
 
 /* Experience grid — 2 columns, taller cards */
+.profileDeck {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.profileTile,
+.profileStory,
+.planHorizon {
+  background:
+    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--slate) 12%, transparent), transparent 14rem),
+    var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: 22px;
+  box-shadow: 0 12px 28px var(--shadow-xs);
+  padding: 16px;
+}
+
+.profileTile span,
+.profileStory span,
+.planHorizon span {
+  color: var(--ink-faint);
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.profileTile strong,
+.planHorizon strong {
+  color: var(--ink);
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.profileStory {
+  grid-column: 1 / -1;
+}
+
+.profileStory p,
+.planHorizon p {
+  color: var(--ink-light);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.planHorizon {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 4px;
+  border-left: 5px solid var(--sage);
+}
+
 .expGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1094,20 +1333,24 @@
   align-items: center;
   gap: 12px;
   padding: 18px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--sage) 8%, transparent), transparent 56%),
+    var(--paper);
   cursor: pointer;
   transition: all 0.15s;
   text-align: left;
+  box-shadow: 0 12px 28px var(--shadow-xs);
 }
 
 .expBigCard:hover { border-color: var(--ink-faint); transform: translateY(-2px); box-shadow: 0 10px 22px var(--shadow); }
 .expBigCard:active { transform: scale(0.97); }
 
 .expBigCardActive {
-  border-color: var(--ink);
-  background: var(--ink);
+  border-color: transparent;
+  background: var(--brand-gradient);
+  box-shadow: 0 18px 36px var(--shadow-md);
 }
 
 .expBigIcon { font-size: 1.6rem; flex-shrink: 0; }
@@ -1120,7 +1363,7 @@
   margin-bottom: 3px;
 }
 
-.expBigCardActive .expBigTitle { color: var(--on-ink); }
+.expBigCardActive .expBigTitle { color: var(--on-dark); }
 
 .expBigSub {
   font-size: 0.68rem;
@@ -1962,8 +2205,15 @@
     grid-template-columns: 1fr;
   }
 
+  .profileDeck {
+    grid-template-columns: 1fr;
+  }
+
   .goalCard,
   .expBigCard,
+  .profileTile,
+  .profileStory,
+  .planHorizon,
   .benchmarkCard,
   .paceGuideCard {
     border-radius: 20px;

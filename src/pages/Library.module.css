@@ -77,6 +77,18 @@
               background var(--d-fast) var(--ease-out);
 }
 
+:global(html[data-theme="dark"]) .pillarBanner span,
+:global(html[data-theme="ember"]) .pillarBanner span,
+:global(html[data-theme="ocean"]) .pillarBanner span,
+:global(html[data-theme="forest"]) .pillarBanner span,
+:global(html[data-theme="violet"]) .pillarBanner span,
+:global(html[data-theme="rose"]) .pillarBanner span,
+:global(html[data-theme="midnight"]) .pillarBanner span {
+  color: var(--ink);
+  background: var(--paper-soft);
+  border-color: var(--border);
+}
+
 .pillarBanner span:hover {
   transform: translateY(-1px);
   background: rgba(99, 127, 95, 0.16);
@@ -207,6 +219,18 @@
               border-color var(--d-base) var(--ease-out),
               box-shadow var(--d-base) var(--ease-out),
               color var(--d-base) var(--ease-out);
+}
+
+:global(html[data-theme="dark"]) .filter,
+:global(html[data-theme="ember"]) .filter,
+:global(html[data-theme="ocean"]) .filter,
+:global(html[data-theme="forest"]) .filter,
+:global(html[data-theme="violet"]) .filter,
+:global(html[data-theme="rose"]) .filter,
+:global(html[data-theme="midnight"]) .filter {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--border);
 }
 
 .filter::after {
