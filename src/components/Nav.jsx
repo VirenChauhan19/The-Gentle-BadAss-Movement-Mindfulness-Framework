@@ -11,7 +11,7 @@ const links = [
   { to: '/history', label: 'History', icon: HistoryIcon, lockedForGuest: true },
   { to: '/library', label: 'Move', icon: LibraryIcon, lockedForGuest: true },
   { to: '/coach', label: 'Running', icon: CoachIcon },
-  { to: '/admin', label: 'Profile', icon: ProfileIcon },
+  { to: '/profile', label: 'Profile', icon: ProfileIcon },
 ]
 
 export default function Nav() {
@@ -36,20 +36,29 @@ export default function Nav() {
         return (
         <NavLink
           key={to}
-          to={locked ? '/admin' : to}
+          to={to}
           end={to === '/'}
-          title={locked ? `${label} unlocks after sign-in` : label}
+          title={locked ? `${label}: sign in to unlock` : label}
           onClick={tapFeedback}
           className={({ isActive }) =>
-            `${styles.link} ${isActive && !locked ? styles.active : ''} ${locked ? styles.locked : ''}`
+            `${styles.link} ${isActive ? styles.active : ''} ${locked ? styles.locked : ''}`
           }
         >
           <Icon />
           <span>{label}</span>
-          {locked && <span className={styles.lockDot} aria-hidden="true">Lock</span>}
+          {locked && <span className={styles.lockDot} aria-label="Sign in to unlock"><LockIcon /></span>}
         </NavLink>
       )})}
     </nav>
+  )
+}
+
+function LockIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
   )
 }
 

@@ -55,7 +55,7 @@ function AppRoutes() {
   }, [user, profile, navigate, location.pathname])
 
   useEffect(() => {
-    const mobileRoutes = ['/', '/journal', '/breathing', '/history', '/library', '/coach', '/admin']
+    const mobileRoutes = ['/', '/journal', '/breathing', '/history', '/library', '/coach', '/profile']
     let startX = 0
     let startY = 0
     let startTime = 0
@@ -116,6 +116,7 @@ function AppRoutes() {
         <Route path="/library" element={<LockedRoute feature="Move"><Library /></LockedRoute>} />
         <Route path="/library/:id" element={<LockedRoute feature="Move"><ExerciseDetail /></LockedRoute>} />
         <Route path="/coach" element={<Coach />} />
+        <Route path="/profile" element={<Admin />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/paywall" element={<Paywall />} />
       </Routes>
@@ -126,21 +127,45 @@ function AppRoutes() {
 function LockedRoute({ feature, children }) {
   const { user, guestName } = useData()
   const { signInWithGoogle, authError, isConfigured } = useAuth()
+  const lockedCopy = {
+    Feel: {
+      title: 'Sign in to log your Feel',
+      intro: 'A two-minute body, energy, soreness, and mood check-in that tunes your day.',
+      bullets: ['Save daily scores', 'Spot recovery patterns', 'Connect Feel to your running plan'],
+    },
+    Move: {
+      title: 'Sign in to unlock Move',
+      intro: 'Tests, drills, strength, and mobility work built to support durable running.',
+      bullets: ['Use the full movement library', 'Track quality scores', 'Keep your exercise history'],
+    },
+    History: {
+      title: 'Sign in to keep your history',
+      intro: 'Your long-term dashboard for training, Feel scores, breathing, and consistency.',
+      bullets: ['See trends over time', 'Review completed sessions', 'Sync progress across devices'],
+    },
+  }[feature] || {
+    title: `Sign in to unlock ${feature}`,
+    intro: 'Save your progress and keep your training data connected.',
+    bullets: ['Save progress', 'Sync across devices', 'Build a long-term record'],
+  }
 
   if (user || !guestName) return children
 
   return (
     <div className={styles.lockedPage}>
-      <div className={styles.lockedPanel}>
-        <p className={styles.lockedLabel}>Member area</p>
-        <h1>{feature} is locked in guest mode</h1>
-        <p>Guest mode lets you explore the app. Sign in to save Feel records, Move quality metrics, and long-term History.</p>
+      <section className={styles.lockedPanel} aria-labelledby="locked-title">
+        <p className={styles.lockedLabel}>{feature}</p>
+        <h1 id="locked-title">{lockedCopy.title}</h1>
+        <p>{lockedCopy.intro}</p>
+        <ul className={styles.lockedBenefits}>
+          {lockedCopy.bullets.map(item => <li key={item}>{item}</li>)}
+        </ul>
         {authError && <p className={styles.authError}>{authError}</p>}
         <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>
           Continue with Google
         </button>
         {!isConfigured && <p className={styles.lockHint}>Firebase is not configured yet, so Google sign-in is unavailable in this environment.</p>}
-      </div>
+      </section>
     </div>
   )
 }
@@ -149,7 +174,6 @@ function SignInGate() {
   const { user, signInWithGoogle, authError, isConfigured } = useAuth()
   const { guestName, setGuestName } = useData()
   const [nameInput, setNameInput] = useState('')
-  const [guestOpen, setGuestOpen] = useState(false)
 
   if (user === undefined) return null
   if (user || guestName) return null
@@ -174,25 +198,21 @@ function SignInGate() {
         </button>
         {!isConfigured && <p className={styles.lockHint}>Firebase is not configured yet, so Google sign-in is unavailable in this environment.</p>}
         <div className={styles.divider}>or</div>
-        {!guestOpen ? (
-          <button className={styles.guestBtn} onClick={() => setGuestOpen(true)}>
-            Continue as Guest
+        <div className={styles.guestForm}>
+          <label htmlFor="guest-name">First name</label>
+          <input
+            id="guest-name"
+            type="text"
+            value={nameInput}
+            onChange={e => setNameInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') continueGuest() }}
+            placeholder="e.g. Rajat"
+          />
+          <p className={styles.guestMicrocopy}>We'll save guest sessions in this browser only.</p>
+          <button className={`${styles.guestBtn} ${nameInput.trim() ? styles.guestBtnReady : ''}`} onClick={continueGuest} disabled={!nameInput.trim()}>
+            Continue as guest
           </button>
-        ) : (
-          <div className={styles.guestForm}>
-            <input
-              type="text"
-              value={nameInput}
-              onChange={e => setNameInput(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') continueGuest() }}
-              placeholder="Your first name"
-              autoFocus
-            />
-            <button className={styles.guestBtn} onClick={continueGuest} disabled={!nameInput.trim()}>
-              Enter Guest Mode
-            </button>
-          </div>
-        )}
+        </div>
       </section>
     </div>
   )
@@ -241,7 +261,8 @@ export default function App() {
       <DataProvider>
         <div className={styles.app}>
           <div className={styles.ambientLayer} aria-hidden="true" />
-          <main className={styles.main}>
+          <a href="#main-content" className={styles.skipLink}>Skip to main content</a>
+          <main id="main-content" className={styles.main}>
             <AppRoutes />
           </main>
           <SignInGate />

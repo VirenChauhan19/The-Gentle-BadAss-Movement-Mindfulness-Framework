@@ -125,6 +125,25 @@
   animation: themeIconIn 360ms var(--ease-spring) both;
 }
 
+.skipLink {
+  position: fixed;
+  left: 18px;
+  top: 18px;
+  z-index: 900;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: var(--ink);
+  color: var(--on-ink);
+  font-weight: 800;
+  font-size: 0.86rem;
+  transform: translateY(-140%);
+  transition: transform var(--d-fast) var(--ease-out);
+}
+
+.skipLink:focus-visible {
+  transform: translateY(0);
+}
+
 .themeSwatch {
   width: 18px;
   height: 18px;
@@ -238,6 +257,33 @@
   line-height: 1.6;
 }
 
+.lockedBenefits {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 4px;
+  list-style: none;
+}
+
+.lockedBenefits li {
+  position: relative;
+  padding-left: 24px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.lockedBenefits li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.48em;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--sage-dark);
+  box-shadow: 0 0 0 4px rgba(99, 127, 95, 0.12);
+}
+
 .googleBtn,
 .guestBtn {
   width: 100%;
@@ -319,6 +365,19 @@
   animation: fadeUp 320ms var(--ease-out) both;
 }
 
+.guestForm label {
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.guestMicrocopy {
+  margin: -2px 0 0;
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
 .guestForm input {
   width: 100%;
   min-height: 48px;
@@ -336,6 +395,12 @@
 .guestForm input:focus {
   border-color: var(--sage-dark);
   box-shadow: 0 0 0 4px rgba(99, 127, 95, 0.13);
+}
+
+.guestBtnReady {
+  background: var(--ink);
+  color: var(--on-ink);
+  border-color: var(--ink);
 }
 
 .authError,

@@ -108,11 +108,11 @@ export default function FloatingChat() {
           </div>
           <div className={styles.headerRight}>
             {msgs.length > 0 && (
-              <button className={styles.iconBtn} title="Clear chat" onClick={() => save([])}>
+              <button className={styles.iconBtn} title="Clear chat" aria-label="Clear chat" onClick={() => save([])}>
                 <TrashIcon />
               </button>
             )}
-            <button className={styles.iconBtn} onClick={() => setOpen(false)}>
+            <button className={styles.iconBtn} aria-label="Close chat" onClick={() => setOpen(false)}>
               <XIcon />
             </button>
           </div>
@@ -189,6 +189,7 @@ export default function FloatingChat() {
             className={styles.sendBtn}
             onClick={() => send()}
             disabled={!input.trim() || loading || !hasKey}
+            aria-label="Send message"
           >
             <SendIcon />
           </button>

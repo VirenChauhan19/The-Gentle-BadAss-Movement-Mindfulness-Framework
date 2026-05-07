@@ -25,7 +25,7 @@
   --sand-light:   #eadcc2;
   --border:       #d9cfbf;
   --border-light: #ece6dc;
-  --focus:        rgba(66, 105, 125, 0.32);
+  --focus:        #42697d;
   --on-dark:      #f7f5ef;
   --on-ink:       #ffffff;
   --on-accent:    #ffffff;
@@ -85,7 +85,7 @@
   --sand-light:   #2b251a;
   --border:       #3a443a;
   --border-light: #2a332b;
-  --focus:        rgba(127, 169, 188, 0.42);
+  --focus:        #a8c89f;
   --on-dark:      #f4efe4;
   --on-ink:       #181713;
   --on-accent:    #ffffff;
@@ -119,7 +119,7 @@
   --sand-light:   #342116;
   --border:       #4a2824;
   --border-light: #38201d;
-  --focus:        rgba(255, 143, 111, 0.38);
+  --focus:        #ffb59c;
   --on-dark:      #fff5ef;
   --on-ink:       #180d0b;
   --on-accent:    #ffffff;
@@ -152,7 +152,7 @@
   --sand-light:   #172d35;
   --border:       #284a55;
   --border-light: #1d3c46;
-  --focus:        rgba(118, 223, 210, 0.38);
+  --focus:        #76dfd2;
   --on-dark:      #f1fdff;
   --on-ink:       #061419;
   --on-accent:    #ffffff;
@@ -185,7 +185,7 @@
   --sand-light:   #1a2e18;
   --border:       #243820;
   --border-light: #1a2c18;
-  --focus:        rgba(82, 168, 74, 0.38);
+  --focus:        #7ad870;
   --on-dark:      #e4f5e0;
   --on-ink:       #080f07;
   --on-accent:    #ffffff;
@@ -218,7 +218,7 @@
   --sand-light:   #201840;
   --border:       #342458;
   --border-light: #281c48;
-  --focus:        rgba(144, 112, 224, 0.38);
+  --focus:        #b8a0ff;
   --on-dark:      #ede8ff;
   --on-ink:       #0e0a18;
   --on-accent:    #ffffff;
@@ -251,7 +251,7 @@
   --sand-light:   #2e1820;
   --border:       #481828;
   --border-light: #381420;
-  --focus:        rgba(224, 104, 136, 0.38);
+  --focus:        #ffaac0;
   --on-dark:      #ffe8f0;
   --on-ink:       #180a0e;
   --on-accent:    #ffffff;
@@ -284,7 +284,7 @@
   --sand-light:   #0e1c30;
   --border:       #1c2e50;
   --border-light: #142440;
-  --focus:        rgba(64, 120, 216, 0.38);
+  --focus:        #80b0f8;
   --on-dark:      #e8f0ff;
   --on-ink:       #070a14;
   --on-accent:    #ffffff;
@@ -519,6 +519,7 @@ select:focus-visible,
 [role="button"]:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.22);
   border-radius: var(--r-sm);
 }
 

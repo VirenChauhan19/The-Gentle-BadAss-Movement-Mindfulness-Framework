@@ -37,9 +37,10 @@ export default function Home() {
   const greeting = firstName ? `${greetingTime}, ${firstName}` : greetingTime
 
   const dateStr = new Date().toLocaleDateString('en-GB', {
-    weekday: 'long',
+    weekday: 'short',
     day: 'numeric',
     month: 'long',
+    year: 'numeric',
   })
 
   const dayOfYear = Math.floor(
@@ -60,7 +61,7 @@ export default function Home() {
 
       <section className={styles.feelHero}>
         <Link
-          to={guestLocked ? '/admin' : '/journal'}
+          to="/journal"
           className={styles.feelCard + (guestLocked ? ' ' + styles.feelCardLocked : '')}
         >
           <div className={styles.ring}>
@@ -100,7 +101,7 @@ export default function Home() {
                   <span className={styles.ringScoreSlash}>/10</span>
                 </>
               ) : (
-                <span className={styles.ringCheck}>Check in</span>
+                <span className={styles.ringCheck}>{guestLocked ? 'Sign in' : 'Check in'} <span aria-hidden="true">-&gt;</span></span>
               )}
             </div>
           </div>
@@ -142,7 +143,7 @@ export default function Home() {
 
       <section className={styles.actionGrid}>
         <Link
-          to={guestLocked ? '/admin' : '/library'}
+          to="/library"
           className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
         >
           <span className={styles.actionTitle}>Movement Library</span>
@@ -150,7 +151,7 @@ export default function Home() {
           {guestLocked && <span className={styles.actionLock}>Locked</span>}
         </Link>
         <Link
-          to={guestLocked ? '/admin' : '/history'}
+          to="/history"
           className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
         >
           <span className={styles.actionTitle}>History</span>

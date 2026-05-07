@@ -87,7 +87,7 @@ export default function Breathing() {
         {
           type: 'breathing',
           exerciseId: 'breathing-5bpm',
-          exerciseName: '5 BPM Breathing',
+          exerciseName: '5 breaths/min breathing',
           durationSeconds: elapsed,
           cycles,
           inhaleSeconds,
@@ -107,7 +107,7 @@ export default function Breathing() {
       <header className={styles.header}>
         <p className={styles.label}>Daily Foundation</p>
         <h1 className={styles.title}>Breathe</h1>
-        <p className={styles.subtitle}>{inhaleSeconds}s inhale. {topHoldSeconds}s hold. {exhaleSeconds}s exhale. {bottomHoldSeconds}s hold. The click is fixed at 60 BPM, so every beat is one honest second.</p>
+        <p className={styles.subtitle}>{inhaleSeconds}s inhale. {topHoldSeconds}s hold. {exhaleSeconds}s exhale. {bottomHoldSeconds}s hold. Breathing pace is shown in breaths per minute; the click stays at 60 BPM so every beat is one honest second.</p>
       </header>
 
       <section className={styles.practice}>
@@ -192,9 +192,9 @@ export default function Breathing() {
           <div className={styles.rhythmControls}>
             <p className={styles.controlsTitle}>Fine tune rhythm</p>
             <PhaseSlider label="Inhale" value={inhaleSeconds} onChange={val => updateCustom(setInhaleSeconds, val)} running={running} />
-            <PhaseSlider label="Hold" value={topHoldSeconds} onChange={val => updateCustom(setTopHoldSeconds, val)} running={running} />
+            <PhaseSlider label="Top hold" value={topHoldSeconds} onChange={val => updateCustom(setTopHoldSeconds, val)} running={running} />
             <PhaseSlider label="Exhale" value={exhaleSeconds} onChange={val => updateCustom(setExhaleSeconds, val)} running={running} />
-            <PhaseSlider label="Hold" value={bottomHoldSeconds} onChange={val => updateCustom(setBottomHoldSeconds, val)} running={running} />
+            <PhaseSlider label="Bottom hold" value={bottomHoldSeconds} onChange={val => updateCustom(setBottomHoldSeconds, val)} running={running} />
           </div>
 
           <div className={styles.controls}>
@@ -207,7 +207,7 @@ export default function Breathing() {
           </div>
 
           <button className={styles.saveBtn} onClick={saveBreathSession} disabled={elapsed < cycleSeconds || saved}>
-            {saved ? 'Saved' : 'Save Breathing Session'}
+            {saved ? 'Saved' : elapsed < cycleSeconds ? 'Save after one cycle' : 'Save breathing session'}
           </button>
         </div>
 
@@ -229,6 +229,11 @@ function PhaseSlider({ label, value, onChange, running, onReset }) {
         value={value}
         onChange={e => { onChange(Number(e.target.value)); onReset?.() }}
         disabled={running}
+        aria-label={`${label} seconds`}
+        aria-valuemin="0"
+        aria-valuemax="30"
+        aria-valuenow={value}
+        aria-valuetext={`${value} seconds`}
       />
       <strong>{value}s</strong>
     </label>
