@@ -37,18 +37,18 @@ const PLANS = {
 }
 
 export default function Onboarding() {
-  const { saveProfile } = useData()
+  const { saveProfile, profile } = useData()
   const navigate = useNavigate()
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(() => (profile?.onboardingComplete && !profile?.sex ? 2 : 1))
   const [data, setData] = useState({
-    fitnessHistory: '',
-    sex: '',
-    lastPeriod: '',
-    periodLength: '',
-    cycleLength: '',
-    menopauseStatus: '',
-    path: '',
-    commitment: 90,
+    fitnessHistory: profile?.fitnessHistory || '',
+    sex: profile?.sex || '',
+    lastPeriod: profile?.lastPeriod || '',
+    periodLength: profile?.periodLength || '',
+    cycleLength: profile?.cycleLength || '',
+    menopauseStatus: profile?.menopauseStatus || '',
+    path: profile?.path || '',
+    commitment: profile?.commitment || 90,
   })
   const plan = PLANS[data.commitment] || PLANS[90]
   const isWoman = data.sex === 'woman'

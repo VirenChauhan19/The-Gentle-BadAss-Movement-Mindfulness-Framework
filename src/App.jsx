@@ -40,7 +40,7 @@ function AppRoutes() {
 
     const needsOnboarding =
       profile === null ||
-      (profile && !profile.onboardingComplete)
+      (profile && (!profile.onboardingComplete || !profile.sex))
 
     if (needsOnboarding) {
       // Last-resort check: Firestore writes are fire-and-forget and can fail
@@ -48,7 +48,7 @@ function AppRoutes() {
       // device, honour it and never redirect to onboarding.
       try {
         const local = JSON.parse(localStorage.getItem('gb_profile') || 'null')
-        if (local?.onboardingComplete) return
+        if (local?.onboardingComplete && local?.sex) return
       } catch {}
       navigate('/onboarding')
     }
