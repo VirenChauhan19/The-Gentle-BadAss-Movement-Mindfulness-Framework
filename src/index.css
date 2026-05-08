@@ -236,7 +236,7 @@
   --paper-soft:   #140e28;
   --ink:          #ede8ff;
   --ink-light:    #beb0e8;
-  --ink-faint:    #8070b0;
+  --ink-faint:    #9b8bd0;
   --sage:         #9070e0;
   --sage-dark:    #b8a0ff;
   --sage-light:   #241840;
@@ -314,7 +314,7 @@
   --paper-soft:   #0a1220;
   --ink:          #e8f0ff;
   --ink-light:    #a8c0e0;
-  --ink-faint:    #6080a8;
+  --ink-faint:    #7898c0;
   --sage:         #4078d8;
   --sage-dark:    #80b0f8;
   --sage-light:   #0c1c38;
@@ -584,22 +584,33 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 7px;
+  height: 12px;
   border-radius: 999px;
-  background: var(--border);
+  background:
+    linear-gradient(90deg, var(--sage-dark), var(--sage)),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 20%, var(--paper)), color-mix(in srgb, var(--ink) 20%, var(--paper)));
+  background-size: 100% 4px, 100% 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid color-mix(in srgb, var(--ink) 24%, var(--border-light));
   outline: none;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--on-dark) 18%, transparent) inset,
+    0 4px 12px var(--shadow-xs);
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--paper);
-  border: 7px solid var(--ink);
+  background: var(--on-accent);
+  border: 5px solid var(--sage-dark);
   cursor: pointer;
-  box-shadow: 0 2px 8px var(--shadow-md);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--paper) 72%, transparent),
+    0 6px 16px var(--shadow-md);
   transition: transform var(--d-fast) var(--ease-out), box-shadow var(--d-fast) var(--ease-out);
 }
 
@@ -613,12 +624,28 @@ input[type="range"]::-webkit-slider-thumb:active {
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--paper);
+  background: var(--on-accent);
   cursor: pointer;
-  border: 7px solid var(--ink);
+  border: 5px solid var(--sage-dark);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--paper) 72%, transparent),
+    0 6px 16px var(--shadow-md);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 20%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--ink) 24%, var(--border-light));
+}
+
+input[type="range"]::-moz-range-progress {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--sage-dark), var(--sage));
 }
 
 /* ── Scrollbar ────────────────────────────────────────── */
@@ -746,17 +773,17 @@ input[type="range"]::-moz-range-thumb {
   }
 
   input[type="range"] {
-    height: 12px;
+    height: 14px;
   }
 
   input[type="range"]::-webkit-slider-thumb {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
   }
 
   input[type="range"]::-moz-range-thumb {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
   }
 
   .routeTransition > * {

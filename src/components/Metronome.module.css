@@ -177,6 +177,24 @@
 
 .volumeControl input {
   min-width: 0;
+  background:
+    linear-gradient(90deg, var(--sage-dark), var(--sage)) 0 / var(--volume-fill, 85%) 4px no-repeat,
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 24%, var(--paper)), color-mix(in srgb, var(--ink) 24%, var(--paper))) center / 100% 12px no-repeat;
+  border-color: color-mix(in srgb, var(--ink) 28%, var(--border-light));
+}
+
+.volumeControl input::-webkit-slider-thumb {
+  background: var(--on-accent);
+  border-color: var(--sage-dark);
+}
+
+.volumeControl input::-moz-range-progress {
+  background: linear-gradient(90deg, var(--sage-dark), var(--sage));
+}
+
+.volumeControl input::-moz-range-track {
+  background: color-mix(in srgb, var(--ink) 24%, var(--paper));
+  border-color: color-mix(in srgb, var(--ink) 28%, var(--border-light));
 }
 
 .metronomeFace {

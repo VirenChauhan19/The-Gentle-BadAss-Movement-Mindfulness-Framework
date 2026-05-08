@@ -140,6 +140,7 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
           max="100"
           step="1"
           value={volume}
+          style={{ '--volume-fill': `${volume}%` }}
           onChange={e => setVolume(Number(e.target.value))}
         />
         <strong>{volume}%</strong>

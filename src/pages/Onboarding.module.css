@@ -441,8 +441,14 @@
   width: 100%;
   -webkit-appearance: none;
   appearance: none;
-  height: 6px;
-  background: var(--border);
+  height: 12px;
+  background:
+    linear-gradient(90deg, var(--sage-dark), var(--sage)),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 20%, var(--paper)), color-mix(in srgb, var(--ink) 20%, var(--paper)));
+  background-size: 100% 4px, 100% 12px;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, var(--border-light));
   border-radius: 999px;
   outline: none;
   margin-bottom: 0.5rem;

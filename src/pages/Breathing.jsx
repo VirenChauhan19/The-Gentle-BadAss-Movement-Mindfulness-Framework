@@ -41,10 +41,10 @@ export default function Breathing() {
   const sessionPct = targetSeconds > 0 ? Math.min(100, (elapsed / targetSeconds) * 100) : 0
   const nextPhase = phaseState.nextLabel
   const breathCue =
-    phase === 'Inhale' ? 'Let the ribs widen.' :
-    phase === 'Exhale' ? 'Release slowly.' :
-    phase === 'Hold' && progress > 0.5 ? 'Stay soft at the top.' :
-    phase === 'Hold' ? 'Rest at the bottom.' :
+    phase === 'Inhale' ? 'Breathe in low and wide.' :
+    phase === 'Exhale' ? 'Let the air leave slowly.' :
+    phase === 'Hold' && progress > 0.5 ? 'Stay relaxed at the top.' :
+    phase === 'Hold' ? 'Rest softly at the bottom.' :
     'Choose a rhythm.'
 
   useEffect(() => {

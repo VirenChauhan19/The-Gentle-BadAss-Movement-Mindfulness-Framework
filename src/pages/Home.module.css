@@ -29,8 +29,16 @@
 }
 
 .subtitle {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sage) 14%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--sage) 34%, var(--border-light));
   color: var(--sage-dark);
-  margin-bottom: 8px;
+  box-shadow: 0 8px 20px var(--shadow-xs);
+  margin-bottom: 12px;
 }
 
 .greeting {
@@ -509,7 +517,9 @@
 
 @media (min-width: 1024px) {
   .page {
+    width: 100%;
     max-width: 1180px;
+    margin: 0 auto;
     padding: 0 56px 48px;
   }
 

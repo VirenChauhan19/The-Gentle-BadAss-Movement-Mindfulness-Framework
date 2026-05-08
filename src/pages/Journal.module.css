@@ -255,9 +255,12 @@
   height: 10px;
   border-radius: 999px;
   background:
-    linear-gradient(to right, var(--slider-color) var(--slider-fill), var(--border-light) var(--slider-fill));
+    linear-gradient(to right, var(--slider-color) var(--slider-fill), color-mix(in srgb, var(--ink) 18%, var(--paper)) var(--slider-fill));
+  border: 1px solid color-mix(in srgb, var(--ink) 20%, var(--border-light));
   outline: none;
-  box-shadow: inset 0 1px 3px rgba(24, 23, 19, 0.10);
+  box-shadow:
+    inset 0 1px 3px rgba(24, 23, 19, 0.10),
+    0 4px 12px var(--shadow-xs);
 }
 
 .slider::-webkit-slider-thumb {

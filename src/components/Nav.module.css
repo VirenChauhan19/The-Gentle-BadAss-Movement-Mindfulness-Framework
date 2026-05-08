@@ -70,7 +70,7 @@
   gap: 3px;
   padding: 9px 6px 7px;
   border-radius: 16px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.62);
   font-size: 0.56rem;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -113,7 +113,7 @@
 .link svg {
   transition: transform var(--d-base) var(--ease-out),
               opacity var(--d-base) var(--ease-out);
-  opacity: 0.55;
+  opacity: 0.72;
 }
 
 .link span:first-of-type {
