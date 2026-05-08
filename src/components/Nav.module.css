@@ -284,19 +284,19 @@
 
 @media (max-width: 767px) {
   .nav {
-    bottom: calc(10px + env(safe-area-inset-bottom));
-    width: calc(100% - 14px);
+    bottom: calc(8px + env(safe-area-inset-bottom));
+    width: calc(100% - 18px);
     max-width: none;
     justify-content: flex-start;
-    gap: 6px;
-    padding: 7px 8px;
+    gap: 5px;
+    padding: 7px;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
-    border-radius: 24px;
+    border-radius: 20px;
     background:
-      linear-gradient(135deg, rgba(24, 23, 19, 0.96), rgba(34, 56, 45, 0.94)),
+      linear-gradient(135deg, rgba(18, 18, 15, 0.97), rgba(31, 50, 41, 0.96)),
       var(--brand-gradient);
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
@@ -307,12 +307,13 @@
   }
 
   .link {
-    flex: 0 0 61px;
-    min-height: 60px;
+    flex: 0 0 58px;
+    min-height: 58px;
     scroll-snap-align: center;
-    padding: 8px 6px 7px;
-    font-size: 0.53rem;
-    border-radius: 18px;
+    padding: 8px 5px 7px;
+    font-size: 0.5rem;
+    letter-spacing: 0.04em;
+    border-radius: 15px;
   }
 
   .link span:first-of-type {
@@ -323,17 +324,26 @@
 
   .link svg,
   .navAvatar {
-    width: 24px;
-    height: 24px;
+    width: 23px;
+    height: 23px;
   }
 
   .active {
-    flex-basis: 82px;
-    transform: translateY(-2px);
+    flex-basis: 76px;
+    transform: translateY(-1px);
     box-shadow:
-      0 10px 20px rgba(63, 95, 62, 0.30),
+      0 9px 18px rgba(63, 95, 62, 0.30),
       0 1px 0 rgba(255, 255, 255, 0.20) inset,
-      0 0 24px rgba(168, 200, 159, 0.18);
+      0 0 18px rgba(168, 200, 159, 0.16);
+  }
+
+  .active::after {
+    inset: auto 24% 5px;
+    height: 2px;
+  }
+
+  .active span:first-of-type {
+    opacity: 1;
   }
 
   .link:active {
@@ -345,8 +355,28 @@
   }
 
   .lockDot {
-    top: 6px;
-    right: 8px;
+    top: 5px;
+    right: 6px;
+    width: 19px;
+    height: 19px;
     transform: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav {
+    width: calc(100% - 12px);
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .link {
+    flex-basis: 53px;
+    min-height: 55px;
+    font-size: 0.47rem;
+  }
+
+  .active {
+    flex-basis: 69px;
   }
 }

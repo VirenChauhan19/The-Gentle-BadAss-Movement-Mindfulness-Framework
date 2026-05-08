@@ -50,16 +50,30 @@ export default function Home() {
 
   const ringPct = feelScore !== null ? feelScore / 10 : 0
   const ringOffset = RING_C * (1 - ringPct)
+  const feelLabel = feelScore !== null
+    ? feelScore >= 7
+      ? 'Ready to build'
+      : feelScore >= 4.5
+        ? 'Keep it measured'
+        : 'Recovery first'
+    : 'Not checked in'
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <p className={styles.subtitle}>La Ultra: Run &amp; Bee</p>
-        <h1 className={styles.greeting}>{greeting}</h1>
-        <p className={styles.date}>{dateStr}</p>
-      </header>
+      <section className={styles.hero}>
+        <header className={styles.header}>
+          <div>
+            <p className={styles.subtitle}>La Ultra: Run &amp; Bee</p>
+            <h1 className={styles.greeting}>{greeting}</h1>
+          </div>
+          <p className={styles.date}>{dateStr}</p>
+        </header>
+        <p className={styles.heroCopy}>
+          Train the engine without fighting the body. Check in, choose the right work, and keep the long run honest.
+        </p>
+      </section>
 
-      <section className={styles.feelHero}>
+      <section className={styles.todayPanel} aria-label="Today">
         <Link
           to="/journal"
           className={styles.feelCard + (guestLocked ? ' ' + styles.feelCardLocked : '')}
@@ -110,6 +124,7 @@ export default function Home() {
             <p className={styles.feelHeading}>
               {today ? 'Logged for today' : 'How does your body feel?'}
             </p>
+            <p className={styles.feelLabel}>{feelLabel}</p>
             <p className={styles.feelSub}>
               {today
                 ? 'Tap to review or update your check-in.'
@@ -118,6 +133,21 @@ export default function Home() {
             {guestLocked && <span className={styles.lockBadge}>Sign in to log</span>}
           </div>
         </Link>
+
+        <div className={styles.metricGrid} aria-label="Journey stats">
+          <div className={styles.metric}>
+            <span className={styles.metricValue}>{streak}</span>
+            <span className={styles.metricLabel}>day streak</span>
+          </div>
+          <div className={styles.metric}>
+            <span className={styles.metricValue}>{progressPct}%</span>
+            <span className={styles.metricLabel}>complete</span>
+          </div>
+          <div className={styles.metric}>
+            <span className={styles.metricValue}>{daysToGo}</span>
+            <span className={styles.metricLabel}>days to go</span>
+          </div>
+        </div>
       </section>
 
       <section className={styles.progressBlock}>
@@ -128,16 +158,13 @@ export default function Home() {
               Day {dayOfJourney} <span>of {commitment}</span>
             </p>
           </div>
-          <div className={styles.streakBadge}>
-            <span className={styles.streakNum}>{streak}</span>
-            <span className={styles.streakLabel}>day streak</span>
-          </div>
+          <span className={styles.progressPercent}>{progressPct}%</span>
         </div>
         <div className={styles.progressTrack} aria-hidden="true">
           <div className={styles.progressFill} style={{ width: `${progressPct}%` }} />
         </div>
         <p className={styles.progressFoot}>
-          {progressPct}% complete · {daysToGo} days to go
+          {daysToGo} days left in your {commitment}-day commitment
         </p>
       </section>
 
@@ -147,7 +174,7 @@ export default function Home() {
           className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
         >
           <span className={styles.actionTitle}>Movement Library</span>
-          <span className={styles.actionSub}>Tests · drills · strength</span>
+          <span className={styles.actionSub}>Tests, drills, strength</span>
           {guestLocked && <span className={styles.actionLock}>Locked</span>}
         </Link>
         <Link

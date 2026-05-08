@@ -10,6 +10,7 @@ import {
 const GUEST_NAME_KEY = 'gb_guest_name'
 const PROFILE_KEY    = 'gb_profile'
 const COACH_KEY      = 'gb_coach'           // guest fallback
+const GUEST_MIGRATION_KEY = 'gb_guest_migrated_uid'
 const coachKey = uid => uid ? `gb_coach_${uid}` : COACH_KEY
 
 const DataContext = createContext(null)
@@ -58,8 +59,18 @@ export function DataProvider({ children }) {
           setCoachData(data)
         } else {
           try {
-            const cached = localStorage.getItem(userCoachKey)
-            setCoachData(cached ? JSON.parse(cached) : null)
+            const cached = localStorage.getItem(userCoachKey) || localStorage.getItem(COACH_KEY)
+            const parsed = cached ? JSON.parse(cached) : null
+            setCoachData(parsed)
+            if (parsed && guestName) {
+              setDoc(doc(db, 'users', user.uid, 'config', 'coach'), {
+                ...parsed,
+                userId: user.uid,
+                userEmail: user.email,
+                userName: user.displayName || guestName,
+                migratedAt: new Date().toISOString(),
+              }, { merge: true }).catch(err => console.warn('Coach migration error:', err))
+            }
           } catch { setCoachData(null) }
         }
       })
@@ -96,6 +107,26 @@ export function DataProvider({ children }) {
     const unsubJournal = onSnapshot(q, snapshot => {
       setEntries(snapshot.docs.map(d => d.data()))
     }, () => {}) // ignore journal errors silently
+
+    try {
+      const migratedUid = localStorage.getItem(GUEST_MIGRATION_KEY)
+      const localEntries = getLocalEntries()
+      if (guestName && migratedUid !== user.uid && localEntries.length) {
+        Promise.all(localEntries.map(entry => {
+          const date = entry.date || new Date().toISOString().split('T')[0]
+          return setDoc(doc(db, 'users', user.uid, 'journal', date), {
+            ...entry,
+            date,
+            userId: user.uid,
+            userEmail: user.email,
+            userName: user.displayName || guestName,
+            migratedAt: new Date().toISOString(),
+          }, { merge: true })
+        }))
+          .then(() => localStorage.setItem(GUEST_MIGRATION_KEY, user.uid))
+          .catch(err => console.warn('Journal migration error:', err))
+      }
+    } catch {}
 
     const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
     const unsubProfile = onSnapshot(profileRef, snapshot => {
@@ -221,8 +252,7 @@ export function DataProvider({ children }) {
   function syncCoachToFirestore(data) {
     if (user && db) {
       const ref = doc(db, 'users', user.uid, 'config', 'coach')
-      const { chatHistory: _, ...toSync } = data
-      setDoc(ref, { ...toSync, userId: user.uid, userEmail: user.email, userName: user.displayName || guestName }, { merge: true })
+      setDoc(ref, { ...data, userId: user.uid, userEmail: user.email, userName: user.displayName || guestName }, { merge: true })
         .catch(err => console.warn('Coach sync error:', err))
     }
   }
@@ -277,6 +307,7 @@ export function DataProvider({ children }) {
         chatHistory: [...(prev?.chatHistory || []), { ...message, timestamp: new Date().toISOString() }],
       }
       localStorage.setItem(key, JSON.stringify(next))
+      syncCoachToFirestore(next)
       return next
     })
   }

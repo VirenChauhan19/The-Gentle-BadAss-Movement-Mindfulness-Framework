@@ -1,58 +1,91 @@
 .page {
-  padding: 0 0 32px;
+  width: 100%;
+  min-height: 100%;
+  padding: 0 0 36px;
   overflow-x: hidden;
 }
 
-/* ── Hero ────────────────────────────────────────────── */
-.header {
-  padding: 48px 24px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.hero {
+  padding: 48px 24px 18px;
   animation: floatIn 560ms var(--ease-elastic) both;
 }
 
-.subtitle {
-  font-size: 0.66rem;
-  letter-spacing: 0.18em;
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.subtitle,
+.feelKicker,
+.progressKicker,
+.intentionKicker,
+.metricLabel {
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-faint);
-  font-weight: 700;
-  margin-bottom: 4px;
+  font-weight: 800;
+}
+
+.subtitle {
+  color: var(--sage-dark);
+  margin-bottom: 8px;
 }
 
 .greeting {
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 6.4vw, 2.6rem);
+  font-size: clamp(2rem, 7vw, 3.2rem);
   color: var(--ink);
-  line-height: 1.12;
+  line-height: 1.04;
   font-weight: 700;
-  letter-spacing: -0.01em;
 }
 
 .date {
-  font-size: 0.85rem;
+  flex: 0 0 auto;
+  max-width: 132px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--paper) 76%, transparent);
   color: var(--ink-faint);
-  margin-top: 6px;
-  font-weight: 500;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: right;
+  box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
-/* ── Feel hero card ──────────────────────────────────── */
-.feelHero {
+.heroCopy {
+  max-width: 660px;
+  margin-top: 18px;
+  color: var(--ink-light);
+  font-size: clamp(0.96rem, 2.4vw, 1.08rem);
+  line-height: 1.65;
+}
+
+.todayPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
   padding: 0 16px 14px;
 }
 
 .feelCard {
-  display: flex;
+  display: grid;
+  grid-template-columns: 126px minmax(0, 1fr);
   align-items: center;
-  gap: 22px;
-  background: var(--brand-gradient);
+  gap: 18px;
+  min-height: 176px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 42%),
+    var(--brand-gradient);
   color: var(--on-dark);
-  border-radius: var(--r-2xl);
-  padding: 22px 22px 22px 18px;
+  border-radius: var(--r-3xl);
+  padding: 20px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 14px 32px var(--shadow-md);
+  box-shadow: 0 18px 42px var(--shadow-md);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
   animation: floatIn 620ms var(--ease-elastic) both 80ms;
 }
@@ -60,9 +93,9 @@
 .feelCard::before {
   content: '';
   position: absolute;
-  inset: -1px;
+  inset: 0;
   background:
-    linear-gradient(115deg, transparent 0 34%, rgba(255, 255, 255, 0.18) 48%, transparent 62%),
+    linear-gradient(110deg, transparent 0 32%, rgba(255, 255, 255, 0.16) 48%, transparent 64%),
     repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 18px);
   transform: translateX(-105%);
   transition: transform 720ms var(--ease-out);
@@ -73,31 +106,33 @@
   content: '';
   position: absolute;
   inset: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: calc(var(--r-2xl) - 6px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: calc(var(--r-3xl) - 8px);
   pointer-events: none;
 }
 
 @media (hover: hover) {
   .feelCard:hover {
     transform: translateY(-3px);
-    box-shadow: 0 20px 40px var(--shadow-md);
+    box-shadow: 0 24px 48px var(--shadow-md);
   }
+
   .feelCard:hover::before {
     transform: translateX(105%);
   }
 }
 
 .feelCard:active {
-  transform: scale(0.99);
+  transform: scale(0.985);
 }
 
 .ring {
   position: relative;
-  width: 132px;
-  height: 132px;
+  width: 126px;
+  height: 126px;
   flex-shrink: 0;
-  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.18));
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.2));
+  z-index: 1;
 }
 
 .ringSvg {
@@ -127,127 +162,155 @@
 
 .ringScore {
   font-family: var(--font-display);
-  font-size: 2.1rem;
+  font-size: 2.08rem;
   color: var(--on-dark);
   font-weight: 700;
   line-height: 1;
-  letter-spacing: -0.02em;
 }
 
 .ringScoreSlash {
-  font-family: var(--font-body);
   font-size: 0.65rem;
-  color: rgba(245, 240, 232, 0.45);
-  font-weight: 700;
+  color: rgba(245, 240, 232, 0.48);
+  font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .ringCheck {
   font-family: var(--font-display);
-  font-size: 0.88rem;
-  color: rgba(245, 240, 232, 0.85);
+  font-size: 0.9rem;
+  color: rgba(245, 240, 232, 0.9);
   font-weight: 700;
-  letter-spacing: 0.01em;
   text-align: center;
-  padding: 0 8px;
+  padding: 0 10px;
   line-height: 1.3;
 }
 
 .feelMeta {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
+  gap: 5px;
   min-width: 0;
 }
 
 .feelKicker {
-  font-size: 0.6rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(245, 240, 232, 0.5);
-  font-weight: 700;
-  margin-bottom: 2px;
+  color: rgba(245, 240, 232, 0.55);
 }
 
 .feelHeading {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: clamp(1.22rem, 4.6vw, 1.55rem);
   font-weight: 700;
   color: var(--on-dark);
-  line-height: 1.25;
+  line-height: 1.12;
+}
+
+.feelLabel {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(245, 240, 232, 0.86);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .feelSub {
-  font-size: 0.83rem;
-  color: rgba(245, 240, 232, 0.7);
-  line-height: 1.5;
-  margin-top: 2px;
+  color: rgba(245, 240, 232, 0.72);
+  font-size: 0.84rem;
+  line-height: 1.45;
 }
 
-.lockBadge {
+.lockBadge,
+.actionLock {
   display: inline-flex;
   align-items: center;
-  align-self: flex-start;
-  margin-top: 8px;
-  padding: 6px 12px;
+  justify-content: center;
   border-radius: 999px;
-  background: #ba5f45;
+  background: var(--terracotta);
   color: #fff8f2;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.07em;
+  font-weight: 900;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.feelCardLocked .feelSub {
-  opacity: 0.75;
+.lockBadge {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 6px 10px;
+  font-size: 0.68rem;
 }
 
-/* ── Progress block ──────────────────────────────────── */
+.feelCardLocked .feelSub {
+  opacity: 0.78;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  animation: floatIn 560ms var(--ease-elastic) both 140ms;
+}
+
+.metric {
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px;
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.metricValue {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metricLabel {
+  color: var(--ink-faint);
+  font-size: 0.54rem;
+  line-height: 1.25;
+}
+
 .progressBlock {
   margin: 0 16px 14px;
   background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
-  padding: 18px;
+  padding: 17px;
   box-shadow: 0 8px 22px var(--shadow-xs);
-  animation: floatIn 560ms var(--ease-elastic) both 160ms;
-  transition: transform var(--d-base) var(--ease-out),
-              box-shadow var(--d-base) var(--ease-out),
-              border-color var(--d-base) var(--ease-out);
-}
-
-@media (hover: hover) {
-  .progressBlock:hover {
-    transform: translateY(-2px);
-    border-color: rgba(99, 127, 95, 0.22);
-    box-shadow: 0 16px 34px var(--shadow);
-  }
+  animation: floatIn 560ms var(--ease-elastic) both 200ms;
 }
 
 .progressTop {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  gap: 14px;
   margin-bottom: 14px;
-  gap: 12px;
 }
 
 .progressKicker {
-  font-size: 0.6rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--ink-faint);
-  font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 .progressDays {
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   color: var(--ink);
   font-weight: 700;
   line-height: 1;
@@ -255,44 +318,22 @@
 
 .progressDays span {
   color: var(--ink-faint);
-  font-weight: 500;
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
-.streakBadge {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 14px;
-  border-radius: var(--r-md);
-  background: rgba(99, 127, 95, 0.10);
-  border: 1px solid rgba(99, 127, 95, 0.22);
-  min-width: 64px;
-}
-
-.streakNum {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
+.progressPercent {
+  flex: 0 0 auto;
   color: var(--sage-dark);
+  font-family: var(--font-display);
+  font-size: 1.34rem;
   font-weight: 700;
   line-height: 1;
 }
 
-:global(html[data-theme="dark"]) .streakNum {
-  color: var(--sage-dark);
-}
-
-.streakLabel {
-  font-size: 0.55rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  font-weight: 700;
-  margin-top: 4px;
-}
-
 .progressTrack {
-  height: 7px;
+  height: 8px;
   background: var(--border-light);
   border-radius: 999px;
   overflow: hidden;
@@ -315,49 +356,53 @@
 }
 
 .progressFoot {
-  font-size: 0.74rem;
-  color: var(--ink-faint);
   margin-top: 10px;
-  font-weight: 500;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
-/* ── Action grid ─────────────────────────────────────── */
 .actionGrid {
-  padding: 0 16px 14px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  padding: 0 16px 14px;
 }
 
 .action {
+  min-height: 104px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: flex-end;
+  gap: 6px;
   padding: 16px;
-  background: var(--paper);
+  background:
+    linear-gradient(145deg, rgba(99, 127, 95, 0.1), transparent 54%),
+    var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
   box-shadow: 0 8px 22px var(--shadow-xs);
   position: relative;
+  overflow: hidden;
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-  min-height: 84px;
   animation: floatIn 540ms var(--ease-elastic) both;
 }
 
-.action:nth-child(1) { animation-delay: 220ms; }
-.action:nth-child(2) { animation-delay: 270ms; }
-.action:nth-child(3) { animation-delay: 320ms; }
-.action:nth-child(4) { animation-delay: 370ms; }
+.action:nth-child(1) { animation-delay: 240ms; }
+.action:nth-child(2) { animation-delay: 290ms; }
+.action:nth-child(3) { animation-delay: 340ms; }
+.action:nth-child(4) { animation-delay: 390ms; }
 
 .action::before {
   content: '';
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(99, 127, 95, 0.11), rgba(66, 105, 125, 0.08));
-  opacity: 0;
-  transition: opacity var(--d-base) var(--ease-out);
-  pointer-events: none;
+  top: 14px;
+  left: 16px;
+  width: 28px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--sage-dark);
+  opacity: 0.7;
 }
 
 @media (hover: hover) {
@@ -365,9 +410,6 @@
     transform: translateY(-2px);
     border-color: rgba(99, 127, 95, 0.32);
     box-shadow: 0 14px 28px var(--shadow);
-  }
-  .action:hover::before {
-    opacity: 1;
   }
 }
 
@@ -377,111 +419,162 @@
 
 .actionTitle {
   font-family: var(--font-display);
-  font-size: 1rem;
   color: var(--ink);
+  font-size: 1rem;
   font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.18;
 }
 
 .actionSub {
-  font-size: 0.74rem;
   color: var(--ink-faint);
-  font-weight: 500;
-  line-height: 1.4;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
 .actionLocked {
-  opacity: 0.78;
+  opacity: 0.82;
 }
 
 .actionLock {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: #ba5f45;
-  color: #fff8f2;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  top: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  font-size: 0.58rem;
 }
 
-/* ── Intention ──────────────────────────────────────── */
 .intention {
-  padding: 18px 24px 8px;
+  margin: 0 16px;
+  padding: 20px 18px;
   text-align: center;
-  animation: floatIn 540ms var(--ease-elastic) both 420ms;
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+  animation: floatIn 540ms var(--ease-elastic) both 440ms;
 }
 
 .intentionKicker {
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--ink-faint);
-  font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 9px;
 }
 
 .intentionText {
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-style: italic;
-  color: var(--ink-light);
-  line-height: 1.55;
-  max-width: 480px;
+  max-width: 520px;
   margin: 0 auto;
+  font-family: var(--font-display);
+  color: var(--ink-light);
+  font-size: 1.03rem;
+  font-style: italic;
+  line-height: 1.55;
 }
 
-/* ── Footer ──────────────────────────────────────────── */
 .footer {
   padding: 24px 24px 8px;
   text-align: center;
   color: var(--ink-faint);
-  font-size: 0.75rem;
-  line-height: 1.9;
+  font-size: 0.74rem;
+  line-height: 1.8;
 }
 
 .footerSub {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   letter-spacing: 0.08em;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
-/* ── Responsive ──────────────────────────────────────── */
 @media (min-width: 640px) {
-  .actionGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  .todayPanel {
+    grid-template-columns: minmax(0, 1fr) 168px;
+    align-items: stretch;
+  }
+
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric {
+    min-height: 0;
   }
 }
 
 @media (min-width: 768px) {
-  .header { padding: 52px 28px 24px; }
-  .feelHero { padding: 0 20px 16px; }
+  .hero { padding: 52px 28px 22px; }
+  .todayPanel { padding: 0 20px 16px; }
   .progressBlock { margin: 0 20px 16px; }
   .actionGrid { padding: 0 20px 16px; }
-  .intention { padding: 22px 28px 10px; }
+  .intention { margin: 0 20px; }
 }
 
 @media (min-width: 1024px) {
-  .header { padding: 60px 56px 30px; }
-  .feelHero { padding: 0 56px 20px; }
-  .feelCard { padding: 32px 32px 32px 28px; gap: 36px; }
-  .ring { width: 160px; height: 160px; }
-  .ringScore { font-size: 2.8rem; }
-  .ringScoreSlash { font-size: 0.75rem; }
-  .ringCheck { font-size: 1rem; }
-  .feelHeading { font-size: 1.4rem; }
-  .feelSub { font-size: 0.95rem; }
-  .progressBlock { margin: 0 56px 20px; padding: 22px 26px; }
-  .progressDays { font-size: 1.7rem; }
-  .actionGrid { padding: 0 56px 20px; gap: 14px; }
-  .action { padding: 20px; min-height: 96px; }
-  .intention { padding: 28px 56px 12px; }
-  .intentionText { font-size: 1.15rem; }
-  .footer { padding: 32px 56px 8px; }
+  .page {
+    max-width: 1180px;
+    padding: 0 56px 48px;
+  }
+
+  .hero {
+    padding: 62px 0 28px;
+  }
+
+  .date {
+    max-width: none;
+    padding: 10px 12px;
+  }
+
+  .todayPanel {
+    grid-template-columns: minmax(0, 1fr) 220px;
+    padding: 0 0 18px;
+    gap: 16px;
+  }
+
+  .feelCard {
+    grid-template-columns: 158px minmax(0, 1fr);
+    min-height: 232px;
+    padding: 30px;
+    gap: 30px;
+  }
+
+  .ring {
+    width: 158px;
+    height: 158px;
+  }
+
+  .ringScore {
+    font-size: 2.75rem;
+  }
+
+  .feelSub {
+    font-size: 0.94rem;
+  }
+
+  .metric {
+    padding: 16px;
+  }
+
+  .metricValue {
+    font-size: 1.55rem;
+  }
+
+  .progressBlock {
+    margin: 0 0 18px;
+    padding: 20px 22px;
+  }
+
+  .actionGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0 0 18px;
+    gap: 14px;
+  }
+
+  .action {
+    min-height: 118px;
+    padding: 18px;
+  }
+
+  .intention {
+    margin: 0;
+  }
 }
 
 @media (max-width: 767px) {
@@ -489,34 +582,39 @@
     padding-bottom: 18px;
   }
 
+  .hero {
+    padding: calc(58px + env(safe-area-inset-top)) 16px 18px;
+  }
+
   .header {
-    padding: calc(58px + env(safe-area-inset-top)) 18px 18px;
-    position: relative;
+    align-items: flex-end;
   }
 
-  .greeting {
-    font-size: clamp(2rem, 10vw, 2.7rem);
+  .date {
+    max-width: 118px;
+    font-size: 0.7rem;
   }
 
-  .feelHero,
+  .heroCopy {
+    margin-top: 14px;
+    font-size: 0.93rem;
+  }
+
+  .todayPanel,
   .actionGrid {
     padding-left: 12px;
     padding-right: 12px;
   }
 
   .feelCard {
-    min-height: 190px;
-    display: grid;
-    grid-template-columns: 110px minmax(0, 1fr);
+    grid-template-columns: 104px minmax(0, 1fr);
     gap: 14px;
-    padding: 18px;
-    border-radius: 24px;
-    transform-origin: center bottom;
-    isolation: isolate;
+    min-height: 178px;
+    padding: 17px;
+    border-radius: 22px;
   }
 
   .feelCard::before {
-    transform: none;
     animation: mobileFeelSheen 5s var(--ease-out) infinite;
   }
 
@@ -526,99 +624,89 @@
     100% { opacity: 0; transform: translateX(105%); }
   }
 
-  .feelCard:active {
-    transform: scale(0.975) translateY(1px);
-  }
-
   .ring {
     width: 104px;
     height: 104px;
-    align-self: center;
   }
 
   .ringScore {
-    font-size: 1.9rem;
+    font-size: 1.86rem;
   }
 
   .feelHeading {
-    font-size: 1.2rem;
+    font-size: 1.16rem;
+  }
+
+  .feelSub {
+    font-size: 0.8rem;
+  }
+
+  .metricGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .metric {
+    border-radius: 16px;
+    padding: 10px;
   }
 
   .progressBlock {
     margin: 0 12px 14px;
     border-radius: 18px;
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .progressBlock::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(99, 127, 95, 0.07), transparent 58%);
-    pointer-events: none;
   }
 
   .actionGrid {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    padding-bottom: 18px;
-    padding-top: 2px;
-    mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 34px), transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 34px), transparent 100%);
-  }
-
-  .actionGrid::-webkit-scrollbar {
-    display: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
   }
 
   .action {
-    flex: 0 0 72%;
-    min-height: 104px;
-    scroll-snap-align: start;
+    min-height: 106px;
     border-radius: 18px;
-    justify-content: flex-end;
-    overflow: hidden;
+    padding: 15px;
   }
 
-  .action::after {
-    content: 'Tap';
-    position: absolute;
-    right: 14px;
-    top: 14px;
-    padding: 4px 8px;
-    border-radius: 999px;
-    color: var(--sage-dark);
-    background: rgba(99, 127, 95, 0.10);
-    border: 1px solid rgba(99, 127, 95, 0.16);
-    font-size: 0.56rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .actionLocked::after {
-    content: none;
-  }
-
-  .action:nth-child(2n) {
-    flex-basis: 64%;
-  }
-
-  .action:active {
-    transform: scale(0.965);
+  .actionTitle {
+    font-size: 0.96rem;
   }
 
   .intention {
     margin: 0 12px;
-    padding: 20px 16px;
-    border-radius: 20px;
-    background: var(--paper);
-    border: 1px solid var(--border-light);
-    box-shadow: 0 10px 24px var(--shadow-xs);
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .header {
+    display: block;
+  }
+
+  .date {
+    display: inline-block;
+    max-width: none;
+    margin-top: 12px;
+    text-align: left;
+  }
+
+  .feelCard {
+    grid-template-columns: 92px minmax(0, 1fr);
+    padding: 15px;
+  }
+
+  .ring {
+    width: 92px;
+    height: 92px;
+  }
+
+  .feelLabel {
+    font-size: 0.66rem;
+  }
+
+  .metric {
+    padding: 9px 7px;
+  }
+
+  .metricValue {
+    font-size: 1.16rem;
   }
 }
