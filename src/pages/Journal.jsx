@@ -6,11 +6,17 @@ import { useData } from '../context/DataContext'
 import styles from './Journal.module.css'
 
 export default function Journal() {
-  const { getTodayEntry, saveEntry, coachData, updateCoachGoal } = useData()
+  const { getTodayEntry, saveEntry, coachData, updateCoachGoal, profile, saveProfile } = useData()
   const existing = getTodayEntry()
   const [scores, setScores] = useState(() => pickCurrentFactors(existing?.scores || {}))
   const [scoreNotes, setScoreNotes] = useState(() => pickCurrentFactors(existing?.scoreNotes || {}))
   const [note, setNote] = useState(existing?.note || '')
+  const [cycle, setCycle] = useState(() => ({
+    lastPeriod: existing?.cycle?.lastPeriod || profile?.lastPeriod || '',
+    periodLength: existing?.cycle?.periodLength || profile?.periodLength || '',
+    cycleLength: existing?.cycle?.cycleLength || profile?.cycleLength || '',
+    menopauseStatus: existing?.cycle?.menopauseStatus || profile?.menopauseStatus || '',
+  }))
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const navigate = useNavigate()
@@ -37,12 +43,17 @@ export default function Journal() {
       setSubmitError('Complete every Feel slider before submitting.')
       return
     }
-    const feelAdjustment = adjustTodayRunningPlan(coachData?.goal, scores)
+    const cycleData = profile?.sex === 'woman' ? cycle : null
+    const feelAdjustment = adjustTodayRunningPlan(coachData?.goal, scores, cycleData)
     if (feelAdjustment?.goal) updateCoachGoal(feelAdjustment.goal)
+    if (cycleData && saveProfile) {
+      saveProfile(cycleData)
+    }
     await saveEntry({
       scores,
       scoreNotes,
       note,
+      cycle: cycleData,
       runningAdjustment: feelAdjustment?.summary || null,
     })
     setSaved(true)
@@ -70,6 +81,60 @@ export default function Journal() {
           <p className={styles.requiredHint}>All sliders are required before Submit Feel unlocks.</p>
         )}
       </header>
+
+      {profile?.sex === 'woman' && (
+        <div className={styles.noteSection}>
+          <label className={styles.noteLabel}>Period check-in</label>
+          <p className={styles.noteHelp}>
+            Update this when it changes. Running intensity and strength work use this context with today's Feel score.
+          </p>
+          <div className={styles.cycleGrid}>
+            <label>
+              <span>Last period</span>
+              <input
+                type="date"
+                value={cycle.lastPeriod}
+                onChange={e => { setCycle({ ...cycle, lastPeriod: e.target.value }); setSaved(false) }}
+              />
+            </label>
+            <label>
+              <span>Period length</span>
+              <input
+                type="number"
+                min="1"
+                max="14"
+                value={cycle.periodLength}
+                onChange={e => { setCycle({ ...cycle, periodLength: e.target.value }); setSaved(false) }}
+                placeholder="days"
+              />
+            </label>
+            <label>
+              <span>Cycle length</span>
+              <input
+                type="number"
+                min="15"
+                max="90"
+                value={cycle.cycleLength}
+                onChange={e => { setCycle({ ...cycle, cycleLength: e.target.value }); setSaved(false) }}
+                placeholder="days"
+              />
+            </label>
+            <label>
+              <span>Perimenopause / menopause</span>
+              <select
+                value={cycle.menopauseStatus}
+                onChange={e => { setCycle({ ...cycle, menopauseStatus: e.target.value }); setSaved(false) }}
+              >
+                <option value="">Select one</option>
+                <option value="no">No</option>
+                <option value="perimenopause">Perimenopause</option>
+                <option value="menopause">Menopause</option>
+                <option value="unsure">Not sure</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      )}
 
       <div className={styles.factors}>
         {JOURNAL_FACTORS.map((factor, index) => (
@@ -368,7 +433,7 @@ function fullPlan(goal) {
   })
 }
 
-function adjustTodayRunningPlan(goal, scores) {
+function adjustTodayRunningPlan(goal, scores, cycleData = null) {
   if (!goal) return null
   const date = todayISO()
   const plan = fullPlan(goal)
@@ -384,9 +449,12 @@ function adjustTodayRunningPlan(goal, scores) {
   if (scores.movementReadiness <= 4) reasons.push('low movement readiness')
   if (scores.jointFluidity <= 4) reasons.push('joint stiffness')
   if (scores.stress <= 4) reasons.push('high stress load')
+  const cycleSignal = getCycleTrainingSignal(cycleData)
+  if (cycleSignal) reasons.push(cycleSignal.reason)
 
+  const highIntensityLocked = feelScore < 7
   const severe = feelScore <= 3.8 || [scores.sleep, scores.energy, scores.pain, scores.movementReadiness].some(v => v <= 2)
-  const moderate = severe ? false : (feelScore < 6.2 || reasons.length > 0)
+  const moderate = severe ? false : (feelScore < 6.2 || reasons.length > 0 || (highIntensityLocked && ['hard', 'long', 'moderate'].includes(base.type)))
 
   let adjusted = base
   let level = 'normal'
@@ -410,7 +478,20 @@ function adjustTodayRunningPlan(goal, scores) {
       distance: base.type === 'rest' ? '' : 'Reduce planned volume by 30-50%',
       duration: base.type === 'rest' ? (base.duration || '10-20 min optional walk') : '20-35 min',
       pace: 'Conversational only. Stop if symptoms rise.',
+      strength: 'No high-intensity strength today. Keep 8-12 min easy activation only: glute bridges, dead bug, calf raises, side plank.',
       notes: `Feel check flagged ${reasons.join(', ') || 'moderate readiness'}. Keep this below workout effort today. No intervals, no long run pressure, no chasing pace.`,
+    }
+  } else if (highIntensityLocked && ['hard', 'long', 'moderate'].includes(base.type)) {
+    level = 'intensity-lock'
+    adjusted = {
+      ...base,
+      type: 'easy',
+      title: 'Easy Aerobic - Feel adjusted',
+      distance: 'Reduce planned volume by 20-40%',
+      duration: '25-40 min',
+      pace: 'Conversational only. No high intensity until Feel is 7/10 or higher.',
+      strength: 'No high-intensity strength today. Use easy activation and mobility only.',
+      notes: `Feel is ${feelScore.toFixed(1)}/10. Replace high-intensity running or strength with easy aerobic work until Feel crosses 7/10.`,
     }
   } else if (plan[index].feelAdjustment?.original) {
     adjusted = base
@@ -439,4 +520,24 @@ function adjustTodayRunningPlan(goal, scores) {
       ? 'Today returned to the original running plan.'
       : `Today adjusted to ${level} because of ${reasons.join(', ') || 'low readiness'}.`,
   }
+}
+
+function getCycleTrainingSignal(cycleData) {
+  if (!cycleData) return null
+  const status = cycleData.menopauseStatus
+  if (status === 'perimenopause') return { reason: 'perimenopause context' }
+  if (status === 'menopause') return { reason: 'menopause context' }
+
+  const lastPeriod = cycleData.lastPeriod
+  const periodLength = Number(cycleData.periodLength) || 0
+  const cycleLength = Number(cycleData.cycleLength) || 0
+  if (!lastPeriod) return null
+
+  const start = new Date(`${lastPeriod}T00:00:00`)
+  if (Number.isNaN(start.getTime())) return null
+  const today = new Date(`${todayISO()}T00:00:00`)
+  const day = Math.floor((today - start) / 86400000) + 1
+  if (day >= 1 && periodLength && day <= periodLength) return { reason: 'period phase' }
+  if (cycleLength && day >= cycleLength - 3 && day <= cycleLength + 1) return { reason: 'late-cycle / expected period window' }
+  return null
 }

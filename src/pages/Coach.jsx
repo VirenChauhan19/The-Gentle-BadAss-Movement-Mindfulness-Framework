@@ -343,7 +343,7 @@ function recentDateCutoff(days = 30) {
   return d.toISOString().split('T')[0]
 }
 
-function getReadinessInsight(entries, todaySession) {
+function getReadinessInsight(entries, todaySession, profile) {
   const today = new Date().toISOString().split('T')[0]
   const todayEntry = entries.find(e => e.date === today)
   const scores = todayEntry?.scores || {}
@@ -369,6 +369,17 @@ function getReadinessInsight(entries, todaySession) {
     scores.movementReadiness <= 4 && 'movement readiness',
     scores.stress <= 4 && 'stress',
   ].filter(Boolean)
+  const cycleSignal = getCycleTrainingSignal(profile)
+  if (cycleSignal) lowSignals.push(cycleSignal.label)
+
+  if (feel < 7 && hardDay) {
+    return {
+      tone: 'caution',
+      title: 'No high intensity today',
+      summary: `Feel is ${feel.toFixed(1)}/10. High-intensity running and strength stay off the plan until Feel is 7/10 or higher.`,
+      action: 'Switch to easy aerobic work, mobility, or recovery strength.',
+    }
+  }
 
   if (feel <= 4.2 || (hardDay && lowSignals.length >= 2)) {
     return {
@@ -394,6 +405,63 @@ function getReadinessInsight(entries, todaySession) {
     summary: `Feel is ${feel.toFixed(1)}/10. Today supports the planned ${SESSION_STYLE[sessionType]?.label || sessionType} session.`,
     action: 'Execute the warm-up properly and keep the first third patient.',
   }
+}
+
+function getCycleTrainingSignal(profile) {
+  if (profile?.sex !== 'woman') return null
+  const status = profile.menopauseStatus
+  if (status === 'perimenopause') return { label: 'perimenopause context' }
+  if (status === 'menopause') return { label: 'menopause context' }
+
+  const lastPeriod = profile.lastPeriod
+  const periodLength = Number(profile.periodLength) || 0
+  const cycleLength = Number(profile.cycleLength) || 0
+  if (!lastPeriod) return null
+  const start = new Date(`${lastPeriod}T00:00:00`)
+  if (Number.isNaN(start.getTime())) return null
+  const today = new Date()
+  const day = Math.floor((new Date(today.toISOString().split('T')[0]) - start) / 86400000) + 1
+  if (periodLength && day >= 1 && day <= periodLength) return { label: 'period phase' }
+  if (cycleLength && day >= cycleLength - 3 && day <= cycleLength + 1) return { label: 'late-cycle window' }
+  return null
+}
+
+function getTodayFeel(entries) {
+  const today = new Date().toISOString().split('T')[0]
+  const entry = entries.find(e => e.date === today)
+  return entry ? computeFeelScore(entry.scores || {}) : null
+}
+
+function adaptSessionForReadiness(session, entries) {
+  if (!session) return session
+  const feel = getTodayFeel(entries)
+  const highIntensity = ['hard', 'moderate', 'long'].includes(session.type)
+  if (feel === null || feel >= 7 || !highIntensity) return session
+  return {
+    ...session,
+    type: 'easy',
+    title: 'Easy Aerobic - Feel adjusted',
+    distance: 'Reduce planned volume by 20-40%',
+    duration: '25-40 min',
+    pace: 'Conversational only. No high intensity until Feel is 7/10 or higher.',
+    strength: 'No high-intensity strength today. Use easy activation and mobility only.',
+    notes: `Feel is ${feel.toFixed(1)}/10. Replace high-intensity running or strength with easy aerobic work until Feel crosses 7/10.`,
+  }
+}
+
+function formatMenopauseStatus(status) {
+  if (status === 'perimenopause') return 'Perimenopause'
+  if (status === 'menopause') return 'Menopause'
+  if (status === 'no') return 'No'
+  if (status === 'unsure') return 'Not sure'
+  return 'Not set'
+}
+
+function formatCycleSummary(profile) {
+  const signal = getCycleTrainingSignal(profile)
+  if (signal) return `Training is being read with ${signal.label}.`
+  if (profile?.lastPeriod) return 'Running readiness uses your period details plus daily Feel.'
+  return 'Add period details in Feel so the plan can adjust month to month.'
 }
 
 function getTrendInsight(entries, checkins) {
@@ -546,7 +614,8 @@ export default function Coach() {
   const weekNum    = Math.ceil(dayNum / 7)
 
   const todayDayName = DAYS_FULL[now.getDay()]
-  const todaySession = plan.find(s => s.date === today) || goal.weekTemplate?.find(s => s.day === todayDayName)
+  const rawTodaySession = plan.find(s => s.date === today) || goal.weekTemplate?.find(s => s.day === todayDayName)
+  const todaySession = adaptSessionForReadiness(rawTodaySession, entries)
   const todayCheckin = checkins.find(c => c.date === today)
 
   async function handleRetune() {
@@ -651,6 +720,7 @@ export default function Coach() {
             actuals={actuals} onRetune={handleRetune} retuning={retuning} retuneNotice={retuneNotice}
             isComplete={isComplete} onCheckin={saveCoachCheckin} onNewGoal={clearCoachGoal}
             adminRemarks={adminRemarks}
+            profile={profile}
           />
         : <ChatTab
             history={chat} goal={goal} checkins={checkins}
@@ -908,6 +978,12 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
     const profileNotes = [
       profileStory ? `Onboarding fitness history: ${profileStory}` : null,
       profilePath && profilePath !== 'not set' ? `Onboarding path: ${profilePath}` : null,
+      profile?.sex ? `Sex: ${profile.sex}` : null,
+      profile?.sex === 'woman' && profile.lastPeriod ? `Last period: ${profile.lastPeriod}` : null,
+      profile?.sex === 'woman' && profile.periodLength ? `Period length: ${profile.periodLength} days` : null,
+      profile?.sex === 'woman' && profile.cycleLength ? `Cycle length: ${profile.cycleLength} days` : null,
+      profile?.sex === 'woman' && profile.menopauseStatus ? `Perimenopause/menopause: ${formatMenopauseStatus(profile.menopauseStatus)}` : null,
+      profile?.sex === 'woman' ? 'For women, avoid forcing high intensity when Feel or cycle context suggests lower readiness. Include adaptable notes for period/perimenopause/menopause changes.' : null,
       notes ? `Runner notes: ${notes}` : null,
     ].filter(Boolean).join('\n')
     try {
@@ -1238,14 +1314,17 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
 }
 
 // ── Program Tab ───────────────────────────────────────────────────────────────
-function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, actuals, onRetune, retuning, retuneNotice, isComplete, onCheckin, onNewGoal, adminRemarks = [] }) {
+function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, actuals, onRetune, retuning, retuneNotice, isComplete, onCheckin, onNewGoal, adminRemarks = [], profile }) {
   const visiblePlan = plan.length ? plan : getPlan(goal)
   const currentDay = Math.max(1, dayNum)
   const currentWeek = Math.max(1, Math.ceil(currentDay / 7))
   const totalWeeks = Math.max(1, Math.ceil(visiblePlan.length / 7))
   const [weekIndex, setWeekIndex] = useState(currentWeek)
   const [selectedDay, setSelectedDay] = useState(null)
-  const nextSessions = visiblePlan.filter(s => s.dayNumber >= currentDay).slice(0, 14)
+  const nextWeekPlan = visiblePlan
+    .filter(s => (s.dayNumber || 0) >= currentDay && (s.dayNumber || 0) < currentDay + 7)
+    .map(s => s.date === todaySession?.date ? todaySession : s)
+  const nextSessions = nextWeekPlan
   const trainingDays = visiblePlan.filter(s => s.type !== 'rest').length
   const completedDates = new Set(checkins.map(c => c.date))
   const todayStyle = SESSION_STYLE[todaySession?.type] || SESSION_STYLE.rest
@@ -1257,7 +1336,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
   }, {})
   const generalRemarks = adminRemarks.filter(r => !r.runDate)
   const todayRemarks = todaySession?.date ? (remarksByDate[todaySession.date] || []) : []
-  const readinessInsight = getReadinessInsight(entries, todaySession)
+  const readinessInsight = getReadinessInsight(entries, todaySession, profile)
   const trendInsight = getTrendInsight(entries, checkins)
   const fallbackActuals = actuals || computeActuals(checkins)
   const recentFeelEntries = entries
@@ -1268,7 +1347,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
   const avgRecentFeel = recentFeelScores.length ? recentFeelScores.reduce((a, b) => a + b, 0) / recentFeelScores.length : null
 
   // Days for the visible week
-  const weekDays = visiblePlan.filter(s => (s.week || Math.ceil((s.dayNumber || 1) / 7)) === weekIndex)
+  const weekDays = nextWeekPlan
   const weekStart = weekDays[0]?.date
   const weekEnd = weekDays[weekDays.length - 1]?.date
   const weekKm = weekDays.reduce((sum, d) => {
@@ -1324,6 +1403,20 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
           retuning={retuning}
           retuneNotice={retuneNotice}
         />
+        {profile?.sex === 'woman' && (
+          <div className={styles.paceGuideCard}>
+            <div>
+              <span>Monthly context</span>
+              <p>{formatCycleSummary(profile)}</p>
+            </div>
+            <div className={styles.paceGuideGrid}>
+              <p><strong>Last period</strong>{profile.lastPeriod || 'Not set'}</p>
+              <p><strong>Period length</strong>{profile.periodLength ? `${profile.periodLength} days` : 'Not set'}</p>
+              <p><strong>Cycle length</strong>{profile.cycleLength ? `${profile.cycleLength} days` : 'Not set'}</p>
+              <p><strong>Stage</strong>{formatMenopauseStatus(profile.menopauseStatus)}</p>
+            </div>
+          </div>
+        )}
         {goal.paceGuide && (
           <div className={styles.paceGuideCard}>
             <div>
@@ -1384,7 +1477,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             <button
               className={styles.weekNavBtn}
               onClick={goToPrevWeek}
-              disabled={weekIndex <= 1}
+              disabled
               aria-label="Previous week"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
@@ -1393,9 +1486,9 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             </button>
             <div className={styles.weekHeading}>
               <p className={styles.weekKicker}>
-                {isCurrentWeek ? 'This week' : isPastWeek ? 'Past week' : 'Upcoming week'}
+                Next seven days
               </p>
-              <h2 className={styles.weekTitle}>Week {weekIndex} <span>of {totalWeeks}</span></h2>
+              <h2 className={styles.weekTitle}>Current plan <span>admin edits the full plan</span></h2>
               {weekStart && weekEnd && (
                 <p className={styles.weekRange}>{formatDateShort(weekStart)} — {formatDateShort(weekEnd)}</p>
               )}
@@ -1403,7 +1496,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             <button
               className={styles.weekNavBtn}
               onClick={goToNextWeek}
-              disabled={weekIndex >= totalWeeks}
+              disabled
               aria-label="Next week"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
@@ -1412,7 +1505,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             </button>
           </div>
 
-          {!isCurrentWeek && (
+          {false && !isCurrentWeek && (
             <button className={styles.jumpToCurrentBtn} onClick={goToCurrentWeek}>
               Jump to current week
             </button>
@@ -2110,6 +2203,7 @@ TRACK EVENT RULES (${raceGoal}):
   const workoutRules = `
 HARD WORKOUT QUALITY RULES:
 - Every hard workout MUST be a real coach-prescribed session, not a generic "interval day".
+- If the runner's daily Feel score is below 7/10, high-intensity running and high-intensity strength must be replaced with easy aerobic work, mobility, or light activation until Feel is 7/10 or higher.
 - Pick one purpose per workout from: speed mechanics, speed endurance, aerobic power, threshold/lactate, race rhythm, hills, fartlek, progression, controlled time trial.
 - The "purpose" field MUST state that intent in plain English (e.g. "Lactate threshold tolerance", "Race-pace specificity", "Top-end speed mechanics").
 - Match the menu to the runner's level — Beginner: relaxed strides, short reps, hills, fartlek; Intermediate: one focused workout/wk; Advanced/Competitive: event-specific reps, threshold support, race-rhythm work.
