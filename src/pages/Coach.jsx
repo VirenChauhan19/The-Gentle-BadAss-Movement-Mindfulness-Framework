@@ -365,9 +365,12 @@ function getReadinessInsight(entries, todaySession, profile) {
   const lowSignals = [
     scores.sleep <= 4 && 'sleep',
     scores.energy <= 4 && 'energy',
-    scores.pain <= 4 && 'pain',
-    scores.movementReadiness <= 4 && 'movement readiness',
-    scores.stress <= 4 && 'stress',
+    scores.movementJoy <= 4 && 'walk/run joy',
+    scores.strengthJoy <= 4 && 'strength joy',
+    scores.jointFluidity <= 4 && 'joint stiffness',
+    scores.digestiveComfort <= 4 && 'digestive comfort',
+    scores.personalStress <= 4 && 'personal stress',
+    scores.professionalStress <= 4 && 'professional stress',
   ].filter(Boolean)
   const cycleSignal = getCycleTrainingSignal(profile)
   if (cycleSignal) lowSignals.push(cycleSignal.label)

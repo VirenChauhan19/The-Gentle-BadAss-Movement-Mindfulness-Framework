@@ -445,15 +445,24 @@ function adjustTodayRunningPlan(goal, scores, cycleData = null) {
   const reasons = []
   if (scores.sleep <= 4) reasons.push('low sleep')
   if (scores.energy <= 4) reasons.push('low energy')
-  if (scores.pain <= 4) reasons.push('pain/niggle')
-  if (scores.movementReadiness <= 4) reasons.push('low movement readiness')
+  if (scores.movementJoy <= 4) reasons.push('low walk/run joy')
+  if (scores.strengthJoy <= 4) reasons.push('low strength joy')
   if (scores.jointFluidity <= 4) reasons.push('joint stiffness')
-  if (scores.stress <= 4) reasons.push('high stress load')
+  if (scores.digestiveComfort <= 4) reasons.push('digestive discomfort')
+  if (scores.personalStress <= 4) reasons.push('high personal stress')
+  if (scores.professionalStress <= 4) reasons.push('high professional stress')
   const cycleSignal = getCycleTrainingSignal(cycleData)
   if (cycleSignal) reasons.push(cycleSignal.reason)
 
   const highIntensityLocked = feelScore < 7
-  const severe = feelScore <= 3.8 || [scores.sleep, scores.energy, scores.pain, scores.movementReadiness].some(v => v <= 2)
+  const severe = feelScore <= 3.8 || [
+    scores.sleep,
+    scores.energy,
+    scores.movementJoy,
+    scores.strengthJoy,
+    scores.jointFluidity,
+    scores.digestiveComfort,
+  ].some(v => v <= 2)
   const moderate = severe ? false : (feelScore < 6.2 || reasons.length > 0 || (highIntensityLocked && ['hard', 'long', 'moderate'].includes(base.type)))
 
   let adjusted = base
