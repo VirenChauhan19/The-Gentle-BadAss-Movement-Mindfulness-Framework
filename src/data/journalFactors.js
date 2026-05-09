@@ -8,19 +8,19 @@ export const JOURNAL_FACTORS = [
   {
     id: 'nutrition',
     label: 'Nutritional Value',
-    question: 'Did you eat well, including quality and timing?',
+    question: 'Did you eat well (quality and timing)?',
     category: 'body',
   },
   {
     id: 'personalStress',
     label: 'Personal Stress',
-    question: 'How manageable were anxiety and mental load from home life?',
+    question: 'Levels of anxiety / mental load from home life.',
     category: 'mind',
   },
   {
     id: 'professionalStress',
     label: 'Professional Stress',
-    question: 'How manageable were anxiety and mental load from work life?',
+    question: 'Levels of anxiety / mental load from work life.',
     category: 'mind',
   },
   {
@@ -32,7 +32,7 @@ export const JOURNAL_FACTORS = [
   {
     id: 'energy',
     label: 'Energy Levels',
-    question: 'How free from lethargy or tiredness do you feel?',
+    question: 'Presence of lethargy or tiredness.',
     category: 'body',
   },
   {
@@ -62,13 +62,13 @@ export const JOURNAL_FACTORS = [
   {
     id: 'jointFluidity',
     label: 'Joint Fluidity',
-    question: 'How greased rather than stiff do your joints feel upon waking?',
+    question: 'How "stiff" or "greased" do your joints feel upon waking?',
     category: 'body',
   },
   {
     id: 'digestiveComfort',
     label: 'Digestive Comfort',
-    question: 'How calm rather than reactive is your gut feeling?',
+    question: 'Is your gut feeling calm or reactive?',
     category: 'body',
   },
   {

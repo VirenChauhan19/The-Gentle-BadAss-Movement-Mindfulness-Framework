@@ -106,7 +106,8 @@
 }
 
 /* ── Story textarea ───────────────────────────────────── */
-.textarea {
+.textarea,
+.textareaSmall {
   width: 100%;
   padding: 1.1rem 1.25rem;
   border: 1.5px solid var(--border);
@@ -124,7 +125,12 @@
               transform var(--d-fast) var(--ease-out);
 }
 
-.textarea:focus {
+.textareaSmall {
+  min-height: 118px;
+}
+
+.textarea:focus,
+.textareaSmall:focus {
   outline: none;
   border-color: var(--sage-dark);
   box-shadow: 0 0 0 4px rgba(99, 127, 95, 0.13);

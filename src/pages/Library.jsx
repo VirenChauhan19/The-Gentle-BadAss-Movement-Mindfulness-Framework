@@ -4,6 +4,9 @@ import { EXERCISES, CATEGORIES } from '../data/exercises'
 import styles from './Library.module.css'
 
 const PILLARS = ['Smile', 'Tall Puppet', 'Relaxed Fists', 'Uncurl Toes', 'Breathe']
+const PLAN_CATEGORIES = Object.fromEntries(
+  Object.entries(CATEGORIES).filter(([id]) => id !== 'functional')
+)
 const PRINCIPLES = [
   ['The Hip Engine', 'Hips are the engine. Knees follow; they never lead.'],
   ['The Stable Pillar', 'The lumbar spine stays quiet while hips and shoulders move around it.'],
@@ -11,7 +14,7 @@ const PRINCIPLES = [
 ]
 
 export default function Library() {
-  const [activeCategory, setActiveCategory] = useState('functional')
+  const [activeCategory, setActiveCategory] = useState('strength')
   const filtered = EXERCISES.filter(e => e.category === activeCategory)
 
   const stats = useMemo(() => {
@@ -25,9 +28,9 @@ export default function Library() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.label}>Movement Library</p>
-        <h1 className={styles.title}>Learn to Feel</h1>
-        <p className={styles.subtitle}>Slow, clinical movement practice built around quality before quantity.</p>
+        <p className={styles.label}>Your 90 day plan</p>
+        <h1 className={styles.title}>Weekly modules</h1>
+        <p className={styles.subtitle}>Your main course page. Modules unlock one week at a time across the 90 day plan.</p>
       </header>
 
       <section className={styles.pillarBanner}>
@@ -38,17 +41,17 @@ export default function Library() {
       </section>
 
       <section className={styles.weeklyModule}>
-        <div className={styles.weeklyIcon}>7</div>
+        <div className={styles.weeklyIcon}>90</div>
         <div className={styles.weeklyCopy}>
-          <p className={styles.weeklyLabel}>Weekly Module</p>
-          <h2>Functional Tests</h2>
-          <p>Use Slump, Hip Rotation, Straight Leg Raise, and other tests once a week to notice change. Daily work stays focused on breath, quality movement, and control.</p>
+          <p className={styles.weeklyLabel}>Main course</p>
+          <h2>Weekwise plan</h2>
+          <p>Start with the current week. Breathe, Strength Tools, and Running Drills live here, while Functional Tests sit on their own weekly check page.</p>
         </div>
-        <button onClick={() => setActiveCategory('functional')}>Open weekly tests</button>
+        <Link to="/breathing" className={styles.weeklyButton}>Breathe</Link>
       </section>
 
       <div className={styles.filters}>
-        {Object.entries(CATEGORIES).map(([id, cat]) => (
+        {Object.entries(PLAN_CATEGORIES).map(([id, cat]) => (
           <button
             key={id}
             className={styles.filter + (activeCategory === id ? ' ' + styles.filterActive : '')}

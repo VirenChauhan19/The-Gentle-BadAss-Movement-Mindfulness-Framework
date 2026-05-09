@@ -7,10 +7,9 @@ import styles from './Nav.module.css'
 const links = [
   { to: '/', label: 'Home', icon: HomeIcon },
   { to: '/journal', label: 'Feel', icon: JournalIcon, lockedForGuest: true },
-  { to: '/breathing', label: 'Breathe', icon: BreathIcon },
-  { to: '/history', label: 'History', icon: HistoryIcon, lockedForGuest: true },
-  { to: '/library', label: 'Move', icon: LibraryIcon, lockedForGuest: true },
-  { to: '/coach', label: 'Running', icon: CoachIcon },
+  { to: '/library', label: '90 Day Plan', icon: LibraryIcon, lockedForGuest: true },
+  { to: '/functional-tests', label: 'Functional Tests', icon: TestIcon, lockedForGuest: true },
+  { to: '/history', label: 'Progress', icon: HistoryIcon, lockedForGuest: true },
   { to: '/profile', label: 'Profile', icon: ProfileIcon },
 ]
 
@@ -88,12 +87,12 @@ function HistoryIcon() {
   )
 }
 
-function BreathIcon() {
+function TestIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 12c3-5 7-5 10-2 2 2 1 5-2 5H8" />
-      <path d="M4 17h9c4 0 6-4 3-7" />
-      <path d="M4 7c2-2 5-2 7 0" />
+      <path d="M9 11l2 2 4-5" />
+      <path d="M20 12a8 8 0 1 1-2.34-5.66" />
+      <path d="M20 4v5h-5" />
     </svg>
   )
 }
@@ -104,15 +103,6 @@ function LibraryIcon() {
       <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="8" x2="12" y2="16" />
       <line x1="8" y1="12" x2="16" y2="12" />
-    </svg>
-  )
-}
-
-function CoachIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2a7 7 0 0 1 7 7c0 3.5-2.5 6.5-6 7.4V18h2a1 1 0 0 1 0 2h-2v2a1 1 0 0 1-2 0v-2H9a1 1 0 0 1 0-2h2v-1.6C7.5 15.5 5 12.5 5 9a7 7 0 0 1 7-7z" />
-      <path d="M9.5 9.5 11 11l3.5-3.5" />
     </svg>
   )
 }

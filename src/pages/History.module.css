@@ -86,6 +86,41 @@
   margin-top: 4px;
 }
 
+.insightGrid {
+  padding: 14px 16px 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.insightCard {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.insightCard h2 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.insightCard p {
+  color: var(--ink-light);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  margin-top: 7px;
+}
+
+.insightCard strong {
+  color: var(--ink);
+}
+
 /* ── Dashboard charts ────────────────────────────────── */
 .dashboard {
   padding: 18px 16px 0;
@@ -357,6 +392,7 @@
   .header { padding: 52px 28px 22px; }
 
   .summaryGrid,
+  .insightGrid,
   .dashboard,
   .list,
   .moveArchive {
@@ -388,6 +424,7 @@
   .list,
   .listTitle,
   .moveArchive,
+  .insightGrid,
   .summaryGrid {
     padding-left: 56px;
     padding-right: 56px;
@@ -422,12 +459,18 @@
 
   .dashboard,
   .list,
+  .insightGrid,
   .moveArchive {
     padding-left: 12px;
     padding-right: 12px;
   }
 
+  .insightGrid {
+    grid-template-columns: 1fr;
+  }
+
   .chartCard,
+  .insightCard,
   .row,
   .moveRow,
   .empty {

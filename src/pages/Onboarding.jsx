@@ -36,12 +36,32 @@ const PLANS = {
   270: { label: '270-Day La Ultra',      desc: 'The full La Ultra journey - the ultimate commitment.',   price: 2999 },
 }
 
+const AGE_RANGES = [
+  '18-24', '25-29', '30-34', '35-39', '40-44', '45-49',
+  '50-54', '55-59', '60-64', '65-69', '70+',
+]
+
+const HEARD_ABOUT = [
+  'Instagram',
+  'Facebook',
+  'LinkedIn',
+  'YouTube',
+  "Rajat's Patient",
+  'Friend referral',
+]
+
 export default function Onboarding() {
   const { saveProfile, profile } = useData()
   const navigate = useNavigate()
   const [step, setStep] = useState(() => (profile?.onboardingComplete && !profile?.sex ? 2 : 1))
   const [data, setData] = useState({
+    name: profile?.name || '',
+    ageRange: profile?.ageRange || '',
+    gender: profile?.gender || profile?.sex || '',
     fitnessHistory: profile?.fitnessHistory || '',
+    commitmentStatement: profile?.commitmentStatement || '',
+    heardAbout: profile?.heardAbout || '',
+    programGoal: profile?.programGoal || '',
     sex: profile?.sex || '',
     lastPeriod: profile?.lastPeriod || '',
     periodLength: profile?.periodLength || '',
@@ -52,9 +72,10 @@ export default function Onboarding() {
   })
   const plan = PLANS[data.commitment] || PLANS[90]
   const isWoman = data.sex === 'woman'
+  const storyReady = data.name.trim() && data.ageRange && data.gender && data.fitnessHistory.trim() && data.commitmentStatement.trim()
 
   async function handleComplete() {
-    await saveProfile({ ...data, onboardingComplete: true })
+    await saveProfile({ ...data, sex: data.sex || data.gender, onboardingComplete: true })
     navigate('/')
   }
 
@@ -75,13 +96,13 @@ export default function Onboarding() {
       <header className={styles.header}>
         <p className={styles.stepLabel}>Step {step} of 4</p>
         <h1 className={styles.title}>
-          {step === 1 && 'Your Story'}
+          {step === 1 && 'Your Sign Up Details'}
           {step === 2 && 'Your Body'}
           {step === 3 && 'Choose Your Path'}
           {step === 4 && 'Your Commitment'}
         </h1>
         <p className={styles.subtitle}>
-          {step === 1 && 'Tell us where you are right now.'}
+          {step === 1 && 'Tell us who you are and what you are committing to.'}
           {step === 2 && 'This helps us adjust training around monthly physiology.'}
           {step === 3 && 'Pick the focus that fits your current state.'}
           {step === 4 && 'Slide to choose your journey length.'}
@@ -90,18 +111,83 @@ export default function Onboarding() {
 
       {step === 1 && (
         <section className={styles.section}>
+          <div className={styles.bodyFields}>
+            <label>
+              <span>Name</span>
+              <input
+                type="text"
+                value={data.name}
+                onChange={e => setData({ ...data, name: e.target.value })}
+                placeholder="Your name"
+                autoFocus
+              />
+            </label>
+            <label>
+              <span>Age range</span>
+              <select
+                value={data.ageRange}
+                onChange={e => setData({ ...data, ageRange: e.target.value })}
+              >
+                <option value="">Select one</option>
+                {AGE_RANGES.map(range => <option key={range} value={range}>{range}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>Gender</span>
+              <select
+                value={data.gender}
+                onChange={e => {
+                  const gender = e.target.value
+                  setData({ ...data, gender, sex: gender })
+                }}
+              >
+                <option value="">Select one</option>
+                <option value="woman">Woman</option>
+                <option value="man">Man</option>
+                <option value="non-binary">Non-binary</option>
+                <option value="self-described">Prefer to self-describe</option>
+                <option value="prefer-not">Prefer not to say</option>
+              </select>
+            </label>
+          </div>
           <textarea
             className={styles.textarea}
             value={data.fitnessHistory}
             onChange={e => setData({ ...data, fitnessHistory: e.target.value })}
-            placeholder="e.g. Occasional walking, recovering from a knee injury, want to run my first 5 km..."
-            autoFocus
+            placeholder="Their story: your journey so far, injuries, life events, work, children, menopause context, and anything else we should know."
           />
-          <p className={styles.hint}>A few sentences is enough - this helps personalise your path.</p>
+          <textarea
+            className={styles.textareaSmall}
+            value={data.commitmentStatement}
+            onChange={e => setData({ ...data, commitmentStatement: e.target.value })}
+            placeholder="Self-commitment: write your own mission statement in your own words."
+          />
+          <div className={styles.bodyFields}>
+            <label>
+              <span>How did you hear about us?</span>
+              <select
+                value={data.heardAbout}
+                onChange={e => setData({ ...data, heardAbout: e.target.value })}
+              >
+                <option value="">Select one</option>
+                {HEARD_ABOUT.map(item => <option key={item} value={item}>{item}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>What are you most looking for from this program?</span>
+              <input
+                type="text"
+                value={data.programGoal}
+                onChange={e => setData({ ...data, programGoal: e.target.value })}
+                placeholder="e.g. consistency, pain-free running, strength"
+              />
+            </label>
+          </div>
+          <p className={styles.hint}>These details help personalise the plan without making the first check-in clinical.</p>
           <div className={styles.btnStack}>
             <button
               className={styles.primaryBtn}
-              disabled={!data.fitnessHistory.trim()}
+              disabled={!storyReady}
               onClick={() => setStep(2)}
             >
               Next
@@ -116,14 +202,14 @@ export default function Onboarding() {
             <button
               type="button"
               className={`${styles.choiceCard} ${data.sex === 'woman' ? styles.choiceCardActive : ''}`}
-              onClick={() => setData({ ...data, sex: 'woman' })}
+              onClick={() => setData({ ...data, sex: 'woman', gender: data.gender || 'woman' })}
             >
               Woman
             </button>
             <button
               type="button"
               className={`${styles.choiceCard} ${data.sex === 'man' ? styles.choiceCardActive : ''}`}
-              onClick={() => setData({ ...data, sex: 'man' })}
+              onClick={() => setData({ ...data, sex: 'man', gender: data.gender || 'man' })}
             >
               Man
             </button>

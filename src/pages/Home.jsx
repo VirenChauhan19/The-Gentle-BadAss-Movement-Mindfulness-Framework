@@ -170,29 +170,42 @@ export default function Home() {
 
       <section className={styles.actionGrid}>
         <Link
-          to="/library"
+          to="/functional-tests"
           className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
         >
-          <span className={styles.actionTitle}>Movement Library</span>
-          <span className={styles.actionSub}>Tests, drills, strength</span>
+          <span className={styles.actionTitle}>Take Functional Test</span>
+          <span className={styles.actionSub}>Activated weekly</span>
           {guestLocked && <span className={styles.actionLock}>Locked</span>}
         </Link>
         <Link
           to="/history"
           className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
         >
-          <span className={styles.actionTitle}>History</span>
-          <span className={styles.actionSub}>Trends &amp; progress</span>
+          <span className={styles.actionTitle}>Progress</span>
+          <span className={styles.actionSub}>Feel, workouts, and change</span>
           {guestLocked && <span className={styles.actionLock}>Locked</span>}
         </Link>
-        <Link to="/breathing" className={styles.action}>
-          <span className={styles.actionTitle}>Breathing</span>
-          <span className={styles.actionSub}>Cadence &amp; ease</span>
-        </Link>
-        <Link to="/coach" className={styles.action}>
-          <span className={styles.actionTitle}>Coach</span>
-          <span className={styles.actionSub}>Goals &amp; check-ins</span>
-        </Link>
+      </section>
+
+      <section className={styles.historyVisual} aria-label="Recent history">
+        <div>
+          <p className={styles.historyKicker}>History</p>
+          <h2>Recent Feel pattern</h2>
+        </div>
+        <div className={styles.historyBars}>
+          {entries.slice(-7).map(entry => {
+            const score = computeFeelScore(entry.scores || {})
+            return (
+              <span
+                key={entry.date}
+                className={styles.historyBar}
+                style={{ height: `${Math.max(12, score * 10)}%` }}
+                title={`${entry.date}: ${score.toFixed(1)}/10`}
+              />
+            )
+          })}
+          {entries.length === 0 && <p className={styles.historyEmpty}>Your Feel and workout history will appear here.</p>}
+        </div>
       </section>
 
       <section className={styles.intention}>

@@ -101,8 +101,8 @@
 }
 
 .factor {
-  min-height: 238px;
-  padding: 16px;
+  min-height: 208px;
+  padding: 14px;
   background: var(--paper);
   border: 1px solid var(--border-light);
   border-radius: var(--r-lg);
@@ -429,6 +429,22 @@
   line-height: 1.45;
 }
 
+.emojiChip {
+  height: 38px;
+  display: grid;
+  place-items: center;
+  gap: 1px;
+  padding: 3px 2px;
+  font-size: 1rem;
+}
+
+.emojiChip small {
+  font-size: 0.52rem;
+  line-height: 1;
+  font-weight: 900;
+  color: currentColor;
+}
+
 .cycleGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -510,7 +526,7 @@
   }
 
   .factor {
-    min-height: 248px;
+    min-height: 218px;
   }
 
   .factorLabel {
@@ -522,7 +538,7 @@
   }
 
   .scoreChip {
-    height: 26px;
+    height: 34px;
     font-size: 0.66rem;
   }
 
@@ -689,7 +705,7 @@
 
   .factorTop {
     display: grid;
-    grid-template-columns: 34px minmax(0, 1fr) 64px;
+    grid-template-columns: 34px minmax(0, 1fr);
     gap: 8px;
   }
 
@@ -806,7 +822,7 @@
     position: relative;
     min-height: 64px;
     display: grid;
-    grid-template-columns: repeat(11, minmax(0, 1fr));
+    grid-template-columns: repeat(10, minmax(0, 1fr));
     align-items: center;
     gap: 4px;
     padding: 10px;

@@ -10,6 +10,7 @@ import History from './pages/History'
 import Library from './pages/Library'
 import Breathing from './pages/Breathing'
 import ExerciseDetail from './pages/ExerciseDetail'
+import FunctionalTests from './pages/FunctionalTests'
 import Admin from './pages/Admin'
 import Coach from './pages/Coach'
 import Onboarding from './pages/Onboarding'
@@ -55,7 +56,7 @@ function AppRoutes() {
   }, [user, profile, navigate, location.pathname])
 
   useEffect(() => {
-    const mobileRoutes = ['/', '/journal', '/breathing', '/history', '/library', '/coach', '/profile']
+    const mobileRoutes = ['/', '/journal', '/library', '/functional-tests', '/history', '/profile']
     let startX = 0
     let startY = 0
     let startTime = 0
@@ -112,9 +113,10 @@ function AppRoutes() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/journal" element={<LockedRoute feature="Feel"><Journal /></LockedRoute>} />
         <Route path="/breathing" element={<Breathing />} />
-        <Route path="/history" element={<LockedRoute feature="History"><History /></LockedRoute>} />
-        <Route path="/library" element={<LockedRoute feature="Move"><Library /></LockedRoute>} />
-        <Route path="/library/:id" element={<LockedRoute feature="Move"><ExerciseDetail /></LockedRoute>} />
+        <Route path="/history" element={<LockedRoute feature="Progress"><History /></LockedRoute>} />
+        <Route path="/functional-tests" element={<LockedRoute feature="Functional Tests"><FunctionalTests /></LockedRoute>} />
+        <Route path="/library" element={<LockedRoute feature="Your 90 day plan"><Library /></LockedRoute>} />
+        <Route path="/library/:id" element={<LockedRoute feature="Your 90 day plan"><ExerciseDetail /></LockedRoute>} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/profile" element={<Admin />} />
         <Route path="/admin" element={<Admin />} />
@@ -133,13 +135,18 @@ function LockedRoute({ feature, children }) {
       intro: 'A two-minute body, energy, soreness, and mood check-in that tunes your day.',
       bullets: ['Save daily scores', 'Spot recovery patterns', 'Connect Feel to your running plan'],
     },
-    Move: {
-      title: 'Sign in to unlock Move',
-      intro: 'Tests, drills, strength, and mobility work built to support durable running.',
-      bullets: ['Use the full movement library', 'Track quality scores', 'Keep your exercise history'],
+    'Your 90 day plan': {
+      title: 'Sign in to unlock your 90 day plan',
+      intro: 'Weekly modules, breathing, strength tools, and running drills built around your progress.',
+      bullets: ['Unlock one week at a time', 'Use the day plan', 'Keep your exercise history'],
     },
-    History: {
-      title: 'Sign in to keep your history',
+    'Functional Tests': {
+      title: 'Sign in to unlock Functional Tests',
+      intro: 'Weekly tests help you notice change before you chase volume.',
+      bullets: ['Run weekly checks', 'Compare movement quality', 'Track changes over time'],
+    },
+    Progress: {
+      title: 'Sign in to keep your progress',
       intro: 'Your long-term dashboard for training, Feel scores, breathing, and consistency.',
       bullets: ['See trends over time', 'Review completed sessions', 'Sync progress across devices'],
     },
@@ -190,7 +197,7 @@ function SignInGate() {
         <p className={styles.signInKicker}>La Ultra: Run &amp; Bee</p>
         <h1 id="signin-title">Start with sign-in</h1>
         <p className={styles.signInCopy}>
-          Sign in to unlock Feel, Move, and History with saved progress across sessions. Guest mode is view-only for those sections.
+          Sign in to unlock Feel, your 90 day plan, Functional Tests, and Progress with saved activity across sessions. Guest mode is view-only for those sections.
         </p>
         {authError && <p className={styles.authError}>{authError}</p>}
         <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>

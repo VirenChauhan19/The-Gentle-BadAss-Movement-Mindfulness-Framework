@@ -20,6 +20,7 @@
 .subtitle,
 .feelKicker,
 .progressKicker,
+.historyKicker,
 .intentionKicker,
 .metricLabel {
   font-size: 0.64rem;
@@ -452,6 +453,55 @@
   font-size: 0.58rem;
 }
 
+.historyVisual {
+  margin: 0 16px 14px;
+  min-height: 148px;
+  display: grid;
+  grid-template-columns: minmax(140px, 0.7fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: end;
+  padding: 18px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.historyKicker {
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+
+.historyVisual h2 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-size: 1.22rem;
+  line-height: 1.18;
+}
+
+.historyBars {
+  min-height: 92px;
+  display: flex;
+  align-items: end;
+  gap: 7px;
+  padding: 8px 0 0;
+}
+
+.historyBar {
+  flex: 1;
+  min-width: 12px;
+  border-radius: 999px 999px 4px 4px;
+  background: linear-gradient(180deg, var(--sage), var(--sage-dark));
+  box-shadow: 0 8px 14px color-mix(in srgb, var(--sage) 28%, transparent);
+}
+
+.historyEmpty {
+  align-self: center;
+  color: var(--ink-faint);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .intention {
   margin: 0 16px;
   padding: 20px 18px;
@@ -572,7 +622,7 @@
   }
 
   .actionGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 0 0 18px;
     gap: 14px;
   }
@@ -584,6 +634,10 @@
 
   .intention {
     margin: 0;
+  }
+
+  .historyVisual {
+    margin: 0 0 18px;
   }
 }
 
@@ -668,6 +722,12 @@
   .actionGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 9px;
+  }
+
+  .historyVisual {
+    grid-template-columns: 1fr;
+    margin: 0 12px 14px;
+    border-radius: 18px;
   }
 
   .action {

@@ -57,12 +57,13 @@ export default function History() {
   const avg = chartData.length
     ? Math.round(chartData.reduce((s, e) => s + e.score, 0) / chartData.length * 10) / 10
     : null
+  const factorSummary = summarizeFactors(entries)
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.label}>Quality Dashboard</p>
-        <h1 className={styles.title}>Your Journey</h1>
+        <p className={styles.label}>Progress Dashboard</p>
+        <h1 className={styles.title}>Your Progress</h1>
         <p className={styles.commitment}>
           Path: <strong>{profile?.path || 'Rehab'}</strong> · 
           Goal: <strong>{profile?.commitment || 270} Days</strong>
@@ -86,6 +87,25 @@ export default function History() {
         <div className={styles.summaryCard}>
           <span>{breathingSessions.length}</span>
           <p>Breath sessions</p>
+        </div>
+      </section>
+
+      <section className={styles.insightGrid}>
+        <div className={styles.insightCard}>
+          <h2>Top changes</h2>
+          {factorSummary.best.length ? (
+            factorSummary.best.map(item => <p key={item.id}><strong>{item.label}</strong> +{item.delta.toFixed(1)}</p>)
+          ) : (
+            <p>Log more Feel entries to see what is improving.</p>
+          )}
+        </div>
+        <div className={styles.insightCard}>
+          <h2>Needs attention</h2>
+          {factorSummary.low.length ? (
+            factorSummary.low.map(item => <p key={item.id}><strong>{item.label}</strong> {item.avg.toFixed(1)}/10 average</p>)
+          ) : (
+            <p>No clear low-signal factor yet.</p>
+          )}
         </div>
       </section>
 
@@ -191,6 +211,36 @@ export default function History() {
       </div>
     </div>
   )
+}
+
+function summarizeFactors(entries) {
+  if (entries.length === 0) return { best: [], low: [] }
+  const windowSize = Math.min(5, entries.length)
+  const firstWindow = entries.slice(0, windowSize)
+  const lastWindow = entries.slice(Math.max(0, entries.length - windowSize))
+  const rows = JOURNAL_FACTORS.map(factor => {
+    const values = entries.map(entry => entry.scores?.[factor.id]).filter(value => typeof value === 'number')
+    const firstValues = firstWindow.map(entry => entry.scores?.[factor.id]).filter(value => typeof value === 'number')
+    const lastValues = lastWindow.map(entry => entry.scores?.[factor.id]).filter(value => typeof value === 'number')
+    const avg = average(values)
+    const firstAvg = average(firstValues)
+    const lastAvg = average(lastValues)
+    return {
+      id: factor.id,
+      label: factor.label,
+      avg,
+      delta: firstAvg !== null && lastAvg !== null ? lastAvg - firstAvg : 0,
+    }
+  }).filter(item => item.avg !== null)
+
+  return {
+    best: [...rows].filter(item => item.delta > 0).sort((a, b) => b.delta - a.delta).slice(0, 3),
+    low: [...rows].sort((a, b) => a.avg - b.avg).slice(0, 3),
+  }
+}
+
+function average(values) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null
 }
 
 function EntryRow({ entry }) {

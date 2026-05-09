@@ -5,6 +5,8 @@ import { computeFeelScore } from '../data/storage'
 import { useData } from '../context/DataContext'
 import styles from './Journal.module.css'
 
+const FEEL_EMOJIS = ['😣', '😟', '🙁', '😐', '🙂', '😊', '😄', '😁', '🤩', '🔥']
+
 export default function Journal() {
   const { getTodayEntry, saveEntry, coachData, updateCoachGoal, profile, saveProfile } = useData()
   const existing = getTodayEntry()
@@ -200,7 +202,7 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
   const tone = scoreTone(currentValue)
 
   function commitScore(next) {
-    const clamped = Math.max(0, Math.min(10, Number(next)))
+    const clamped = Math.max(1, Math.min(10, Number(next)))
     if (navigator.vibrate && window.innerWidth <= 767 && clamped !== value) navigator.vibrate(7)
     onChange(clamped)
   }
@@ -208,7 +210,7 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
   function setFromPointer(event) {
     const rect = event.currentTarget.getBoundingClientRect()
     const pct = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width))
-    commitScore(Math.round(pct * 10))
+    commitScore(1 + Math.round(pct * 9))
   }
 
   function onMeterKey(event) {
@@ -222,7 +224,7 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
     }
     if (event.key === 'Home') {
       event.preventDefault()
-      commitScore(0)
+      commitScore(1)
     }
     if (event.key === 'End') {
       event.preventDefault()
@@ -235,7 +237,7 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
       className={styles.factor}
       style={{
         '--factor-color': hasValue ? scoreColor(currentValue) : cat.color,
-        '--factor-fill': `${currentValue * 10}%`,
+        '--factor-fill': `${((currentValue - 1) / 9) * 100}%`,
         '--bloom-scale': 0.78 + currentValue * 0.04,
       }}
       data-swipe-lock
@@ -258,7 +260,7 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
             type="button"
             className={styles.nudgeBtn}
             onClick={() => commitScore(currentValue - 1)}
-            disabled={currentValue <= 0}
+            disabled={currentValue <= 1}
             aria-label={`Decrease ${factor.label}`}
           >
             -
@@ -282,7 +284,7 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
           role="slider"
           tabIndex={0}
           aria-label={`${factor.label} score`}
-          aria-valuemin={0}
+          aria-valuemin={1}
           aria-valuemax={10}
           aria-valuenow={hasValue ? value : currentValue}
           onPointerDown={event => {
@@ -295,7 +297,7 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
           onKeyDown={onMeterKey}
         >
           <div className={styles.touchFill} />
-          {Array.from({ length: 11 }, (_, score) => (
+          {Array.from({ length: 10 }, (_, i) => i + 1).map(score => (
             <button
               key={score}
               type="button"
@@ -306,7 +308,7 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
               }}
               aria-label={`${factor.label} score ${score}`}
             >
-              <span>{score}</span>
+              <span>{FEEL_EMOJIS[score - 1]}</span>
             </button>
           ))}
         </div>
@@ -317,33 +319,34 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
         </div>
       </div>
       <div className={styles.sliderRow}>
-        <span className={styles.sliderEdge}>0</span>
+        <span className={styles.sliderEdge}>1</span>
         <input
           type="range"
-          min="0"
+          min="1"
           max="10"
           step="1"
           value={currentValue}
           onChange={e => onChange(e.target.value)}
           className={styles.slider}
           style={{
-            '--slider-fill': `${currentValue * 10}%`,
+            '--slider-fill': `${((currentValue - 1) / 9) * 100}%`,
             '--slider-color': hasValue ? scoreColor(currentValue) : 'var(--ink-faint)',
           }}
         />
         <span className={styles.sliderEdge}>10</span>
       </div>
       <div className={styles.scoreRail} aria-label={`Score ${factor.label}`}>
-        {Array.from({ length: 11 }, (_, score) => (
+        {Array.from({ length: 10 }, (_, i) => i + 1).map(score => (
           <button
             key={score}
             type="button"
-            className={`${styles.scoreChip} ${hasValue && value === score ? styles.scoreChipActive : ''}`}
+            className={`${styles.scoreChip} ${styles.emojiChip} ${hasValue && value === score ? styles.scoreChipActive : ''}`}
             onClick={() => onChange(score)}
             style={{ '--chip-color': scoreColor(score) }}
             aria-label={`${factor.label} score ${score}`}
           >
-            {score}
+            <span aria-hidden="true">{FEEL_EMOJIS[score - 1]}</span>
+            <small>{score}</small>
           </button>
         ))}
       </div>
