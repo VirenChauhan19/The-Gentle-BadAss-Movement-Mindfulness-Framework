@@ -397,7 +397,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
       if (!map[uid]) {
         map[uid] = {
           uid,
-          name: e.userName || allUserData[uid]?.userProfile?.displayName || 'Anonymous',
+          name: e.userName || allUserData[uid]?.userProfile?.name || allUserData[uid]?.userProfile?.displayName || 'Anonymous',
           email: e.userEmail || '',
           entries: [],
         }
@@ -409,7 +409,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
       if (!map[uid]) {
         map[uid] = {
           uid,
-          name: data.userProfile?.displayName || data.coach?.userName || 'Anonymous',
+          name: data.userProfile?.name || data.userProfile?.displayName || data.coach?.userName || 'Anonymous',
           email: data.coach?.userEmail || data.userProfile?.email || '',
           entries: [],
         }
@@ -418,7 +418,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
       map[uid].coach       = data.coach
       map[uid].remarks     = data.remarks || []
       // Prefer profile displayName if present
-      if (data.userProfile?.displayName) map[uid].name = data.userProfile.displayName
+      if (data.userProfile?.name || data.userProfile?.displayName) map[uid].name = data.userProfile.name || data.userProfile.displayName
     })
     return map
   }, [allEntries, allUserData])
@@ -521,7 +521,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
 
 // ── User Detail ───────────────────────────────────────────────────────────────
 function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
-  const [tab,           setTab]           = useState('journal')
+  const [tab,           setTab]           = useState('overview')
   const [remarkText,    setRemarkText]    = useState('')
   const [remarkRunDate, setRemarkRunDate] = useState('')
   const [sending,       setSending]       = useState(false)
@@ -538,6 +538,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
   const goal        = coach?.goal
   const checkins    = coach?.checkins || []
   const plan        = useMemo(() => getFullCoachPlan(goal), [goal])
+  const insights    = useMemo(() => getUserInsights(user, plan, checkins), [user, plan, checkins])
 
   useEffect(() => {
     setPlanDraft(plan)
@@ -578,6 +579,81 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
     setPlanDraft(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item))
   }
 
+  function normalizeDraftOrder(items) {
+    const startDate = goal?.startDate || items[0]?.date || new Date().toISOString().split('T')[0]
+    return items.map((item, i) => {
+      const date = addDaysISO(startDate, i)
+      return {
+        ...item,
+        id: item.id || `day-${i + 1}`,
+        dayNumber: i + 1,
+        week: Math.floor(i / 7) + 1,
+        date,
+        day: DAYS_FULL[new Date(`${date}T00:00:00`).getDay()],
+      }
+    })
+  }
+
+  function addPlanDay(afterIndex = planDraft.length - 1) {
+    setPlanDraft(prev => {
+      const insertAt = Math.max(0, Math.min(prev.length, afterIndex + 1))
+      const base = prev[afterIndex] || prev[prev.length - 1] || {}
+      const nextDay = {
+        id: `admin-day-${Date.now()}`,
+        type: 'easy',
+        title: 'New workout',
+        distance: '',
+        duration: '30 min',
+        pace: 'Conversational',
+        notes: 'Add the workout details here.',
+        strength: base.strength || '',
+        mobility: base.mobility || '',
+        crossTraining: '',
+      }
+      return normalizeDraftOrder([...prev.slice(0, insertAt), nextDay, ...prev.slice(insertAt)])
+    })
+    setEditingPlan(true)
+  }
+
+  function duplicatePlanDay(index) {
+    setPlanDraft(prev => {
+      const copy = { ...prev[index], id: `admin-day-${Date.now()}`, title: `${prev[index]?.title || 'Workout'} copy` }
+      return normalizeDraftOrder([...prev.slice(0, index + 1), copy, ...prev.slice(index + 1)])
+    })
+    setEditingPlan(true)
+  }
+
+  function removePlanDay(index) {
+    setPlanDraft(prev => normalizeDraftOrder(prev.filter((_, i) => i !== index)))
+    setEditingPlan(true)
+  }
+
+  function restPlanDay(index) {
+    setPlanDraft(prev => prev.map((item, i) => i === index ? {
+      ...item,
+      type: 'rest',
+      title: 'Rest / Recovery',
+      distance: '',
+      duration: '10-20 min optional walk',
+      pace: 'Very easy',
+      notes: 'Full rest or an easy walk. Keep effort low and prepare for the next planned session.',
+      crossTraining: '',
+    } : item))
+    setEditingPlan(true)
+  }
+
+  function movePlanDay(fromIndex, toIndex) {
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return
+    setPlanDraft(prev => {
+      if (fromIndex >= prev.length || toIndex >= prev.length) return prev
+      const next = [...prev]
+      const [moved] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, moved)
+      return normalizeDraftOrder(next)
+    })
+    setEditingPlan(true)
+  }
+
   async function savePlanEdits() {
     if (!coach?.goal || savingPlan) return
     setSavingPlan(true)
@@ -586,7 +662,8 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
       ...coach,
       goal: {
         ...coach.goal,
-        plan: planDraft.map((item, i) => ({ ...item, dayNumber: item.dayNumber || i + 1 })),
+        plan: normalizeDraftOrder(planDraft),
+        commitmentDays: planDraft.length,
         updatedByAdminAt: new Date().toISOString(),
       },
     }
@@ -629,6 +706,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
       {/* Tabs */}
       <div className={styles.detailTabs}>
         {[
+          { id: 'overview', label: 'Overview' },
           { id: 'journal', label: `Journal (${user.entries.length})` },
           { id: 'coach',   label: goal ? `Running · ${goal.focus || goal.raceGoal}` : 'Running' },
           { id: 'remarks', label: `Remarks (${localRemarks.length})` },
@@ -644,6 +722,15 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
       </div>
 
       <div className={styles.detailContent}>
+        {tab === 'overview' && (
+          <AdminUserOverview
+            user={user}
+            userProfile={userProfile}
+            insights={insights}
+            plan={plan}
+            checkins={checkins}
+          />
+        )}
 
         {/* ── Journal Tab ─────────────────────────────────────── */}
         {tab === 'journal' && (
@@ -709,6 +796,11 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
                     planError={planError}
                     checkins={checkins}
                     onUpdateDay={updatePlanDay}
+                    onAddDay={addPlanDay}
+                    onDuplicateDay={duplicatePlanDay}
+                    onRemoveDay={removePlanDay}
+                    onRestDay={restPlanDay}
+                    onMoveDay={movePlanDay}
                     onSave={savePlanEdits}
                     onCancel={() => { setPlanDraft(plan); setEditingPlan(false); setPlanError(null) }}
                     onStartEdit={() => setEditingPlan(true)}
@@ -795,10 +887,157 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
   )
 }
 
+function getUserInsights(user, plan, checkins) {
+  const entries = [...(user.entries || [])].sort((a, b) => b.date.localeCompare(a.date))
+  const sessions = entries.flatMap(entry => (entry.sessions || []).map(session => ({
+    date: entry.date,
+    name: session.exerciseName || session.title || session.exerciseId || session.type || 'Session',
+    type: session.type,
+    status: session.status || 'completed',
+  })))
+  const timeline = entries.slice(0, 10).map(entry => {
+    const score = computeFeelScore(entry.scores || {})
+    const entrySessions = entry.sessions || []
+    const runCheckin = checkins.find(c => c.date === entry.date)
+    const parts = []
+    parts.push(`Feel ${score.toFixed(1)}/10`)
+    if (entrySessions.length) parts.push(`${entrySessions.length} exercise${entrySessions.length === 1 ? '' : 's'}`)
+    if (runCheckin) parts.push(`run ${runCheckin.status}`)
+    return { date: entry.date, score, summary: parts.join(' - ') }
+  })
+
+  return {
+    streak: computeEntryStreak(entries),
+    exerciseCount: sessions.length,
+    recentExercises: sessions.slice(0, 8),
+    lastEntryDate: entries[0]?.date || null,
+    plannedWorkouts: plan.filter(day => day.type !== 'rest').length,
+    timeline,
+  }
+}
+
+function computeEntryStreak(entries) {
+  if (!entries.length) return 0
+  const dates = new Set(entries.map(entry => entry.date))
+  let cursor = new Date()
+  let streak = 0
+  while (dates.has(cursor.toISOString().split('T')[0])) {
+    streak += 1
+    cursor.setDate(cursor.getDate() - 1)
+  }
+  return streak
+}
+
+function AdminUserOverview({ user, userProfile, insights, plan, checkins }) {
+  const signupRows = [
+    ['Name', userProfile?.name || user.name],
+    ['Age range', userProfile?.ageRange],
+    ['Gender', userProfile?.gender || userProfile?.sex],
+    ['Path', PATH_NAMES[userProfile?.path] || userProfile?.path],
+    ['Commitment', userProfile?.commitment ? `${userProfile.commitment} days` : null],
+    ['Heard about us', userProfile?.heardAbout],
+    ['Program goal', userProfile?.programGoal],
+    ['Last updated', userProfile?.updatedAt],
+  ]
+
+  return (
+    <div className={styles.adminOverview}>
+      <section className={styles.overviewMetricGrid}>
+        <div className={styles.overviewMetric}><strong>{insights.streak}</strong><span>day streak</span></div>
+        <div className={styles.overviewMetric}><strong>{user.entries.length}</strong><span>Feel entries</span></div>
+        <div className={styles.overviewMetric}><strong>{insights.exerciseCount}</strong><span>exercises done</span></div>
+        <div className={styles.overviewMetric}><strong>{checkins.length}</strong><span>run check-ins</span></div>
+      </section>
+
+      <section className={styles.overviewGrid}>
+        <div className={styles.overviewCard}>
+          <h3>Sign-up Submission</h3>
+          <div className={styles.signupRows}>
+            {signupRows.filter(([, value]) => value).map(([label, value]) => (
+              <div key={label} className={styles.signupRow}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </div>
+            ))}
+          </div>
+          {(userProfile?.fitnessHistory || userProfile?.story) && (
+            <div className={styles.longProfileText}>
+              <span>Their story</span>
+              <p>{userProfile.fitnessHistory || userProfile.story}</p>
+            </div>
+          )}
+          {userProfile?.commitmentStatement && (
+            <div className={styles.longProfileText}>
+              <span>Self-commitment</span>
+              <p>{userProfile.commitmentStatement}</p>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.overviewCard}>
+          <h3>Activity Snapshot</h3>
+          <div className={styles.signupRows}>
+            <div className={styles.signupRow}><span>Last Feel</span><strong>{insights.lastEntryDate || 'None yet'}</strong></div>
+            <div className={styles.signupRow}><span>Average Feel</span><strong>{user.avgScore !== null ? user.avgScore.toFixed(1) : 'No data'}</strong></div>
+            <div className={styles.signupRow}><span>Planned workouts</span><strong>{plan.filter(day => day.type !== 'rest').length}</strong></div>
+            <div className={styles.signupRow}><span>Completed runs</span><strong>{checkins.filter(c => c.status === 'done').length}</strong></div>
+          </div>
+          <h4 className={styles.overviewSubhead}>Recent exercises</h4>
+          {insights.recentExercises.length ? (
+            <div className={styles.exercisePills}>
+              {insights.recentExercises.map((session, index) => (
+                <span key={`${session.date}-${session.name}-${index}`}>
+                  {session.name} <em>{session.date}</em>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className={styles.overviewEmpty}>No exercise sessions logged yet.</p>
+          )}
+        </div>
+      </section>
+
+      <section className={styles.overviewCard}>
+        <h3>Recent Feel and Workout Timeline</h3>
+        {insights.timeline.length ? (
+          <div className={styles.userTimeline}>
+            {insights.timeline.map(item => (
+              <div key={item.date} className={styles.timelineRow}>
+                <span className={styles.timelineDate}>{item.date}</span>
+                <span className={styles.timelineScore}>{item.score !== null ? item.score.toFixed(1) : '-'}</span>
+                <p>{item.summary}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.overviewEmpty}>No timeline activity yet.</p>
+        )}
+      </section>
+    </div>
+  )
+}
+
 // ── Admin Plan Editor (week-grouped) ─────────────────────────────────────────
-function AdminPlanEditor({ plan, planDraft, editingPlan, savingPlan, planError, checkins, onUpdateDay, onSave, onCancel, onStartEdit }) {
+function AdminPlanEditor({
+  plan,
+  planDraft,
+  editingPlan,
+  savingPlan,
+  planError,
+  checkins,
+  onUpdateDay,
+  onAddDay,
+  onDuplicateDay,
+  onRemoveDay,
+  onRestDay,
+  onMoveDay,
+  onSave,
+  onCancel,
+  onStartEdit,
+}) {
   const today = new Date().toISOString().split('T')[0]
   const checkinByDate = useMemo(() => Object.fromEntries(checkins.map(c => [c.date, c])), [checkins])
+  const [dragIndex, setDragIndex] = useState(null)
 
   // Group plan by week
   const weekGroups = useMemo(() => {
@@ -845,6 +1084,11 @@ function AdminPlanEditor({ plan, planDraft, editingPlan, savingPlan, planError, 
         </div>
         <div className={styles.adminPlanActions}>
           {editingPlan && (
+            <button className={styles.addWorkoutBtn} onClick={() => onAddDay(planDraft.length - 1)}>
+              Add Workout
+            </button>
+          )}
+          {editingPlan && (
             <button className={styles.cancelPlanBtn} onClick={onCancel}>
               Cancel
             </button>
@@ -859,6 +1103,11 @@ function AdminPlanEditor({ plan, planDraft, editingPlan, savingPlan, planError, 
         </div>
       </div>
       {planError && <p className={styles.errorMsg}>{planError}</p>}
+      {editingPlan && (
+        <p className={styles.adminPlanHint}>
+          Drag a workout by the handle to move it. Use Rest to remove the workout but keep the day, or Remove to delete that day from the program.
+        </p>
+      )}
 
       <div className={styles.adminWeekList}>
         {weekNumbers.map(w => {
@@ -906,11 +1155,43 @@ function AdminPlanEditor({ plan, planDraft, editingPlan, savingPlan, planError, 
                   {weekItems.map(({ day, idx }) => {
                     const log = checkinByDate[day.date]
                     return (
-                      <div key={day.id || day.date || idx} className={styles.adminPlanDay}>
+                      <div
+                        key={day.id || day.date || idx}
+                        className={`${styles.adminPlanDay} ${editingPlan ? styles.adminPlanDayEditable : ''} ${dragIndex === idx ? styles.adminPlanDayDragging : ''}`}
+                        draggable={editingPlan}
+                        onDragStart={event => {
+                          if (!editingPlan) return
+                          setDragIndex(idx)
+                          event.dataTransfer.effectAllowed = 'move'
+                          event.dataTransfer.setData('text/plain', String(idx))
+                        }}
+                        onDragOver={event => {
+                          if (!editingPlan) return
+                          event.preventDefault()
+                          event.dataTransfer.dropEffect = 'move'
+                        }}
+                        onDrop={event => {
+                          if (!editingPlan) return
+                          event.preventDefault()
+                          const from = Number(event.dataTransfer.getData('text/plain'))
+                          onMoveDay(from, idx)
+                          setDragIndex(null)
+                        }}
+                        onDragEnd={() => setDragIndex(null)}
+                      >
                         <div className={styles.adminPlanDayMeta}>
+                          {editingPlan && <span className={styles.dragHandle} title="Drag to reorder">::::</span>}
                           <strong>Day {day.dayNumber || idx + 1}</strong>
                           <span>{day.day || ''} · {day.date || 'Unscheduled'}</span>
                           {log && <em>{log.status}</em>}
+                          {editingPlan && (
+                            <div className={styles.adminPlanRowActions}>
+                              <button type="button" onClick={() => onAddDay(idx)}>Add after</button>
+                              <button type="button" onClick={() => onDuplicateDay(idx)}>Duplicate</button>
+                              <button type="button" onClick={() => onRestDay(idx)}>Rest</button>
+                              <button type="button" className={styles.removeWorkoutBtn} onClick={() => onRemoveDay(idx)}>Remove</button>
+                            </div>
+                          )}
                         </div>
                         {editingPlan ? (
                           <div className={styles.adminPlanEditGrid}>

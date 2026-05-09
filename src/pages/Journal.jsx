@@ -5,7 +5,7 @@ import { computeFeelScore } from '../data/storage'
 import { useData } from '../context/DataContext'
 import styles from './Journal.module.css'
 
-const FEEL_EMOJIS = ['😣', '😟', '🙁', '😐', '🙂', '😊', '😄', '😁', '🤩', '🔥']
+const FEEL_EMOJIS = ['😞', '😕', '🙁', '😐', '🙂', '😊', '😃', '😄', '😁', '🤩']
 
 export default function Journal() {
   const { getTodayEntry, saveEntry, coachData, updateCoachGoal, profile, saveProfile } = useData()
@@ -266,8 +266,8 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
             -
           </button>
           <div className={styles.bloomOrb} data-tone={tone}>
-            <span>{hasValue ? currentValue : '?'}</span>
-            <small>{status}</small>
+            <span>{hasValue ? FEEL_EMOJIS[currentValue - 1] : '?'}</span>
+            <small>{hasValue ? `Score ${currentValue}` : status}</small>
           </div>
           <button
             type="button"

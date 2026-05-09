@@ -1172,6 +1172,186 @@
   line-height: 1.65;
 }
 
+.adminOverview {
+  display: grid;
+  gap: 16px;
+}
+
+.overviewMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.overviewMetric,
+.overviewCard {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+}
+
+.overviewMetric {
+  min-height: 88px;
+  padding: 14px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+}
+
+.overviewMetric strong {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.overviewMetric span {
+  color: var(--ink-faint);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 14px;
+}
+
+.overviewCard {
+  padding: 18px;
+}
+
+.overviewCard h3 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-size: 1.08rem;
+  margin-bottom: 12px;
+}
+
+.signupRows {
+  display: grid;
+  gap: 8px;
+}
+
+.signupRow {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.signupRow span,
+.longProfileText span {
+  color: var(--ink-faint);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.signupRow strong {
+  color: var(--ink);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.longProfileText {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+}
+
+.longProfileText p {
+  margin-top: 7px;
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.overviewSubhead {
+  margin: 16px 0 9px;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.exercisePills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.exercisePills span {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.exercisePills em {
+  color: var(--ink-faint);
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.overviewEmpty {
+  color: var(--ink-faint);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.userTimeline {
+  display: grid;
+  gap: 8px;
+}
+
+.timelineRow {
+  display: grid;
+  grid-template-columns: 104px 48px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.timelineRow:last-child {
+  border-bottom: none;
+}
+
+.timelineDate {
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.timelineScore {
+  color: var(--sage-dark);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.timelineRow p {
+  color: var(--ink-light);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 /* ── Entry card ─── */
 .entryCard {
   background: var(--paper);
@@ -1438,7 +1618,8 @@
 }
 
 .editPlanBtn,
-.cancelPlanBtn {
+.cancelPlanBtn,
+.addWorkoutBtn {
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -1452,6 +1633,11 @@
   color: var(--on-ink);
 }
 
+.addWorkoutBtn {
+  background: var(--sage);
+  color: #fff;
+}
+
 .editPlanBtn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
@@ -1461,6 +1647,17 @@
   background: var(--cream);
   color: var(--ink-light);
   border: 1px solid var(--border-light);
+}
+
+.adminPlanHint {
+  margin: 10px 16px 0;
+  padding: 10px 12px;
+  background: rgba(99, 127, 95, 0.10);
+  border: 1px solid rgba(99, 127, 95, 0.22);
+  border-radius: 12px;
+  color: var(--ink-light);
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 .adminPlanList {
@@ -1624,6 +1821,19 @@
   border-bottom: 1px solid var(--border-light);
 }
 
+.adminPlanDayEditable {
+  cursor: grab;
+}
+
+.adminPlanDayEditable:active {
+  cursor: grabbing;
+}
+
+.adminPlanDayDragging {
+  opacity: 0.48;
+  background: rgba(99, 127, 95, 0.10);
+}
+
 .adminPlanDay:last-child {
   border-bottom: none;
 }
@@ -1632,6 +1842,20 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.dragHandle {
+  align-self: flex-start;
+  color: var(--ink-faint);
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 3px 7px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  cursor: grab;
+  user-select: none;
 }
 
 .adminPlanDayMeta strong {
@@ -1644,6 +1868,34 @@
   color: var(--ink-faint);
   font-size: 0.74rem;
   font-style: normal;
+}
+
+.adminPlanRowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.adminPlanRowActions button {
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-light);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 5px 8px;
+}
+
+.adminPlanRowActions button:hover {
+  border-color: var(--sage);
+  color: var(--ink);
+}
+
+.adminPlanRowActions .removeWorkoutBtn {
+  border-color: rgba(186, 95, 69, 0.30);
+  color: var(--terracotta);
 }
 
 .adminPlanRead span {
@@ -1808,11 +2060,20 @@
   .adminPanelHeader { padding: 16px; }
   .adminPlanHeader { flex-direction: column; }
   .adminPlanActions { width: 100%; }
-  .editPlanBtn, .cancelPlanBtn { flex: 1; }
+  .editPlanBtn, .cancelPlanBtn, .addWorkoutBtn { flex: 1; }
   .adminPlanDay { grid-template-columns: 1fr; }
   .adminPlanEditGrid { grid-template-columns: 1fr; }
   .adminPlanEditGrid textarea,
   .adminPlanEditGrid input:nth-of-type(4) { grid-column: auto; }
+  .overviewMetricGrid,
+  .overviewGrid {
+    grid-template-columns: 1fr;
+  }
+  .signupRow,
+  .timelineRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
 }
 
 /* ── Desktop: taller layout ─── */
