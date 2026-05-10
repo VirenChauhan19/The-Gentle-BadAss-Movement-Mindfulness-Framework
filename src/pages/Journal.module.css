@@ -634,7 +634,7 @@
     linear-gradient(90deg, color-mix(in srgb, var(--factor-color) 18%, transparent) var(--factor-fill), var(--paper-soft) var(--factor-fill)),
     var(--paper-soft);
   border: 1px solid var(--border-light);
-  touch-action: none;
+  touch-action: pan-y;
   overflow: hidden;
   cursor: pointer;
 }

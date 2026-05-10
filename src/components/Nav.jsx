@@ -5,12 +5,12 @@ import { useData } from '../context/DataContext'
 import styles from './Nav.module.css'
 
 const links = [
-  { to: '/', label: 'Home', icon: HomeIcon },
-  { to: '/journal', label: 'Feel', icon: JournalIcon, lockedForGuest: true },
-  { to: '/library', label: 'Your Plan', icon: LibraryIcon, lockedForGuest: true },
-  { to: '/functional-tests', label: 'Functional Tests', icon: TestIcon, lockedForGuest: true },
-  { to: '/history', label: 'Progress', icon: HistoryIcon, lockedForGuest: true },
-  { to: '/profile', label: 'Profile', icon: ProfileIcon },
+  { to: '/', label: 'Home', shortLabel: 'Home', icon: HomeIcon },
+  { to: '/journal', label: 'Feel', shortLabel: 'Feel', icon: JournalIcon, lockedForGuest: true },
+  { to: '/library', label: 'Your Plan', shortLabel: 'Plan', icon: LibraryIcon, lockedForGuest: true },
+  { to: '/functional-tests', label: 'Functional Tests', shortLabel: 'Tests', icon: TestIcon, lockedForGuest: true },
+  { to: '/history', label: 'Progress', shortLabel: 'Progress', icon: HistoryIcon, lockedForGuest: true },
+  { to: '/profile', label: 'Profile', shortLabel: 'Me', icon: ProfileIcon },
 ]
 
 export default function Nav() {
@@ -30,7 +30,7 @@ export default function Nav() {
 
   return (
     <nav className={styles.nav} ref={navRef} aria-label="Primary">
-      {links.map(({ to, label, icon: Icon, lockedForGuest }) => {
+      {links.map(({ to, label, shortLabel, icon: Icon, lockedForGuest }) => {
         const locked = guestLocked && lockedForGuest
         return (
         <NavLink
@@ -44,7 +44,8 @@ export default function Nav() {
           }
         >
           <Icon />
-          <span>{label}</span>
+          <span className={styles.fullLabel}>{label}</span>
+          <span className={styles.shortLabel}>{shortLabel || label}</span>
           {locked && <span className={styles.lockDot} aria-label="Sign in to unlock"><LockIcon /></span>}
         </NavLink>
       )})}

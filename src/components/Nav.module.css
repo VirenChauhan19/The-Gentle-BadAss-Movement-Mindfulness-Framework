@@ -120,6 +120,10 @@
   transition: opacity var(--d-base) var(--ease-out);
 }
 
+.shortLabel {
+  display: none;
+}
+
 @media (hover: hover) {
   .link:hover:not(.active) {
     color: rgba(255, 255, 255, 0.82);
@@ -316,10 +320,16 @@
     border-radius: 15px;
   }
 
-  .link span:first-of-type {
+  .fullLabel {
+    display: none;
+  }
+
+  .shortLabel {
+    display: block;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: opacity var(--d-base) var(--ease-out);
   }
 
   .link svg,
