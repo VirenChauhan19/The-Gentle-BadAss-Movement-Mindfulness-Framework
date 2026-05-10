@@ -268,7 +268,6 @@ export default function App() {
       <DataProvider>
         <div className={styles.app}>
           <div className={styles.ambientLayer} aria-hidden="true" />
-          <a href="#main-content" className={styles.skipLink}>Skip to main content</a>
           <main id="main-content" className={styles.main}>
             <AppRoutes />
           </main>

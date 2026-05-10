@@ -157,25 +157,6 @@
   50% { opacity: 0.62; transform: scale(1.08) rotate(18deg); }
 }
 
-.skipLink {
-  position: fixed;
-  left: 18px;
-  top: 18px;
-  z-index: 900;
-  padding: 10px 14px;
-  border-radius: var(--r-md);
-  background: var(--ink);
-  color: var(--on-ink);
-  font-weight: 800;
-  font-size: 0.86rem;
-  transform: translateY(-140%);
-  transition: transform var(--d-fast) var(--ease-out);
-}
-
-.skipLink:focus-visible {
-  transform: translateY(0);
-}
-
 .themeSwatch {
   width: 18px;
   height: 18px;

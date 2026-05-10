@@ -1706,12 +1706,12 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(64px + env(safe-area-inset-bottom));
+  bottom: calc(102px + env(safe-area-inset-bottom));
   z-index: 24;
   display: grid;
   grid-template-columns: 52px 1fr;
   gap: 9px;
-  padding: 12px 12px 10px;
+  padding: 12px 12px 14px;
   background:
     linear-gradient(180deg, transparent, color-mix(in srgb, var(--cream) 96%, transparent) 26%);
   pointer-events: none;
