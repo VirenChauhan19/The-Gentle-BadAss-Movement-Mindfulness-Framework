@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { JOURNAL_FACTORS, CATEGORIES } from '../data/journalFactors'
 import { computeFeelScore } from '../data/storage'
@@ -20,6 +20,26 @@ const CATEGORY_META = {
   movement: { label: 'Movement', hint: 'Today’s relationship to movement.' },
 }
 
+function useIsMobile() {
+  const get = () =>
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(max-width: 767px)').matches
+  const [v, setV] = useState(get)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mql = window.matchMedia('(max-width: 767px)')
+    const handler = e => setV(e.matches)
+    if (mql.addEventListener) mql.addEventListener('change', handler)
+    else mql.addListener(handler)
+    return () => {
+      if (mql.removeEventListener) mql.removeEventListener('change', handler)
+      else mql.removeListener(handler)
+    }
+  }, [])
+  return v
+}
+
 export default function Journal() {
   const { getTodayEntry, saveEntry, coachData, updateCoachGoal, profile, saveProfile } = useData()
   const existing = getTodayEntry()
@@ -38,6 +58,7 @@ export default function Journal() {
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
 
   const feelScore = computeFeelScore(scores)
   const answered = Object.keys(scores).length
@@ -96,6 +117,28 @@ export default function Journal() {
   const status = statusWord(feelScore, answered)
   const tone = scoreTone(answered ? feelScore : 5)
 
+  const sharedProps = {
+    profile, scores, scoreNotes, note, cycle, cycleOpen,
+    saved, submitError, feelScore, answered, total, allAnswered,
+    status, tone, dateStr, displayOrder, grouped, wordCount,
+    handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setSaved,
+    handleSave,
+  }
+
+  if (isMobile) return <JournalMobile {...sharedProps} />
+  return <JournalDesktop {...sharedProps} />
+}
+
+/* ─────────────────────────────────────────────────────
+   DESKTOP / TABLET: existing categorized layout
+   ───────────────────────────────────────────────────── */
+function JournalDesktop({
+  profile, scores, scoreNotes, note, cycle, cycleOpen,
+  saved, submitError, feelScore, answered, total, allAnswered,
+  status, tone, dateStr, displayOrder, grouped, wordCount,
+  handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setSaved,
+  handleSave,
+}) {
   function jumpToCategory(id) {
     const el = document.getElementById(`feel-cat-${id}`)
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -160,69 +203,14 @@ export default function Journal() {
       </header>
 
       {profile?.sex === 'woman' && (
-        <section className={styles.cycleCard}>
-          <button
-            type="button"
-            className={styles.cycleToggle}
-            aria-expanded={cycleOpen}
-            onClick={() => setCycleOpen(o => !o)}
-          >
-            <span className={styles.cycleKicker}>Cycle context</span>
-            <span className={styles.cycleTitle}>
-              {cycleOpen ? 'Hide' : 'Add'} period &amp; cycle info
-              <span className={styles.cycleOptional}>optional</span>
-            </span>
-            <span className={styles.cycleChev} data-open={cycleOpen} aria-hidden="true">›</span>
-          </button>
-          {cycleOpen && (
-            <div className={styles.cycleBody}>
-              <p className={styles.cycleHelp}>
-                Your running and strength work use this with today’s Feel score.
-              </p>
-              <div className={styles.cycleGrid}>
-                <label>
-                  <span>Last period</span>
-                  <input
-                    type="date"
-                    value={cycle.lastPeriod}
-                    onChange={e => { setCycle({ ...cycle, lastPeriod: e.target.value }); setSaved(false) }}
-                  />
-                </label>
-                <label>
-                  <span>Period length (days)</span>
-                  <input
-                    type="number" min="1" max="14"
-                    value={cycle.periodLength}
-                    onChange={e => { setCycle({ ...cycle, periodLength: e.target.value }); setSaved(false) }}
-                    placeholder="e.g. 5"
-                  />
-                </label>
-                <label>
-                  <span>Cycle length (days)</span>
-                  <input
-                    type="number" min="15" max="90"
-                    value={cycle.cycleLength}
-                    onChange={e => { setCycle({ ...cycle, cycleLength: e.target.value }); setSaved(false) }}
-                    placeholder="e.g. 28"
-                  />
-                </label>
-                <label>
-                  <span>Perimenopause / menopause</span>
-                  <select
-                    value={cycle.menopauseStatus}
-                    onChange={e => { setCycle({ ...cycle, menopauseStatus: e.target.value }); setSaved(false) }}
-                  >
-                    <option value="">Select one</option>
-                    <option value="no">No</option>
-                    <option value="perimenopause">Perimenopause</option>
-                    <option value="menopause">Menopause</option>
-                    <option value="unsure">Not sure</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          )}
-        </section>
+        <CycleSection
+          cycle={cycle}
+          setCycle={setCycle}
+          cycleOpen={cycleOpen}
+          setCycleOpen={setCycleOpen}
+          setSaved={setSaved}
+          variant="desktop"
+        />
       )}
 
       <main className={styles.factors}>
@@ -271,64 +259,7 @@ export default function Journal() {
         })}
       </main>
 
-      <section className={styles.reflection} aria-labelledby="reflection-heading">
-        <header className={styles.reflectionHead}>
-          <p className={styles.reflectionKicker}>Today’s reflection</p>
-          <h2 id="reflection-heading" className={styles.reflectionTitle}>
-            A page for whatever wants out.
-          </h2>
-          <p className={styles.reflectionTagline}>
-            <span>Optional.</span> One line or fifty — patterns surface over time.
-          </p>
-        </header>
-
-        {!note.trim() && (
-          <div className={styles.promptChips} aria-label="Reflection starters">
-            {REFLECTION_PROMPTS.map(prompt => (
-              <button
-                key={prompt}
-                type="button"
-                className={styles.promptChip}
-                onClick={() => {
-                  setNote(`${prompt}\n\n`)
-                  setSaved(false)
-                  requestAnimationFrame(() => {
-                    const el = document.getElementById('daily-note')
-                    if (el) {
-                      el.focus()
-                      el.setSelectionRange(el.value.length, el.value.length)
-                    }
-                  })
-                }}
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className={styles.notebook}>
-          <span className={styles.notebookStamp} aria-hidden="true">
-            {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-          </span>
-          <textarea
-            id="daily-note"
-            className={styles.reflectionField}
-            placeholder="Let your hand wander…"
-            value={note}
-            onChange={e => { setNote(e.target.value); setSaved(false) }}
-            rows={6}
-          />
-          <footer className={styles.notebookFoot}>
-            <span className={styles.reflectionHint}>No pressure. Skip if today is busy.</span>
-            {wordCount > 0 && (
-              <span className={styles.reflectionCount}>
-                {wordCount} word{wordCount === 1 ? '' : 's'}
-              </span>
-            )}
-          </footer>
-        </div>
-      </section>
+      <ReflectionBlock note={note} setNote={setNote} setSaved={setSaved} wordCount={wordCount} />
 
       <div className={styles.saveBar} data-tone={tone}>
         <div className={styles.saveScore}>
@@ -357,6 +288,466 @@ export default function Journal() {
   )
 }
 
+/* ─────────────────────────────────────────────────────
+   MOBILE: card-stack flow
+   ───────────────────────────────────────────────────── */
+function JournalMobile(props) {
+  const {
+    profile, scores, scoreNotes, note, cycle, cycleOpen,
+    saved, submitError, feelScore, answered, total, allAnswered,
+    status, tone, dateStr, displayOrder, wordCount,
+    handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setSaved,
+    handleSave,
+  } = props
+
+  const initialUnanswered = displayOrder.findIndex(f => scores[f.id] === undefined)
+  const [step, setStep] = useState(() => (allAnswered ? 'reflection' : 'factors'))
+  const [activeIdx, setActiveIdx] = useState(() => (initialUnanswered >= 0 ? initialUnanswered : 0))
+  const [direction, setDirection] = useState('forward')
+
+  const activeFactor = displayOrder[activeIdx]
+  const activeValue = scores[activeFactor.id]
+  const activeNote = scoreNotes[activeFactor.id] || ''
+
+  function next() {
+    setDirection('forward')
+    if (activeIdx + 1 >= total) {
+      setStep('reflection')
+      window.scrollTo({ top: 0 })
+    } else {
+      setActiveIdx(i => i + 1)
+    }
+  }
+
+  function prev() {
+    setDirection('backward')
+    if (activeIdx > 0) setActiveIdx(i => i - 1)
+  }
+
+  function jumpTo(idx) {
+    setDirection(idx > activeIdx ? 'forward' : 'backward')
+    setStep('factors')
+    setActiveIdx(idx)
+  }
+
+  if (step === 'reflection') {
+    return (
+      <MobileReflectionScreen
+        profile={profile}
+        scores={scores}
+        scoreNotes={scoreNotes}
+        note={note}
+        cycle={cycle}
+        cycleOpen={cycleOpen}
+        saved={saved}
+        submitError={submitError}
+        feelScore={feelScore}
+        answered={answered}
+        total={total}
+        allAnswered={allAnswered}
+        status={status}
+        tone={tone}
+        dateStr={dateStr}
+        displayOrder={displayOrder}
+        wordCount={wordCount}
+        setNote={setNote}
+        setCycle={setCycle}
+        setCycleOpen={setCycleOpen}
+        setSaved={setSaved}
+        handleSave={handleSave}
+        onBackToFactors={() => {
+          setDirection('backward')
+          setActiveIdx(total - 1)
+          setStep('factors')
+        }}
+      />
+    )
+  }
+
+  return (
+    <div className={styles.mPage}>
+      <header className={styles.mHead}>
+        <div className={styles.mHeadText}>
+          <p className={styles.mHeadKicker}>Feel</p>
+          <p className={styles.mHeadDate}>{dateStr}</p>
+        </div>
+        <div className={styles.mHeadScore} data-tone={tone}>
+          <span className={styles.mHeadScoreNum}>{answered ? feelScore.toFixed(1) : '–'}</span>
+          <span className={styles.mHeadScoreLabel}>{status}</span>
+        </div>
+      </header>
+
+      <div className={styles.mDots} role="tablist" aria-label="Feel progress">
+        {displayOrder.map((f, i) => {
+          const isAnswered = scores[f.id] !== undefined
+          const isActive = i === activeIdx
+          const cat = CATEGORIES[f.category]
+          return (
+            <button
+              key={f.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              className={`${styles.mDot} ${isActive ? styles.mDotActive : ''} ${isAnswered ? styles.mDotFilled : ''}`}
+              style={{ '--dot-color': isAnswered ? scoreColor(scores[f.id]) : cat.color }}
+              onClick={() => jumpTo(i)}
+              aria-label={`${f.label}: ${isAnswered ? `scored ${scores[f.id]}` : 'not scored'}`}
+            />
+          )
+        })}
+      </div>
+
+      <MobileFactorScreen
+        key={activeIdx}
+        direction={direction}
+        factor={activeFactor}
+        index={activeIdx + 1}
+        total={total}
+        value={activeValue}
+        note={activeNote}
+        onChange={v => handleScore(activeFactor.id, v)}
+        onNoteChange={v => handleScoreNote(activeFactor.id, v)}
+        onSwipeNext={() => { if (activeValue !== undefined) next() }}
+        onSwipePrev={() => { if (activeIdx > 0) prev() }}
+      />
+
+      <footer className={styles.mFlowFoot}>
+        <button
+          type="button"
+          className={styles.mFlowNav}
+          onClick={prev}
+          disabled={activeIdx === 0}
+          aria-label="Previous factor"
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <button
+          type="button"
+          className={`${styles.mFlowContinue} ${activeValue !== undefined ? styles.mFlowReady : ''}`}
+          onClick={next}
+          disabled={activeValue === undefined}
+        >
+          {activeIdx + 1 >= total ? 'To reflection' : 'Continue'}
+          <span aria-hidden="true" className={styles.mFlowArrow}>→</span>
+        </button>
+      </footer>
+    </div>
+  )
+}
+
+function MobileFactorScreen({
+  direction, factor, index, total, value, note,
+  onChange, onNoteChange, onSwipeNext, onSwipePrev,
+}) {
+  const hasValue = value !== undefined
+  const cat = CATEGORIES[factor.category]
+  const tone = scoreTone(hasValue ? value : 5)
+  const needsWhy = hasValue && (value <= 2 || value >= 9)
+  const swipeRef = useRef(null)
+
+  function pickScore(n) {
+    if (navigator.vibrate) navigator.vibrate(8)
+    onChange(n)
+  }
+
+  function handleTouchStart(e) {
+    if (e.target.closest('button, input, textarea')) {
+      swipeRef.current = null
+      return
+    }
+    swipeRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      t: Date.now(),
+    }
+  }
+
+  function handleTouchEnd(e) {
+    const start = swipeRef.current
+    swipeRef.current = null
+    if (!start) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - start.x
+    const dy = t.clientY - start.y
+    const dt = Date.now() - start.t
+    if (dt > 600 || Math.abs(dy) > 60 || Math.abs(dx) < 80) return
+    if (dx < 0) onSwipeNext()
+    else onSwipePrev()
+  }
+
+  return (
+    <article
+      className={styles.mCard}
+      data-tone={tone}
+      data-answered={hasValue}
+      data-direction={direction}
+      style={{ '--factor-color': hasValue ? scoreColor(value) : cat.color }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      data-swipe-lock
+    >
+      <div className={styles.mCardKicker}>
+        <span className={styles.mCardCat} style={{ color: cat.color }}>
+          {cat.label}
+        </span>
+        <span className={styles.mCardIdx}>
+          {String(index).padStart(2, '0')}<small> / {String(total).padStart(2, '0')}</small>
+        </span>
+      </div>
+
+      <div className={styles.mEmojiOrb} data-tone={tone}>
+        <span className={styles.mEmojiGlyph} aria-hidden="true">
+          {hasValue ? FEEL_EMOJIS[value - 1] : '·'}
+        </span>
+        {hasValue && <span className={styles.mEmojiBadge}>{value}</span>}
+      </div>
+
+      <h2 className={styles.mFactorName}>{factor.label}</h2>
+      <p className={styles.mFactorQ}>{factor.question}</p>
+
+      <div className={styles.mScoreGrid} role="group" aria-label="Score 1 to 10">
+        {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+          <button
+            key={n}
+            type="button"
+            className={`${styles.mScoreBtn} ${value === n ? styles.mScoreBtnActive : ''}`}
+            style={{ '--btn-color': scoreColor(n) }}
+            onClick={() => pickScore(n)}
+            aria-label={`Score ${n} of 10`}
+          >
+            <span className={styles.mScoreEmoji} aria-hidden="true">{FEEL_EMOJIS[n - 1]}</span>
+            <span className={styles.mScoreNum}>{n}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className={styles.mScoreLabels}>
+        <span>Care</span>
+        <span>Steady</span>
+        <span>Ready</span>
+      </div>
+
+      {needsWhy && (
+        <label className={styles.mWhyPrompt}>
+          <span>{value <= 2 ? 'Low signal — what’s the why?' : 'High signal — what’s lifting it?'}</span>
+          <input
+            type="text"
+            value={note}
+            onChange={e => onNoteChange(e.target.value)}
+            placeholder="One line is enough."
+          />
+        </label>
+      )}
+    </article>
+  )
+}
+
+function MobileReflectionScreen({
+  profile, scores, scoreNotes, note, cycle, cycleOpen,
+  saved, submitError, feelScore, answered, total, allAnswered,
+  status, tone, dateStr, displayOrder, wordCount,
+  setNote, setCycle, setCycleOpen, setSaved,
+  handleSave, onBackToFactors,
+}) {
+  return (
+    <div className={styles.mReflectPage}>
+      <header className={styles.mHead}>
+        <button
+          type="button"
+          className={styles.mFlowNav}
+          onClick={onBackToFactors}
+          aria-label="Back to factors"
+          style={{ marginRight: 4 }}
+        >
+          <span aria-hidden="true">‹</span>
+        </button>
+        <div className={styles.mHeadText}>
+          <p className={styles.mHeadKicker}>Reflection</p>
+          <p className={styles.mHeadDate}>{dateStr}</p>
+        </div>
+        <div className={styles.mHeadScore} data-tone={tone}>
+          <span className={styles.mHeadScoreNum}>{feelScore.toFixed(1)}</span>
+          <span className={styles.mHeadScoreLabel}>{status}</span>
+        </div>
+      </header>
+
+      <section className={styles.mReflectGauge}>
+        <div className={styles.mGaugeMini}>
+          <FeelGauge factors={displayOrder} scores={scores} feelScore={feelScore} />
+          <div className={styles.mGaugeMiniCore}>
+            <span>{feelScore.toFixed(1)}</span>
+          </div>
+        </div>
+        <div className={styles.mReflectStatus}>
+          <h2>{status}</h2>
+          <p>{answered}/{total} captured</p>
+        </div>
+      </section>
+
+      {profile?.sex === 'woman' && (
+        <CycleSection
+          cycle={cycle}
+          setCycle={setCycle}
+          cycleOpen={cycleOpen}
+          setCycleOpen={setCycleOpen}
+          setSaved={setSaved}
+          variant="mobile"
+        />
+      )}
+
+      <ReflectionBlock note={note} setNote={setNote} setSaved={setSaved} wordCount={wordCount} />
+
+      <div className={styles.mReflectSave}>
+        {submitError && <p className={styles.saveError}>{submitError}</p>}
+        <button
+          className={`${styles.saveBtn} ${styles.mReflectSaveBtn} ${saved ? styles.saved : ''}`}
+          onClick={handleSave}
+          disabled={!allAnswered}
+        >
+          {saved ? '✓ Saved' : allAnswered ? 'Save & open Move' : `${total - answered} factors left`}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────────────────
+   Shared blocks
+   ───────────────────────────────────────────────────── */
+function CycleSection({ cycle, setCycle, cycleOpen, setCycleOpen, setSaved }) {
+  return (
+    <section className={styles.cycleCard}>
+      <button
+        type="button"
+        className={styles.cycleToggle}
+        aria-expanded={cycleOpen}
+        onClick={() => setCycleOpen(o => !o)}
+      >
+        <span className={styles.cycleKicker}>Cycle context</span>
+        <span className={styles.cycleTitle}>
+          {cycleOpen ? 'Hide' : 'Add'} period &amp; cycle info
+          <span className={styles.cycleOptional}>optional</span>
+        </span>
+        <span className={styles.cycleChev} data-open={cycleOpen} aria-hidden="true">›</span>
+      </button>
+      {cycleOpen && (
+        <div className={styles.cycleBody}>
+          <p className={styles.cycleHelp}>
+            Your running and strength work use this with today’s Feel score.
+          </p>
+          <div className={styles.cycleGrid}>
+            <label>
+              <span>Last period</span>
+              <input
+                type="date"
+                value={cycle.lastPeriod}
+                onChange={e => { setCycle({ ...cycle, lastPeriod: e.target.value }); setSaved(false) }}
+              />
+            </label>
+            <label>
+              <span>Period length (days)</span>
+              <input
+                type="number" min="1" max="14"
+                value={cycle.periodLength}
+                onChange={e => { setCycle({ ...cycle, periodLength: e.target.value }); setSaved(false) }}
+                placeholder="e.g. 5"
+              />
+            </label>
+            <label>
+              <span>Cycle length (days)</span>
+              <input
+                type="number" min="15" max="90"
+                value={cycle.cycleLength}
+                onChange={e => { setCycle({ ...cycle, cycleLength: e.target.value }); setSaved(false) }}
+                placeholder="e.g. 28"
+              />
+            </label>
+            <label>
+              <span>Perimenopause / menopause</span>
+              <select
+                value={cycle.menopauseStatus}
+                onChange={e => { setCycle({ ...cycle, menopauseStatus: e.target.value }); setSaved(false) }}
+              >
+                <option value="">Select one</option>
+                <option value="no">No</option>
+                <option value="perimenopause">Perimenopause</option>
+                <option value="menopause">Menopause</option>
+                <option value="unsure">Not sure</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function ReflectionBlock({ note, setNote, setSaved, wordCount }) {
+  return (
+    <section className={styles.reflection} aria-labelledby="reflection-heading">
+      <header className={styles.reflectionHead}>
+        <p className={styles.reflectionKicker}>Today’s reflection</p>
+        <h2 id="reflection-heading" className={styles.reflectionTitle}>
+          A page for whatever wants out.
+        </h2>
+        <p className={styles.reflectionTagline}>
+          <span>Optional.</span> One line or fifty — patterns surface over time.
+        </p>
+      </header>
+
+      {!note.trim() && (
+        <div className={styles.promptChips} aria-label="Reflection starters">
+          {REFLECTION_PROMPTS.map(prompt => (
+            <button
+              key={prompt}
+              type="button"
+              className={styles.promptChip}
+              onClick={() => {
+                setNote(`${prompt}\n\n`)
+                setSaved(false)
+                requestAnimationFrame(() => {
+                  const el = document.getElementById('daily-note')
+                  if (el) {
+                    el.focus()
+                    el.setSelectionRange(el.value.length, el.value.length)
+                  }
+                })
+              }}
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className={styles.notebook}>
+        <span className={styles.notebookStamp} aria-hidden="true">
+          {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+        </span>
+        <textarea
+          id="daily-note"
+          className={styles.reflectionField}
+          placeholder="Let your hand wander…"
+          value={note}
+          onChange={e => { setNote(e.target.value); setSaved(false) }}
+          rows={6}
+        />
+        <footer className={styles.notebookFoot}>
+          <span className={styles.reflectionHint}>No pressure. Skip if today is busy.</span>
+          {wordCount > 0 && (
+            <span className={styles.reflectionCount}>
+              {wordCount} word{wordCount === 1 ? '' : 's'}
+            </span>
+          )}
+        </footer>
+      </div>
+    </section>
+  )
+}
+
+/* ─────────────────────────────────────────────────────
+   Gauge & desktop FactorCard (unchanged)
+   ───────────────────────────────────────────────────── */
 function FeelGauge({ factors, scores, feelScore }) {
   const radius = 92
   const circumference = 2 * Math.PI * radius
@@ -564,6 +955,9 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
   )
 }
 
+/* ─────────────────────────────────────────────────────
+   Helpers
+   ───────────────────────────────────────────────────── */
 function statusWord(score, answered) {
   if (!answered) return 'Awaiting'
   if (score < 3.5) return 'Tender'
