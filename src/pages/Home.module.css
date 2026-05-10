@@ -679,7 +679,8 @@
   }
 
   .feelCard::before {
-    animation: mobileFeelSheen 5s var(--ease-out) infinite;
+    animation: none;
+    display: none;
   }
 
   @keyframes mobileFeelSheen {
@@ -695,6 +696,10 @@
 
   .ringScore {
     font-size: 1.86rem;
+  }
+
+  .progressFill {
+    animation: none;
   }
 
   .feelHeading {

@@ -688,9 +688,10 @@
   .filters {
     top: 0;
     padding: 14px 12px 8px;
-    background: linear-gradient(180deg, var(--cream) 0%, rgba(247, 245, 239, 0.86) 82%, transparent 100%);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: var(--cream);
+    border-bottom: 1px solid var(--border-light);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     scroll-padding-inline: 12px;
   }
 
@@ -701,7 +702,7 @@
   :global(html[data-theme="violet"]) .filters,
   :global(html[data-theme="rose"]) .filters,
   :global(html[data-theme="midnight"]) .filters {
-    background: linear-gradient(180deg, var(--cream) 0%, rgba(16, 19, 15, 0.84) 82%, transparent 100%);
+    background: var(--cream);
   }
 
   .filter {

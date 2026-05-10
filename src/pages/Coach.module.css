@@ -2983,6 +2983,16 @@
     padding-bottom: calc(112px + env(safe-area-inset-bottom));
   }
 
+  .header::before,
+  .progressFill,
+  .wizardTop::before,
+  .generatingShell::before,
+  .thinkingDot,
+  .typingDots span,
+  .liveBubble::after {
+    animation: none;
+  }
+
   .header {
     padding: calc(54px + env(safe-area-inset-top)) 18px 22px;
     border-radius: 0 0 26px 26px;

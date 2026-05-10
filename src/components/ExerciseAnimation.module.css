@@ -337,3 +337,45 @@
   animation: defaultBreath 4s ease-in-out infinite;
   transform-origin: 100px 140px;
 }
+
+@media (max-width: 767px) {
+  .squatBody,
+  .squatHipL,
+  .squatHipR,
+  .squatKneeL,
+  .squatKneeR,
+  .squatArmL,
+  .squatArmR,
+  .deadliftHinge,
+  .deadliftBar,
+  .carryBody,
+  .carryLegL,
+  .carryLegR,
+  .carryArmR,
+  .hopBody,
+  .bounceArrow,
+  .jogBody,
+  .jogLegL,
+  .jogLegR,
+  .jogArmL,
+  .jogArmR,
+  .forwardFold,
+  .hipHighlight,
+  .pressArmL,
+  .pressArmR,
+  .pressBar,
+  .rotateLeg,
+  .benchArms,
+  .rowArms,
+  .lungeBody,
+  .lungeBackLeg,
+  .curlForearmL,
+  .curlForearmR,
+  .slrLeg,
+  .proneLeg,
+  .slumpBody,
+  .sideBendTorso,
+  .defaultFigure {
+    animation-play-state: paused;
+  }
+}
