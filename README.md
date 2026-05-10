@@ -2,6 +2,7 @@
 
 **SCAD AI 201 — Project 3: Persons Required**
 **Designer:** Viren Chauhan | **Person:** Dr. Rajat Chauhan
+**AI Development Support:** ChatGPT / Codex
 **Live App:** [your-deployed-url-here]
 
 ---

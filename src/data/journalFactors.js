@@ -32,7 +32,7 @@ export const JOURNAL_FACTORS = [
   {
     id: 'energy',
     label: 'Energy Levels',
-    question: 'Presence of lethargy or tiredness.',
+    question: 'How energized do you feel? A low score suggests lethargy or tiredness.',
     category: 'body',
   },
   {

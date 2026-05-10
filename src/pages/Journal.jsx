@@ -77,6 +77,7 @@ export default function Journal() {
     () => CATEGORY_ORDER.flatMap(c => grouped[c]),
     [grouped]
   )
+  const mobileDisplayOrder = JOURNAL_FACTORS
 
   function handleScore(id, val) {
     setScores(prev => ({ ...prev, [id]: Number(val) }))
@@ -120,7 +121,7 @@ export default function Journal() {
   const sharedProps = {
     profile, scores, scoreNotes, note, cycle, cycleOpen,
     saved, submitError, feelScore, answered, total, allAnswered,
-    status, tone, dateStr, displayOrder, grouped, wordCount,
+    status, tone, dateStr, displayOrder, mobileDisplayOrder, grouped, wordCount,
     handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setSaved,
     handleSave,
   }
@@ -295,11 +296,12 @@ function JournalMobile(props) {
   const {
     profile, scores, scoreNotes, note, cycle, cycleOpen,
     saved, submitError, feelScore, answered, total, allAnswered,
-    status, tone, dateStr, displayOrder, wordCount,
+    status, tone, dateStr, mobileDisplayOrder, wordCount,
     handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setSaved,
     handleSave,
   } = props
 
+  const displayOrder = mobileDisplayOrder
   const initialUnanswered = displayOrder.findIndex(f => scores[f.id] === undefined)
   const [step, setStep] = useState(() => (allAnswered ? 'reflection' : 'factors'))
   const [activeIdx, setActiveIdx] = useState(() => (initialUnanswered >= 0 ? initialUnanswered : 0))
