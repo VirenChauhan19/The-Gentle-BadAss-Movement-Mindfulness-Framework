@@ -4,9 +4,7 @@ import { EXERCISES, CATEGORIES } from '../data/exercises'
 import styles from './Library.module.css'
 
 const PILLARS = ['Smile', 'Tall Puppet', 'Relaxed Fists', 'Uncurl Toes', 'Breathe']
-const PLAN_CATEGORIES = Object.fromEntries(
-  Object.entries(CATEGORIES).filter(([id]) => id !== 'functional')
-)
+const PLAN_CATEGORY_ORDER = ['running', 'strength']
 const PRINCIPLES = [
   ['The Hip Engine', 'Hips are the engine. Knees follow; they never lead.'],
   ['The Stable Pillar', 'The lumbar spine stays quiet while hips and shoulders move around it.'],
@@ -14,23 +12,21 @@ const PRINCIPLES = [
 ]
 
 export default function Library() {
-  const [activeCategory, setActiveCategory] = useState('strength')
-  const filtered = EXERCISES.filter(e => e.category === activeCategory)
+  const [activeCategory, setActiveCategory] = useState(null)
+  const filtered = activeCategory ? EXERCISES.filter(e => e.category === activeCategory) : []
 
   const stats = useMemo(() => {
-    const total = EXERCISES.length
-    const withVideo = EXERCISES.filter(e => e.video).length
     const inCategory = filtered.length
     const categoryWithVideo = filtered.filter(e => e.video).length
-    return { total, withVideo, inCategory, categoryWithVideo }
+    return { inCategory, categoryWithVideo }
   }, [filtered])
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <p className={styles.label}>Your 90 day plan</p>
+        <p className={styles.label}>Your Plan</p>
         <h1 className={styles.title}>Weekly modules</h1>
-        <p className={styles.subtitle}>Your main course page. Modules unlock one week at a time across the 90 day plan.</p>
+        <p className={styles.subtitle}>Choose Breathe, Mobility, or Strength Tools to begin.</p>
       </header>
 
       <section className={styles.pillarBanner}>
@@ -44,36 +40,40 @@ export default function Library() {
         <div className={styles.weeklyIcon}>90</div>
         <div className={styles.weeklyCopy}>
           <p className={styles.weeklyLabel}>Main course</p>
-          <h2>Weekwise plan</h2>
-          <p>Start with the current week. Breathe, Strength Tools, and Running Drills live here, while Functional Tests sit on their own weekly check page.</p>
+          <h2>Your Plan</h2>
+          <p>Start with Breathe, then open Mobility or Strength Tools when you are ready for the exercise list.</p>
         </div>
-        <Link to="/breathing" className={styles.weeklyButton}>Breathe</Link>
       </section>
 
       <div className={styles.filters}>
-        {Object.entries(PLAN_CATEGORIES).map(([id, cat]) => (
+        <Link to="/breathing" className={styles.filter}>
+          Breathe
+        </Link>
+        {PLAN_CATEGORY_ORDER.map(id => (
           <button
             key={id}
             className={styles.filter + (activeCategory === id ? ' ' + styles.filterActive : '')}
             onClick={() => setActiveCategory(id)}
           >
-            {cat.label}
+            {CATEGORIES[id].label}
           </button>
         ))}
       </div>
 
-      <div className={styles.categoryHeader}>
-        <p className={styles.categoryDesc}>{CATEGORIES[activeCategory]?.description}</p>
-        <div className={styles.categoryStats}>
-          <span><strong>{stats.inCategory}</strong> exercises</span>
-          {stats.categoryWithVideo > 0 && (
-            <span className={styles.statsVideoCount}>
-              <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M8 5v14l11-7z"/></svg>
-              {stats.categoryWithVideo} with video
-            </span>
-          )}
+      {activeCategory && (
+        <div className={styles.categoryHeader}>
+          <p className={styles.categoryDesc}>{CATEGORIES[activeCategory]?.description}</p>
+          <div className={styles.categoryStats}>
+            <span><strong>{stats.inCategory}</strong> exercises</span>
+            {stats.categoryWithVideo > 0 && (
+              <span className={styles.statsVideoCount}>
+                <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10"><path d="M8 5v14l11-7z"/></svg>
+                {stats.categoryWithVideo} with video
+              </span>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {activeCategory === 'running' && (
         <section className={styles.principlesBanner}>
@@ -89,11 +89,13 @@ export default function Library() {
         </section>
       )}
 
-      <div className={styles.grid} key={activeCategory}>
-        {filtered.map((exercise, i) => (
-          <ExerciseCard key={exercise.id} exercise={exercise} index={i} />
-        ))}
-      </div>
+      {activeCategory && (
+        <div className={styles.grid} key={activeCategory}>
+          {filtered.map((exercise, i) => (
+            <ExerciseCard key={exercise.id} exercise={exercise} index={i} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

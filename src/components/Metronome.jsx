@@ -19,9 +19,11 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
   const [beat, setBeat] = useState(0)
   const [volume, setVolume] = useState(85)
   const audioRef = useRef(null)
+  const outputRef = useRef(null)
   const timerRef = useRef(null)
   const beatRef = useRef(0)
   const volumeRef = useRef(volume)
+  const skipImmediateTickRef = useRef(false)
 
   useEffect(() => {
     volumeRef.current = volume
@@ -34,7 +36,11 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
       return
     }
 
-    tick()
+    if (skipImmediateTickRef.current) {
+      skipImmediateTickRef.current = false
+    } else {
+      tick()
+    }
     timerRef.current = window.setInterval(tick, 60000 / selectedTempo.bpm)
     return () => window.clearInterval(timerRef.current)
   }, [playing, selectedTempo.bpm])
@@ -55,6 +61,11 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
       try {
         const ctx = ensureAudio()
         if (ctx.state === 'suspended') await ctx.resume()
+        const nextBeat = (beatRef.current + 1) % 4
+        beatRef.current = nextBeat
+        setBeat(nextBeat)
+        playClick(ctx, nextBeat === 0, volumeRef.current / 100)
+        skipImmediateTickRef.current = true
       } catch {}
     }
     onPlayingChange?.(!playing)
@@ -69,37 +80,48 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
 
   function ensureAudio() {
     const AudioContext = window.AudioContext || window.webkitAudioContext
-    if (!audioRef.current) audioRef.current = new AudioContext()
+    if (!audioRef.current) {
+      audioRef.current = new AudioContext()
+      const compressor = audioRef.current.createDynamicsCompressor()
+      compressor.threshold.setValueAtTime(-24, audioRef.current.currentTime)
+      compressor.knee.setValueAtTime(18, audioRef.current.currentTime)
+      compressor.ratio.setValueAtTime(3, audioRef.current.currentTime)
+      compressor.attack.setValueAtTime(0.003, audioRef.current.currentTime)
+      compressor.release.setValueAtTime(0.08, audioRef.current.currentTime)
+      compressor.connect(audioRef.current.destination)
+      outputRef.current = compressor
+    }
     return audioRef.current
   }
 
   function playClick(ctx, accent, volumeLevel) {
     const now = ctx.currentTime
-    const peak = Math.max(0.02, volumeLevel) * (accent ? 0.72 : 0.52)
+    const output = outputRef.current || ctx.destination
+    const peak = Math.max(0.04, volumeLevel) * (accent ? 1 : 0.78)
 
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
     osc.type = 'square'
-    osc.frequency.setValueAtTime(accent ? 1320 : 960, now)
+    osc.frequency.setValueAtTime(accent ? 1760 : 1280, now)
     gain.gain.setValueAtTime(0.0001, now)
     gain.gain.exponentialRampToValueAtTime(peak, now + 0.006)
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.075)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11)
     osc.connect(gain)
-    gain.connect(ctx.destination)
+    gain.connect(output)
     osc.start(now)
-    osc.stop(now + 0.085)
+    osc.stop(now + 0.12)
 
     const knock = ctx.createOscillator()
     const knockGain = ctx.createGain()
-    knock.type = 'triangle'
-    knock.frequency.setValueAtTime(accent ? 220 : 180, now)
+    knock.type = 'sine'
+    knock.frequency.setValueAtTime(accent ? 260 : 210, now)
     knockGain.gain.setValueAtTime(0.0001, now)
-    knockGain.gain.exponentialRampToValueAtTime(peak * 0.35, now + 0.004)
-    knockGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045)
+    knockGain.gain.exponentialRampToValueAtTime(peak * 0.45, now + 0.004)
+    knockGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07)
     knock.connect(knockGain)
-    knockGain.connect(ctx.destination)
+    knockGain.connect(output)
     knock.start(now)
-    knock.stop(now + 0.05)
+    knock.stop(now + 0.08)
   }
 
   return (

@@ -383,5 +383,5 @@ export const EXERCISES = [
 export const CATEGORIES = {
   functional: { label: 'Functional Tests', color: '#8b9e7e', description: 'Assess your baseline — where you are today.' },
   strength: { label: 'Strength Tools', color: '#9e8b7e', description: 'Build the engine. 10-second cadence: control over momentum.' },
-  running: { label: 'Running Drills', color: '#7e8b9e', description: 'Learn the soft landing and the hip engine.' }
+  running: { label: 'Mobility', color: '#7e8b9e', description: 'Learn the soft landing and the hip engine.' }
 }

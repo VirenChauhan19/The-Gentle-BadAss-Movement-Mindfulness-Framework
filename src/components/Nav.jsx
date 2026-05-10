@@ -7,7 +7,7 @@ import styles from './Nav.module.css'
 const links = [
   { to: '/', label: 'Home', icon: HomeIcon },
   { to: '/journal', label: 'Feel', icon: JournalIcon, lockedForGuest: true },
-  { to: '/library', label: '90 Day Plan', icon: LibraryIcon, lockedForGuest: true },
+  { to: '/library', label: 'Your Plan', icon: LibraryIcon, lockedForGuest: true },
   { to: '/functional-tests', label: 'Functional Tests', icon: TestIcon, lockedForGuest: true },
   { to: '/coach', label: 'Running', icon: CoachIcon },
   { to: '/history', label: 'Progress', icon: HistoryIcon, lockedForGuest: true },

@@ -115,8 +115,8 @@ function AppRoutes() {
         <Route path="/breathing" element={<Breathing />} />
         <Route path="/history" element={<LockedRoute feature="Progress"><History /></LockedRoute>} />
         <Route path="/functional-tests" element={<LockedRoute feature="Functional Tests"><FunctionalTests /></LockedRoute>} />
-        <Route path="/library" element={<LockedRoute feature="Your 90 day plan"><Library /></LockedRoute>} />
-        <Route path="/library/:id" element={<LockedRoute feature="Your 90 day plan"><ExerciseDetail /></LockedRoute>} />
+        <Route path="/library" element={<LockedRoute feature="Your Plan"><Library /></LockedRoute>} />
+        <Route path="/library/:id" element={<LockedRoute feature="Your Plan"><ExerciseDetail /></LockedRoute>} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/profile" element={<Admin />} />
         <Route path="/admin" element={<Admin />} />
@@ -135,9 +135,9 @@ function LockedRoute({ feature, children }) {
       intro: 'A two-minute body, energy, soreness, and mood check-in that tunes your day.',
       bullets: ['Save daily scores', 'Spot recovery patterns', 'Connect Feel to your running plan'],
     },
-    'Your 90 day plan': {
-      title: 'Sign in to unlock your 90 day plan',
-      intro: 'Weekly modules, breathing, strength tools, and running drills built around your progress.',
+    'Your Plan': {
+      title: 'Sign in to unlock Your Plan',
+      intro: 'Weekly modules, breathing, mobility, and strength tools built around your progress.',
       bullets: ['Unlock one week at a time', 'Use the day plan', 'Keep your exercise history'],
     },
     'Functional Tests': {
@@ -197,7 +197,7 @@ function SignInGate() {
         <p className={styles.signInKicker}>La Ultra: Run &amp; Bee</p>
         <h1 id="signin-title">Start with sign-in</h1>
         <p className={styles.signInCopy}>
-          Sign in to unlock Feel, your 90 day plan, Functional Tests, and Progress with saved activity across sessions. Guest mode is view-only for those sections.
+          Sign in to unlock Feel, Your Plan, Functional Tests, and Progress with saved activity across sessions. Guest mode is view-only for those sections.
         </p>
         {authError && <p className={styles.authError}>{authError}</p>}
         <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>
