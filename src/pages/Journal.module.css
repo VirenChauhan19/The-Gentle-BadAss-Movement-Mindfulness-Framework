@@ -759,13 +759,14 @@
 .reflection::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 26px;
-  bottom: 26px;
-  width: 3px;
-  background: linear-gradient(180deg, var(--sage) 0%, var(--slate) 100%);
-  opacity: 0.4;
-  border-radius: 0 999px 999px 0;
+  left: 50%;
+  top: 0;
+  width: 64px;
+  height: 3px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--sage) 0%, var(--slate) 100%);
+  opacity: 0.55;
+  border-radius: 0 0 999px 999px;
   pointer-events: none;
 }
 
@@ -872,24 +873,25 @@
 }
 
 .notebookStamp {
-  position: absolute;
-  top: 14px;
-  right: 18px;
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 12px 0 0;
   font-family: var(--font-display);
   font-style: italic;
   font-size: 0.78rem;
   color: var(--ink-faint);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   pointer-events: none;
-  opacity: 0.7;
-  z-index: 1;
+  opacity: 0.75;
 }
 
 .reflectionField {
+  display: block;
   width: 100%;
   background: transparent;
   border: 0;
-  padding: 18px 20px 16px 24px;
+  padding: 22px 22px 18px;
   font-family: var(--font-display);
   font-size: 1.06rem;
   color: var(--ink);
@@ -899,6 +901,7 @@
   min-height: 168px;
   letter-spacing: 0.005em;
   caret-color: var(--sage-dark);
+  text-align: center;
   transition: background 220ms var(--ease-out);
 }
 
@@ -914,12 +917,14 @@
 
 .notebookFoot {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 10px;
-  padding: 10px 20px 12px;
+  gap: 4px;
+  padding: 12px 20px 14px;
   border-top: 1px dashed color-mix(in srgb, var(--sage) 22%, var(--border-light));
   font-size: 0.74rem;
+  text-align: center;
 }
 
 .reflectionHint {
