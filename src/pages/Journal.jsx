@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { JOURNAL_FACTORS, CATEGORIES } from '../data/journalFactors'
 import { computeFeelScore } from '../data/storage'
@@ -6,6 +6,13 @@ import { useData } from '../context/DataContext'
 import styles from './Journal.module.css'
 
 const FEEL_EMOJIS = ['😞', '😕', '🙁', '😐', '🙂', '😊', '😃', '😄', '😁', '🤩']
+
+const CATEGORY_ORDER = ['body', 'mind', 'movement']
+const CATEGORY_META = {
+  body:     { label: 'Body',     hint: 'How the body feels today.' },
+  mind:     { label: 'Mind',     hint: 'Your mental and emotional weather.' },
+  movement: { label: 'Movement', hint: 'Today’s relationship to movement.' },
+}
 
 export default function Journal() {
   const { getTodayEntry, saveEntry, coachData, updateCoachGoal, profile, saveProfile } = useData()
@@ -19,6 +26,9 @@ export default function Journal() {
     cycleLength: existing?.cycle?.cycleLength || profile?.cycleLength || '',
     menopauseStatus: existing?.cycle?.menopauseStatus || profile?.menopauseStatus || '',
   }))
+  const [cycleOpen, setCycleOpen] = useState(() =>
+    Boolean(cycle.lastPeriod || cycle.periodLength || cycle.cycleLength || cycle.menopauseStatus)
+  )
   const [saved, setSaved] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const navigate = useNavigate()
@@ -26,8 +36,20 @@ export default function Journal() {
   const feelScore = computeFeelScore(scores)
   const answered = Object.keys(scores).length
   const total = JOURNAL_FACTORS.length
-  const allAnswered = JOURNAL_FACTORS.every(f => scores[f.id] !== undefined)
+  const allAnswered = answered === total
   const wordCount = note.trim() ? note.trim().split(/\s+/).length : 0
+
+  const grouped = useMemo(() => {
+    const out = {}
+    for (const id of CATEGORY_ORDER) {
+      out[id] = JOURNAL_FACTORS.filter(f => f.category === id)
+    }
+    return out
+  }, [])
+  const displayOrder = useMemo(
+    () => CATEGORY_ORDER.flatMap(c => grouped[c]),
+    [grouped]
+  )
 
   function handleScore(id, val) {
     setScores(prev => ({ ...prev, [id]: Number(val) }))
@@ -42,15 +64,13 @@ export default function Journal() {
 
   async function handleSave() {
     if (!allAnswered) {
-      setSubmitError('Complete every Feel slider before submitting.')
+      setSubmitError('Capture every Feel signal before saving.')
       return
     }
     const cycleData = profile?.sex === 'woman' ? cycle : null
     const feelAdjustment = adjustTodayRunningPlan(coachData?.goal, scores, cycleData)
     if (feelAdjustment?.goal) updateCoachGoal(feelAdjustment.goal)
-    if (cycleData && saveProfile) {
-      saveProfile(cycleData)
-    }
+    if (cycleData && saveProfile) saveProfile(cycleData)
     await saveEntry({
       scores,
       scoreNotes,
@@ -59,7 +79,7 @@ export default function Journal() {
       runningAdjustment: feelAdjustment?.summary || null,
     })
     setSaved(true)
-    setTimeout(() => navigate('/library'), 650)
+    setTimeout(() => navigate('/library'), 700)
   }
 
   const dateStr = new Date().toLocaleDateString('en-GB', {
@@ -67,134 +87,298 @@ export default function Journal() {
     day: 'numeric',
     month: 'long',
   })
+  const status = statusWord(feelScore, answered)
+  const tone = scoreTone(answered ? feelScore : 5)
+
+  function jumpToCategory(id) {
+    const el = document.getElementById(`feel-cat-${id}`)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <p className={styles.label}>Feel Module</p>
-        <h1 className={styles.title}>{dateStr}</h1>
-        <div className={styles.progress}>
-          <div className={styles.progressBar} style={{ width: `${(answered / total) * 100}%` }} />
+      <header className={styles.hero} data-tone={tone}>
+        <div className={styles.heroLabel}>
+          <span>Feel</span>
+          <span className={styles.heroDate}>{dateStr}</span>
         </div>
-        <p className={styles.progressText}>
-          {answered} of {total} factors. Feel score: <strong>{feelScore.toFixed(1)}</strong>
+
+        <div className={styles.gaugeWrap}>
+          <FeelGauge
+            factors={displayOrder}
+            scores={scores}
+            feelScore={answered ? feelScore : 0}
+          />
+          <div className={styles.gaugeCore}>
+            <span className={styles.gaugeNumber}>
+              {answered ? feelScore.toFixed(1) : '–'}
+            </span>
+            <span className={styles.gaugeStatus}>{status}</span>
+            <span className={styles.gaugeMeta}>{answered}/{total} captured</span>
+          </div>
+        </div>
+
+        <p className={styles.heroIntro}>
+          {answered === 0
+            ? 'Take a breath. Read each prompt, and let your body answer first.'
+            : allAnswered
+              ? 'You captured all 14. Save when you’re ready.'
+              : `Keep going. ${total - answered} signal${total - answered === 1 ? '' : 's'} left.`}
         </p>
-        {!allAnswered && (
-          <p className={styles.requiredHint}>All sliders are required before Submit Feel unlocks.</p>
-        )}
+
+        <div className={styles.catNav} role="tablist" aria-label="Feel categories">
+          {CATEGORY_ORDER.map(catId => {
+            const cat = CATEGORIES[catId]
+            const factors = grouped[catId]
+            const done = factors.filter(f => scores[f.id] !== undefined).length
+            const complete = done === factors.length
+            return (
+              <button
+                key={catId}
+                type="button"
+                className={styles.catNavBtn}
+                style={{ '--cat-color': cat.color }}
+                onClick={() => jumpToCategory(catId)}
+                aria-label={`${cat.label}: ${done} of ${factors.length} captured`}
+                data-complete={complete}
+              >
+                <span className={styles.catNavRing} aria-hidden="true">
+                  <span style={{ '--cat-fill': `${(done / factors.length) * 100}%` }} />
+                </span>
+                <span className={styles.catNavLabel}>{cat.label}</span>
+                <span className={styles.catNavCount}>{done}/{factors.length}</span>
+              </button>
+            )
+          })}
+        </div>
       </header>
 
       {profile?.sex === 'woman' && (
-        <div className={styles.noteSection}>
-          <label className={styles.noteLabel}>Period check-in</label>
-          <p className={styles.noteHelp}>
-            Update this when it changes. Running intensity and strength work use this context with today's Feel score.
-          </p>
-          <div className={styles.cycleGrid}>
-            <label>
-              <span>Last period</span>
-              <input
-                type="date"
-                value={cycle.lastPeriod}
-                onChange={e => { setCycle({ ...cycle, lastPeriod: e.target.value }); setSaved(false) }}
-              />
-            </label>
-            <label>
-              <span>Period length</span>
-              <input
-                type="number"
-                min="1"
-                max="14"
-                value={cycle.periodLength}
-                onChange={e => { setCycle({ ...cycle, periodLength: e.target.value }); setSaved(false) }}
-                placeholder="days"
-              />
-            </label>
-            <label>
-              <span>Cycle length</span>
-              <input
-                type="number"
-                min="15"
-                max="90"
-                value={cycle.cycleLength}
-                onChange={e => { setCycle({ ...cycle, cycleLength: e.target.value }); setSaved(false) }}
-                placeholder="days"
-              />
-            </label>
-            <label>
-              <span>Perimenopause / menopause</span>
-              <select
-                value={cycle.menopauseStatus}
-                onChange={e => { setCycle({ ...cycle, menopauseStatus: e.target.value }); setSaved(false) }}
-              >
-                <option value="">Select one</option>
-                <option value="no">No</option>
-                <option value="perimenopause">Perimenopause</option>
-                <option value="menopause">Menopause</option>
-                <option value="unsure">Not sure</option>
-              </select>
-            </label>
-          </div>
-        </div>
+        <section className={styles.cycleCard}>
+          <button
+            type="button"
+            className={styles.cycleToggle}
+            aria-expanded={cycleOpen}
+            onClick={() => setCycleOpen(o => !o)}
+          >
+            <span className={styles.cycleKicker}>Cycle context</span>
+            <span className={styles.cycleTitle}>
+              {cycleOpen ? 'Hide' : 'Add'} period &amp; cycle info
+              <span className={styles.cycleOptional}>optional</span>
+            </span>
+            <span className={styles.cycleChev} data-open={cycleOpen} aria-hidden="true">›</span>
+          </button>
+          {cycleOpen && (
+            <div className={styles.cycleBody}>
+              <p className={styles.cycleHelp}>
+                Your running and strength work use this with today’s Feel score.
+              </p>
+              <div className={styles.cycleGrid}>
+                <label>
+                  <span>Last period</span>
+                  <input
+                    type="date"
+                    value={cycle.lastPeriod}
+                    onChange={e => { setCycle({ ...cycle, lastPeriod: e.target.value }); setSaved(false) }}
+                  />
+                </label>
+                <label>
+                  <span>Period length (days)</span>
+                  <input
+                    type="number" min="1" max="14"
+                    value={cycle.periodLength}
+                    onChange={e => { setCycle({ ...cycle, periodLength: e.target.value }); setSaved(false) }}
+                    placeholder="e.g. 5"
+                  />
+                </label>
+                <label>
+                  <span>Cycle length (days)</span>
+                  <input
+                    type="number" min="15" max="90"
+                    value={cycle.cycleLength}
+                    onChange={e => { setCycle({ ...cycle, cycleLength: e.target.value }); setSaved(false) }}
+                    placeholder="e.g. 28"
+                  />
+                </label>
+                <label>
+                  <span>Perimenopause / menopause</span>
+                  <select
+                    value={cycle.menopauseStatus}
+                    onChange={e => { setCycle({ ...cycle, menopauseStatus: e.target.value }); setSaved(false) }}
+                  >
+                    <option value="">Select one</option>
+                    <option value="no">No</option>
+                    <option value="perimenopause">Perimenopause</option>
+                    <option value="menopause">Menopause</option>
+                    <option value="unsure">Not sure</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          )}
+        </section>
       )}
 
-      <div className={styles.factors}>
-        {JOURNAL_FACTORS.map((factor, index) => (
-          <FactorSlider
-            key={factor.id}
-            factor={factor}
-            index={index}
-            value={scores[factor.id]}
-            note={scoreNotes[factor.id] || ''}
-            onChange={val => handleScore(factor.id, val)}
-            onNoteChange={val => handleScoreNote(factor.id, val)}
-          />
-        ))}
-      </div>
+      <main className={styles.factors}>
+        {CATEGORY_ORDER.map(catId => {
+          const cat = CATEGORIES[catId]
+          const meta = CATEGORY_META[catId]
+          const factors = grouped[catId]
+          const done = factors.filter(f => scores[f.id] !== undefined).length
+          return (
+            <section
+              key={catId}
+              id={`feel-cat-${catId}`}
+              className={styles.catSection}
+              style={{ '--cat-color': cat.color }}
+              data-complete={done === factors.length}
+            >
+              <header className={styles.catHeader}>
+                <div className={styles.catHeaderText}>
+                  <span className={styles.catBadge}>{meta.label}</span>
+                  <p className={styles.catHint}>{meta.hint}</p>
+                </div>
+                <div className={styles.catProgress} aria-hidden="true">
+                  <span className={styles.catProgressNum}>
+                    {done}<small>/{factors.length}</small>
+                  </span>
+                  <div className={styles.catProgressBar}>
+                    <span style={{ width: `${(done / factors.length) * 100}%` }} />
+                  </div>
+                </div>
+              </header>
+              <div className={styles.catGrid}>
+                {factors.map(factor => (
+                  <FactorCard
+                    key={factor.id}
+                    factor={factor}
+                    index={JOURNAL_FACTORS.findIndex(f => f.id === factor.id) + 1}
+                    value={scores[factor.id]}
+                    note={scoreNotes[factor.id] || ''}
+                    onChange={val => handleScore(factor.id, val)}
+                    onNoteChange={val => handleScoreNote(factor.id, val)}
+                  />
+                ))}
+              </div>
+            </section>
+          )
+        })}
+      </main>
 
-      <div className={styles.noteSection}>
-        <label className={styles.noteLabel} htmlFor="daily-note">
-          Reflection <span className={styles.optional}>(Optional)</span>
+      <section className={styles.reflection}>
+        <label className={styles.reflectionLabel} htmlFor="daily-note">
+          Reflection <span className={styles.optional}>optional</span>
         </label>
-        <p className={styles.noteHelp}>
-          Optional personal diary. Longer reflections can reveal patterns, but this should never become a chore.
+        <p className={styles.reflectionHelp}>
+          One line, or fifty. Patterns surface over time.
         </p>
         <textarea
           id="daily-note"
-          className={styles.note}
-          placeholder="Write 50+ words if it helps: what happened, what you noticed, and what your body may be asking for."
+          className={styles.reflectionField}
+          placeholder="What happened today? What is your body asking for?"
           value={note}
           onChange={e => { setNote(e.target.value); setSaved(false) }}
-          rows={8}
+          rows={6}
         />
-        {wordCount > 0 && (
-          <div className={styles.noteFooter}>
-            <span className={styles.validCount}>{wordCount} words</span>
-          </div>
-        )}
-      </div>
+        {wordCount > 0 && <span className={styles.reflectionCount}>{wordCount} words</span>}
+      </section>
 
-      <div className={styles.saveSection}>
-        {submitError && <p className={styles.submitError}>{submitError}</p>}
+      <div className={styles.saveBar} data-tone={tone}>
+        <div className={styles.saveScore}>
+          <span className={styles.saveScoreNum}>
+            {answered ? feelScore.toFixed(1) : '–'}
+          </span>
+          <div className={styles.saveScoreText}>
+            <span className={styles.saveScoreStatus}>{status}</span>
+            <span className={styles.saveScoreMeta}>{answered}/{total} captured</span>
+          </div>
+        </div>
         <button
-          className={styles.saveBtn + (saved ? ' ' + styles.saved : '')}
+          className={`${styles.saveBtn} ${saved ? styles.saved : ''}`}
           onClick={handleSave}
           disabled={!allAnswered}
         >
-          {saved ? 'Saved' : 'Submit Feel and Start Move'}
+          {saved
+            ? '✓ Saved'
+            : allAnswered
+              ? 'Save & open Move'
+              : `${total - answered} more`}
         </button>
+        {submitError && <p className={styles.saveError}>{submitError}</p>}
       </div>
     </div>
   )
 }
 
-function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
+function FeelGauge({ factors, scores, feelScore }) {
+  const radius = 92
+  const circumference = 2 * Math.PI * radius
+  const fillLength = (Math.max(0, Math.min(10, feelScore)) / 10) * circumference
+  const strokeColor = scoreColor(feelScore || 5)
+
+  return (
+    <svg viewBox="0 0 240 240" className={styles.gaugeSvg} aria-hidden="true">
+      <defs>
+        <radialGradient id="gauge-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.32" />
+          <stop offset="62%" stopColor={strokeColor} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      <circle cx="120" cy="120" r="104" fill="url(#gauge-glow)" />
+
+      <circle
+        cx="120" cy="120" r={radius}
+        fill="none"
+        stroke="var(--border-light)"
+        strokeWidth="2"
+      />
+
+      <circle
+        cx="120" cy="120" r={radius}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeDasharray={`${fillLength} ${circumference}`}
+        transform="rotate(-90 120 120)"
+        style={{
+          opacity: feelScore > 0 ? 1 : 0,
+          transition: 'stroke-dasharray 600ms cubic-bezier(0.22, 0.61, 0.36, 1), stroke 280ms ease, opacity 280ms ease',
+          filter: `drop-shadow(0 0 12px ${strokeColor}55)`,
+        }}
+      />
+
+      {factors.map((f, i) => {
+        const angle = (i / factors.length) * Math.PI * 2 - Math.PI / 2
+        const dotR = 110
+        const x = 120 + Math.cos(angle) * dotR
+        const y = 120 + Math.sin(angle) * dotR
+        const v = scores[f.id]
+        const isAnswered = v !== undefined
+        const color = isAnswered ? scoreColor(v) : CATEGORIES[f.category].color
+        return (
+          <circle
+            key={f.id}
+            cx={x} cy={y}
+            r={isAnswered ? 5 : 2.6}
+            fill={color}
+            opacity={isAnswered ? 1 : 0.36}
+            style={{ transition: 'r 220ms cubic-bezier(0.34, 1.56, 0.64, 1), fill 240ms ease, opacity 240ms ease' }}
+          />
+        )
+      })}
+    </svg>
+  )
+}
+
+function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
   const hasValue = value !== undefined
   const currentValue = hasValue ? value : 5
   const needsWhy = hasValue && (value <= 2 || value >= 9)
   const cat = CATEGORIES[factor.category]
   const status =
-    !hasValue ? 'Tap or drag' :
+    !hasValue ? 'Tap to score' :
     value <= 3 ? 'Needs care' :
     value <= 6 ? 'Steady' :
     value <= 8 ? 'Good' :
@@ -233,8 +417,9 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
   }
 
   return (
-    <div
+    <article
       className={styles.factor}
+      data-answered={hasValue}
       style={{
         '--factor-color': hasValue ? scoreColor(currentValue) : cat.color,
         '--factor-fill': `${((currentValue - 1) / 9) * 100}%`,
@@ -242,122 +427,84 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
       }}
       data-swipe-lock
     >
-      <div className={styles.factorTop}>
-        <span className={styles.factorIndex}>{String(index + 1).padStart(2, '0')}</span>
-        <div className={styles.factorInfo}>
-          <span className={styles.factorCat} style={{ color: cat.color }}>{cat.label}</span>
-          <span className={styles.factorLabel}>{factor.label}</span>
-          <span className={styles.factorQ}>{factor.question}</span>
+      <header className={styles.factorHead}>
+        <span className={styles.factorIndex}>{String(index).padStart(2, '0')}</span>
+        <div className={styles.factorTitle}>
+          <h3>{factor.label}</h3>
+          <p>{factor.question}</p>
         </div>
-        <div className={styles.valuePill}>
-          <span className={styles.factorValue}>{hasValue ? value : '-'}</span>
-          <span className={styles.valueText}>{status}</span>
-        </div>
-      </div>
-      <div className={styles.mobileBloom}>
-        <div className={styles.bloomTop}>
-          <button
-            type="button"
-            className={styles.nudgeBtn}
-            onClick={() => commitScore(currentValue - 1)}
-            disabled={currentValue <= 1}
-            aria-label={`Decrease ${factor.label}`}
-          >
-            -
-          </button>
-          <div className={styles.bloomOrb} data-tone={tone}>
-            <span>{hasValue ? FEEL_EMOJIS[currentValue - 1] : '?'}</span>
-            <small>{hasValue ? `Score ${currentValue}` : status}</small>
-          </div>
-          <button
-            type="button"
-            className={styles.nudgeBtn}
-            onClick={() => commitScore(currentValue + 1)}
-            disabled={currentValue >= 10}
-            aria-label={`Increase ${factor.label}`}
-          >
-            +
-          </button>
-        </div>
-        <div
-          className={styles.touchMeter}
-          role="slider"
-          tabIndex={0}
-          aria-label={`${factor.label} score`}
-          aria-valuemin={1}
-          aria-valuemax={10}
-          aria-valuenow={hasValue ? value : currentValue}
-          onPointerDown={event => {
-            event.currentTarget.setPointerCapture?.(event.pointerId)
-            setFromPointer(event)
-          }}
-          onPointerMove={event => {
-            if (event.buttons === 1) setFromPointer(event)
-          }}
-          onKeyDown={onMeterKey}
+      </header>
+
+      <div className={styles.bloomTop}>
+        <button
+          type="button"
+          className={styles.nudgeBtn}
+          onClick={() => commitScore(currentValue - 1)}
+          disabled={currentValue <= 1}
+          aria-label={`Decrease ${factor.label}`}
         >
-          <div className={styles.touchFill} />
-          {Array.from({ length: 10 }, (_, i) => i + 1).map(score => (
-            <button
-              key={score}
-              type="button"
-              className={`${styles.touchDot} ${hasValue && value === score ? styles.touchDotActive : ''} ${score <= currentValue ? styles.touchDotFilled : ''}`}
-              onClick={event => {
-                event.stopPropagation()
-                commitScore(score)
-              }}
-              aria-label={`${factor.label} score ${score}`}
-            >
-              <span>{FEEL_EMOJIS[score - 1]}</span>
-            </button>
-          ))}
+          <span aria-hidden="true">−</span>
+        </button>
+        <div className={styles.bloomOrb} data-tone={tone}>
+          <span className={styles.bloomEmoji} aria-hidden="true">
+            {hasValue ? FEEL_EMOJIS[currentValue - 1] : '·'}
+          </span>
+          <small>{hasValue ? `${currentValue} · ${status}` : status}</small>
         </div>
-        <div className={styles.feelWords}>
-          <span>Care</span>
-          <span>Steady</span>
-          <span>Ready</span>
-        </div>
+        <button
+          type="button"
+          className={styles.nudgeBtn}
+          onClick={() => commitScore(currentValue + 1)}
+          disabled={currentValue >= 10}
+          aria-label={`Increase ${factor.label}`}
+        >
+          <span aria-hidden="true">+</span>
+        </button>
       </div>
-      <div className={styles.sliderRow}>
-        <span className={styles.sliderEdge}>1</span>
-        <input
-          type="range"
-          min="1"
-          max="10"
-          step="1"
-          value={currentValue}
-          onChange={e => onChange(e.target.value)}
-          className={styles.slider}
-          style={{
-            '--slider-fill': `${((currentValue - 1) / 9) * 100}%`,
-            '--slider-color': hasValue ? scoreColor(currentValue) : 'var(--ink-faint)',
-          }}
-        />
-        <span className={styles.sliderEdge}>10</span>
-      </div>
-      <div className={styles.scoreRail} aria-label={`Score ${factor.label}`}>
+
+      <div
+        className={styles.touchMeter}
+        role="slider"
+        tabIndex={0}
+        aria-label={`${factor.label} score`}
+        aria-valuemin={1}
+        aria-valuemax={10}
+        aria-valuenow={hasValue ? value : currentValue}
+        onPointerDown={event => {
+          event.currentTarget.setPointerCapture?.(event.pointerId)
+          setFromPointer(event)
+        }}
+        onPointerMove={event => {
+          if (event.buttons === 1) setFromPointer(event)
+        }}
+        onKeyDown={onMeterKey}
+      >
+        <div className={styles.touchFill} aria-hidden="true" />
         {Array.from({ length: 10 }, (_, i) => i + 1).map(score => (
           <button
             key={score}
             type="button"
-            className={`${styles.scoreChip} ${styles.emojiChip} ${hasValue && value === score ? styles.scoreChipActive : ''}`}
-            onClick={() => onChange(score)}
-            style={{ '--chip-color': scoreColor(score) }}
+            className={`${styles.touchDot} ${hasValue && value === score ? styles.touchDotActive : ''} ${score <= currentValue ? styles.touchDotFilled : ''}`}
+            onClick={event => {
+              event.stopPropagation()
+              commitScore(score)
+            }}
             aria-label={`${factor.label} score ${score}`}
           >
-            <span aria-hidden="true">{FEEL_EMOJIS[score - 1]}</span>
-            <small>{score}</small>
+            <span aria-hidden="true">{score}</span>
           </button>
         ))}
       </div>
-      <div className={styles.sliderLabels}>
-        <span>Not great</span>
-        <span>Okay</span>
-        <span>Great</span>
+
+      <div className={styles.feelWords}>
+        <span>Care</span>
+        <span>Steady</span>
+        <span>Ready</span>
       </div>
+
       {needsWhy && (
         <label className={styles.whyPrompt}>
-          <span>{value <= 2 ? 'Low signal' : 'High signal'}: what is the why?</span>
+          <span>{value <= 2 ? 'Low signal — what is the why?' : 'High signal — what is the why?'}</span>
           <input
             type="text"
             value={note}
@@ -366,8 +513,17 @@ function FactorSlider({ factor, index, value, note, onChange, onNoteChange }) {
           />
         </label>
       )}
-    </div>
+    </article>
   )
+}
+
+function statusWord(score, answered) {
+  if (!answered) return 'Awaiting'
+  if (score < 3.5) return 'Tender'
+  if (score < 5.5) return 'Steady'
+  if (score < 7) return 'Open'
+  if (score < 8.5) return 'Strong'
+  return 'Radiant'
 }
 
 function scoreColor(value) {
