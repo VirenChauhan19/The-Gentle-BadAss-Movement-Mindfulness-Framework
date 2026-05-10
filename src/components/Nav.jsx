@@ -9,7 +9,6 @@ const links = [
   { to: '/journal', label: 'Feel', icon: JournalIcon, lockedForGuest: true },
   { to: '/library', label: 'Your Plan', icon: LibraryIcon, lockedForGuest: true },
   { to: '/functional-tests', label: 'Functional Tests', icon: TestIcon, lockedForGuest: true },
-  { to: '/coach', label: 'Running', icon: CoachIcon },
   { to: '/history', label: 'Progress', icon: HistoryIcon, lockedForGuest: true },
   { to: '/profile', label: 'Profile', icon: ProfileIcon },
 ]

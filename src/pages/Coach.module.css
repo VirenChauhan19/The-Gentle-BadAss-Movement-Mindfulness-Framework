@@ -5,6 +5,16 @@
   overflow-x: hidden;
 }
 
+.embedded {
+  min-height: auto;
+  padding-bottom: 28px;
+  background: transparent;
+}
+
+.embeddedWizard {
+  padding-bottom: 28px;
+}
+
 /* ── Header ──────────────────────────────────────────────────── */
 .header {
   background: var(--brand-gradient);

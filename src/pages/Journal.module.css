@@ -737,27 +737,71 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--factor-color) 16%, transparent);
 }
 
-/* ── Reflection ──────────────────────────────────────── */
+/* ── Reflection (journal page) ───────────────────────── */
 .reflection {
-  margin: 8px 16px 0;
-  padding: 18px 18px 16px;
-  background: var(--paper);
+  position: relative;
+  margin: 22px 16px 0;
+  padding: 26px 24px 22px;
+  background:
+    radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--sage) 14%, transparent), transparent 38%),
+    linear-gradient(180deg, var(--paper) 0%, color-mix(in srgb, var(--cream) 60%, var(--paper)) 100%);
   border: 1px solid var(--border-light);
-  border-radius: var(--r-2xl);
-  box-shadow: 0 10px 26px var(--shadow-xs);
+  border-radius: 26px;
+  box-shadow:
+    0 18px 38px var(--shadow-xs),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset;
   display: grid;
-  gap: 10px;
+  gap: 16px;
+  overflow: hidden;
+  isolation: isolate;
 }
 
-.reflectionLabel {
-  font-size: 0.66rem;
-  letter-spacing: 0.16em;
+.reflection::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 26px;
+  bottom: 26px;
+  width: 3px;
+  background: linear-gradient(180deg, var(--sage) 0%, var(--slate) 100%);
+  opacity: 0.4;
+  border-radius: 0 999px 999px 0;
+  pointer-events: none;
+}
+
+.reflectionHead {
+  display: grid;
+  gap: 4px;
+}
+
+.reflectionKicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink-faint);
   font-weight: 800;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
+}
+
+.reflectionTitle {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 4.5vw, 1.55rem);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.18;
+}
+
+.reflectionTagline {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.reflectionTagline > span {
+  color: var(--sage-dark);
+  font-weight: 800;
+  letter-spacing: 0.04em;
 }
 
 .optional {
@@ -767,38 +811,123 @@
   letter-spacing: 0.08em;
 }
 
-.reflectionHelp {
-  font-size: 0.8rem;
+/* Prompt chips */
+.promptChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  animation: floatIn 360ms var(--ease-elastic) both;
+}
+
+.promptChip {
+  padding: 9px 14px;
+  background: color-mix(in srgb, var(--paper-soft) 92%, var(--sage) 6%);
+  border: 1px dashed color-mix(in srgb, var(--sage) 38%, var(--border));
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.84rem;
+  font-weight: 600;
   color: var(--ink-light);
-  line-height: 1.5;
+  letter-spacing: 0.005em;
+  transition: transform 160ms var(--ease-out),
+              background 200ms var(--ease-out),
+              border-color 200ms var(--ease-out),
+              color 200ms var(--ease-out);
+}
+
+.promptChip::before {
+  content: '“ ';
+  color: var(--sage-dark);
+  font-weight: 800;
+  font-style: normal;
+  margin-right: 1px;
+}
+
+.promptChip:hover {
+  background: color-mix(in srgb, var(--sage) 14%, var(--paper-soft));
+  border-style: solid;
+  border-color: var(--sage);
+  color: var(--ink);
+  transform: translateY(-2px);
+}
+
+/* Notebook */
+.notebook {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--sage) 14%, var(--border-light));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--paper) 96%, var(--cream)), color-mix(in srgb, var(--paper) 88%, var(--cream)));
+  box-shadow: 0 8px 22px var(--shadow-xs) inset;
+  overflow: hidden;
+}
+
+.notebookStamp {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.05em;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 1;
 }
 
 .reflectionField {
   width: 100%;
-  background: var(--paper-soft);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 12px 14px;
-  font-family: var(--font-body);
-  font-size: 0.92rem;
+  background: transparent;
+  border: 0;
+  padding: 18px 20px 16px 24px;
+  font-family: var(--font-display);
+  font-size: 1.06rem;
   color: var(--ink);
   resize: vertical;
   outline: none;
-  line-height: 1.55;
-  min-height: 130px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  line-height: 1.85;
+  min-height: 168px;
+  letter-spacing: 0.005em;
+  caret-color: var(--sage-dark);
+  transition: background 220ms var(--ease-out);
 }
 
 .reflectionField:focus {
-  border-color: var(--sage-dark);
-  box-shadow: 0 0 0 4px rgba(99, 127, 95, 0.12);
+  background: color-mix(in srgb, var(--sage) 4%, transparent);
+}
+
+.reflectionField::placeholder {
+  font-style: italic;
+  color: var(--ink-faint);
+  opacity: 0.62;
+}
+
+.notebookFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px 12px;
+  border-top: 1px dashed color-mix(in srgb, var(--sage) 22%, var(--border-light));
+  font-size: 0.74rem;
+}
+
+.reflectionHint {
+  color: var(--ink-faint);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.82rem;
 }
 
 .reflectionCount {
-  justify-self: end;
-  font-size: 0.72rem;
   color: var(--sage-dark);
-  font-weight: 700;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  font-size: 0.74rem;
+  text-transform: uppercase;
 }
 
 /* ── Save bar (sticky) ───────────────────────────────── */

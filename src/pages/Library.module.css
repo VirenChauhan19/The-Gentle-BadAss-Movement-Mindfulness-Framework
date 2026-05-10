@@ -278,6 +278,65 @@
   to { transform: scale(1); }
 }
 
+.breathePanel {
+  margin: 14px 16px 0;
+  padding: 18px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+  display: grid;
+  gap: 14px;
+  animation: fadeUp 360ms var(--ease-out) both;
+}
+
+.breatheLabel {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.breathePanel h2 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-size: 1.08rem;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.breathePanel p:last-child {
+  color: var(--ink-light);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.breatheButton {
+  min-height: 44px;
+  border-radius: var(--r-md);
+  background: var(--brand-gradient);
+  color: var(--on-dark);
+  font-weight: 800;
+  font-size: 0.84rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  box-shadow: 0 8px 22px rgba(24, 23, 19, 0.18);
+}
+
+.breatheButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(24, 23, 19, 0.24);
+}
+
+.runningPanel {
+  margin-top: 14px;
+  animation: fadeUp 360ms var(--ease-out) both;
+}
+
 .categoryHeader {
   padding: 8px 24px 4px;
   display: flex;
@@ -548,6 +607,8 @@
   .weeklyModule button,
   .weeklyButton { grid-column: auto; padding: 0 22px; min-height: 44px; }
   .filters { padding: 18px 20px 4px; }
+  .breathePanel { margin: 14px 20px 0; grid-template-columns: 1fr auto; align-items: center; }
+  .runningPanel { margin-top: 16px; }
   .principlesBanner { margin: 14px 20px 0; }
   .grid    { padding: 14px 20px 0; }
 }
@@ -557,6 +618,8 @@
   .pillarBanner { margin: 6px 56px 0; }
   .weeklyModule { margin: 12px 56px 0; padding: 22px; }
   .filters { padding: 18px 56px 4px; }
+  .breathePanel { margin: 14px 56px 0; }
+  .runningPanel { margin-top: 18px; }
   .principlesBanner { margin: 14px 56px 0; }
   .principlesGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid    {
@@ -578,6 +641,7 @@
 
   .pillarBanner,
   .weeklyModule,
+  .breathePanel,
   .principlesBanner {
     margin-left: 12px;
     margin-right: 12px;
@@ -615,7 +679,8 @@
   }
 
   .weeklyModule button,
-  .weeklyButton {
+  .weeklyButton,
+  .breatheButton {
     min-height: 50px;
     border-radius: 16px;
   }

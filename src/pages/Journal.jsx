@@ -7,6 +7,12 @@ import styles from './Journal.module.css'
 
 const FEEL_EMOJIS = ['😞', '😕', '🙁', '😐', '🙂', '😊', '😃', '😄', '😁', '🤩']
 
+const REFLECTION_PROMPTS = [
+  'What my body needed',
+  'Something I noticed',
+  'A small win today',
+]
+
 const CATEGORY_ORDER = ['body', 'mind', 'movement']
 const CATEGORY_META = {
   body:     { label: 'Body',     hint: 'How the body feels today.' },
@@ -265,22 +271,63 @@ export default function Journal() {
         })}
       </main>
 
-      <section className={styles.reflection}>
-        <label className={styles.reflectionLabel} htmlFor="daily-note">
-          Reflection <span className={styles.optional}>optional</span>
-        </label>
-        <p className={styles.reflectionHelp}>
-          One line, or fifty. Patterns surface over time.
-        </p>
-        <textarea
-          id="daily-note"
-          className={styles.reflectionField}
-          placeholder="What happened today? What is your body asking for?"
-          value={note}
-          onChange={e => { setNote(e.target.value); setSaved(false) }}
-          rows={6}
-        />
-        {wordCount > 0 && <span className={styles.reflectionCount}>{wordCount} words</span>}
+      <section className={styles.reflection} aria-labelledby="reflection-heading">
+        <header className={styles.reflectionHead}>
+          <p className={styles.reflectionKicker}>Today’s reflection</p>
+          <h2 id="reflection-heading" className={styles.reflectionTitle}>
+            A page for whatever wants out.
+          </h2>
+          <p className={styles.reflectionTagline}>
+            <span>Optional.</span> One line or fifty — patterns surface over time.
+          </p>
+        </header>
+
+        {!note.trim() && (
+          <div className={styles.promptChips} aria-label="Reflection starters">
+            {REFLECTION_PROMPTS.map(prompt => (
+              <button
+                key={prompt}
+                type="button"
+                className={styles.promptChip}
+                onClick={() => {
+                  setNote(`${prompt}\n\n`)
+                  setSaved(false)
+                  requestAnimationFrame(() => {
+                    const el = document.getElementById('daily-note')
+                    if (el) {
+                      el.focus()
+                      el.setSelectionRange(el.value.length, el.value.length)
+                    }
+                  })
+                }}
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className={styles.notebook}>
+          <span className={styles.notebookStamp} aria-hidden="true">
+            {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+          </span>
+          <textarea
+            id="daily-note"
+            className={styles.reflectionField}
+            placeholder="Let your hand wander…"
+            value={note}
+            onChange={e => { setNote(e.target.value); setSaved(false) }}
+            rows={6}
+          />
+          <footer className={styles.notebookFoot}>
+            <span className={styles.reflectionHint}>No pressure. Skip if today is busy.</span>
+            {wordCount > 0 && (
+              <span className={styles.reflectionCount}>
+                {wordCount} word{wordCount === 1 ? '' : 's'}
+              </span>
+            )}
+          </footer>
+        </div>
       </section>
 
       <div className={styles.saveBar} data-tone={tone}>

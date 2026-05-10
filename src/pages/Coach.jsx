@@ -575,7 +575,7 @@ function CoachIntelligenceCard({ goal, actuals, weekTarget, weekIndex, totalWeek
 }
 
 // ── Root ──────────────────────────────────────────────────────────────────────
-export default function Coach() {
+export default function Coach({ embedded = false }) {
   const { coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, entries, adminRemarks, profile } = useData()
   const [tab, setTab] = useState('program')
   const [retuning, setRetuning] = useState(false)
@@ -603,7 +603,7 @@ export default function Coach() {
     }
   }, [actuals.runsLast28, actuals.weeklyKm28])
 
-  if (!goal) return <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={profile?.commitment || 30} />
+  if (!goal) return <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={profile?.commitment || 30} embedded={embedded} />
 
   const today      = new Date().toISOString().split('T')[0]
   const now        = new Date()
@@ -692,7 +692,7 @@ export default function Coach() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${embedded ? styles.embedded : ''}`}>
       <header className={styles.header}>
         <p className={styles.label}>Running</p>
         <h1 className={styles.title}>{goal.focus || goal.raceGoal}</h1>
@@ -929,7 +929,7 @@ function defaultGoalDistanceFor(focus) {
   return ''
 }
 
-function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
+function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }) {
   const [step,        setStep]        = useState(1)
   const [focus,       setFocus]       = useState('')
   const [experience,  setExperience]  = useState('')
@@ -1036,7 +1036,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
 
   if (!apiKey) {
     return (
-      <div className={styles.page}>
+      <div className={`${styles.page} ${embedded ? styles.embedded : ''}`}>
         <header className={styles.header}>
           <p className={styles.label}>Running</p>
           <h1 className={styles.title}>Setup Required</h1>
@@ -1069,7 +1069,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30 }) {
   }
 
   return (
-    <div className={styles.wizard}>
+    <div className={`${styles.wizard} ${embedded ? styles.embeddedWizard : ''}`}>
       {/* Header */}
       <div className={styles.wizardTop}>
         <p className={styles.wizardStepLabel}>Step {step} of {TOTAL_STEPS}</p>

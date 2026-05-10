@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { EXERCISES, CATEGORIES } from '../data/exercises'
+import Coach from './Coach'
 import styles from './Library.module.css'
 
 const PILLARS = ['Smile', 'Tall Puppet', 'Relaxed Fists', 'Uncurl Toes', 'Breathe']
@@ -12,7 +13,8 @@ const PRINCIPLES = [
 ]
 
 export default function Library() {
-  const [activeCategory, setActiveCategory] = useState(null)
+  const [activeSection, setActiveSection] = useState(null)
+  const activeCategory = PLAN_CATEGORY_ORDER.includes(activeSection) ? activeSection : null
   const filtered = activeCategory ? EXERCISES.filter(e => e.category === activeCategory) : []
 
   const stats = useMemo(() => {
@@ -26,7 +28,7 @@ export default function Library() {
       <header className={styles.header}>
         <p className={styles.label}>Your Plan</p>
         <h1 className={styles.title}>Weekly modules</h1>
-        <p className={styles.subtitle}>Choose Breathe, Mobility, or Strength Tools to begin.</p>
+        <p className={styles.subtitle}>Choose Breathe, Running, Mobility, or Strength Tools to begin.</p>
       </header>
 
       <section className={styles.pillarBanner}>
@@ -41,24 +43,50 @@ export default function Library() {
         <div className={styles.weeklyCopy}>
           <p className={styles.weeklyLabel}>Main course</p>
           <h2>Your Plan</h2>
-          <p>Start with Breathe, then open Mobility or Strength Tools when you are ready for the exercise list.</p>
+          <p>Start with Breathe, build your Running plan, then open Mobility or Strength Tools when you are ready.</p>
         </div>
       </section>
 
       <div className={styles.filters}>
-        <Link to="/breathing" className={styles.filter}>
+        <button
+          className={styles.filter + (activeSection === 'breathe' ? ' ' + styles.filterActive : '')}
+          onClick={() => setActiveSection('breathe')}
+        >
           Breathe
-        </Link>
+        </button>
+        <button
+          className={styles.filter + (activeSection === 'coach' ? ' ' + styles.filterActive : '')}
+          onClick={() => setActiveSection('coach')}
+        >
+          Running
+        </button>
         {PLAN_CATEGORY_ORDER.map(id => (
           <button
             key={id}
-            className={styles.filter + (activeCategory === id ? ' ' + styles.filterActive : '')}
-            onClick={() => setActiveCategory(id)}
+            className={styles.filter + (activeSection === id ? ' ' + styles.filterActive : '')}
+            onClick={() => setActiveSection(id)}
           >
             {CATEGORIES[id].label}
           </button>
         ))}
       </div>
+
+      {activeSection === 'breathe' && (
+        <section className={styles.breathePanel}>
+          <div>
+            <p className={styles.breatheLabel}>Breathe</p>
+            <h2>5 BPM breathing practice</h2>
+            <p>Use this before Mobility or Strength Tools to settle your rhythm and start clean.</p>
+          </div>
+          <Link to="/breathing" className={styles.breatheButton}>Open breathing timer</Link>
+        </section>
+      )}
+
+      {activeSection === 'coach' && (
+        <section className={styles.runningPanel}>
+          <Coach embedded />
+        </section>
+      )}
 
       {activeCategory && (
         <div className={styles.categoryHeader}>

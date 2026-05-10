@@ -56,7 +56,7 @@ function AppRoutes() {
   }, [user, profile, navigate, location.pathname])
 
   useEffect(() => {
-    const mobileRoutes = ['/', '/journal', '/library', '/functional-tests', '/coach', '/history', '/profile']
+    const mobileRoutes = ['/', '/journal', '/library', '/functional-tests', '/history', '/profile']
     let startX = 0
     let startY = 0
     let startTime = 0
