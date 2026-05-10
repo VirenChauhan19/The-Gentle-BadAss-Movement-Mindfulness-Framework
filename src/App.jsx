@@ -244,6 +244,10 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    // Pointer tracking only powers the desktop ambient layer. The mobile shell
+    // hides that layer entirely, so skip the listener on phones.
+    if (typeof window === 'undefined' || window.matchMedia('(max-width: 767px)').matches) return
+
     let frame = 0
     function handlePointerMove(event) {
       if (frame) return

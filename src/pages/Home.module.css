@@ -642,146 +642,341 @@
 }
 
 @media (max-width: 767px) {
+  /* ── Calm, decluttered phone Home ─────────────────── */
   .page {
-    padding-bottom: 18px;
+    padding: 0 0 24px;
+  }
+
+  /* Disable per-block floatIn entries — the global routeTransition is
+     already disabled on phones, and chained delays make the page feel
+     laggy on first paint. */
+  .hero,
+  .feelCard,
+  .metricGrid,
+  .progressBlock,
+  .action,
+  .intention {
+    animation: none;
   }
 
   .hero {
-    padding: calc(58px + env(safe-area-inset-top)) 16px 18px;
+    padding: calc(20px + env(safe-area-inset-top)) 16px 12px;
   }
 
   .header {
-    align-items: flex-end;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  /* Smaller, lighter "kicker" — the page already has clear context. */
+  .subtitle {
+    padding: 5px 9px;
+    font-size: 0.58rem;
+    margin-bottom: 8px;
+    box-shadow: none;
+  }
+
+  .greeting {
+    font-size: clamp(1.7rem, 7.4vw, 2.05rem);
+    line-height: 1.08;
   }
 
   .date {
-    max-width: 118px;
-    font-size: 0.7rem;
+    max-width: none;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ink-faint);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: right;
+    align-self: flex-start;
+    margin-top: 4px;
   }
 
   .heroCopy {
-    margin-top: 14px;
-    font-size: 0.93rem;
-  }
-
-  .todayPanel,
-  .actionGrid {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .feelCard {
-    grid-template-columns: 104px minmax(0, 1fr);
-    gap: 14px;
-    min-height: 178px;
-    padding: 17px;
-    border-radius: 22px;
-  }
-
-  .feelCard::before {
-    animation: none;
     display: none;
   }
 
-  @keyframes mobileFeelSheen {
-    0%, 52% { opacity: 0; transform: translateX(-105%); }
-    72% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(105%); }
+  .todayPanel {
+    padding: 0 16px 12px;
+    gap: 10px;
+  }
+
+  /* Feel card: keep the dark surface, drop the sheen, inset border,
+     line pattern, and drop-shadow on the ring. Calmer, reads instantly. */
+  .feelCard {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 14px;
+    min-height: 0;
+    padding: 16px;
+    border-radius: 18px;
+    box-shadow: 0 8px 22px var(--shadow-xs);
+    background: var(--brand-gradient);
+  }
+
+  .feelCard::before,
+  .feelCard::after {
+    display: none;
   }
 
   .ring {
-    width: 104px;
-    height: 104px;
+    width: 96px;
+    height: 96px;
+    filter: none;
   }
 
-  .ringScore {
-    font-size: 1.86rem;
-  }
-
-  .progressFill {
+  .ringProgress {
     animation: none;
   }
 
+  .ringScore {
+    font-size: 1.7rem;
+  }
+
+  .ringScoreSlash {
+    font-size: 0.6rem;
+  }
+
+  .ringCheck {
+    font-size: 0.82rem;
+  }
+
+  .feelKicker {
+    font-size: 0.56rem;
+    letter-spacing: 0.16em;
+  }
+
   .feelHeading {
-    font-size: 1.16rem;
+    font-size: 1.06rem;
+    line-height: 1.18;
+  }
+
+  .feelLabel {
+    padding: 4px 8px;
+    font-size: 0.64rem;
+    background: rgba(255, 255, 255, 0.13);
+    border-color: transparent;
   }
 
   .feelSub {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
+    line-height: 1.4;
   }
 
+  .lockBadge {
+    padding: 5px 9px;
+    font-size: 0.62rem;
+  }
+
+  /* Metric strip: ditch the boxed grid, use a single inline row. */
   .metricGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    padding: 6px 4px;
+    background: transparent;
+    border-radius: 0;
   }
 
   .metric {
-    border-radius: 16px;
-    padding: 10px;
+    min-height: 0;
+    padding: 8px 6px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border-light);
+    border-radius: 0;
+    box-shadow: none;
+    align-items: center;
+    text-align: center;
+    gap: 2px;
   }
 
+  .metric:last-child {
+    border-right: none;
+  }
+
+  .metricValue {
+    font-size: 1.1rem;
+  }
+
+  .metricLabel {
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+  }
+
+  /* Progress block: slimmer, no shimmering animation. */
   .progressBlock {
-    margin: 0 12px 14px;
+    margin: 0 16px 12px;
+    padding: 14px 16px;
     border-radius: 18px;
+    box-shadow: none;
   }
 
+  .progressTop {
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+
+  .progressKicker {
+    font-size: 0.56rem;
+    letter-spacing: 0.14em;
+  }
+
+  .progressDays {
+    font-size: 1.2rem;
+  }
+
+  .progressDays span {
+    font-size: 0.8rem;
+  }
+
+  .progressPercent {
+    font-size: 1.15rem;
+  }
+
+  .progressTrack {
+    height: 6px;
+  }
+
+  .progressFill {
+    background: linear-gradient(90deg, var(--sage-dark), var(--sage));
+    animation: none;
+  }
+
+  .progressFoot {
+    margin-top: 8px;
+    font-size: 0.7rem;
+  }
+
+  /* Action grid: cleaner, no decorative dash above title. */
   .actionGrid {
+    padding: 0 16px 12px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
-  }
-
-  .historyVisual {
-    grid-template-columns: 1fr;
-    margin: 0 12px 14px;
-    border-radius: 18px;
+    gap: 10px;
   }
 
   .action {
-    min-height: 106px;
+    min-height: 88px;
+    padding: 14px;
     border-radius: 18px;
-    padding: 15px;
+    background: var(--paper);
+    box-shadow: none;
+  }
+
+  .action::before {
+    display: none;
   }
 
   .actionTitle {
-    font-size: 0.96rem;
+    font-size: 0.92rem;
+    line-height: 1.18;
   }
 
-  .intention {
-    margin: 0 12px;
+  .actionSub {
+    font-size: 0.7rem;
+    margin-top: 2px;
+  }
+
+  .actionLock {
+    top: 8px;
+    right: 8px;
+    padding: 3px 7px;
+    font-size: 0.54rem;
+  }
+
+  /* History card: stacked, tight, smaller bars. */
+  .historyVisual {
+    grid-template-columns: 1fr;
+    margin: 0 16px 12px;
+    padding: 14px 16px;
     border-radius: 18px;
+    box-shadow: none;
+    min-height: 0;
+    gap: 10px;
+  }
+
+  .historyVisual h2 {
+    font-size: 1.05rem;
+  }
+
+  .historyKicker {
+    font-size: 0.56rem;
+    margin-bottom: 4px;
+  }
+
+  .historyBars {
+    min-height: 64px;
+    padding-top: 4px;
+    gap: 6px;
+  }
+
+  .historyBar {
+    box-shadow: none;
+    min-width: 8px;
+    border-radius: 4px;
+  }
+
+  /* Intention: simpler, quote-style, no card outline. */
+  .intention {
+    margin: 0 16px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    text-align: left;
+  }
+
+  .intentionKicker {
+    font-size: 0.56rem;
+    letter-spacing: 0.16em;
+    margin-bottom: 6px;
+  }
+
+  .intentionText {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    text-align: left;
+    margin: 0;
+  }
+
+  .footer {
+    padding: 18px 16px 4px;
+    text-align: left;
+    font-size: 0.7rem;
   }
 }
 
 @media (max-width: 380px) {
   .header {
-    display: block;
+    flex-direction: column;
   }
 
   .date {
-    display: inline-block;
-    max-width: none;
-    margin-top: 12px;
     text-align: left;
   }
 
   .feelCard {
-    grid-template-columns: 92px minmax(0, 1fr);
-    padding: 15px;
+    grid-template-columns: 84px minmax(0, 1fr);
+    padding: 14px;
+    gap: 12px;
   }
 
   .ring {
-    width: 92px;
-    height: 92px;
+    width: 84px;
+    height: 84px;
   }
 
-  .feelLabel {
-    font-size: 0.66rem;
+  .ringScore {
+    font-size: 1.5rem;
   }
 
-  .metric {
-    padding: 9px 7px;
+  .feelHeading {
+    font-size: 1rem;
   }
 
   .metricValue {
-    font-size: 1.16rem;
+    font-size: 1rem;
   }
 }

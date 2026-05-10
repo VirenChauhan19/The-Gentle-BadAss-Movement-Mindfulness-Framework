@@ -287,43 +287,69 @@
 }
 
 @media (max-width: 767px) {
+  /* ── Calm, fixed 5-item bottom bar ──────────────────── */
   .nav {
-    bottom: calc(8px + env(safe-area-inset-bottom));
-    width: calc(100% - 18px);
+    position: fixed;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 12px;
+    right: 12px;
+    width: auto;
     max-width: none;
-    justify-content: flex-start;
-    gap: 5px;
-    padding: 7px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
+    transform: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 0;
+    padding: 6px;
     border-radius: 20px;
-    background: color-mix(in srgb, #111a14 96%, var(--sage));
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    animation: none;
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    border: 1px solid var(--border-light);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
     box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.08) inset,
-      0 10px 24px rgba(0, 0, 0, 0.30);
+      0 1px 0 rgba(255, 255, 255, 0.5) inset,
+      0 10px 28px rgba(20, 28, 22, 0.16);
+    overflow: visible;
+    animation: none;
+    touch-action: manipulation;
   }
 
-  .nav::before {
+  /* Kill the desktop sheen + brand-gradient on mobile. */
+  .nav::before,
+  .nav::after {
     display: none;
   }
 
-  .nav::-webkit-scrollbar {
-    display: none;
+  .hiddenOnMobile {
+    display: none !important;
   }
 
   .link {
-    flex: 0 0 58px;
-    min-height: 58px;
-    scroll-snap-align: center;
-    padding: 8px 5px 7px;
-    font-size: 0.5rem;
-    letter-spacing: 0.04em;
-    border-radius: 15px;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 52px;
+    padding: 8px 4px 6px;
+    gap: 4px;
+    border-radius: 14px;
+    color: var(--ink-faint);
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    background: transparent;
+    transition: color 180ms var(--ease-out);
+  }
+
+  .link::before,
+  .link::after {
+    display: none;
+  }
+
+  .link svg,
+  .navAvatar {
+    width: 22px;
+    height: 22px;
+    opacity: 0.72;
+    transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-spring);
   }
 
   .fullLabel {
@@ -335,64 +361,82 @@
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: opacity var(--d-base) var(--ease-out);
+    white-space: nowrap;
   }
 
-  .link svg,
-  .navAvatar {
-    width: 23px;
-    height: 23px;
-  }
-
+  /* Active: ink-coloured icon + label, no growing pill, no glow. */
   .active {
-    flex-basis: 76px;
-    transform: translateY(-1px);
-    box-shadow:
-      0 9px 18px rgba(63, 95, 62, 0.30),
-      0 1px 0 rgba(255, 255, 255, 0.20) inset,
-      0 0 18px rgba(168, 200, 159, 0.16);
+    flex: 1 1 0;
+    color: var(--ink);
+    background: transparent;
+    box-shadow: none;
+    transform: none;
   }
 
+  .active::before,
   .active::after {
-    inset: auto 24% 5px;
-    height: 2px;
+    display: none;
   }
 
-  .active span:first-of-type {
+  .active svg,
+  .active .navAvatar {
     opacity: 1;
+    transform: none;
+    animation: none;
   }
 
   .link:active {
-    transform: translateY(1px) scale(0.94);
+    transform: none;
   }
 
-  .active:active {
-    transform: translateY(-1px) scale(0.94);
+  .link:active svg {
+    transform: scale(0.92);
+  }
+
+  /* Tiny dot under the active item — calmer than a pill. */
+  .active .shortLabel::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    margin: 3px auto 0;
+    border-radius: 999px;
+    background: var(--sage-dark);
+  }
+
+  .locked {
+    opacity: 0.62;
   }
 
   .lockDot {
-    top: 5px;
-    right: 6px;
-    width: 19px;
-    height: 19px;
-    transform: none;
+    top: 3px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    background: var(--terracotta);
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  .lockDot svg {
+    width: 9px;
+    height: 9px;
   }
 }
 
-@media (max-width: 380px) {
-  .nav {
-    width: calc(100% - 12px);
-    gap: 4px;
-    padding: 6px;
-  }
-
-  .link {
-    flex-basis: 53px;
-    min-height: 55px;
-    font-size: 0.47rem;
-  }
-
-  .active {
-    flex-basis: 69px;
+/* ── Dark themes: nav stays paper-coloured, only border tints ── */
+@media (max-width: 767px) {
+  :global(html[data-theme="dark"]) .nav,
+  :global(html[data-theme="ember"]) .nav,
+  :global(html[data-theme="ocean"]) .nav,
+  :global(html[data-theme="forest"]) .nav,
+  :global(html[data-theme="violet"]) .nav,
+  :global(html[data-theme="rose"]) .nav,
+  :global(html[data-theme="midnight"]) .nav {
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    border-color: var(--border);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 10px 28px rgba(0, 0, 0, 0.42);
   }
 }

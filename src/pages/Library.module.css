@@ -631,21 +631,46 @@
 }
 
 @media (max-width: 767px) {
+  /* Stop cascading entry animations. */
+  .header,
+  .pillarBanner,
+  .weeklyModule,
+  .filters,
+  .breathePanel,
+  .runningPanel,
+  .principlesBanner,
+  .card {
+    animation: none;
+  }
+
   .page {
-    padding-bottom: 30px;
+    padding-bottom: 24px;
   }
 
   .header {
-    padding: calc(54px + env(safe-area-inset-top)) 18px 18px;
+    padding: calc(20px + env(safe-area-inset-top)) 16px 12px;
+  }
+
+  .title {
+    font-size: clamp(1.6rem, 7vw, 1.95rem);
+  }
+
+  .subtitle {
+    font-size: 0.86rem;
   }
 
   .pillarBanner,
   .weeklyModule,
   .breathePanel,
   .principlesBanner {
-    margin-left: 12px;
-    margin-right: 12px;
-    border-radius: 20px;
+    margin-left: 16px;
+    margin-right: 16px;
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  .pillarBanner {
+    padding: 14px 16px;
   }
 
   .pillarBanner div {
@@ -663,72 +688,151 @@
   .pillarBanner span {
     flex: 0 0 auto;
     scroll-snap-align: start;
-    min-height: 34px;
+    min-height: 32px;
     display: inline-flex;
     align-items: center;
+    font-size: 0.72rem;
   }
 
+  /* Weekly module: kill the sheen + repeating-line pattern. */
   .weeklyModule {
-    grid-template-columns: 48px minmax(0, 1fr);
-    padding: 16px;
+    grid-template-columns: 44px minmax(0, 1fr);
+    padding: 14px;
+    gap: 12px;
+    box-shadow: none;
+  }
+
+  .weeklyModule::before {
+    display: none;
   }
 
   .weeklyIcon {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+
+  .weeklyModule h2 {
+    font-size: 1rem;
+  }
+
+  .weeklyModule p {
+    font-size: 0.78rem;
   }
 
   .weeklyModule button,
   .weeklyButton,
   .breatheButton {
-    min-height: 50px;
-    border-radius: 16px;
+    min-height: 44px;
+    border-radius: 12px;
+    font-size: 0.82rem;
   }
 
   .filters {
-    top: 0;
-    padding: 14px 12px 8px;
-    background: var(--cream);
-    border-bottom: 1px solid var(--border-light);
+    position: static;
+    padding: 14px 16px 4px;
+    background: transparent;
+    border-bottom: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    scroll-padding-inline: 12px;
+    overflow-x: auto;
+    scroll-padding-inline: 16px;
   }
 
-  :global(html[data-theme="dark"]) .filters,
-  :global(html[data-theme="ember"]) .filters,
-  :global(html[data-theme="ocean"]) .filters,
-  :global(html[data-theme="forest"]) .filters,
-  :global(html[data-theme="violet"]) .filters,
-  :global(html[data-theme="rose"]) .filters,
-  :global(html[data-theme="midnight"]) .filters {
-    background: var(--cream);
-  }
-
+  /* Calmer pill: no shadow, no underline accent, no pop. */
   .filter {
-    min-height: 42px;
-    padding: 10px 16px;
-    border-radius: 16px;
-    font-weight: 800;
+    min-height: 40px;
+    padding: 8px 14px;
+    border-radius: 14px;
+    border-width: 1px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    box-shadow: none;
+  }
+
+  .filter::after {
+    display: none;
+  }
+
+  .filter:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .filterActive {
+    box-shadow: none;
+    animation: none;
+  }
+
+  .breathePanel,
+  .principlesBanner {
+    padding: 16px;
+  }
+
+  .breathePanel h2 {
+    font-size: 1rem;
+  }
+
+  .breatheButton {
+    box-shadow: none;
+  }
+
+  .principlesGrid article {
+    padding: 11px 13px;
+    border-radius: 12px;
+  }
+
+  .principlesGrid article:hover {
+    transform: none;
+    border-color: var(--border-light);
+    box-shadow: none;
+  }
+
+  .categoryHeader {
+    padding: 8px 16px 4px;
   }
 
   .categoryDesc {
-    padding: 8px 16px 2px;
+    padding: 0;
   }
 
   .grid {
-    padding: 12px 12px 0;
+    padding: 12px 16px 0;
     gap: 10px;
   }
 
   .card {
-    min-height: 130px;
-    border-radius: 20px;
-    padding: 18px;
-    transform-origin: center bottom;
+    min-height: 0;
+    border-radius: 16px;
+    padding: 14px 14px 14px 18px;
+    box-shadow: none;
+  }
+
+  .card::after {
+    display: none;
+  }
+
+  .card:hover,
+  .card:hover .arrow {
+    transform: none;
+    border-color: var(--border-light);
+    box-shadow: none;
   }
 
   .card:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
+  }
+
+  .cardName {
+    font-size: 1rem;
+  }
+
+  .cardPurpose {
+    font-size: 0.8rem;
+  }
+
+  .cardFooter {
+    margin-top: 10px;
+    padding-top: 10px;
   }
 }

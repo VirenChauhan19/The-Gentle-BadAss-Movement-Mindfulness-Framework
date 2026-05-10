@@ -470,7 +470,7 @@
 
 @media (max-width: 767px) {
   .page {
-    padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(150px + env(safe-area-inset-bottom));
+    padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(108px + env(safe-area-inset-bottom));
     max-width: none;
   }
 

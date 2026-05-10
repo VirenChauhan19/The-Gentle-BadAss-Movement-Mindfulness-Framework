@@ -8,7 +8,7 @@ const links = [
   { to: '/', label: 'Home', shortLabel: 'Home', icon: HomeIcon },
   { to: '/journal', label: 'Feel', shortLabel: 'Feel', icon: JournalIcon, lockedForGuest: true },
   { to: '/library', label: 'Your Plan', shortLabel: 'Plan', icon: LibraryIcon, lockedForGuest: true },
-  { to: '/functional-tests', label: 'Functional Tests', shortLabel: 'Tests', icon: TestIcon, lockedForGuest: true },
+  { to: '/functional-tests', label: 'Functional Tests', shortLabel: 'Tests', icon: TestIcon, lockedForGuest: true, hiddenOnMobile: true },
   { to: '/history', label: 'Progress', shortLabel: 'Progress', icon: HistoryIcon, lockedForGuest: true },
   { to: '/profile', label: 'Profile', shortLabel: 'Me', icon: ProfileIcon },
 ]
@@ -30,7 +30,7 @@ export default function Nav() {
 
   return (
     <nav className={styles.nav} ref={navRef} aria-label="Primary">
-      {links.map(({ to, label, shortLabel, icon: Icon, lockedForGuest }) => {
+      {links.map(({ to, label, shortLabel, icon: Icon, lockedForGuest, hiddenOnMobile }) => {
         const locked = guestLocked && lockedForGuest
         return (
         <NavLink
@@ -40,7 +40,7 @@ export default function Nav() {
           title={locked ? `${label}: sign in to unlock` : label}
           onClick={tapFeedback}
           className={({ isActive }) =>
-            `${styles.link} ${isActive ? styles.active : ''} ${locked ? styles.locked : ''}`
+            `${styles.link} ${isActive ? styles.active : ''} ${locked ? styles.locked : ''} ${hiddenOnMobile ? styles.hiddenOnMobile : ''}`
           }
         >
           <Icon />
