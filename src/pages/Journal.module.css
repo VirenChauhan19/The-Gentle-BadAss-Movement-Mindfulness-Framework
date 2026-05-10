@@ -771,7 +771,14 @@
 
 .reflectionHead {
   display: grid;
-  gap: 4px;
+  gap: 6px;
+  text-align: center;
+  justify-items: center;
+  padding: 0 8px;
+}
+
+.reflectionHead > * {
+  max-width: 460px;
 }
 
 .reflectionKicker {
@@ -815,6 +822,7 @@
 .promptChips {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
   animation: floatIn 360ms var(--ease-elastic) both;
 }
