@@ -540,6 +540,28 @@
     transform: scale(0.9) rotate(-12deg);
   }
 
+  .ambientLayer {
+    opacity: 0.48;
+    background:
+      radial-gradient(22rem 18rem at 86% 0%, var(--ambient-glow), transparent 72%),
+      linear-gradient(180deg, var(--ambient-sheen), transparent 160px);
+    mix-blend-mode: normal;
+  }
+
+  .ambientLayer::before,
+  .ambientLayer::after,
+  .themeToggle::after {
+    display: none;
+  }
+
+  .themeToggle {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.7) inset,
+      0 8px 18px var(--shadow-xs);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
   .signInGate {
     align-items: flex-end;
     padding: 14px 14px calc(14px + env(safe-area-inset-bottom));

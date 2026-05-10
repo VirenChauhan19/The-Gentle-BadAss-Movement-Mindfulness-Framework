@@ -470,7 +470,7 @@
 
 @media (max-width: 767px) {
   .page {
-    padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(118px + env(safe-area-inset-bottom));
+    padding: calc(1rem + env(safe-area-inset-top)) 1rem calc(150px + env(safe-area-inset-bottom));
     max-width: none;
   }
 
@@ -483,7 +483,7 @@
   }
 
   .section {
-    animation: floatIn 420ms var(--ease-elastic) both 80ms;
+    animation: none;
   }
 
   .pathCard,
@@ -498,8 +498,49 @@
 
   .primaryBtn,
   .startBtn {
-    min-height: 56px;
-    border-radius: 18px;
+    min-height: 52px;
+    border-radius: 16px;
+  }
+
+  .btnStack {
+    position: sticky;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    z-index: 20;
+    display: grid;
+    grid-template-columns: minmax(92px, 0.42fr) minmax(0, 1fr);
+    gap: 9px;
+    margin: 28px -4px 0;
+    padding: 12px 4px 4px;
+    background: linear-gradient(180deg, transparent, var(--cream) 28%);
+  }
+
+  .btnStack .primaryBtn:first-child:last-child,
+  .btnStack .startBtn:first-child:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .backLink {
+    order: 1;
+    min-height: 52px;
+    border-radius: 16px;
+    background: var(--paper);
+    border: 1px solid var(--border-light);
+    color: var(--ink);
+    box-shadow: 0 6px 16px var(--shadow-xs);
+    padding: 0 14px;
+    font-weight: 800;
+  }
+
+  .primaryBtn,
+  .startBtn {
+    order: 2;
+    box-shadow: 0 8px 20px var(--shadow-md);
+  }
+
+  .progressLineFill,
+  .progressDotActive,
+  .commitmentCard::after {
+    animation: none;
   }
 }
 

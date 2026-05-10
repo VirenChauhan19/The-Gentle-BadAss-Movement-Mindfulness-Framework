@@ -760,8 +760,11 @@ input[type="range"]::-moz-range-progress {
     height: auto;
     overflow-x: hidden;
     overflow-y: auto;
-    user-select: none;
     -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    min-height: 100dvh;
   }
 
   button,
@@ -788,6 +791,7 @@ input[type="range"]::-moz-range-progress {
   a,
   [role="button"] {
     min-height: 42px;
+    will-change: auto;
   }
 
   input[type="range"] {
@@ -805,6 +809,6 @@ input[type="range"]::-moz-range-progress {
   }
 
   .routeTransition > * {
-    animation-duration: 380ms;
+    animation: none;
   }
 }
