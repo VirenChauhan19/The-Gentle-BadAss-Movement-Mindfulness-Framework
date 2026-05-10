@@ -740,6 +740,21 @@ input[type="range"]::-moz-range-progress {
     color-scheme: light dark;
   }
 
+  /* Android scroll smoothness: detach huge gradients from the viewport.
+     `background-attachment: fixed` forces the browser to repaint the body
+     gradient on every scroll frame on Android Chrome. Letting it scroll
+     with the page is dramatically cheaper. */
+  html, body,
+  html[data-theme="dark"], html[data-theme="dark"] body,
+  html[data-theme="ember"], html[data-theme="ember"] body,
+  html[data-theme="ocean"], html[data-theme="ocean"] body,
+  html[data-theme="forest"], html[data-theme="forest"] body,
+  html[data-theme="violet"], html[data-theme="violet"] body,
+  html[data-theme="rose"], html[data-theme="rose"] body,
+  html[data-theme="midnight"], html[data-theme="midnight"] body {
+    background-attachment: scroll;
+  }
+
   body {
     min-height: 100dvh;
     height: auto;

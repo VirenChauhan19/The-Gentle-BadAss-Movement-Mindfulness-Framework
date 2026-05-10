@@ -1199,6 +1199,33 @@
 }
 
 @media (max-width: 767px) {
+  /* ── Android scroll smoothness ─────────────────────── */
+  /* Skip painting offscreen factor cards while scrolling. */
+  .factor {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 320px;
+  }
+
+  /* Disable infinite shadow/glow animations on the busiest elements —
+     they trigger compositor work every frame and make scroll jank. */
+  .saveBtn:not(:disabled),
+  .bloomOrb[data-tone="strong"] {
+    animation: none;
+  }
+
+  /* `backdrop-filter` is extremely expensive on Android Chrome while the
+     content behind the bar scrolls. Use a near-opaque background instead. */
+  .saveBar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: color-mix(in srgb, var(--paper) 96%, transparent);
+  }
+
+  /* Hero glow blob — keep the static blur but stop the infinite drift. */
+  .hero::before {
+    animation: none;
+  }
+
   .hero {
     padding: calc(36px + env(safe-area-inset-top)) 18px 22px;
   }

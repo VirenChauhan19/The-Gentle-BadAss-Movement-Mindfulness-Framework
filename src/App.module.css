@@ -514,6 +514,15 @@
       linear-gradient(115deg, transparent 0 28%, var(--ambient-sheen) 47%, transparent 64%),
       radial-gradient(22rem 22rem at var(--pointer-x, 82%) var(--pointer-y, 8%), var(--ambient-glow), transparent 72%),
       repeating-linear-gradient(105deg, var(--ambient-line) 0 1px, transparent 1px 16px);
+    /* Mobile: disable infinite drift/breath animations — they keep the
+       compositor busy and turn scroll into jank on Android. */
+    animation: none;
+  }
+
+  .ambientLayer::before,
+  .ambientLayer::after {
+    animation: none;
+    filter: none;
   }
 
   .themeToggle {
