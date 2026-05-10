@@ -742,8 +742,11 @@ input[type="range"]::-moz-range-progress {
 
   body {
     min-height: 100dvh;
+    height: auto;
     overflow-x: hidden;
+    overflow-y: auto;
     user-select: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   button,
