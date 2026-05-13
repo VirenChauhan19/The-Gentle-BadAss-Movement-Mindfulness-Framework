@@ -1923,22 +1923,62 @@
   color: var(--terracotta);
 }
 
+.adminPlanRead {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.planReadHead {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .adminPlanRead .planTypeBadge {
   display: inline-flex;
+  margin: 0;
 }
 
 .adminPlanRead h4 {
   color: var(--ink);
-  font-size: 0.94rem;
+  font-size: 0.98rem;
   line-height: 1.25;
-  margin-bottom: 4px;
+  margin: 0;
+  font-weight: 700;
 }
 
 .adminPlanRead p {
   color: var(--ink-light);
   font-size: 0.82rem;
   line-height: 1.5;
-  margin-top: 4px;
+  margin: 0;
+}
+
+.planReadDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.planReadDetail {
+  background: var(--paper-soft);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.planDetailLabel {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--ink-faint);
 }
 
 .adminPlanLogNote {
@@ -1946,6 +1986,13 @@
   border-left: 3px solid var(--sage);
   border-radius: 8px;
   padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.adminPlanLogNote p {
+  color: var(--ink);
 }
 
 .adminPlanEditGrid {
@@ -2084,32 +2131,42 @@
 .planReadStats {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 5px;
+  gap: 8px;
 }
 
-.planReadStats span {
-  font-size: 0.78rem;
-  color: var(--ink-light);
+.planStatChip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   background: var(--cream);
   border: 1px solid var(--border-light);
-  border-radius: 8px;
-  padding: 2px 8px;
-  font-weight: 600;
+  border-radius: 10px;
+  padding: 6px 10px;
+  min-width: 80px;
+}
+
+.planStatLabel {
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--ink-faint);
+}
+
+.planStatValue {
+  font-size: 0.86rem;
+  color: var(--ink);
+  font-weight: 700;
 }
 
 .planReadNotes {
-  font-size: 0.82rem;
-  color: var(--ink-light);
-  line-height: 1.5;
-  margin-top: 5px;
-}
-
-.planReadDetail {
-  font-size: 0.78rem;
-  color: var(--ink-light);
-  line-height: 1.45;
-  margin-top: 4px;
+  font-size: 0.86rem;
+  color: var(--ink);
+  line-height: 1.55;
+  padding: 8px 12px;
+  background: var(--paper-soft);
+  border-left: 3px solid var(--border);
+  border-radius: 6px;
 }
 
 .planLogBadge {

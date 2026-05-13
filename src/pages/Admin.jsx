@@ -635,15 +635,11 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }
     setDeleting(true)
     setDeleteError(null)
     try {
-      // Delete journal entries
       const journalSnap = await getDocs(collection(db, 'users', user.uid, 'journal'))
       await Promise.all(journalSnap.docs.map(d => deleteDoc(d.ref)))
-      // Delete config docs
-      await Promise.all([
-        deleteDoc(doc(db, 'users', user.uid, 'config', 'profile')).catch(() => {}),
-        deleteDoc(doc(db, 'users', user.uid, 'config', 'coach')).catch(() => {}),
-        deleteDoc(doc(db, 'users', user.uid, 'config', 'adminRemarks')).catch(() => {}),
-      ])
+      const configSnap = await getDocs(collection(db, 'users', user.uid, 'config'))
+      await Promise.all(configSnap.docs.map(d => deleteDoc(d.ref)))
+      setConfirmDelete(false)
       onDeleted?.()
     } catch (err) {
       setDeleteError('Could not delete user: ' + err.message)
@@ -1338,32 +1334,65 @@ function AdminPlanEditor({
                           </div>
                         ) : (
                           <div className={styles.adminPlanRead}>
-                            <span
-                              className={styles.planTypeBadge}
-                              style={{ background: typeColors.bg, color: typeColors.color }}
-                            >
-                              {day.type || 'rest'}
-                            </span>
-                            <h4>{day.title || 'Untitled session'}</h4>
-                            <div className={styles.planReadStats}>
-                              {day.distance && <span>{day.distance}</span>}
-                              {day.duration && <span>{day.duration}</span>}
-                              {day.pace && <span>{day.pace}</span>}
+                            <div className={styles.planReadHead}>
+                              <span
+                                className={styles.planTypeBadge}
+                                style={{ background: typeColors.bg, color: typeColors.color }}
+                              >
+                                {day.type || 'rest'}
+                              </span>
+                              <h4>{day.title || 'Untitled session'}</h4>
                             </div>
+                            {(day.distance || day.duration || day.pace) && (
+                              <div className={styles.planReadStats}>
+                                {day.distance && (
+                                  <div className={styles.planStatChip}>
+                                    <span className={styles.planStatLabel}>Distance</span>
+                                    <span className={styles.planStatValue}>{day.distance}</span>
+                                  </div>
+                                )}
+                                {day.duration && (
+                                  <div className={styles.planStatChip}>
+                                    <span className={styles.planStatLabel}>Duration</span>
+                                    <span className={styles.planStatValue}>{day.duration}</span>
+                                  </div>
+                                )}
+                                {day.pace && (
+                                  <div className={styles.planStatChip}>
+                                    <span className={styles.planStatLabel}>Pace</span>
+                                    <span className={styles.planStatValue}>{day.pace}</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                             {day.notes && <p className={styles.planReadNotes}>{day.notes}</p>}
-                            {day.crossTraining && (
-                              <p className={styles.planReadDetail}><strong>Cross-training:</strong> {day.crossTraining}</p>
-                            )}
-                            {day.strength && (
-                              <p className={styles.planReadDetail}><strong>Strength:</strong> {day.strength}</p>
-                            )}
-                            {day.mobility && (
-                              <p className={styles.planReadDetail}><strong>Mobility:</strong> {day.mobility}</p>
+                            {(day.crossTraining || day.strength || day.mobility) && (
+                              <div className={styles.planReadDetailGrid}>
+                                {day.crossTraining && (
+                                  <div className={styles.planReadDetail}>
+                                    <span className={styles.planDetailLabel}>Cross-training</span>
+                                    <p>{day.crossTraining}</p>
+                                  </div>
+                                )}
+                                {day.strength && (
+                                  <div className={styles.planReadDetail}>
+                                    <span className={styles.planDetailLabel}>Strength</span>
+                                    <p>{day.strength}</p>
+                                  </div>
+                                )}
+                                {day.mobility && (
+                                  <div className={styles.planReadDetail}>
+                                    <span className={styles.planDetailLabel}>Mobility</span>
+                                    <p>{day.mobility}</p>
+                                  </div>
+                                )}
+                              </div>
                             )}
                             {log?.userNote && (
-                              <p className={styles.adminPlanLogNote}>
-                                <strong>User log:</strong> {log.userNote}
-                              </p>
+                              <div className={styles.adminPlanLogNote}>
+                                <span className={styles.planDetailLabel}>User log</span>
+                                <p>{log.userNote}</p>
+                              </div>
                             )}
                           </div>
                         )}

@@ -12,16 +12,16 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Admin (Viren) can read all users' journal entries via collection group query
+    // Admin (Viren) can read and delete any user's journal entries
     match /{path=**}/journal/{entryId} {
-      allow read: if request.auth != null
-                  && request.auth.token.email == 'chauhan.viren08@gmail.com';
+      allow read, delete: if request.auth != null
+                          && request.auth.token.email == 'chauhan.viren08@gmail.com';
     }
 
-    // Admin can read all users' config documents (profile, coach)
+    // Admin can read and delete any user's config documents (profile, coach, remarks)
     match /users/{userId}/config/{configId} {
-      allow read: if request.auth != null
-                  && request.auth.token.email == 'chauhan.viren08@gmail.com';
+      allow read, delete: if request.auth != null
+                          && request.auth.token.email == 'chauhan.viren08@gmail.com';
     }
 
     // Admin can edit any user's running coach plan and write remarks
