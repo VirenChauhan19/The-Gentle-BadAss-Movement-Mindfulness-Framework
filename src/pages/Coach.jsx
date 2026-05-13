@@ -1480,6 +1480,15 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
       </div>
 
       {visiblePlan.length > 0 && (
+        <div className={styles.adminPlanNotice}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.7 }}>
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+          </svg>
+          <p>Your coach actively reviews and updates this plan. Check back regularly — your schedule may be adjusted based on your progress.</p>
+        </div>
+      )}
+
+      {visiblePlan.length > 0 && (
         <div className={styles.weekBoard}>
           <div className={styles.weekNav}>
             <button
@@ -2167,7 +2176,7 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
 }
 
 // ── API Helpers ───────────────────────────────────────────────────────────────
-async function apiCall(messages, maxTokens = 600) {
+async function apiCall(messages, maxTokens = 600, temperature = 0.75) {
   const key = import.meta.env.VITE_OPENROUTER_API_KEY
   if (!key) throw new Error('OpenRouter API key not configured')
   const model = import.meta.env.VITE_OPENROUTER_MODEL || 'anthropic/claude-sonnet-4.5'
@@ -2180,11 +2189,11 @@ async function apiCall(messages, maxTokens = 600) {
       'HTTP-Referer': window.location.origin,
       'X-Title': 'La Ultra Run & Bee',
     },
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature: 0.75 }),
+    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
   })
   if (!res.ok) {
     const e = await res.json().catch(() => ({}))
-    if (res.status === 429) throw new Error('Rate limit reached — wait 30 seconds and try again. (Free tier limit)')
+    if (res.status === 429) throw new Error('Rate limit reached — wait 30 seconds and try again.')
     throw new Error(e.error?.message || `OpenRouter error ${res.status}`)
   }
   const data = await res.json()
@@ -2299,12 +2308,18 @@ ${r.trackRules}`
   const goalLine = goalPace ? ` Goal: ${goalPace.distance} in ${goalPace.targetTime} (race pace ~${goalPace.targetPace}).` : ''
   const prefixLine = prefix ? ` ${prefix}` : ''
 
-  const raw = await apiCall([
-    { role: 'system', content: system },
-    { role: 'user', content: `Design my ${totalWeeks}-week macrocycle for a ${commitmentDays}-day ${r.raceGoal} program. I'm ${experience}, currently doing ${currentKm}, training ${daysPerWeek} days/week.${goalLine}${prefixLine}${notes ? ` Notes: ${notes}` : ''}` },
-  ], 3500)
+  const userMsg = `Design my ${totalWeeks}-week macrocycle for a ${commitmentDays}-day ${r.raceGoal} program. I'm ${experience}, currently doing ${currentKm}, training ${daysPerWeek} days/week.${goalLine}${prefixLine}${notes ? ` Notes: ${notes}` : ''}`
 
-  return extractJSON(raw)
+  // Two attempts — second uses a stricter extraction prompt
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const messages = attempt === 1
+      ? [{ role: 'system', content: system }, { role: 'user', content: userMsg }]
+      : [{ role: 'system', content: 'Return ONLY the raw JSON object, no markdown, no extra text.' }, { role: 'user', content: userMsg }]
+    const raw = await apiCall(messages, 3500, 0.35)
+    try { return extractJSON(raw) } catch (e) {
+      if (attempt === 2) throw e
+    }
+  }
 }
 
 async function generateMesocycleChunk({ focus, experience, daysPerWeek, currentKm, notes, paceGuide, goalPace, macro, chunkStart, chunkEnd, chunkTargets, priorTitles }) {
@@ -2371,14 +2386,20 @@ ${r.workoutRules}
 ${r.trackRules}`
 
   const tokenBudget = Math.min(7000, Math.max(2200, chunkDays * 220))
+  const userMsg = `Write days ${chunkStart}-${chunkEnd} as instructed. Make every workout feel like a real coach wrote it.`
 
-  const raw = await apiCall([
-    { role: 'system', content: system },
-    { role: 'user', content: `Write days ${chunkStart}-${chunkEnd} as instructed. Make every workout feel like a real coach wrote it.` },
-  ], tokenBudget)
-
-  const parsed = extractJSON(raw)
-  return Array.isArray(parsed?.plan) ? parsed.plan : []
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const messages = attempt === 1
+      ? [{ role: 'system', content: system }, { role: 'user', content: userMsg }]
+      : [{ role: 'system', content: 'Return ONLY the raw JSON object with a "plan" array. No markdown, no extra text.' }, { role: 'user', content: userMsg }]
+    const raw = await apiCall(messages, tokenBudget, 0.35)
+    try {
+      const parsed = extractJSON(raw)
+      return Array.isArray(parsed?.plan) ? parsed.plan : []
+    } catch (e) {
+      if (attempt === 2) throw e
+    }
+  }
 }
 
 async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes, paceGuide, goalPace, prefix, onProgress }) {
@@ -2388,8 +2409,9 @@ async function generateProgram({ focus, experience, daysPerWeek, currentKm, week
   const macro = await generateMacrocycle({ focus, experience, daysPerWeek, currentKm, commitmentDays, notes, paceGuide, goalPace, prefix })
   onProgress?.({ key: 'macro', status: 'done' })
 
+  // Build the list of chunks upfront, then generate all in parallel
   const chunkSize = 28
-  const allDays = []
+  const chunks = []
   let cursor = 1
   let chunkNum = 0
   while (cursor <= commitmentDays) {
@@ -2398,24 +2420,36 @@ async function generateProgram({ focus, experience, daysPerWeek, currentKm, week
     const startWeek = Math.ceil(cursor / 7)
     const endWeek = Math.ceil(chunkEnd / 7)
     const chunkTargets = (macro.weeklyTargets || []).filter(w => w.week >= startWeek && w.week <= endWeek)
-    const priorTitles = allDays.slice(-21).map(d => `D${d.dayNumber} ${d.day || ''} ${d.type}: ${d.title}`).join(' · ')
-
-    onProgress?.({ key: `chunk-${chunkNum}`, label: `Writing weeks ${startWeek}-${endWeek} workouts`, status: 'active' })
-    let chunkDays = []
-    try {
-      chunkDays = await generateMesocycleChunk({
-        focus, experience, daysPerWeek, currentKm, notes,
-        paceGuide, goalPace, macro,
-        chunkStart: cursor, chunkEnd, chunkTargets, priorTitles,
-      })
-    } catch (err) {
-      onProgress?.({ key: `chunk-${chunkNum}`, status: 'error', label: `Weeks ${startWeek}-${endWeek} failed: ${err.message}` })
-      throw err
-    }
-    allDays.push(...chunkDays)
-    onProgress?.({ key: `chunk-${chunkNum}`, status: 'done' })
+    chunks.push({ chunkNum, chunkStart: cursor, chunkEnd, chunkTargets, startWeek, endWeek })
     cursor = chunkEnd + 1
   }
+
+  // Kick off all chunk generations in parallel for speed
+  chunks.forEach(c => {
+    onProgress?.({ key: `chunk-${c.chunkNum}`, label: `Writing weeks ${c.startWeek}-${c.endWeek} workouts`, status: 'active' })
+  })
+
+  const chunkResults = await Promise.all(
+    chunks.map(async c => {
+      try {
+        const days = await generateMesocycleChunk({
+          focus, experience, daysPerWeek, currentKm, notes,
+          paceGuide, goalPace, macro,
+          chunkStart: c.chunkStart, chunkEnd: c.chunkEnd,
+          chunkTargets: c.chunkTargets, priorTitles: '',
+        })
+        onProgress?.({ key: `chunk-${c.chunkNum}`, status: 'done' })
+        return { chunkNum: c.chunkNum, days }
+      } catch (err) {
+        onProgress?.({ key: `chunk-${c.chunkNum}`, status: 'error', label: `Weeks ${c.startWeek}-${c.endWeek} failed: ${err.message}` })
+        throw err
+      }
+    })
+  )
+
+  const allDays = chunkResults
+    .sort((a, b) => a.chunkNum - b.chunkNum)
+    .flatMap(r => r.days)
 
   return {
     overview: macro.overview,
@@ -2586,10 +2620,19 @@ Be specific and reference their program where relevant. Max 180 words. No fluff.
 }
 
 function extractJSON(text) {
+  if (!text) throw new Error('Empty response from AI. Please try generating again.')
+  // Direct parse
   try { return JSON.parse(text.trim()) } catch {}
+  // Fenced code block ``` or ```json
   const block = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
   if (block) { try { return JSON.parse(block[1]) } catch {} }
-  const obj = text.match(/\{[\s\S]*\}/)
-  if (obj) { try { return JSON.parse(obj[0]) } catch {} }
-  throw new Error('Could not read program from AI. Please try generating again.')
+  // Largest {...} or [...] span in the text
+  const objMatch = text.match(/\{[\s\S]*\}/)
+  if (objMatch) { try { return JSON.parse(objMatch[0]) } catch {} }
+  const arrMatch = text.match(/\[[\s\S]*\]/)
+  if (arrMatch) { try { return JSON.parse(arrMatch[0]) } catch {} }
+  // Last-ditch: strip any leading prose before the first { or [
+  const stripped = text.replace(/^[\s\S]*?(?=\{|\[)/, '')
+  try { return JSON.parse(stripped) } catch {}
+  throw new Error('Could not read program from AI — the response was not valid JSON. Please try again.')
 }

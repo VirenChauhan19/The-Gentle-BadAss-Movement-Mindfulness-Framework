@@ -72,6 +72,7 @@ export default function Onboarding() {
   })
   const plan = PLANS[data.commitment] || PLANS[90]
   const isWoman = data.sex === 'woman'
+  const skipBodyStep = data.gender === 'man'
   const storyReady = data.name.trim() && data.ageRange && data.gender && data.fitnessHistory.trim() && data.commitmentStatement.trim()
 
   async function handleComplete() {
@@ -188,7 +189,7 @@ export default function Onboarding() {
             <button
               className={styles.primaryBtn}
               disabled={!storyReady}
-              onClick={() => setStep(2)}
+              onClick={() => setStep(skipBodyStep ? 3 : 2)}
             >
               Next
             </button>
@@ -302,7 +303,7 @@ export default function Onboarding() {
             >
               Next
             </button>
-            <button className={styles.backLink} onClick={() => setStep(2)}>Back</button>
+            <button className={styles.backLink} onClick={() => setStep(skipBodyStep ? 1 : 2)}>Back</button>
           </div>
         </section>
       )}

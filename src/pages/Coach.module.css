@@ -461,6 +461,25 @@
   padding-right: 4px;
 }
 
+/* ── Admin plan notice ───────────────────────────────── */
+.adminPlanNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 16px 12px;
+  padding: 11px 14px;
+  background: rgba(99, 127, 95, 0.08);
+  border: 1px solid rgba(99, 127, 95, 0.22);
+  border-radius: 12px;
+  color: var(--ink-light);
+}
+
+.adminPlanNotice p {
+  font-size: 0.80rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* ── Week board (user view) ──────────────────────────── */
 .weekBoard {
   margin: 0 16px 16px;
