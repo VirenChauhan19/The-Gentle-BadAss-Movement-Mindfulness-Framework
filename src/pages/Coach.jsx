@@ -1324,8 +1324,13 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
   const totalWeeks = Math.max(1, Math.ceil(visiblePlan.length / 7))
   const [weekIndex, setWeekIndex] = useState(currentWeek)
   const [selectedDay, setSelectedDay] = useState(null)
+  const weekStartDay = (weekIndex - 1) * 7 + 1
+  const weekEndDay   = weekIndex * 7
   const nextWeekPlan = visiblePlan
-    .filter(s => (s.dayNumber || 0) >= currentDay && (s.dayNumber || 0) < currentDay + 7)
+    .filter(s => {
+      const dn = s.dayNumber || 0
+      return dn >= weekStartDay && dn <= weekEndDay
+    })
     .map(s => s.date === todaySession?.date ? todaySession : s)
   const nextSessions = nextWeekPlan
   const trainingDays = visiblePlan.filter(s => s.type !== 'rest').length
@@ -1480,7 +1485,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             <button
               className={styles.weekNavBtn}
               onClick={goToPrevWeek}
-              disabled
+              disabled={weekIndex <= 1}
               aria-label="Previous week"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
@@ -1489,9 +1494,9 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             </button>
             <div className={styles.weekHeading}>
               <p className={styles.weekKicker}>
-                Next seven days
+                {isCurrentWeek ? 'This week' : isPastWeek ? 'Past week' : 'Upcoming week'}
               </p>
-              <h2 className={styles.weekTitle}>Current plan <span>admin edits the full plan</span></h2>
+              <h2 className={styles.weekTitle}>Week {weekIndex} <span>of {totalWeeks}</span></h2>
               {weekStart && weekEnd && (
                 <p className={styles.weekRange}>{formatDateShort(weekStart)} — {formatDateShort(weekEnd)}</p>
               )}
@@ -1499,7 +1504,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             <button
               className={styles.weekNavBtn}
               onClick={goToNextWeek}
-              disabled
+              disabled={weekIndex >= totalWeeks}
               aria-label="Next week"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
@@ -1508,7 +1513,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             </button>
           </div>
 
-          {false && !isCurrentWeek && (
+          {!isCurrentWeek && (
             <button className={styles.jumpToCurrentBtn} onClick={goToCurrentWeek}>
               Jump to current week
             </button>

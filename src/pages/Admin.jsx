@@ -282,6 +282,12 @@ export default function Admin() {
             [uid]: { ...prev[uid], coach },
           }))
         }
+        onProfileUpdated={(uid, profile) =>
+          setAllUserData(prev => ({
+            ...prev,
+            [uid]: { ...prev[uid], userProfile: profile },
+          }))
+        }
       />
     )
   }
@@ -442,7 +448,7 @@ export default function Admin() {
 }
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
-function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent, onCoachUpdated, onUserDeleted }) {
+function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent, onCoachUpdated, onUserDeleted, onProfileUpdated }) {
   const [selectedUid, setSelectedUid] = useState(null)
 
   const userMap = useMemo(() => {
@@ -572,6 +578,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
               onCoachUpdated={coach => onCoachUpdated(selectedUser.uid, coach)}
               onRemarkSent={remark => onRemarkSent(selectedUser.uid, remark)}
               onDeleted={() => handleUserDeleted(selectedUser.uid)}
+              onProfileUpdated={profile => onProfileUpdated?.(selectedUser.uid, profile)}
             />
           )}
         </main>
@@ -581,22 +588,33 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
 }
 
 // ── User Detail ───────────────────────────────────────────────────────────────
-function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }) {
-  const [tab,             setTab]             = useState('overview')
-  const [remarkText,      setRemarkText]      = useState('')
-  const [remarkRunDate,   setRemarkRunDate]   = useState('')
-  const [sending,         setSending]         = useState(false)
-  const [remarkError,     setRemarkError]     = useState(null)
-  const [expandedEntry,   setExpandedEntry]   = useState(null)
-  const [localRemarks,    setLocalRemarks]    = useState(user.remarks || [])
-  const [editingPlan,     setEditingPlan]     = useState(false)
-  const [planDraft,       setPlanDraft]       = useState([])
-  const [savingPlan,      setSavingPlan]      = useState(false)
-  const [planError,       setPlanError]       = useState(null)
+function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, onProfileUpdated }) {
+  const [tab,              setTab]             = useState('overview')
+  const [remarkText,       setRemarkText]      = useState('')
+  const [remarkRunDate,    setRemarkRunDate]   = useState('')
+  const [sending,          setSending]         = useState(false)
+  const [remarkError,      setRemarkError]     = useState(null)
+  const [expandedEntry,    setExpandedEntry]   = useState(null)
+  const [localRemarks,     setLocalRemarks]    = useState(user.remarks || [])
+  const [localEntries,     setLocalEntries]    = useState(user.entries || [])
+  const [editingPlan,      setEditingPlan]     = useState(false)
+  const [planDraft,        setPlanDraft]       = useState([])
+  const [savingPlan,       setSavingPlan]      = useState(false)
+  const [planError,        setPlanError]       = useState(null)
   const [pickerAfterIndex, setPickerAfterIndex] = useState(null)
-  const [confirmDelete,   setConfirmDelete]   = useState(false)
-  const [deleting,        setDeleting]        = useState(false)
-  const [deleteError,     setDeleteError]     = useState(null)
+  const [confirmDelete,    setConfirmDelete]   = useState(false)
+  const [deleting,         setDeleting]        = useState(false)
+  const [deleteError,      setDeleteError]     = useState(null)
+  // Profile editing
+  const [profileDraft,     setProfileDraft]    = useState(null)
+  const [savingProfile,    setSavingProfile]   = useState(false)
+  const [profileError,     setProfileError]    = useState(null)
+  // Journal entry deletion
+  const [deletingEntry,    setDeletingEntry]   = useState(null)
+  // Coach goal management
+  const [clearingGoal,     setClearingGoal]    = useState(false)
+  const [clearGoalError,   setClearGoalError]  = useState(null)
+  const [confirmClearGoal, setConfirmClearGoal] = useState(false)
 
   const userProfile = user.userProfile
   const coach       = user.coach
@@ -668,6 +686,46 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }
       setDeleteError('Could not delete user: ' + err.message)
       setDeleting(false)
     }
+  }
+
+  async function saveProfile() {
+    if (savingProfile || !profileDraft) return
+    setSavingProfile(true)
+    setProfileError(null)
+    try {
+      await setDoc(doc(db, 'users', user.uid, 'config', 'profile'), profileDraft, { merge: true })
+      onProfileUpdated?.(profileDraft)
+      setProfileDraft(null)
+    } catch (err) {
+      setProfileError('Could not save profile: ' + err.message)
+    }
+    setSavingProfile(false)
+  }
+
+  async function deleteJournalEntry(date) {
+    setDeletingEntry(date)
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'journal', date))
+      setLocalEntries(prev => prev.filter(e => e.date !== date))
+      if (expandedEntry === date) setExpandedEntry(null)
+    } catch (err) {
+      console.warn('Could not delete entry:', err)
+    }
+    setDeletingEntry(null)
+  }
+
+  async function clearCoachGoal() {
+    if (clearingGoal) return
+    setClearingGoal(true)
+    setClearGoalError(null)
+    try {
+      await deleteDoc(doc(db, 'users', user.uid, 'config', 'coach'))
+      onCoachUpdated(null)
+      setConfirmClearGoal(false)
+    } catch (err) {
+      setClearGoalError('Could not clear goal: ' + err.message)
+    }
+    setClearingGoal(false)
   }
 
   function updatePlanDay(index, field, value) {
@@ -846,9 +904,10 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }
       <div className={styles.detailTabs}>
         {[
           { id: 'overview', label: 'Overview' },
-          { id: 'journal', label: `Journal (${user.entries.length})` },
-          { id: 'coach',   label: goal ? `Running · ${goal.focus || goal.raceGoal}` : 'Running' },
-          { id: 'remarks', label: `Remarks (${localRemarks.length})` },
+          { id: 'profile',  label: 'Edit Profile' },
+          { id: 'journal',  label: `Journal (${localEntries.length})` },
+          { id: 'coach',    label: goal ? `Running · ${goal.focus || goal.raceGoal}` : 'Running' },
+          { id: 'remarks',  label: `Remarks (${localRemarks.length})` },
         ].map(t => (
           <button
             key={t.id}
@@ -871,6 +930,75 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }
           />
         )}
 
+        {/* ── Profile Edit Tab ────────────────────────────────── */}
+        {tab === 'profile' && (() => {
+          const draft = profileDraft || userProfile || {}
+          const set = (k, v) => setProfileDraft(prev => ({ ...(prev || userProfile || {}), [k]: v }))
+          return (
+            <div className={styles.profileEditPanel}>
+              <p className={styles.profileEditHint}>Edit this user&apos;s profile. Changes save to Firestore immediately.</p>
+              {profileError && <p className={styles.errorMsg}>{profileError}</p>}
+              <div className={styles.profileEditGrid}>
+                {[
+                  ['Name',         'name',         'text',   draft.name || ''],
+                  ['Email',        'email',        'email',  draft.email || ''],
+                  ['Age range',    'ageRange',     'text',   draft.ageRange || ''],
+                  ['Gender',       'gender',       'text',   draft.gender || draft.sex || ''],
+                  ['Heard about',  'heardAbout',   'text',   draft.heardAbout || ''],
+                ].map(([label, key, type, val]) => (
+                  <label key={key} className={styles.profileEditField}>
+                    <span>{label}</span>
+                    <input
+                      type={type}
+                      value={val}
+                      onChange={e => set(key, e.target.value)}
+                    />
+                  </label>
+                ))}
+                <label className={styles.profileEditField}>
+                  <span>Path</span>
+                  <select value={draft.path || ''} onChange={e => set('path', e.target.value)}>
+                    <option value="">— not set —</option>
+                    <option value="rehab">The Rehab Path</option>
+                    <option value="beginner">The Beginner Path</option>
+                    <option value="performance">The Performance Path</option>
+                  </select>
+                </label>
+                <label className={styles.profileEditField}>
+                  <span>Commitment (days)</span>
+                  <input type="number" value={draft.commitment || ''} onChange={e => set('commitment', Number(e.target.value) || '')} />
+                </label>
+              </div>
+              <label className={styles.profileEditField} style={{ marginTop: 12 }}>
+                <span>Program goal</span>
+                <input type="text" value={draft.programGoal || ''} onChange={e => set('programGoal', e.target.value)} />
+              </label>
+              <label className={styles.profileEditField} style={{ marginTop: 8 }}>
+                <span>Their story</span>
+                <textarea rows={4} value={draft.fitnessHistory || draft.story || ''} onChange={e => { set('fitnessHistory', e.target.value); set('story', e.target.value) }} />
+              </label>
+              <label className={styles.profileEditField} style={{ marginTop: 8 }}>
+                <span>Self-commitment statement</span>
+                <textarea rows={3} value={draft.commitmentStatement || ''} onChange={e => set('commitmentStatement', e.target.value)} />
+              </label>
+              <div className={styles.profileEditActions}>
+                <button
+                  className={styles.editPlanBtn}
+                  onClick={saveProfile}
+                  disabled={savingProfile || !profileDraft}
+                >
+                  {savingProfile ? 'Saving…' : 'Save Profile'}
+                </button>
+                {profileDraft && (
+                  <button className={styles.cancelPlanBtn} onClick={() => { setProfileDraft(null); setProfileError(null) }}>
+                    Discard changes
+                  </button>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+
         {/* ── Journal Tab ─────────────────────────────────────── */}
         {tab === 'journal' && (
           <div>
@@ -880,14 +1008,16 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }
                 <p className={styles.storyText}>{userProfile.story}</p>
               </div>
             )}
-            {user.entries.length === 0
+            {localEntries.length === 0
               ? <p className={styles.empty}>No journal entries yet.</p>
-              : user.entries.map(entry => (
+              : localEntries.map(entry => (
                   <EntryCard
                     key={entry.date}
                     entry={entry}
                     expanded={expandedEntry === entry.date}
                     onToggle={() => setExpandedEntry(p => p === entry.date ? null : entry.date)}
+                    onDelete={() => deleteJournalEntry(entry.date)}
+                    deleting={deletingEntry === entry.date}
                   />
                 ))
             }
@@ -897,6 +1027,25 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }
         {/* ── Coach Tab ───────────────────────────────────────── */}
         {tab === 'coach' && (
           <div>
+            {/* Clear goal */}
+            {goal && (
+              <div className={styles.clearGoalRow}>
+                {confirmClearGoal ? (
+                  <>
+                    {clearGoalError && <p className={styles.deleteErrorMsg}>{clearGoalError}</p>}
+                    <span>Clear all training data for {user.name}?</span>
+                    <button className={styles.confirmDestructBtn} disabled={clearingGoal} onClick={clearCoachGoal}>
+                      {clearingGoal ? 'Clearing…' : 'Yes, clear'}
+                    </button>
+                    <button className={styles.confirmCancelBtn} onClick={() => setConfirmClearGoal(false)}>Cancel</button>
+                  </>
+                ) : (
+                  <button className={styles.deleteUserBtn} onClick={() => setConfirmClearGoal(true)}>
+                    Clear Training Program
+                  </button>
+                )}
+              </div>
+            )}
             {!goal
               ? <p className={styles.empty}>No training program set up yet.</p>
               : <>
@@ -1530,18 +1679,28 @@ function WorkoutPickerModal({ onPick, onClose }) {
 }
 
 // ── Entry Card ────────────────────────────────────────────────────────────────
-function EntryCard({ entry, expanded, onToggle }) {
+function EntryCard({ entry, expanded, onToggle, onDelete, deleting }) {
   const score = computeFeelScore(entry.scores || {})
   const color = SCORE_COLOR(score)
 
   return (
-    <div className={styles.entryCard} onClick={onToggle}>
-      <div className={styles.entryCardTop}>
+    <div className={styles.entryCard}>
+      <div className={styles.entryCardTop} onClick={onToggle} style={{ cursor: 'pointer' }}>
         <span className={styles.entryCardDate}>{entry.date}</span>
         <div className={styles.entryCardBar}>
           <div className={styles.entryCardBarFill} style={{ width: `${score * 10}%`, background: color }} />
         </div>
         <span className={styles.entryCardScore} style={{ color }}>{score.toFixed(1)}</span>
+        {onDelete && (
+          <button
+            className={styles.entryDeleteBtn}
+            disabled={deleting}
+            onClick={e => { e.stopPropagation(); onDelete() }}
+            title="Delete this entry"
+          >
+            {deleting ? '…' : '✕'}
+          </button>
+        )}
         <span className={styles.entryCardToggle}>{expanded ? '▲' : '▼'}</span>
       </div>
 
