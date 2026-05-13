@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { db } from '../firebase'
+import { auth, db } from '../firebase'
+import { signOut as fbSignOut } from 'firebase/auth'
 import { collection, doc, setDoc, deleteDoc, getDocs, getDoc, onSnapshot, query, orderBy } from 'firebase/firestore'
 import { useAuth } from './AuthContext'
 import {
@@ -48,6 +49,33 @@ export function DataProvider({ children }) {
     }
 
     setAdminRemarks([]) // clear previous user's remarks
+
+    // ── Deletion tombstone check ──────────────────────────────────────────────
+    // If the admin has tombstoned this user, wipe their local cache and sign out
+    // immediately. Stops any further Firestore writes from this client and
+    // prevents the localStorage→Firestore profile re-migration below from
+    // resurrecting the account.
+    let tombstoned = false
+    const tombstoneRef = doc(db, 'users', user.uid, 'config', '_deleted')
+    const unsubTombstone = onSnapshot(tombstoneRef, snap => {
+      if (!snap.exists() || tombstoned) return
+      tombstoned = true
+      try {
+        localStorage.removeItem('gb_journal')
+        localStorage.removeItem(PROFILE_KEY)
+        localStorage.removeItem(GUEST_NAME_KEY)
+        localStorage.removeItem(GUEST_MIGRATION_KEY)
+        localStorage.removeItem(coachKey(user.uid))
+      } catch {}
+      setEntries([])
+      setProfileState(null)
+      setCoachData(null)
+      setAdminRemarks([])
+      setGuestNameState(null)
+      setProfileFetched(true)
+      fbSignOut(auth).catch(() => {})
+    }, () => {})
+
     // Load this user's coach data from Firestore (source of truth) or their local cache
     setCoachData(null) // clear previous user's data immediately
     const userCoachKey = coachKey(user.uid)
@@ -150,6 +178,13 @@ export function DataProvider({ children }) {
         // No Firestore profile — check if a complete localStorage profile exists
         // (e.g. user previously used the app as a guest or on another device).
         // If so, migrate it to Firestore so they don't have to redo onboarding.
+        // SKIP this entirely if a tombstone is active — re-migrating would
+        // resurrect the account the admin just deleted.
+        if (tombstoned) {
+          setProfileState(null)
+          setProfileFetched(true)
+          return
+        }
         try {
           const cached = localStorage.getItem(PROFILE_KEY)
           if (cached) {
@@ -197,6 +232,7 @@ export function DataProvider({ children }) {
       clearTimeout(safetyTimeout)
       unsubJournal()
       unsubProfile()
+      unsubTombstone()
     }
   }, [user])
 

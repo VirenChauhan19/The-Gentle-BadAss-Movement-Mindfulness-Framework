@@ -178,11 +178,20 @@ export default function Admin() {
   useEffect(() => {
     if (!isAdmin || !db) return
     const unsub = onSnapshot(query(collectionGroup(db, 'config')), snapshot => {
+      // Collect uids that have a tombstone — they should NOT appear in the list.
+      const deletedUids = new Set(
+        snapshot.docs
+          .filter(d => d.id === '_deleted')
+          .map(d => d.ref.parent.parent?.id)
+          .filter(Boolean)
+      )
       setAllUserData(prev => {
         const next = { ...prev }
+        // Drop any user that has been tombstoned.
+        deletedUids.forEach(uid => { delete next[uid] })
         snapshot.docs.forEach(d => {
           const uid = d.ref.parent.parent?.id
-          if (!uid) return
+          if (!uid || deletedUids.has(uid)) return
           const current = next[uid] || {}
           if (d.id === 'profile') current.userProfile = d.data()
           if (d.id === 'coach') current.coach = d.data()
@@ -191,6 +200,7 @@ export default function Admin() {
         })
         return next
       })
+      setAllEntries(prev => prev.filter(e => !deletedUids.has(e._uid)))
     })
     return unsub
   }, [isAdmin])
@@ -635,10 +645,23 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }
     setDeleting(true)
     setDeleteError(null)
     try {
+      // 1. Plant tombstone first so an online client sees it on its next snapshot
+      //    tick and signs itself out before we wipe everything.
+      await setDoc(doc(db, 'users', user.uid, 'config', '_deleted'), {
+        deletedAt: new Date().toISOString(),
+        deletedBy: adminUser.email,
+      })
+      // 2. Delete journal entries
       const journalSnap = await getDocs(collection(db, 'users', user.uid, 'journal'))
       await Promise.all(journalSnap.docs.map(d => deleteDoc(d.ref)))
+      // 3. Delete every config doc EXCEPT the tombstone, which we keep so the
+      //    deleted user's client can still detect the deletion on next load.
       const configSnap = await getDocs(collection(db, 'users', user.uid, 'config'))
-      await Promise.all(configSnap.docs.map(d => deleteDoc(d.ref)))
+      await Promise.all(
+        configSnap.docs
+          .filter(d => d.id !== '_deleted')
+          .map(d => deleteDoc(d.ref))
+      )
       setConfirmDelete(false)
       onDeleted?.()
     } catch (err) {

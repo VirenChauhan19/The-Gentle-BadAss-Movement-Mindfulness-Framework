@@ -348,8 +348,10 @@
 html, body {
   height: 100%;
   background:
-    radial-gradient(circle at 12% 8%, rgba(99, 127, 95, 0.13), transparent 24rem),
-    radial-gradient(circle at 88% 92%, rgba(66, 105, 125, 0.08), transparent 28rem),
+    radial-gradient(circle at 12% 8%, rgba(99, 127, 95, 0.14), transparent 26rem),
+    radial-gradient(circle at 88% 92%, rgba(66, 105, 125, 0.10), transparent 30rem),
+    radial-gradient(circle at 50% 50%, rgba(218, 196, 168, 0.10), transparent 36rem),
+    radial-gradient(circle at 92% 18%, rgba(176, 144, 112, 0.06), transparent 22rem),
     linear-gradient(135deg, var(--paper-soft) 0%, var(--cream) 48%, #eee7dc 100%);
   background-attachment: fixed;
   color: var(--ink);
@@ -361,6 +363,34 @@ html, body {
   overscroll-behavior-y: none;
 }
 
+/* Fine paper-grain overlay — sits above the gradient, below all content.
+   Low opacity keeps the visual calm; pointer-events: none keeps it inert. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 220px 220px;
+}
+
+html[data-theme="dark"] body::before,
+html[data-theme="ember"] body::before,
+html[data-theme="ocean"] body::before,
+html[data-theme="forest"] body::before,
+html[data-theme="violet"] body::before,
+html[data-theme="rose"] body::before,
+html[data-theme="midnight"] body::before {
+  opacity: 0.07;
+  mix-blend-mode: screen;
+}
+
+/* Ensure app content sits above the grain overlay */
+#root { position: relative; z-index: 1; }
+
 html[data-theme="dark"],
 html[data-theme="ember"],
 html[data-theme="ocean"],
@@ -369,9 +399,10 @@ html[data-theme="ember"] body,
 html[data-theme="ocean"] body,
 html[data-theme="dark"] #root {
   background:
-    radial-gradient(circle at 14% 8%, rgba(131, 168, 120, 0.13), transparent 22rem),
-    radial-gradient(circle at 88% 12%, rgba(127, 169, 188, 0.10), transparent 24rem),
-    radial-gradient(circle at 78% 88%, rgba(168, 200, 159, 0.06), transparent 24rem),
+    radial-gradient(circle at 14% 8%, rgba(131, 168, 120, 0.15), transparent 24rem),
+    radial-gradient(circle at 88% 12%, rgba(127, 169, 188, 0.12), transparent 26rem),
+    radial-gradient(circle at 50% 55%, rgba(140, 180, 130, 0.07), transparent 32rem),
+    radial-gradient(circle at 78% 88%, rgba(168, 200, 159, 0.08), transparent 26rem),
     linear-gradient(135deg, #090c0a 0%, #10130f 52%, #141a14 100%);
   background-attachment: fixed;
 }
@@ -380,9 +411,10 @@ html[data-theme="ember"],
 html[data-theme="ember"] body,
 html[data-theme="ember"] #root {
   background:
-    radial-gradient(circle at 16% 10%, rgba(255, 115, 88, 0.20), transparent 20rem),
-    radial-gradient(circle at 88% 12%, rgba(224, 160, 74, 0.14), transparent 22rem),
-    radial-gradient(circle at 72% 86%, rgba(196, 83, 63, 0.10), transparent 22rem),
+    radial-gradient(circle at 16% 10%, rgba(255, 115, 88, 0.22), transparent 22rem),
+    radial-gradient(circle at 88% 12%, rgba(224, 160, 74, 0.16), transparent 24rem),
+    radial-gradient(circle at 48% 58%, rgba(232, 132, 92, 0.09), transparent 30rem),
+    radial-gradient(circle at 72% 86%, rgba(196, 83, 63, 0.12), transparent 24rem),
     linear-gradient(135deg, #0e0808 0%, #160d0d 52%, #25100e 100%);
   background-attachment: fixed;
 }
@@ -391,9 +423,10 @@ html[data-theme="ocean"],
 html[data-theme="ocean"] body,
 html[data-theme="ocean"] #root {
   background:
-    radial-gradient(circle at 15% 10%, rgba(118, 223, 210, 0.16), transparent 22rem),
-    radial-gradient(circle at 88% 15%, rgba(93, 183, 232, 0.16), transparent 24rem),
-    radial-gradient(circle at 72% 90%, rgba(26, 163, 157, 0.08), transparent 24rem),
+    radial-gradient(circle at 15% 10%, rgba(118, 223, 210, 0.18), transparent 24rem),
+    radial-gradient(circle at 88% 15%, rgba(93, 183, 232, 0.18), transparent 26rem),
+    radial-gradient(circle at 50% 56%, rgba(80, 168, 208, 0.09), transparent 32rem),
+    radial-gradient(circle at 72% 90%, rgba(26, 163, 157, 0.10), transparent 26rem),
     linear-gradient(135deg, #041014 0%, #071419 52%, #0b2028 100%);
   background-attachment: fixed;
 }
@@ -402,9 +435,10 @@ html[data-theme="forest"],
 html[data-theme="forest"] body,
 html[data-theme="forest"] #root {
   background:
-    radial-gradient(circle at 14% 8%,  rgba(122, 216, 112, 0.14), transparent 22rem),
-    radial-gradient(circle at 88% 15%, rgba(82, 168, 74, 0.10),   transparent 24rem),
-    radial-gradient(circle at 72% 88%, rgba(96, 184, 112, 0.07),  transparent 24rem),
+    radial-gradient(circle at 14% 8%,  rgba(122, 216, 112, 0.16), transparent 24rem),
+    radial-gradient(circle at 88% 15%, rgba(82, 168, 74, 0.12),   transparent 26rem),
+    radial-gradient(circle at 50% 56%, rgba(112, 192, 96, 0.08),  transparent 32rem),
+    radial-gradient(circle at 72% 88%, rgba(96, 184, 112, 0.09),  transparent 26rem),
     linear-gradient(135deg, #040a04 0%, #080f07 52%, #101808 100%);
   background-attachment: fixed;
 }
@@ -413,9 +447,10 @@ html[data-theme="violet"],
 html[data-theme="violet"] body,
 html[data-theme="violet"] #root {
   background:
-    radial-gradient(circle at 14% 8%,  rgba(184, 160, 255, 0.16), transparent 22rem),
-    radial-gradient(circle at 88% 15%, rgba(112, 152, 224, 0.12), transparent 24rem),
-    radial-gradient(circle at 72% 88%, rgba(144, 112, 224, 0.08), transparent 24rem),
+    radial-gradient(circle at 14% 8%,  rgba(184, 160, 255, 0.18), transparent 24rem),
+    radial-gradient(circle at 88% 15%, rgba(112, 152, 224, 0.14), transparent 26rem),
+    radial-gradient(circle at 50% 56%, rgba(160, 136, 232, 0.08), transparent 32rem),
+    radial-gradient(circle at 72% 88%, rgba(144, 112, 224, 0.10), transparent 26rem),
     linear-gradient(135deg, #090614 0%, #0e0a18 52%, #160e28 100%);
   background-attachment: fixed;
 }
@@ -424,9 +459,10 @@ html[data-theme="rose"],
 html[data-theme="rose"] body,
 html[data-theme="rose"] #root {
   background:
-    radial-gradient(circle at 16% 10%, rgba(255, 170, 192, 0.18), transparent 20rem),
-    radial-gradient(circle at 88% 14%, rgba(224, 144, 200, 0.12), transparent 22rem),
-    radial-gradient(circle at 72% 86%, rgba(224, 104, 136, 0.08), transparent 22rem),
+    radial-gradient(circle at 16% 10%, rgba(255, 170, 192, 0.20), transparent 22rem),
+    radial-gradient(circle at 88% 14%, rgba(224, 144, 200, 0.14), transparent 24rem),
+    radial-gradient(circle at 48% 58%, rgba(232, 144, 176, 0.08), transparent 30rem),
+    radial-gradient(circle at 72% 86%, rgba(224, 104, 136, 0.10), transparent 24rem),
     linear-gradient(135deg, #100608 0%, #180a0e 52%, #22101a 100%);
   background-attachment: fixed;
 }
@@ -435,9 +471,10 @@ html[data-theme="midnight"],
 html[data-theme="midnight"] body,
 html[data-theme="midnight"] #root {
   background:
-    radial-gradient(circle at 14% 8%,  rgba(128, 176, 248, 0.14), transparent 22rem),
-    radial-gradient(circle at 88% 15%, rgba(80, 160, 232, 0.12),  transparent 24rem),
-    radial-gradient(circle at 72% 88%, rgba(64, 120, 216, 0.07),  transparent 24rem),
+    radial-gradient(circle at 14% 8%,  rgba(128, 176, 248, 0.16), transparent 24rem),
+    radial-gradient(circle at 88% 15%, rgba(80, 160, 232, 0.14),  transparent 26rem),
+    radial-gradient(circle at 50% 56%, rgba(104, 152, 232, 0.08), transparent 32rem),
+    radial-gradient(circle at 72% 88%, rgba(64, 120, 216, 0.09),  transparent 26rem),
     linear-gradient(135deg, #040710 0%, #070a14 52%, #0c1220 100%);
   background-attachment: fixed;
 }

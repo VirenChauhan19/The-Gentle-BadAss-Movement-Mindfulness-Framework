@@ -61,7 +61,9 @@
       "Bash(Select-Object FullName)",
       "Bash(Sort-Object FullName)",
       "Bash(grep -E \"\\\\.\\(jsx|js|css\\)$\")",
-      "Bash(xargs wc -l)"
+      "Bash(xargs wc -l)",
+      "Bash(firebase --version)",
+      "Bash(firebase projects:list)"
     ]
   }
 }

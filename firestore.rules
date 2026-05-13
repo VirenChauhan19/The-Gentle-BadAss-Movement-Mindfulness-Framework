@@ -18,10 +18,11 @@ service cloud.firestore {
                           && request.auth.token.email == 'chauhan.viren08@gmail.com';
     }
 
-    // Admin can read and delete any user's config documents (profile, coach, remarks)
+    // Admin can read, write and delete any user's config documents
+    // (covers tombstone writes for deleted accounts too)
     match /users/{userId}/config/{configId} {
-      allow read, delete: if request.auth != null
-                          && request.auth.token.email == 'chauhan.viren08@gmail.com';
+      allow read, write, delete: if request.auth != null
+                                 && request.auth.token.email == 'chauhan.viren08@gmail.com';
     }
 
     // Admin can edit any user's running coach plan and write remarks
