@@ -58,13 +58,13 @@ const WORKOUT_PRESETS = [
 
 function planDayTypeColor(type) {
   switch (type) {
-    case 'easy':     return { bg: 'rgba(122,148,112,0.16)', color: '#4a7244' }
-    case 'moderate': return { bg: 'rgba(190,155,80,0.16)',  color: '#8a6a20' }
-    case 'hard':     return { bg: 'rgba(186,95,69,0.16)',   color: '#c05040' }
-    case 'long':     return { bg: 'rgba(90,100,160,0.16)',  color: '#5060a8' }
-    case 'cross':    return { bg: 'rgba(60,130,180,0.16)',  color: '#2a7abf' }
-    case 'rest':     return { bg: 'rgba(130,130,130,0.12)', color: '#777' }
-    default:         return { bg: 'rgba(130,130,130,0.12)', color: '#777' }
+    case 'easy':     return { bg: 'rgba(122,148,112,0.16)', color: '#4a7244', border: 'rgba(122,148,112,0.55)' }
+    case 'moderate': return { bg: 'rgba(190,155,80,0.16)',  color: '#8a6a20', border: 'rgba(190,155,80,0.55)' }
+    case 'hard':     return { bg: 'rgba(186,95,69,0.16)',   color: '#c05040', border: 'rgba(186,95,69,0.55)' }
+    case 'long':     return { bg: 'rgba(90,100,160,0.16)',  color: '#5060a8', border: 'rgba(90,100,160,0.55)' }
+    case 'cross':    return { bg: 'rgba(60,130,180,0.16)',  color: '#2a7abf', border: 'rgba(60,130,180,0.55)' }
+    case 'rest':     return { bg: 'rgba(130,130,130,0.12)', color: '#777',    border: 'rgba(130,130,130,0.35)' }
+    default:         return { bg: 'rgba(130,130,130,0.12)', color: '#777',    border: 'rgba(130,130,130,0.35)' }
   }
 }
 
@@ -629,6 +629,13 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
     setPlanError(null)
   }, [user.uid, plan])
 
+  // Auto-populate profileDraft when switching to the profile tab
+  useEffect(() => {
+    if (tab === 'profile' && profileDraft === null) {
+      setProfileDraft({ ...(userProfile || {}) })
+    }
+  }, [tab, userProfile])
+
   async function sendRemark() {
     if (!remarkText.trim() || sending) return
     setSending(true)
@@ -985,15 +992,10 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
                 <button
                   className={styles.editPlanBtn}
                   onClick={saveProfile}
-                  disabled={savingProfile || !profileDraft}
+                  disabled={savingProfile}
                 >
                   {savingProfile ? 'Saving…' : 'Save Profile'}
                 </button>
-                {profileDraft && (
-                  <button className={styles.cancelPlanBtn} onClick={() => { setProfileDraft(null); setProfileError(null) }}>
-                    Discard changes
-                  </button>
-                )}
               </div>
             </div>
           )

@@ -1852,11 +1852,61 @@
 }
 
 .adminPlanDay {
-  display: grid;
-  grid-template-columns: 116px minmax(0, 1fr);
-  gap: 14px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-light);
+  border-left: 4px solid transparent;
+}
+
+.adminDayHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.adminDayHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.adminDayHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.adminDayNum {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.adminDayMeta {
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.adminDayContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adminDayTitle {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.3;
 }
 
 .adminPlanDayEditable {
@@ -2213,7 +2263,7 @@
   font-weight: 900;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  margin-bottom: 5px;
+  flex-shrink: 0;
 }
 
 .planReadStats {
@@ -2587,7 +2637,6 @@
   .adminPlanHeader { flex-direction: column; }
   .adminPlanActions { width: 100%; }
   .editPlanBtn, .cancelPlanBtn, .addWorkoutBtn { flex: 1; }
-  .adminPlanDay { grid-template-columns: 1fr; }
   .adminPlanEditGrid { grid-template-columns: 1fr; }
   .adminPlanEditGrid textarea,
   .adminPlanEditGrid input:nth-of-type(4) { grid-column: auto; }
