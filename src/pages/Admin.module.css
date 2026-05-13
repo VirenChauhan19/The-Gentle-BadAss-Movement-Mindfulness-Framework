@@ -1923,14 +1923,8 @@
   color: var(--terracotta);
 }
 
-.adminPlanRead span {
-  color: var(--sage-dark);
-  display: block;
-  font-size: 0.66rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  margin-bottom: 3px;
-  text-transform: uppercase;
+.adminPlanRead .planTypeBadge {
+  display: inline-flex;
 }
 
 .adminPlanRead h4 {
@@ -2073,6 +2067,368 @@
   background: rgba(217,138,138,0.08);
   border-radius: 8px;
 }
+
+/* ── Plan type badge (read view) ─── */
+.planTypeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.planReadStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+
+.planReadStats span {
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-weight: 600;
+}
+
+.planReadNotes {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+  margin-top: 5px;
+}
+
+.planReadDetail {
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+.planLogBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  margin-top: 2px;
+}
+
+/* ── Add workout to week footer ─── */
+.addAfterWeekBtn {
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-top: 1px dashed var(--border-light);
+  color: var(--sage-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  letter-spacing: 0.04em;
+  transition: background 0.15s, color 0.15s;
+}
+
+.addAfterWeekBtn:hover {
+  background: rgba(99, 127, 95, 0.07);
+  color: var(--ink);
+}
+
+/* ── Delete user button ─── */
+.deleteUserBtn {
+  margin-top: 10px;
+  padding: 5px 11px;
+  background: transparent;
+  border: 1.5px solid rgba(186, 95, 69, 0.35);
+  border-radius: 10px;
+  color: var(--terracotta);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.deleteUserBtn:hover {
+  background: rgba(186, 95, 69, 0.08);
+  border-color: var(--terracotta);
+}
+
+.deleteConfirmInline {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+  max-width: 200px;
+}
+
+.deleteConfirmText {
+  font-size: 0.72rem;
+  color: var(--ink-light);
+  line-height: 1.4;
+}
+
+.deleteConfirmActions {
+  display: flex;
+  gap: 6px;
+}
+
+.deleteConfirmActions .confirmDestructBtn {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 0.72rem;
+}
+
+.deleteConfirmActions .confirmCancelBtn {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 0.72rem;
+}
+
+.deleteErrorMsg {
+  font-size: 0.7rem;
+  color: var(--terracotta);
+  line-height: 1.4;
+}
+
+/* ── Workout Picker Modal ─── */
+.pickerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeInOverlay 200ms ease both;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.pickerModal {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: 22px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 32px 72px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  animation: slideUpModal 260ms var(--ease-elastic) both;
+  overflow: hidden;
+}
+
+@keyframes slideUpModal {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pickerModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.pickerModalTitle {
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pickerCloseBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--border-light);
+  background: var(--cream);
+  color: var(--ink-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+
+.pickerCloseBtn:hover { background: var(--border); color: var(--ink); }
+
+.pickerCategories {
+  display: flex;
+  gap: 6px;
+  padding: 12px 20px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.pickerCategories::-webkit-scrollbar { display: none; }
+
+.pickerCategoryBtn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 999px;
+  background: var(--paper-soft);
+  color: var(--ink-light);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.pickerCategoryBtn:hover {
+  border-color: var(--sage);
+  color: var(--ink);
+}
+
+.pickerCategoryBtnActive {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-ink);
+}
+
+.pickerGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 14px 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (min-width: 500px) {
+  .pickerGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.pickerCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 13px;
+  border: 1.5px solid var(--border-light);
+  border-radius: 14px;
+  background: var(--paper-soft);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.pickerCard:hover {
+  border-color: var(--sage);
+  background: var(--cream);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px var(--shadow-xs);
+}
+
+.pickerCardSelected {
+  border-color: var(--ink) !important;
+  background: rgba(44, 36, 21, 0.05) !important;
+  box-shadow: 0 0 0 2px var(--ink) inset !important;
+  transform: translateY(-1px);
+}
+
+.pickerCardType {
+  display: inline-block;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-bottom: 3px;
+  font-family: inherit;
+}
+
+.pickerCard strong {
+  font-size: 0.83rem;
+  color: var(--ink);
+  line-height: 1.25;
+  display: block;
+}
+
+.pickerCard span {
+  font-size: 0.72rem;
+  color: var(--ink-light);
+  display: block;
+}
+
+.pickerPreview {
+  margin: 0 20px;
+  padding: 11px 14px;
+  background: rgba(99, 127, 95, 0.08);
+  border: 1px solid rgba(99, 127, 95, 0.22);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.pickerPreview p {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.52;
+  margin-bottom: 5px;
+}
+
+.pickerPreview p:last-child { margin-bottom: 0; }
+
+.pickerPreview strong { color: var(--ink); }
+
+.pickerActions {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.pickerAddBtn {
+  flex: 1;
+  padding: 11px 20px;
+  background: var(--brand-gradient);
+  color: var(--on-dark);
+  border: none;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.18s;
+}
+
+.pickerAddBtn:hover:not(:disabled) { opacity: 0.88; }
+.pickerAddBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ── Mobile: stack layout ─── */
 @media (max-width: 767px) {

@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { db } from '../firebase'
-import { collectionGroup, onSnapshot, query, doc, getDoc, setDoc } from 'firebase/firestore'
+import { collectionGroup, onSnapshot, query, doc, getDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore'
 import { arrayUnion } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
@@ -32,6 +32,41 @@ const THEME_OPTIONS = [
   { id: 'midnight', label: 'Midnight', description: 'Deep navy for night sessions.'    },
   { id: 'light',    label: 'Light',    description: 'Bright daytime mode.'             },
 ]
+
+const WORKOUT_PRESETS = [
+  { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 30 min',          distance: '4–5 km',    duration: '30 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Keep it very easy — full conversation throughout. Focus on form and breathing.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 40 min',          distance: '5–7 km',    duration: '40 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Keep it easy. Full conversation pace the entire way. Focus on cadence and form.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 50 min',          distance: '7–9 km',    duration: '50 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Steady easy effort. Stay fully aerobic. Walk if needed — keep heart rate low.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 60 min',          distance: '9–12 km',   duration: '60 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Build aerobic base. Keep effort fully conversational throughout the session.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Tempo',          icon: '⚡',  type: 'moderate', title: 'Tempo Run 40 min',         distance: '6–8 km',    duration: '40 min',       pace: 'Comfortably hard (Z3)',   notes: '10 min easy warm-up → 20 min at tempo effort → 10 min easy cool-down.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Tempo',          icon: '⚡',  type: 'moderate', title: 'Tempo Run 50 min',         distance: '8–10 km',   duration: '50 min',       pace: 'Comfortably hard (Z3)',   notes: '10 min easy warm-up → 30 min at tempo effort → 10 min easy cool-down.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Tempo',          icon: '⚡',  type: 'moderate', title: 'Progression Run 50 min',   distance: '8–10 km',   duration: '50 min',       pace: 'Easy → Moderate → Tempo', notes: 'First third easy, second third moderate, final third at tempo. Controlled build.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Tempo',          icon: '⚡',  type: 'moderate', title: 'Fartlek 45 min',           distance: '7–9 km',    duration: '45 min',       pace: 'Mixed effort',            notes: '10 min easy → 5×(2 min hard / 2 min easy) → finish easy. Play with effort.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Intervals',      icon: '🔥', type: 'hard',     title: 'Interval Session 45 min',  distance: '7–9 km',    duration: '45 min',       pace: 'Hard (Z4–Z5)',            notes: '10 min warm-up → 6×400m at 5K effort with 90s recovery jog → 10 min cool-down.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Intervals',      icon: '🔥', type: 'hard',     title: 'Interval Session 60 min',  distance: '9–12 km',   duration: '60 min',       pace: 'Hard (Z4–Z5)',            notes: '10 min warm-up → 8×400m at 5K effort with 90s recovery jog → 10 min cool-down.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Intervals',      icon: '🔥', type: 'hard',     title: 'Hill Repeats 50 min',      distance: '7–9 km',    duration: '50 min',       pace: 'Hard (Z4–Z5)',            notes: '15 min warm-up → 8–10×60s hard hill efforts, walk-back recovery → 10 min cool-down.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Intervals',      icon: '🔥', type: 'hard',     title: '1K Repeats 60 min',        distance: '10–13 km',  duration: '60 min',       pace: 'Hard (Z4–Z5)',            notes: '15 min warm-up → 5×1K at 10K pace with 2 min jog recovery → 10 min cool-down.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Long Run',       icon: '🎯', type: 'long',     title: 'Long Run 75 min',          distance: '12–15 km',  duration: '75 min',       pace: 'Easy (Z1–Z2)',            notes: 'Easy long distance. Walk breaks are totally fine. Hydrate every 20 min.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Long Run',       icon: '🎯', type: 'long',     title: 'Long Run 90 min',          distance: '15–18 km',  duration: '90 min',       pace: 'Easy (Z1–Z2)',            notes: 'Long slow distance. Practice race nutrition strategy if training for an event.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Long Run',       icon: '🎯', type: 'long',     title: 'Long Run 120 min',         distance: '18–24 km',  duration: '120 min',      pace: 'Easy (Z1–Z2)',            notes: 'Race-prep long run. Practice full nutrition, pacing, and kit strategy.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Cross Training', icon: '🚴', type: 'cross',    title: 'Cross Training 40 min',    distance: '',          duration: '40 min',       pace: 'Low–moderate effort',     notes: 'Active recovery using non-impact cardio. Keep heart rate in Z1–Z2.', crossTraining: '40 min easy cycling, swimming, elliptical, or rowing at conversational effort.', strength: '', mobility: '' },
+  { category: 'Cross Training', icon: '🚴', type: 'cross',    title: 'Cross Training 50 min',    distance: '',          duration: '50 min',       pace: 'Low–moderate effort',     notes: 'Non-impact aerobic session. Stay comfortable and aerobic throughout.', crossTraining: '50 min easy cycling, swimming, elliptical, or rowing. Comfortable throughout.', strength: '', mobility: '' },
+  { category: 'Cross Training', icon: '🚴', type: 'cross',    title: 'Cross Training 60 min',    distance: '',          duration: '60 min',       pace: 'Moderate effort',         notes: 'Sustained cross-training with a moderate push in the final 15 minutes.', crossTraining: '60 min cycling, swimming, or elliptical — push to moderate effort for last 15 min.', strength: '', mobility: '' },
+  { category: 'Rest',           icon: '😴', type: 'rest',     title: 'Rest Day',                 distance: '',          duration: '—',            pace: '—',                       notes: 'Complete rest. Optional 15–20 min walk if you feel like moving. Sleep, hydrate, recover.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Rest',           icon: '🧘', type: 'rest',     title: 'Active Recovery',          distance: '',          duration: '20–30 min',    pace: 'Very easy',               notes: 'Gentle walk or light yoga only. Keep heart rate very low. This is a recovery day.', crossTraining: '', strength: '', mobility: '' },
+]
+
+function planDayTypeColor(type) {
+  switch (type) {
+    case 'easy':     return { bg: 'rgba(122,148,112,0.16)', color: '#4a7244' }
+    case 'moderate': return { bg: 'rgba(190,155,80,0.16)',  color: '#8a6a20' }
+    case 'hard':     return { bg: 'rgba(186,95,69,0.16)',   color: '#c05040' }
+    case 'long':     return { bg: 'rgba(90,100,160,0.16)',  color: '#5060a8' }
+    case 'cross':    return { bg: 'rgba(60,130,180,0.16)',  color: '#2a7abf' }
+    case 'rest':     return { bg: 'rgba(130,130,130,0.12)', color: '#777' }
+    default:         return { bg: 'rgba(130,130,130,0.12)', color: '#777' }
+  }
+}
 
 function addDaysISO(startDate, offset) {
   const d = new Date(`${startDate}T00:00:00`)
@@ -103,6 +138,15 @@ export default function Admin() {
     localStorage.setItem('gb_theme', nextTheme)
     document.documentElement.dataset.theme = nextTheme
     window.dispatchEvent(new CustomEvent('gb-theme-change', { detail: { theme: nextTheme } }))
+  }
+
+  function handleUserDeleted(uid) {
+    setAllEntries(prev => prev.filter(e => e._uid !== uid))
+    setAllUserData(prev => {
+      const next = { ...prev }
+      delete next[uid]
+      return next
+    })
   }
 
   // Live listener for all users' journal entries (admin only)
@@ -215,6 +259,7 @@ export default function Admin() {
         indexError={indexError}
         adminUser={user}
         onClose={() => setAdminMode(false)}
+        onUserDeleted={handleUserDeleted}
         onRemarkSent={(uid, remark) =>
           setAllUserData(prev => ({
             ...prev,
@@ -387,7 +432,7 @@ export default function Admin() {
 }
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
-function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent, onCoachUpdated }) {
+function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent, onCoachUpdated, onUserDeleted }) {
   const [selectedUid, setSelectedUid] = useState(null)
 
   const userMap = useMemo(() => {
@@ -438,6 +483,11 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
   const selectedUser = selectedUid
     ? userList.find(u => u.uid === selectedUid) || null
     : null
+
+  function handleUserDeleted(uid) {
+    setSelectedUid(null)
+    onUserDeleted?.(uid)
+  }
 
   return (
     <div className={styles.adminPanelPage}>
@@ -511,6 +561,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
               adminUser={adminUser}
               onCoachUpdated={coach => onCoachUpdated(selectedUser.uid, coach)}
               onRemarkSent={remark => onRemarkSent(selectedUser.uid, remark)}
+              onDeleted={() => handleUserDeleted(selectedUser.uid)}
             />
           )}
         </main>
@@ -520,18 +571,22 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
 }
 
 // ── User Detail ───────────────────────────────────────────────────────────────
-function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
-  const [tab,           setTab]           = useState('overview')
-  const [remarkText,    setRemarkText]    = useState('')
-  const [remarkRunDate, setRemarkRunDate] = useState('')
-  const [sending,       setSending]       = useState(false)
-  const [remarkError,   setRemarkError]   = useState(null)
-  const [expandedEntry, setExpandedEntry] = useState(null)
-  const [localRemarks,  setLocalRemarks]  = useState(user.remarks || [])
-  const [editingPlan,   setEditingPlan]   = useState(false)
-  const [planDraft,     setPlanDraft]     = useState([])
-  const [savingPlan,    setSavingPlan]    = useState(false)
-  const [planError,     setPlanError]     = useState(null)
+function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted }) {
+  const [tab,             setTab]             = useState('overview')
+  const [remarkText,      setRemarkText]      = useState('')
+  const [remarkRunDate,   setRemarkRunDate]   = useState('')
+  const [sending,         setSending]         = useState(false)
+  const [remarkError,     setRemarkError]     = useState(null)
+  const [expandedEntry,   setExpandedEntry]   = useState(null)
+  const [localRemarks,    setLocalRemarks]    = useState(user.remarks || [])
+  const [editingPlan,     setEditingPlan]     = useState(false)
+  const [planDraft,       setPlanDraft]       = useState([])
+  const [savingPlan,      setSavingPlan]      = useState(false)
+  const [planError,       setPlanError]       = useState(null)
+  const [pickerAfterIndex, setPickerAfterIndex] = useState(null)
+  const [confirmDelete,   setConfirmDelete]   = useState(false)
+  const [deleting,        setDeleting]        = useState(false)
+  const [deleteError,     setDeleteError]     = useState(null)
 
   const userProfile = user.userProfile
   const coach       = user.coach
@@ -575,6 +630,27 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
     setSending(false)
   }
 
+  async function deleteUserData() {
+    if (deleting) return
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      // Delete journal entries
+      const journalSnap = await getDocs(collection(db, 'users', user.uid, 'journal'))
+      await Promise.all(journalSnap.docs.map(d => deleteDoc(d.ref)))
+      // Delete config docs
+      await Promise.all([
+        deleteDoc(doc(db, 'users', user.uid, 'config', 'profile')).catch(() => {}),
+        deleteDoc(doc(db, 'users', user.uid, 'config', 'coach')).catch(() => {}),
+        deleteDoc(doc(db, 'users', user.uid, 'config', 'adminRemarks')).catch(() => {}),
+      ])
+      onDeleted?.()
+    } catch (err) {
+      setDeleteError('Could not delete user: ' + err.message)
+      setDeleting(false)
+    }
+  }
+
   function updatePlanDay(index, field, value) {
     setPlanDraft(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item))
   }
@@ -594,21 +670,25 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
     })
   }
 
-  function addPlanDay(afterIndex = planDraft.length - 1) {
+  function openPicker(afterIndex) {
+    setPickerAfterIndex(afterIndex ?? planDraft.length - 1)
+  }
+
+  function addPlanDayWithPreset(preset, afterIndex) {
+    const idx = afterIndex ?? planDraft.length - 1
     setPlanDraft(prev => {
-      const insertAt = Math.max(0, Math.min(prev.length, afterIndex + 1))
-      const base = prev[afterIndex] || prev[prev.length - 1] || {}
+      const insertAt = Math.max(0, Math.min(prev.length, idx + 1))
       const nextDay = {
         id: `admin-day-${Date.now()}`,
-        type: 'easy',
-        title: 'New workout',
-        distance: '',
-        duration: '30 min',
-        pace: 'Conversational',
-        notes: 'Add the workout details here.',
-        strength: base.strength || '',
-        mobility: base.mobility || '',
-        crossTraining: '',
+        type: preset.type || 'easy',
+        title: preset.title || 'New workout',
+        distance: preset.distance || '',
+        duration: preset.duration || '30 min',
+        pace: preset.pace || 'Conversational',
+        notes: preset.notes || '',
+        strength: preset.strength || '',
+        mobility: preset.mobility || '',
+        crossTraining: preset.crossTraining || '',
       }
       return normalizeDraftOrder([...prev.slice(0, insertAt), nextDay, ...prev.slice(insertAt)])
     })
@@ -682,6 +762,17 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
 
   return (
     <div className={styles.userDetail}>
+      {/* Workout picker modal */}
+      {pickerAfterIndex !== null && (
+        <WorkoutPickerModal
+          onPick={preset => {
+            addPlanDayWithPreset(preset, pickerAfterIndex)
+            setPickerAfterIndex(null)
+          }}
+          onClose={() => setPickerAfterIndex(null)}
+        />
+      )}
+
       {/* User header */}
       <div className={styles.userDetailHeader}>
         <div className={styles.userDetailAvatarBig}>{(user.name || '?')[0].toUpperCase()}</div>
@@ -700,6 +791,35 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
             {avgScore !== null ? avgScore.toFixed(1) : '—'}
           </span>
           <span className={styles.scoreBigLabel}>avg feel</span>
+          {confirmDelete ? (
+            <div className={styles.deleteConfirmInline}>
+              {deleteError && <p className={styles.deleteErrorMsg}>{deleteError}</p>}
+              <p className={styles.deleteConfirmText}>Delete all data for {user.name}?</p>
+              <div className={styles.deleteConfirmActions}>
+                <button
+                  className={styles.confirmDestructBtn}
+                  disabled={deleting}
+                  onClick={deleteUserData}
+                >
+                  {deleting ? 'Deleting…' : 'Yes, delete'}
+                </button>
+                <button
+                  className={styles.confirmCancelBtn}
+                  disabled={deleting}
+                  onClick={() => { setConfirmDelete(false); setDeleteError(null) }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button className={styles.deleteUserBtn} onClick={() => setConfirmDelete(true)}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+              </svg>
+              Delete Account
+            </button>
+          )}
         </div>
       </div>
 
@@ -796,7 +916,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated }) {
                     planError={planError}
                     checkins={checkins}
                     onUpdateDay={updatePlanDay}
-                    onAddDay={addPlanDay}
+                    onOpenPicker={openPicker}
                     onDuplicateDay={duplicatePlanDay}
                     onRemoveDay={removePlanDay}
                     onRestDay={restPlanDay}
@@ -1026,7 +1146,7 @@ function AdminPlanEditor({
   planError,
   checkins,
   onUpdateDay,
-  onAddDay,
+  onOpenPicker,
   onDuplicateDay,
   onRemoveDay,
   onRestDay,
@@ -1079,13 +1199,13 @@ function AdminPlanEditor({
         <div>
           <p className={styles.runLogTitle}>Workout Plan</p>
           <p className={styles.adminPlanSub}>
-            {planDraft.length} days · {weekNumbers.length} weeks · current week is {currentWeek}
+            {planDraft.length} days · {weekNumbers.length} weeks · current week {currentWeek}
           </p>
         </div>
         <div className={styles.adminPlanActions}>
           {editingPlan && (
-            <button className={styles.addWorkoutBtn} onClick={() => onAddDay(planDraft.length - 1)}>
-              Add Workout
+            <button className={styles.addWorkoutBtn} onClick={() => onOpenPicker(planDraft.length - 1)}>
+              + Add Workout
             </button>
           )}
           {editingPlan && (
@@ -1105,7 +1225,7 @@ function AdminPlanEditor({
       {planError && <p className={styles.errorMsg}>{planError}</p>}
       {editingPlan && (
         <p className={styles.adminPlanHint}>
-          Drag a workout by the handle to move it. Use Rest to remove the workout but keep the day, or Remove to delete that day from the program.
+          Drag a workout by the handle to reorder. Click <strong>+ Add Workout</strong> to insert from preset templates. Use <strong>Rest</strong> to convert a day to rest without removing it.
         </p>
       )}
 
@@ -1154,6 +1274,7 @@ function AdminPlanEditor({
                 <div className={styles.adminWeekBody}>
                   {weekItems.map(({ day, idx }) => {
                     const log = checkinByDate[day.date]
+                    const typeColors = planDayTypeColor(day.type)
                     return (
                       <div
                         key={day.id || day.date || idx}
@@ -1180,13 +1301,21 @@ function AdminPlanEditor({
                         onDragEnd={() => setDragIndex(null)}
                       >
                         <div className={styles.adminPlanDayMeta}>
-                          {editingPlan && <span className={styles.dragHandle} title="Drag to reorder">::::</span>}
+                          {editingPlan && <span className={styles.dragHandle} title="Drag to reorder">⠿⠿</span>}
                           <strong>Day {day.dayNumber || idx + 1}</strong>
-                          <span>{day.day || ''} · {day.date || 'Unscheduled'}</span>
-                          {log && <em>{log.status}</em>}
+                          <span>{day.day || ''}</span>
+                          <span>{day.date || 'Unscheduled'}</span>
+                          {log && (
+                            <span className={styles.planLogBadge} style={{
+                              color: log.status === 'done' ? '#4a7244' : log.status === 'partial' ? '#8a6a20' : '#c05040',
+                              background: log.status === 'done' ? 'rgba(122,148,112,0.14)' : log.status === 'partial' ? 'rgba(190,155,80,0.14)' : 'rgba(186,95,69,0.14)',
+                            }}>
+                              {log.status === 'done' ? '✓ Done' : log.status === 'partial' ? '↗ Partial' : '✗ Missed'}
+                            </span>
+                          )}
                           {editingPlan && (
                             <div className={styles.adminPlanRowActions}>
-                              <button type="button" onClick={() => onAddDay(idx)}>Add after</button>
+                              <button type="button" onClick={() => onOpenPicker(idx)}>+ Add after</button>
                               <button type="button" onClick={() => onDuplicateDay(idx)}>Duplicate</button>
                               <button type="button" onClick={() => onRestDay(idx)}>Rest</button>
                               <button type="button" className={styles.removeWorkoutBtn} onClick={() => onRemoveDay(idx)}>Remove</button>
@@ -1199,34 +1328,150 @@ function AdminPlanEditor({
                               {['easy', 'moderate', 'hard', 'long', 'rest', 'cross'].map(type => <option key={type} value={type}>{type}</option>)}
                             </select>
                             <input value={day.title || ''} onChange={e => onUpdateDay(idx, 'title', e.target.value)} placeholder="Title" />
-                            <input value={day.distance || ''} onChange={e => onUpdateDay(idx, 'distance', e.target.value)} placeholder="Distance" />
-                            <input value={day.duration || ''} onChange={e => onUpdateDay(idx, 'duration', e.target.value)} placeholder="Duration" />
+                            <input value={day.distance || ''} onChange={e => onUpdateDay(idx, 'distance', e.target.value)} placeholder="Distance (e.g. 8–10 km)" />
+                            <input value={day.duration || ''} onChange={e => onUpdateDay(idx, 'duration', e.target.value)} placeholder="Duration (e.g. 50 min)" />
                             <input value={day.pace || ''} onChange={e => onUpdateDay(idx, 'pace', e.target.value)} placeholder="Pace / effort" />
-                            <input value={day.crossTraining || ''} onChange={e => onUpdateDay(idx, 'crossTraining', e.target.value)} placeholder="Cross-training" />
-                            <textarea value={day.strength || ''} onChange={e => onUpdateDay(idx, 'strength', e.target.value)} placeholder="Daily strength" rows={2} />
-                            <textarea value={day.mobility || ''} onChange={e => onUpdateDay(idx, 'mobility', e.target.value)} placeholder="Daily mobility" rows={2} />
-                            <textarea value={day.notes || ''} onChange={e => onUpdateDay(idx, 'notes', e.target.value)} placeholder="Workout notes" rows={3} />
+                            <input value={day.crossTraining || ''} onChange={e => onUpdateDay(idx, 'crossTraining', e.target.value)} placeholder="Cross-training details" />
+                            <textarea value={day.strength || ''} onChange={e => onUpdateDay(idx, 'strength', e.target.value)} placeholder="Strength circuit" rows={2} />
+                            <textarea value={day.mobility || ''} onChange={e => onUpdateDay(idx, 'mobility', e.target.value)} placeholder="Mobility routine" rows={2} />
+                            <textarea value={day.notes || ''} onChange={e => onUpdateDay(idx, 'notes', e.target.value)} placeholder="Workout notes & instructions" rows={3} />
                           </div>
                         ) : (
                           <div className={styles.adminPlanRead}>
-                            <span>{day.type || 'rest'}</span>
+                            <span
+                              className={styles.planTypeBadge}
+                              style={{ background: typeColors.bg, color: typeColors.color }}
+                            >
+                              {day.type || 'rest'}
+                            </span>
                             <h4>{day.title || 'Untitled session'}</h4>
-                            <p>{[day.distance, day.duration, day.pace].filter(Boolean).join(' | ')}</p>
-                            {day.notes && <p>{day.notes}</p>}
-                            {day.crossTraining && <p><strong>Cross-training:</strong> {day.crossTraining}</p>}
-                            {day.strength && <p><strong>Strength:</strong> {day.strength}</p>}
-                            {day.mobility && <p><strong>Mobility:</strong> {day.mobility}</p>}
-                            {log?.userNote && <p className={styles.adminPlanLogNote}>User log: {log.userNote}</p>}
+                            <div className={styles.planReadStats}>
+                              {day.distance && <span>{day.distance}</span>}
+                              {day.duration && <span>{day.duration}</span>}
+                              {day.pace && <span>{day.pace}</span>}
+                            </div>
+                            {day.notes && <p className={styles.planReadNotes}>{day.notes}</p>}
+                            {day.crossTraining && (
+                              <p className={styles.planReadDetail}><strong>Cross-training:</strong> {day.crossTraining}</p>
+                            )}
+                            {day.strength && (
+                              <p className={styles.planReadDetail}><strong>Strength:</strong> {day.strength}</p>
+                            )}
+                            {day.mobility && (
+                              <p className={styles.planReadDetail}><strong>Mobility:</strong> {day.mobility}</p>
+                            )}
+                            {log?.userNote && (
+                              <p className={styles.adminPlanLogNote}>
+                                <strong>User log:</strong> {log.userNote}
+                              </p>
+                            )}
                           </div>
                         )}
                       </div>
                     )
                   })}
+                  {editingPlan && (
+                    <button
+                      className={styles.addAfterWeekBtn}
+                      onClick={() => onOpenPicker(weekItems[weekItems.length - 1]?.idx ?? planDraft.length - 1)}
+                    >
+                      + Add workout to Week {w}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+// ── Workout Picker Modal ──────────────────────────────────────────────────────
+function WorkoutPickerModal({ onPick, onClose }) {
+  const categories = [...new Set(WORKOUT_PRESETS.map(p => p.category))]
+  const [activeCategory, setActiveCategory] = useState(categories[0])
+  const [selectedIdx, setSelectedIdx] = useState(null)
+
+  const filtered = WORKOUT_PRESETS.filter(p => p.category === activeCategory)
+  const selectedPreset = selectedIdx !== null ? filtered[selectedIdx] : null
+
+  function handleCategoryChange(cat) {
+    setActiveCategory(cat)
+    setSelectedIdx(null)
+  }
+
+  return (
+    <div className={styles.pickerOverlay} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className={styles.pickerModal}>
+        <div className={styles.pickerModalHeader}>
+          <h3 className={styles.pickerModalTitle}>Choose a Workout</h3>
+          <button className={styles.pickerCloseBtn} onClick={onClose}>×</button>
+        </div>
+
+        <div className={styles.pickerCategories}>
+          {categories.map(cat => {
+            const icon = WORKOUT_PRESETS.find(p => p.category === cat)?.icon
+            return (
+              <button
+                key={cat}
+                className={`${styles.pickerCategoryBtn} ${activeCategory === cat ? styles.pickerCategoryBtnActive : ''}`}
+                onClick={() => handleCategoryChange(cat)}
+              >
+                {icon} {cat}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className={styles.pickerGrid}>
+          {filtered.map((preset, i) => {
+            const tc = planDayTypeColor(preset.type)
+            return (
+              <button
+                key={i}
+                className={`${styles.pickerCard} ${selectedIdx === i ? styles.pickerCardSelected : ''}`}
+                onClick={() => setSelectedIdx(selectedIdx === i ? null : i)}
+              >
+                <span
+                  className={styles.pickerCardType}
+                  style={{ background: tc.bg, color: tc.color }}
+                >
+                  {preset.type}
+                </span>
+                <strong>{preset.title}</strong>
+                {preset.distance && <span>{preset.distance}</span>}
+                <span>{preset.duration}</span>
+                <span style={{ color: 'var(--ink-faint)', fontSize: '0.68rem' }}>{preset.pace}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {selectedPreset && (
+          <div className={styles.pickerPreview}>
+            <p>{selectedPreset.notes}</p>
+            {selectedPreset.crossTraining && (
+              <p><strong>Cross-training:</strong> {selectedPreset.crossTraining}</p>
+            )}
+          </div>
+        )}
+
+        <div className={styles.pickerActions}>
+          <button className={styles.cancelPlanBtn} onClick={onClose}>Cancel</button>
+          <button
+            className={styles.pickerAddBtn}
+            disabled={selectedIdx === null}
+            onClick={() => {
+              if (selectedPreset) {
+                onPick(selectedPreset)
+              }
+            }}
+          >
+            {selectedIdx === null ? 'Select a workout above' : `Add "${selectedPreset.title}"`}
+          </button>
+        </div>
       </div>
     </div>
   )
