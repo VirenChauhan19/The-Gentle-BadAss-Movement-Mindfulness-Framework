@@ -1442,11 +1442,15 @@ function AdminPlanEditor({
                 <div className={styles.adminWeekBody}>
                   {weekItems.map(({ day, idx }) => {
                     const log = checkinByDate[day.date]
-                    const typeColors = planDayTypeColor(day.type)
+                    const tc = planDayTypeColor(day.type)
+                    const logColor = log?.status === 'done' ? { color: '#4a7244', bg: 'rgba(122,148,112,0.14)' }
+                      : log?.status === 'partial' ? { color: '#8a6a20', bg: 'rgba(190,155,80,0.14)' }
+                      : { color: '#c05040', bg: 'rgba(186,95,69,0.14)' }
                     return (
                       <div
                         key={day.id || day.date || idx}
                         className={`${styles.adminPlanDay} ${editingPlan ? styles.adminPlanDayEditable : ''} ${dragIndex === idx ? styles.adminPlanDayDragging : ''}`}
+                        style={{ borderLeftColor: tc.border }}
                         draggable={editingPlan}
                         onDragStart={event => {
                           if (!editingPlan) return
@@ -1454,46 +1458,47 @@ function AdminPlanEditor({
                           event.dataTransfer.effectAllowed = 'move'
                           event.dataTransfer.setData('text/plain', String(idx))
                         }}
-                        onDragOver={event => {
-                          if (!editingPlan) return
-                          event.preventDefault()
-                          event.dataTransfer.dropEffect = 'move'
-                        }}
+                        onDragOver={event => { if (!editingPlan) return; event.preventDefault(); event.dataTransfer.dropEffect = 'move' }}
                         onDrop={event => {
                           if (!editingPlan) return
                           event.preventDefault()
-                          const from = Number(event.dataTransfer.getData('text/plain'))
-                          onMoveDay(from, idx)
+                          onMoveDay(Number(event.dataTransfer.getData('text/plain')), idx)
                           setDragIndex(null)
                         }}
                         onDragEnd={() => setDragIndex(null)}
                       >
-                        <div className={styles.adminPlanDayMeta}>
-                          {editingPlan && <span className={styles.dragHandle} title="Drag to reorder">⠿⠿</span>}
-                          <strong>Day {day.dayNumber || idx + 1}</strong>
-                          <span>{day.day || ''}</span>
-                          <span>{day.date || 'Unscheduled'}</span>
-                          {log && (
-                            <span className={styles.planLogBadge} style={{
-                              color: log.status === 'done' ? '#4a7244' : log.status === 'partial' ? '#8a6a20' : '#c05040',
-                              background: log.status === 'done' ? 'rgba(122,148,112,0.14)' : log.status === 'partial' ? 'rgba(190,155,80,0.14)' : 'rgba(186,95,69,0.14)',
-                            }}>
-                              {log.status === 'done' ? '✓ Done' : log.status === 'partial' ? '↗ Partial' : '✗ Missed'}
+                        {/* ── Day header row ── */}
+                        <div className={styles.adminDayHeader}>
+                          <div className={styles.adminDayHeaderLeft}>
+                            {editingPlan && <span className={styles.dragHandle} title="Drag to reorder">⠿⠿</span>}
+                            <span className={styles.planTypeBadge} style={{ background: tc.bg, color: tc.color }}>
+                              {day.type || 'rest'}
                             </span>
-                          )}
-                          {editingPlan && (
-                            <div className={styles.adminPlanRowActions}>
-                              <button type="button" onClick={() => onOpenPicker(idx)}>+ Add after</button>
-                              <button type="button" onClick={() => onDuplicateDay(idx)}>Duplicate</button>
-                              <button type="button" onClick={() => onRestDay(idx)}>Rest</button>
-                              <button type="button" className={styles.removeWorkoutBtn} onClick={() => onRemoveDay(idx)}>Remove</button>
-                            </div>
-                          )}
+                            <strong className={styles.adminDayNum}>Day {day.dayNumber || idx + 1}</strong>
+                            <span className={styles.adminDayMeta}>{day.day} · {day.date || 'Unscheduled'}</span>
+                          </div>
+                          <div className={styles.adminDayHeaderRight}>
+                            {log && (
+                              <span className={styles.planLogBadge} style={{ color: logColor.color, background: logColor.bg }}>
+                                {log.status === 'done' ? '✓ Done' : log.status === 'partial' ? '↗ Partial' : '✗ Missed'}
+                              </span>
+                            )}
+                            {editingPlan && (
+                              <div className={styles.adminPlanRowActions}>
+                                <button type="button" onClick={() => onOpenPicker(idx)}>+ After</button>
+                                <button type="button" onClick={() => onDuplicateDay(idx)}>Dupe</button>
+                                <button type="button" onClick={() => onRestDay(idx)}>Rest</button>
+                                <button type="button" className={styles.removeWorkoutBtn} onClick={() => onRemoveDay(idx)}>✕</button>
+                              </div>
+                            )}
+                          </div>
                         </div>
+
+                        {/* ── Day content ── */}
                         {editingPlan ? (
                           <div className={styles.adminPlanEditGrid}>
                             <select value={day.type || 'rest'} onChange={e => onUpdateDay(idx, 'type', e.target.value)}>
-                              {['easy', 'moderate', 'hard', 'long', 'rest', 'cross'].map(type => <option key={type} value={type}>{type}</option>)}
+                              {['easy', 'moderate', 'hard', 'long', 'rest', 'cross'].map(t => <option key={t} value={t}>{t}</option>)}
                             </select>
                             <input value={day.title || ''} onChange={e => onUpdateDay(idx, 'title', e.target.value)} placeholder="Title" />
                             <input value={day.distance || ''} onChange={e => onUpdateDay(idx, 'distance', e.target.value)} placeholder="Distance (e.g. 8–10 km)" />
@@ -1505,59 +1510,21 @@ function AdminPlanEditor({
                             <textarea value={day.notes || ''} onChange={e => onUpdateDay(idx, 'notes', e.target.value)} placeholder="Workout notes & instructions" rows={3} />
                           </div>
                         ) : (
-                          <div className={styles.adminPlanRead}>
-                            <div className={styles.planReadHead}>
-                              <span
-                                className={styles.planTypeBadge}
-                                style={{ background: typeColors.bg, color: typeColors.color }}
-                              >
-                                {day.type || 'rest'}
-                              </span>
-                              <h4>{day.title || 'Untitled session'}</h4>
-                            </div>
+                          <div className={styles.adminDayContent}>
+                            <h4 className={styles.adminDayTitle}>{day.title || 'Untitled session'}</h4>
                             {(day.distance || day.duration || day.pace) && (
                               <div className={styles.planReadStats}>
-                                {day.distance && (
-                                  <div className={styles.planStatChip}>
-                                    <span className={styles.planStatLabel}>Distance</span>
-                                    <span className={styles.planStatValue}>{day.distance}</span>
-                                  </div>
-                                )}
-                                {day.duration && (
-                                  <div className={styles.planStatChip}>
-                                    <span className={styles.planStatLabel}>Duration</span>
-                                    <span className={styles.planStatValue}>{day.duration}</span>
-                                  </div>
-                                )}
-                                {day.pace && (
-                                  <div className={styles.planStatChip}>
-                                    <span className={styles.planStatLabel}>Pace</span>
-                                    <span className={styles.planStatValue}>{day.pace}</span>
-                                  </div>
-                                )}
+                                {day.distance && <div className={styles.planStatChip}><span className={styles.planStatLabel}>Distance</span><span className={styles.planStatValue}>{day.distance}</span></div>}
+                                {day.duration && <div className={styles.planStatChip}><span className={styles.planStatLabel}>Duration</span><span className={styles.planStatValue}>{day.duration}</span></div>}
+                                {day.pace    && <div className={styles.planStatChip}><span className={styles.planStatLabel}>Pace</span><span className={styles.planStatValue}>{day.pace}</span></div>}
                               </div>
                             )}
                             {day.notes && <p className={styles.planReadNotes}>{day.notes}</p>}
                             {(day.crossTraining || day.strength || day.mobility) && (
                               <div className={styles.planReadDetailGrid}>
-                                {day.crossTraining && (
-                                  <div className={styles.planReadDetail}>
-                                    <span className={styles.planDetailLabel}>Cross-training</span>
-                                    <p>{day.crossTraining}</p>
-                                  </div>
-                                )}
-                                {day.strength && (
-                                  <div className={styles.planReadDetail}>
-                                    <span className={styles.planDetailLabel}>Strength</span>
-                                    <p>{day.strength}</p>
-                                  </div>
-                                )}
-                                {day.mobility && (
-                                  <div className={styles.planReadDetail}>
-                                    <span className={styles.planDetailLabel}>Mobility</span>
-                                    <p>{day.mobility}</p>
-                                  </div>
-                                )}
+                                {day.crossTraining && <div className={styles.planReadDetail}><span className={styles.planDetailLabel}>Cross-training</span><p>{day.crossTraining}</p></div>}
+                                {day.strength      && <div className={styles.planReadDetail}><span className={styles.planDetailLabel}>Strength</span><p>{day.strength}</p></div>}
+                                {day.mobility      && <div className={styles.planReadDetail}><span className={styles.planDetailLabel}>Mobility</span><p>{day.mobility}</p></div>}
                               </div>
                             )}
                             {log?.userNote && (
