@@ -580,6 +580,8 @@ export default function Coach({ embedded = false }) {
   const [tab, setTab] = useState('program')
   const [retuning, setRetuning] = useState(false)
   const [retuneNotice, setRetuneNotice] = useState(null)
+  const [expandingWeek, setExpandingWeek] = useState(false)
+  const expandingWeekRef = useRef(false)
 
   const goal     = coachData?.goal        || null
   const checkins = coachData?.checkins    || []
@@ -602,6 +604,56 @@ export default function Coach({ embedded = false }) {
       updateCoachGoal({ ...goal, currentKm: `${observed} km/week`, observedWeeklyKm: observed })
     }
   }, [actuals.runsLast28, actuals.weeklyKm28])
+
+  // Background-generate remaining weeks one at a time after initial 2 are ready
+  useEffect(() => {
+    if (!goal || !updateCoachGoal) return
+    const genWeeks = goal.generatedWeeks
+    if (genWeeks === undefined || genWeeks === null) return
+    const totalWeeks = Math.ceil((goal.commitmentDays || 90) / 7)
+    if (genWeeks >= totalWeeks) return
+    if (expandingWeekRef.current) return
+
+    expandingWeekRef.current = true
+    setExpandingWeek(true)
+    const nextWeekNum = genWeeks + 1
+
+    generateSingleWeek({ goal, weekNum: nextWeekNum })
+      .then(rawDays => {
+        const dayOffset = (nextWeekNum - 1) * 7
+        const newDays = (rawDays || []).map((d, i) => {
+          const date = addDaysISO(goal.startDate, dayOffset + i)
+          return {
+            id: `day-${dayOffset + i + 1}`,
+            dayNumber: dayOffset + i + 1,
+            week: nextWeekNum,
+            date,
+            day: DAYS_FULL[new Date(`${date}T00:00:00`).getDay()],
+            type: d.type || 'rest',
+            title: d.title || 'Rest / Recovery',
+            purpose: d.purpose || '',
+            distance: d.distance || '',
+            duration: d.duration || '',
+            pace: d.pace || '',
+            notes: d.notes || '',
+            crossTraining: d.crossTraining || (d.type === 'cross' ? `${d.duration || '30-45 min'} easy cycling, swimming, elliptical, rowing, or brisk incline walk at conversational effort.` : ''),
+            strength: d.strength || DEFAULT_STRENGTH,
+            mobility: d.mobility || DEFAULT_MOBILITY,
+          }
+        })
+        const existing = goal.plan || []
+        const merged = [
+          ...existing.filter(d => (d.dayNumber || 0) <= dayOffset),
+          ...newDays,
+        ].sort((a, b) => (a.dayNumber || 0) - (b.dayNumber || 0))
+        updateCoachGoal({ ...goal, plan: merged, generatedWeeks: nextWeekNum })
+      })
+      .catch(err => console.warn('Auto-expand week failed:', err))
+      .finally(() => {
+        expandingWeekRef.current = false
+        setExpandingWeek(false)
+      })
+  }, [goal?.generatedWeeks, goal?.startDate])
 
   if (!goal) return <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={profile?.commitment || 30} embedded={embedded} />
 
@@ -639,17 +691,19 @@ export default function Coach({ embedded = false }) {
       const recentFeel = entries.slice(0, 5).map(e => `${e.date}: ${computeFeelScore(e.scores || {}).toFixed(1)}/10`).join(', ') || 'none'
       const prefix = `RE-TUNING from week ${weekNum} of ${Math.ceil(totalDays / 7)}. Recent actual avg: ${observedKm} km/week. ${actuals.avgPace ? `Recent avg pace: ${actuals.avgPace}.` : ''} Recent runs: ${checkinSummary}. Recent feel scores: ${recentFeel}. Build a fresh ${remainingDays}-day continuation that respects what the runner is actually doing.`
 
+      const retuneTotalWeeks = Math.ceil(remainingDays / 7)
       const program = await generateProgram({
         focus: goal.focus || goal.raceGoal,
         experience: goal.experience,
         daysPerWeek: goal.daysPerWeek,
         currentKm: `${observedKm} km/week`,
-        weeks: Math.ceil(remainingDays / 7),
+        weeks: retuneTotalWeeks,
         commitmentDays: remainingDays,
         notes: goal.notes || '',
         paceGuide: goal.paceGuide,
         goalPace: goal.goalPace,
         prefix,
+        initialWeeks: retuneTotalWeeks,
         onProgress: (update) => {
           if (update.status === 'active' && update.label) setRetuneNotice(update.label + '…')
           else if (update.status === 'done' && update.key === 'macro') setRetuneNotice('Macrocycle ready, writing weeks…')
@@ -682,6 +736,7 @@ export default function Coach({ embedded = false }) {
         weeklyTargets: weeklyTargets.length ? weeklyTargets : goal.weeklyTargets,
         progressionNote: program.progressionNote || goal.progressionNote,
         peakWeeklyVolume: program.peakWeeklyVolume || goal.peakWeeklyVolume,
+        generatedWeeks: Math.ceil(merged.length / 7),
         lastRetunedAt: new Date().toISOString(),
       })
       setRetuneNotice('Plan re-tuned from your recent training data.')
@@ -724,6 +779,7 @@ export default function Coach({ embedded = false }) {
             isComplete={isComplete} onCheckin={saveCoachCheckin} onNewGoal={clearCoachGoal}
             adminRemarks={adminRemarks}
             profile={profile}
+            expandingWeek={expandingWeek}
           />
         : <ChatTab
             history={chat} goal={goal} checkins={checkins}
@@ -768,9 +824,10 @@ function formatPath(path) {
   return path.charAt(0).toUpperCase() + path.slice(1)
 }
 
-function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, currentKm, benchmarkDistance, benchmarkTime, goalPace, paceGuide, progressStages = [] }) {
+function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, currentKm, benchmarkDistance, benchmarkTime, goalPace, paceGuide, progressStages = [], initialWeeks = 2 }) {
   const totalWeeks = Math.ceil(commitmentDays / 7)
-  const expectedChunks = Math.ceil(commitmentDays / 28)
+  const generateUpToDays = Math.min(initialWeeks * 7, commitmentDays)
+  const expectedChunks = Math.max(1, Math.ceil(generateUpToDays / 28))
   const totalStages = 1 + expectedChunks
   const [elapsed, setElapsed] = useState(0)
   const [thoughtIndex, setThoughtIndex] = useState(0)
@@ -992,7 +1049,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
     try {
       setProgressStages([])
       const startDate = new Date().toISOString().split('T')[0]
-      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes: profileNotes, paceGuide, goalPace, onProgress: handleProgress })
+      const program = await generateProgram({ focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays, notes: profileNotes, paceGuide, goalPace, onProgress: handleProgress, initialWeeks: 2 })
       const plan = normalizePlan(program.plan, startDate, totalDays)
       const weeklyTargets = Array.isArray(program.weeklyTargets) ? program.weeklyTargets : []
       const templatePlan = expandProgramPlan(program.weekTemplate || [], startDate, totalDays, weeklyTargets)
@@ -1027,6 +1084,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
         plan:             fallbackPlan,
         progressionNote:  program.progressionNote,
         peakWeeklyVolume: program.peakWeeklyVolume,
+        generatedWeeks:   2,
       })
     } catch (err) {
       setError(err.message)
@@ -1064,6 +1122,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
         goalPace={goalPace}
         paceGuide={paceGuide}
         progressStages={progressStages}
+        initialWeeks={2}
       />
     )
   }
@@ -1317,7 +1376,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
 }
 
 // ── Program Tab ───────────────────────────────────────────────────────────────
-function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, actuals, onRetune, retuning, retuneNotice, isComplete, onCheckin, onNewGoal, adminRemarks = [], profile }) {
+function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, actuals, onRetune, retuning, retuneNotice, isComplete, onCheckin, onNewGoal, adminRemarks = [], profile, expandingWeek = false }) {
   const visiblePlan = plan.length ? plan : getPlan(goal)
   const currentDay = Math.max(1, dayNum)
   const currentWeek = Math.max(1, Math.ceil(currentDay / 7))
@@ -1487,6 +1546,17 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
           <p>Your coach actively reviews and updates this plan. Check back regularly — your schedule may be adjusted based on your progress.</p>
         </div>
       )}
+
+      {expandingWeek && (() => {
+        const genW = goal.generatedWeeks || 0
+        const totalW = Math.ceil((goal.commitmentDays || 90) / 7)
+        return (
+          <div className={styles.buildingNotice}>
+            <div className={styles.buildingDot} />
+            <p>Building your full plan in the background — week {genW} of {totalW} ready. Keep training, more weeks are on the way.</p>
+          </div>
+        )
+      })()}
 
       {visiblePlan.length > 0 && (
         <div className={styles.weekBoard}>
@@ -2402,8 +2472,36 @@ ${r.trackRules}`
   }
 }
 
-async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes, paceGuide, goalPace, prefix, onProgress }) {
+// ── Generate a single week (used for auto-expansion and admin) ────────────────
+export async function generateSingleWeek({ goal, weekNum }) {
+  const chunkStart  = (weekNum - 1) * 7 + 1
+  const chunkEnd    = Math.min(weekNum * 7, goal.commitmentDays || 9999)
+  const chunkTargets = (goal.weeklyTargets || []).filter(w => Number(w.week) === weekNum)
+  const priorTitles  = (goal.plan || []).slice(-14)
+    .map(d => `D${d.dayNumber} ${d.type}: ${d.title}`).join(' · ')
+  const macro = {
+    overview:          goal.overview          || '',
+    progressionNote:   goal.progressionNote   || '',
+    peakWeeklyVolume:  goal.peakWeeklyVolume  || '',
+    weeklyTargets:     goal.weeklyTargets     || [],
+    weekTemplate:      goal.weekTemplate      || [],
+  }
+  return generateMesocycleChunk({
+    focus:        goal.focus || goal.raceGoal,
+    experience:   goal.experience,
+    daysPerWeek:  goal.daysPerWeek,
+    currentKm:    goal.currentKm || '30 km/week',
+    notes:        '',
+    paceGuide:    goal.paceGuide  || null,
+    goalPace:     goal.goalPace   || null,
+    macro,
+    chunkStart, chunkEnd, chunkTargets, priorTitles,
+  })
+}
+
+async function generateProgram({ focus, experience, daysPerWeek, currentKm, weeks, commitmentDays, notes, paceGuide, goalPace, prefix, onProgress, initialWeeks = 2 }) {
   const totalWeeks = Math.max(1, Math.ceil((commitmentDays || (weeks * 7)) / 7))
+  const generateUpToDay = Math.min(initialWeeks * 7, commitmentDays)
 
   onProgress?.({ key: 'macro', label: `Designing the ${totalWeeks}-week macrocycle blueprint`, status: 'active' })
   const macro = await generateMacrocycle({ focus, experience, daysPerWeek, currentKm, commitmentDays, notes, paceGuide, goalPace, prefix })
@@ -2414,7 +2512,7 @@ async function generateProgram({ focus, experience, daysPerWeek, currentKm, week
   const chunks = []
   let cursor = 1
   let chunkNum = 0
-  while (cursor <= commitmentDays) {
+  while (cursor <= generateUpToDay) {
     chunkNum++
     const chunkEnd = Math.min(cursor + chunkSize - 1, commitmentDays)
     const startWeek = Math.ceil(cursor / 7)

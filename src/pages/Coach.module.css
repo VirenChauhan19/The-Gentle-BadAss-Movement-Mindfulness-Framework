@@ -480,6 +480,40 @@
   margin: 0;
 }
 
+/* ── Background build notice ─────────────────────────── */
+.buildingNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 16px 12px;
+  padding: 11px 14px;
+  background: rgba(99, 127, 95, 0.05);
+  border: 1px solid rgba(99, 127, 95, 0.18);
+  border-radius: 12px;
+  color: var(--ink-light);
+}
+
+.buildingNotice p {
+  font-size: 0.80rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.buildingDot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6b9e65;
+  margin-top: 3px;
+  animation: buildPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes buildPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
 /* ── Week board (user view) ──────────────────────────── */
 .weekBoard {
   margin: 0 16px 16px;

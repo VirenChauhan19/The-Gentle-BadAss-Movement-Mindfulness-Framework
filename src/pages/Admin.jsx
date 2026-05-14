@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
 import { JOURNAL_FACTORS } from '../data/journalFactors'
+import { generateSingleWeek } from './Coach'
 import styles from './Admin.module.css'
 
 const ADMIN_EMAIL = 'chauhan.viren08@gmail.com'
@@ -615,6 +616,9 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
   const [clearingGoal,     setClearingGoal]    = useState(false)
   const [clearGoalError,   setClearGoalError]  = useState(null)
   const [confirmClearGoal, setConfirmClearGoal] = useState(false)
+  // Week generation
+  const [generatingWeek,   setGeneratingWeek]  = useState(null)
+  const [generateWeekError, setGenerateWeekError] = useState(null)
 
   const userProfile = user.userProfile
   const coach       = user.coach
@@ -839,6 +843,54 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
       setPlanError('Could not save plan: ' + err.message)
     }
     setSavingPlan(false)
+  }
+
+  async function adminGenerateWeek(weekNum) {
+    if (!coach?.goal || generatingWeek !== null) return
+    setGeneratingWeek(weekNum)
+    setGenerateWeekError(null)
+    try {
+      const rawDays = await generateSingleWeek({ goal: coach.goal, weekNum })
+      const dayOffset = (weekNum - 1) * 7
+      const startDate = coach.goal.startDate
+      const newDays = (rawDays || []).map((d, i) => {
+        const date = addDaysISO(startDate, dayOffset + i)
+        return {
+          id: `day-${dayOffset + i + 1}`,
+          dayNumber: dayOffset + i + 1,
+          week: weekNum,
+          date,
+          day: DAYS_FULL[new Date(`${date}T00:00:00`).getDay()],
+          type: d.type || 'rest',
+          title: d.title || 'Rest / Recovery',
+          purpose: d.purpose || '',
+          distance: d.distance || '',
+          duration: d.duration || '',
+          pace: d.pace || '',
+          notes: d.notes || '',
+          crossTraining: d.crossTraining || '',
+          strength: d.strength || '',
+          mobility: d.mobility || '',
+        }
+      })
+      const existingPlan = coach.goal.plan || []
+      const merged = [
+        ...existingPlan.filter(d => (d.dayNumber || 0) <= dayOffset),
+        ...newDays,
+        ...existingPlan.filter(d => (d.dayNumber || 0) > dayOffset + newDays.length),
+      ].sort((a, b) => (a.dayNumber || 0) - (b.dayNumber || 0))
+      const newGeneratedWeeks = Math.max(coach.goal.generatedWeeks || 0, weekNum)
+      const nextCoach = {
+        ...coach,
+        goal: { ...coach.goal, plan: merged, generatedWeeks: newGeneratedWeeks, updatedByAdminAt: new Date().toISOString() },
+      }
+      await setDoc(doc(db, 'users', user.uid, 'config', 'coach'), nextCoach, { merge: true })
+      onCoachUpdated?.(nextCoach)
+      setPlanDraft(merged)
+    } catch (err) {
+      setGenerateWeekError(`Week ${weekNum} generation failed: ${err.message}`)
+    }
+    setGeneratingWeek(null)
   }
 
   const avgScore = user.avgScore
@@ -1078,6 +1130,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
                     <span style={{ color: '#d98a8a' }}>✗ {checkins.filter(c => c.status === 'missed').length} missed</span>
                   </div>
 
+                  {generateWeekError && <p className={styles.errorMsg}>{generateWeekError}</p>}
                   <AdminPlanEditor
                     plan={plan}
                     planDraft={planDraft}
@@ -1094,6 +1147,9 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
                     onSave={savePlanEdits}
                     onCancel={() => { setPlanDraft(plan); setEditingPlan(false); setPlanError(null) }}
                     onStartEdit={() => setEditingPlan(true)}
+                    goal={goal}
+                    onGenerateWeek={adminGenerateWeek}
+                    generatingWeek={generatingWeek}
                   />
 
                   {checkins.length > 0 && (
@@ -1324,6 +1380,9 @@ function AdminPlanEditor({
   onSave,
   onCancel,
   onStartEdit,
+  goal,
+  onGenerateWeek,
+  generatingWeek,
 }) {
   const today = new Date().toISOString().split('T')[0]
   const checkinByDate = useMemo(() => Object.fromEntries(checkins.map(c => [c.date, c])), [checkins])
@@ -1399,6 +1458,21 @@ function AdminPlanEditor({
         </p>
       )}
 
+      {(() => {
+        const genW = goal?.generatedWeeks
+        const totalW = Math.ceil((goal?.commitmentDays || 0) / 7)
+        if (!genW || !totalW || genW >= totalW) return null
+        return (
+          <div className={styles.adminGenProgressBanner}>
+            <div className={styles.adminGenProgressDot} />
+            <p>
+              Plan auto-generating on user's device — <strong>{genW} of {totalW} weeks</strong> ready.
+              Ungenerated weeks show template previews. Use <strong>✦ Generate Week</strong> to create AI sessions manually.
+            </p>
+          </div>
+        )
+      })()}
+
       <div className={styles.adminWeekList}>
         {weekNumbers.map(w => {
           const weekItems = weekGroups[w]
@@ -1412,33 +1486,47 @@ function AdminPlanEditor({
           }, 0)
           const workouts = weekDays.filter(d => d.type !== 'rest').length
           const logged = weekDays.filter(d => checkinByDate[d.date]).length
+          const isAiGenerated = goal?.generatedWeeks === undefined || goal?.generatedWeeks === null || w <= goal.generatedWeeks
+          const isGeneratingThis = generatingWeek === w
 
           return (
             <div
               key={w}
               className={`${styles.adminWeekGroup} ${isOpen ? styles.adminWeekGroupOpen : ''} ${isPast ? styles.adminWeekGroupPast : ''} ${isCurrent ? styles.adminWeekGroupCurrent : ''}`}
             >
-              <button
-                type="button"
-                className={styles.adminWeekHeader}
-                onClick={() => setOpenWeek(isOpen ? null : w)}
-              >
-                <div className={styles.adminWeekHeaderTitle}>
-                  <span className={styles.adminWeekTag}>
-                    {isCurrent ? 'Current' : isPast ? 'Past' : 'Future'}
-                  </span>
-                  <strong>Week {w}</strong>
-                  <span className={styles.adminWeekDates}>
-                    {weekDays[0]?.date} → {weekDays[weekDays.length - 1]?.date}
-                  </span>
-                </div>
-                <div className={styles.adminWeekHeaderStats}>
-                  <span>{workouts} workouts</span>
-                  {weekKm > 0 && <span>{weekKm.toFixed(1)} km</span>}
-                  <span>{logged}/{weekDays.length} logged</span>
-                  <span className={styles.adminWeekChevron}>{isOpen ? '▾' : '▸'}</span>
-                </div>
-              </button>
+              <div className={styles.adminWeekHeader}>
+                <button
+                  type="button"
+                  className={styles.adminWeekHeaderBtn}
+                  onClick={() => setOpenWeek(isOpen ? null : w)}
+                >
+                  <div className={styles.adminWeekHeaderTitle}>
+                    <span className={styles.adminWeekTag}>
+                      {isCurrent ? 'Current' : isPast ? 'Past' : 'Future'}
+                    </span>
+                    <strong>Week {w}</strong>
+                    <span className={styles.adminWeekDates}>
+                      {weekDays[0]?.date} → {weekDays[weekDays.length - 1]?.date}
+                    </span>
+                  </div>
+                  <div className={styles.adminWeekHeaderStats}>
+                    <span>{workouts} workouts</span>
+                    {weekKm > 0 && <span>{weekKm.toFixed(1)} km</span>}
+                    <span>{logged}/{weekDays.length} logged</span>
+                    <span className={styles.adminWeekChevron}>{isOpen ? '▾' : '▸'}</span>
+                  </div>
+                </button>
+                {!isAiGenerated && (
+                  <button
+                    type="button"
+                    className={styles.generateWeekBtn}
+                    disabled={generatingWeek !== null}
+                    onClick={e => { e.stopPropagation(); onGenerateWeek?.(w) }}
+                  >
+                    {isGeneratingThis ? 'Generating…' : '✦ Generate Week'}
+                  </button>
+                )}
+              </div>
 
               {isOpen && (
                 <div className={styles.adminWeekBody}>

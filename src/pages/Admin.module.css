@@ -86,6 +86,11 @@
   86%, 100% { transform: translateX(105%); }
 }
 
+@keyframes buildPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
 .largeAvatar {
   width: 80px;
   height: 80px;
@@ -1698,6 +1703,34 @@
   line-height: 1.45;
 }
 
+.adminGenProgressBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 10px 16px 0;
+  padding: 10px 14px;
+  background: rgba(80, 110, 180, 0.07);
+  border: 1px solid rgba(80, 110, 180, 0.22);
+  border-radius: 12px;
+  color: var(--ink-light);
+}
+
+.adminGenProgressBanner p {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.adminGenProgressDot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6080c8;
+  margin-top: 3px;
+  animation: buildPulse 1.4s ease-in-out infinite;
+}
+
 .adminPlanList {
   max-height: 540px;
   overflow-y: auto;
@@ -1748,7 +1781,13 @@
 }
 
 .adminWeekHeader {
+  display: flex;
+  align-items: center;
   width: 100%;
+}
+
+.adminWeekHeaderBtn {
+  flex: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1763,8 +1802,33 @@
   transition: background 0.15s ease;
 }
 
-.adminWeekHeader:hover {
+.adminWeekHeaderBtn:hover {
   background: rgba(0, 0, 0, 0.02);
+}
+
+.generateWeekBtn {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  margin-right: 12px;
+  background: rgba(99, 127, 95, 0.1);
+  border: 1px solid rgba(99, 127, 95, 0.3);
+  border-radius: 8px;
+  color: #4a7244;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.generateWeekBtn:hover {
+  background: rgba(99, 127, 95, 0.18);
+}
+
+.generateWeekBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .adminWeekHeaderTitle {
@@ -1838,7 +1902,7 @@
 }
 
 @media (max-width: 767px) {
-  .adminWeekHeader {
+  .adminWeekHeaderBtn {
     flex-wrap: wrap;
   }
   .adminWeekHeaderStats {
