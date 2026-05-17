@@ -2204,6 +2204,36 @@
   margin-bottom: 10px;
 }
 
+.profileLiveNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: rgba(195, 139, 63, 0.10);
+  border: 1px solid rgba(195, 139, 63, 0.24);
+}
+
+.profileLiveNotice p {
+  color: var(--ink-light);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.profileLiveNotice button {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
 .profileEditGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -2249,6 +2279,11 @@
   display: flex;
   gap: 10px;
   margin-top: 14px;
+}
+
+.profileEditField input[readonly] {
+  color: var(--ink-faint);
+  background: color-mix(in srgb, var(--cream) 72%, var(--paper));
 }
 
 .profileEditSection {

@@ -26,6 +26,32 @@ const MENOPAUSE_LABELS = {
   unsure: 'Not sure',
 }
 
+function buildAdminProfileDraft(user = {}) {
+  const profile = user.userProfile || {}
+  return {
+    name: profile.name || user.name || '',
+    displayName: profile.displayName || profile.name || user.name || '',
+    email: profile.email || user.email || '',
+    ageRange: profile.ageRange || '',
+    gender: profile.gender || profile.sex || '',
+    sex: profile.sex || profile.gender || '',
+    heardAbout: profile.heardAbout || '',
+    path: profile.path || '',
+    commitment: profile.commitment || '',
+    programGoal: profile.programGoal || '',
+    fitnessHistory: profile.fitnessHistory || profile.story || '',
+    story: profile.story || profile.fitnessHistory || '',
+    commitmentStatement: profile.commitmentStatement || '',
+    lastPeriod: profile.lastPeriod || '',
+    nextPeriod: profile.nextPeriod || '',
+    cycleLength: profile.cycleLength || '',
+    periodLength: profile.periodLength || '',
+    menopauseStatus: profile.menopauseStatus || '',
+    onboardingComplete: profile.onboardingComplete ?? true,
+    updatedAt: profile.updatedAt || '',
+  }
+}
+
 const SCORE_COLOR = v =>
   v >= 8 ? '#8b9e7e' : v >= 6 ? '#a0b870' : v >= 4 ? '#d9b38a' : '#d98a8a'
 
@@ -177,7 +203,10 @@ export default function Admin() {
           ]).then(([userProfile, coach, remarks]) => [uid, { userProfile, coach, remarks }])
         )
       )
-      setAllUserData(Object.fromEntries(pairs))
+      setAllUserData(prev => ({
+        ...prev,
+        ...Object.fromEntries(pairs),
+      }))
     }, err => {
       if (err.code === 'failed-precondition') setIndexError(err.message)
     })
@@ -615,7 +644,9 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
   const [deleting,         setDeleting]        = useState(false)
   const [deleteError,      setDeleteError]     = useState(null)
   // Profile editing
-  const [profileDraft,     setProfileDraft]    = useState(null)
+  const [profileDraft,     setProfileDraft]    = useState(() => buildAdminProfileDraft(user))
+  const [profileDirty,     setProfileDirty]    = useState(false)
+  const [profileLiveNotice, setProfileLiveNotice] = useState('')
   const [savingProfile,    setSavingProfile]   = useState(false)
   const [profileError,     setProfileError]    = useState(null)
   // Journal entry deletion
@@ -641,12 +672,33 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
     setPlanError(null)
   }, [user.uid, plan])
 
-  // Auto-populate profileDraft when switching to the profile tab
   useEffect(() => {
-    if (tab === 'profile' && profileDraft === null) {
-      setProfileDraft({ ...(userProfile || {}) })
+    setLocalEntries(user.entries || [])
+    setLocalRemarks(user.remarks || [])
+  }, [user.uid, user.entries, user.remarks])
+
+  useEffect(() => {
+    const nextDraft = buildAdminProfileDraft(user)
+    if (!profileDirty) {
+      setProfileDraft(nextDraft)
+      setProfileLiveNotice('')
+      return
     }
-  }, [tab, userProfile])
+    setProfileLiveNotice('This profile changed from another device. Save your edits or reload the latest details.')
+  }, [user.uid, userProfile, user.name, user.email])
+
+  function setProfileField(key, value) {
+    setProfileDirty(true)
+    setProfileLiveNotice('')
+    setProfileDraft(prev => ({ ...buildAdminProfileDraft(user), ...(prev || {}), [key]: value }))
+  }
+
+  function reloadProfileDraft() {
+    setProfileDraft(buildAdminProfileDraft(user))
+    setProfileDirty(false)
+    setProfileLiveNotice('')
+    setProfileError(null)
+  }
 
   async function sendRemark() {
     if (!remarkText.trim() || sending) return
@@ -714,8 +766,10 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
     try {
       const nextProfile = { ...profileDraft, updatedAt: new Date().toISOString() }
       await setDoc(doc(db, 'users', user.uid, 'config', 'profile'), nextProfile, { merge: true })
+      setProfileDraft(nextProfile)
+      setProfileDirty(false)
+      setProfileLiveNotice('')
       onProfileUpdated?.(nextProfile)
-      setProfileDraft(null)
     } catch (err) {
       setProfileError('Could not save profile: ' + err.message)
     }
@@ -1000,15 +1054,22 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
 
         {/* ── Profile Edit Tab ────────────────────────────────── */}
         {tab === 'profile' && (() => {
-          const draft = profileDraft || userProfile || {}
-          const set = (k, v) => setProfileDraft(prev => ({ ...(prev || userProfile || {}), [k]: v }))
+          const draft = profileDraft || buildAdminProfileDraft(user)
+          const set = setProfileField
           return (
             <div className={styles.profileEditPanel}>
-              <p className={styles.profileEditHint}>Edit this user&apos;s profile. Changes save to Firestore immediately.</p>
+              <p className={styles.profileEditHint}>All known profile details are editable here. Saving writes to Firestore and live-syncs to the user&apos;s app.</p>
               {profileError && <p className={styles.errorMsg}>{profileError}</p>}
+              {profileLiveNotice && (
+                <div className={styles.profileLiveNotice}>
+                  <p>{profileLiveNotice}</p>
+                  <button type="button" onClick={reloadProfileDraft}>Reload latest</button>
+                </div>
+              )}
               <div className={styles.profileEditGrid}>
                 {[
                   ['Name',         'name',         'text',   draft.name || ''],
+                  ['Display name', 'displayName',  'text',   draft.displayName || ''],
                   ['Email',        'email',        'email',  draft.email || ''],
                   ['Age range',    'ageRange',     'text',   draft.ageRange || ''],
                   ['Heard about',  'heardAbout',   'text',   draft.heardAbout || ''],
@@ -1048,6 +1109,17 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
                 <label className={styles.profileEditField}>
                   <span>Commitment (days)</span>
                   <input type="number" value={draft.commitment || ''} onChange={e => set('commitment', Number(e.target.value) || '')} />
+                </label>
+                <label className={styles.profileEditField}>
+                  <span>Onboarding complete</span>
+                  <select value={draft.onboardingComplete ? 'yes' : 'no'} onChange={e => set('onboardingComplete', e.target.value === 'yes')}>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                  </select>
+                </label>
+                <label className={styles.profileEditField}>
+                  <span>Last profile update</span>
+                  <input type="text" value={draft.updatedAt || ''} readOnly />
                 </label>
               </div>
               <div className={styles.profileEditSection}>
@@ -1097,11 +1169,19 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
               </label>
               <div className={styles.profileEditActions}>
                 <button
+                  type="button"
+                  className={styles.cancelPlanBtn}
+                  onClick={reloadProfileDraft}
+                  disabled={savingProfile || !profileDirty}
+                >
+                  Reset
+                </button>
+                <button
                   className={styles.editPlanBtn}
                   onClick={saveProfile}
-                  disabled={savingProfile}
+                  disabled={savingProfile || !profileDirty}
                 >
-                  {savingProfile ? 'Saving…' : 'Save Profile'}
+                  {savingProfile ? 'Saving...' : profileDirty ? 'Save Profile' : 'Profile Saved'}
                 </button>
               </div>
             </div>
