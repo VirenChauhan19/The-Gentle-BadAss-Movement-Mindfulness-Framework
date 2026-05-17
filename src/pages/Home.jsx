@@ -51,7 +51,7 @@ export default function Home() {
   const ringPct = feelScore !== null ? feelScore / 10 : 0
   const ringOffset = RING_C * (1 - ringPct)
   const feelLabel = feelScore !== null
-    ? feelScore >= 7
+    ? feelScore > 7
       ? 'Ready to build'
       : feelScore >= 4.5
         ? 'Keep it measured'

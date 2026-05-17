@@ -64,6 +64,7 @@ export default function Onboarding() {
     programGoal: profile?.programGoal || '',
     sex: profile?.sex || '',
     lastPeriod: profile?.lastPeriod || '',
+    nextPeriod: profile?.nextPeriod || '',
     periodLength: profile?.periodLength || '',
     cycleLength: profile?.cycleLength || '',
     menopauseStatus: profile?.menopauseStatus || '',
@@ -227,7 +228,26 @@ export default function Onboarding() {
                 />
               </label>
               <label>
-                <span>How long do your periods usually last?</span>
+                <span>When do you expect your next period?</span>
+                <input
+                  type="date"
+                  value={data.nextPeriod}
+                  onChange={e => setData({ ...data, nextPeriod: e.target.value })}
+                />
+              </label>
+              <label>
+                <span>Average cycle length, if you prefer</span>
+                <input
+                  type="number"
+                  min="15"
+                  max="90"
+                  value={data.cycleLength}
+                  onChange={e => setData({ ...data, cycleLength: e.target.value })}
+                  placeholder="e.g. 28 days"
+                />
+              </label>
+              <label>
+                <span>Average period duration</span>
                 <input
                   type="number"
                   min="1"
@@ -235,17 +255,6 @@ export default function Onboarding() {
                   value={data.periodLength}
                   onChange={e => setData({ ...data, periodLength: e.target.value })}
                   placeholder="e.g. 5 days"
-                />
-              </label>
-              <label>
-                <span>How often do they come?</span>
-                <input
-                  type="number"
-                  min="15"
-                  max="90"
-                  value={data.cycleLength}
-                  onChange={e => setData({ ...data, cycleLength: e.target.value })}
-                  placeholder="e.g. every 28 days"
                 />
               </label>
               <label>
@@ -267,7 +276,7 @@ export default function Onboarding() {
           <div className={styles.btnStack}>
             <button
               className={styles.primaryBtn}
-              disabled={!data.sex || (isWoman && !data.menopauseStatus)}
+              disabled={!data.sex}
               onClick={() => setStep(3)}
             >
               Next

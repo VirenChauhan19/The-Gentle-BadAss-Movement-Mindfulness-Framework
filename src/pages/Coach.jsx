@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
+import {
+  adaptSessionForFeel as adaptSessionForFeelState,
+  applyCycleAdaptationToPlan,
+  getCycleTrainingSignal as getCycleSignal,
+} from '../data/trainingAdaptation'
 import styles from './Coach.module.css'
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
@@ -372,14 +377,14 @@ function getReadinessInsight(entries, todaySession, profile) {
     scores.personalStress <= 4 && 'personal stress',
     scores.professionalStress <= 4 && 'professional stress',
   ].filter(Boolean)
-  const cycleSignal = getCycleTrainingSignal(profile)
+  const cycleSignal = getCycleSignal(profile)
   if (cycleSignal) lowSignals.push(cycleSignal.label)
 
-  if (feel < 7 && hardDay) {
+  if (feel <= 7 && hardDay) {
     return {
       tone: 'caution',
       title: 'No high intensity today',
-      summary: `Feel is ${feel.toFixed(1)}/10. High-intensity running and strength stay off the plan until Feel is 7/10 or higher.`,
+      summary: `Feel is ${feel.toFixed(1)}/10. High-intensity running and strength stay off the plan unless Feel is greater than 7/10.`,
       action: 'Switch to easy aerobic work, mobility, or recovery strength.',
     }
   }
@@ -439,7 +444,7 @@ function adaptSessionForReadiness(session, entries) {
   if (!session) return session
   const feel = getTodayFeel(entries)
   const highIntensity = ['hard', 'moderate', 'long'].includes(session.type)
-  if (feel === null || feel >= 7 || !highIntensity) return session
+  if (feel === null || feel > 7 || !highIntensity) return session
   return {
     ...session,
     type: 'easy',
@@ -660,7 +665,7 @@ export default function Coach({ embedded = false }) {
   const today      = new Date().toISOString().split('T')[0]
   const now        = new Date()
   const startDate  = new Date(goal.startDate)
-  const plan       = getPlan(goal)
+  const plan       = applyCycleAdaptationToPlan(getPlan(goal), profile)
   const totalDays  = goal.commitmentDays || plan.length || ((goal.weeks || 12) * 7)
   const dayNum     = Math.floor((now - startDate) / 86400000) + 1
   const remaining  = Math.max(0, totalDays - dayNum + 1)
@@ -670,7 +675,7 @@ export default function Coach({ embedded = false }) {
 
   const todayDayName = DAYS_FULL[now.getDay()]
   const rawTodaySession = plan.find(s => s.date === today) || goal.weekTemplate?.find(s => s.day === todayDayName)
-  const todaySession = adaptSessionForReadiness(rawTodaySession, entries)
+  const todaySession = adaptSessionForFeelState(rawTodaySession, entries, profile)
   const todayCheckin = checkins.find(c => c.date === today)
 
   async function handleRetune() {
@@ -1071,6 +1076,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
           mobility: DEFAULT_MOBILITY,
         }
       )
+      const adaptivePlan = applyCycleAdaptationToPlan(fallbackPlan, profile)
       onSave({
         focus, raceGoal: focus, experience, daysPerWeek, currentKm: kmStr, weeks: weeksNum, commitmentDays: totalDays,
         startDate,
@@ -1081,7 +1087,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
         overview:         program.overview,
         weekTemplate:     program.weekTemplate || [],
         weeklyTargets,
-        plan:             fallbackPlan,
+        plan:             adaptivePlan,
         progressionNote:  program.progressionNote,
         peakWeeklyVolume: program.peakWeeklyVolume,
         generatedWeeks:   2,

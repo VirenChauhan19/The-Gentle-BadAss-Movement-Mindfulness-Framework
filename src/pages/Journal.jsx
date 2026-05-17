@@ -2,10 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { JOURNAL_FACTORS, CATEGORIES } from '../data/journalFactors'
 import { computeFeelScore } from '../data/storage'
+import { applyTodayFeelOverrideToGoal } from '../data/trainingAdaptation'
 import { useData } from '../context/DataContext'
 import styles from './Journal.module.css'
 
-const FEEL_EMOJIS = ['😞', '😕', '🙁', '😐', '🙂', '😊', '😃', '😄', '😁', '🤩']
+const FEEL_EMOJIS = ['😵', '😣', '😖', '😟', '🙁', '😔', '😶', '😐', '🙂', '😄', '🤩']
+const FEEL_SCORES = Array.from({ length: 11 }, (_, i) => i)
 
 const REFLECTION_PROMPTS = [
   'What my body needed',
@@ -48,6 +50,7 @@ export default function Journal() {
   const [note, setNote] = useState(existing?.note || '')
   const [cycle, setCycle] = useState(() => ({
     lastPeriod: existing?.cycle?.lastPeriod || profile?.lastPeriod || '',
+    nextPeriod: existing?.cycle?.nextPeriod || profile?.nextPeriod || '',
     periodLength: existing?.cycle?.periodLength || profile?.periodLength || '',
     cycleLength: existing?.cycle?.cycleLength || profile?.cycleLength || '',
     menopauseStatus: existing?.cycle?.menopauseStatus || profile?.menopauseStatus || '',
@@ -96,7 +99,7 @@ export default function Journal() {
       return
     }
     const cycleData = profile?.sex === 'woman' ? cycle : null
-    const feelAdjustment = adjustTodayRunningPlan(coachData?.goal, scores, cycleData)
+    const feelAdjustment = applyTodayFeelOverrideToGoal(coachData?.goal, scores, { ...profile, ...cycleData })
     if (feelAdjustment?.goal) updateCoachGoal(feelAdjustment.goal)
     if (cycleData && saveProfile) saveProfile(cycleData)
     await saveEntry({
@@ -499,7 +502,7 @@ function MobileFactorScreen({
 
       <div className={styles.mEmojiOrb} data-tone={tone}>
         <span className={styles.mEmojiGlyph} aria-hidden="true">
-          {hasValue ? FEEL_EMOJIS[value - 1] : '·'}
+          {hasValue ? FEEL_EMOJIS[value] : '·'}
         </span>
         {hasValue && <span className={styles.mEmojiBadge}>{value}</span>}
       </div>
@@ -507,8 +510,8 @@ function MobileFactorScreen({
       <h2 className={styles.mFactorName}>{factor.label}</h2>
       <p className={styles.mFactorQ}>{factor.question}</p>
 
-      <div className={styles.mScoreGrid} role="group" aria-label="Score 1 to 10">
-        {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+      <div className={styles.mScoreGrid} role="group" aria-label="Score 0 to 10">
+        {FEEL_SCORES.map(n => (
           <button
             key={n}
             type="button"
@@ -517,7 +520,7 @@ function MobileFactorScreen({
             onClick={() => pickScore(n)}
             aria-label={`Score ${n} of 10`}
           >
-            <span className={styles.mScoreEmoji} aria-hidden="true">{FEEL_EMOJIS[n - 1]}</span>
+            <span className={styles.mScoreEmoji} aria-hidden="true">{FEEL_EMOJIS[n]}</span>
             <span className={styles.mScoreNum}>{n}</span>
           </button>
         ))}
@@ -644,6 +647,14 @@ function CycleSection({ cycle, setCycle, cycleOpen, setCycleOpen, setSaved }) {
                 type="date"
                 value={cycle.lastPeriod}
                 onChange={e => { setCycle({ ...cycle, lastPeriod: e.target.value }); setSaved(false) }}
+              />
+            </label>
+            <label>
+              <span>Expected next period</span>
+              <input
+                type="date"
+                value={cycle.nextPeriod || ''}
+                onChange={e => { setCycle({ ...cycle, nextPeriod: e.target.value }); setSaved(false) }}
               />
             </label>
             <label>
@@ -826,7 +837,7 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
   const tone = scoreTone(currentValue)
 
   function commitScore(next) {
-    const clamped = Math.max(1, Math.min(10, Number(next)))
+    const clamped = Math.max(0, Math.min(10, Number(next)))
     if (navigator.vibrate && window.innerWidth <= 767 && clamped !== value) navigator.vibrate(7)
     onChange(clamped)
   }
@@ -834,7 +845,7 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
   function setFromPointer(event) {
     const rect = event.currentTarget.getBoundingClientRect()
     const pct = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width))
-    commitScore(1 + Math.round(pct * 9))
+    commitScore(Math.round(pct * 10))
   }
 
   function onMeterKey(event) {
@@ -848,7 +859,7 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
     }
     if (event.key === 'Home') {
       event.preventDefault()
-      commitScore(1)
+      commitScore(0)
     }
     if (event.key === 'End') {
       event.preventDefault()
@@ -862,7 +873,7 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
       data-answered={hasValue}
       style={{
         '--factor-color': hasValue ? scoreColor(currentValue) : cat.color,
-        '--factor-fill': `${((currentValue - 1) / 9) * 100}%`,
+        '--factor-fill': `${(currentValue / 10) * 100}%`,
         '--bloom-scale': 0.78 + currentValue * 0.04,
       }}
       data-swipe-lock
@@ -880,14 +891,14 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
           type="button"
           className={styles.nudgeBtn}
           onClick={() => commitScore(currentValue - 1)}
-          disabled={currentValue <= 1}
+          disabled={currentValue <= 0}
           aria-label={`Decrease ${factor.label}`}
         >
           <span aria-hidden="true">−</span>
         </button>
         <div className={styles.bloomOrb} data-tone={tone}>
           <span className={styles.bloomEmoji} aria-hidden="true">
-            {hasValue ? FEEL_EMOJIS[currentValue - 1] : '·'}
+            {hasValue ? FEEL_EMOJIS[currentValue] : '·'}
           </span>
           <small>{hasValue ? `${currentValue} · ${status}` : status}</small>
         </div>
@@ -907,7 +918,7 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
         role="slider"
         tabIndex={0}
         aria-label={`${factor.label} score`}
-        aria-valuemin={1}
+        aria-valuemin={0}
         aria-valuemax={10}
         aria-valuenow={hasValue ? value : currentValue}
         onPointerDown={event => {
@@ -920,7 +931,7 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
         onKeyDown={onMeterKey}
       >
         <div className={styles.touchFill} aria-hidden="true" />
-        {Array.from({ length: 10 }, (_, i) => i + 1).map(score => (
+        {FEEL_SCORES.map(score => (
           <button
             key={score}
             type="button"
@@ -986,169 +997,4 @@ function scoreTone(value) {
 function pickCurrentFactors(values) {
   const allowed = new Set(JOURNAL_FACTORS.map(f => f.id))
   return Object.fromEntries(Object.entries(values).filter(([id]) => allowed.has(id)))
-}
-
-function todayISO() {
-  return new Date().toISOString().split('T')[0]
-}
-
-function addDaysISO(startDate, offset) {
-  const d = new Date(`${startDate}T00:00:00`)
-  d.setDate(d.getDate() + offset)
-  return d.toISOString().split('T')[0]
-}
-
-function fullPlan(goal) {
-  if (!goal) return []
-  const startDate = goal.startDate || todayISO()
-  const totalDays = goal.commitmentDays || ((goal.weeks || 4) * 7)
-  const stored = Array.isArray(goal.plan) ? goal.plan : []
-  const template = goal.weekTemplate || []
-  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
-
-  return Array.from({ length: totalDays }, (_, i) => {
-    const date = addDaysISO(startDate, i)
-    if (stored[i]) return {
-      ...stored[i],
-      id: stored[i].id || `day-${i + 1}`,
-      dayNumber: stored[i].dayNumber || i + 1,
-      week: stored[i].week || Math.floor(i / 7) + 1,
-      date: stored[i].date || date,
-      day: stored[i].day || days[new Date(`${date}T00:00:00`).getDay()],
-    }
-    const day = days[new Date(`${date}T00:00:00`).getDay()]
-    const session = template.find(s => s.day === day) || template[i % template.length] || {}
-    return {
-      ...session,
-      id: `day-${i + 1}`,
-      dayNumber: i + 1,
-      week: Math.floor(i / 7) + 1,
-      date,
-      day,
-      type: session.type || 'rest',
-      title: session.title || 'Rest / Recovery',
-      distance: session.distance || '',
-      duration: session.duration || '10-20 min optional walk',
-      pace: session.pace || 'Very easy',
-      notes: session.notes || 'Full rest or an easy walk. Keep effort low and prepare for the next planned session.',
-    }
-  })
-}
-
-function adjustTodayRunningPlan(goal, scores, cycleData = null) {
-  if (!goal) return null
-  const date = todayISO()
-  const plan = fullPlan(goal)
-  const index = plan.findIndex(day => day.date === date)
-  if (index < 0) return null
-
-  const base = plan[index].feelAdjustment?.original || plan[index]
-  const feelScore = computeFeelScore(scores)
-  const reasons = []
-  if (scores.sleep <= 4) reasons.push('low sleep')
-  if (scores.energy <= 4) reasons.push('low energy')
-  if (scores.movementJoy <= 4) reasons.push('low walk/run joy')
-  if (scores.strengthJoy <= 4) reasons.push('low strength joy')
-  if (scores.jointFluidity <= 4) reasons.push('joint stiffness')
-  if (scores.digestiveComfort <= 4) reasons.push('digestive discomfort')
-  if (scores.personalStress <= 4) reasons.push('high personal stress')
-  if (scores.professionalStress <= 4) reasons.push('high professional stress')
-  const cycleSignal = getCycleTrainingSignal(cycleData)
-  if (cycleSignal) reasons.push(cycleSignal.reason)
-
-  const highIntensityLocked = feelScore < 7
-  const severe = feelScore <= 3.8 || [
-    scores.sleep,
-    scores.energy,
-    scores.movementJoy,
-    scores.strengthJoy,
-    scores.jointFluidity,
-    scores.digestiveComfort,
-  ].some(v => v <= 2)
-  const moderate = severe ? false : (feelScore < 6.2 || reasons.length > 0 || (highIntensityLocked && ['hard', 'long', 'moderate'].includes(base.type)))
-
-  let adjusted = base
-  let level = 'normal'
-  if (severe) {
-    level = 'recovery'
-    adjusted = {
-      ...base,
-      type: 'rest',
-      title: 'Recovery Reset - Feel adjusted',
-      distance: '',
-      duration: '20-30 min optional walk + mobility',
-      pace: 'Very easy. Keep effort at 2-3/10.',
-      notes: `Feel check flagged ${reasons.join(', ') || 'low readiness'}. Replace today's workout with easy walking, gentle mobility, and recovery breathing. Resume training when tomorrow's Feel score improves.`,
-    }
-  } else if (moderate) {
-    level = 'deload'
-    adjusted = {
-      ...base,
-      type: base.type === 'rest' ? 'rest' : 'easy',
-      title: `${base.type === 'rest' ? 'Recovery Day' : 'Reduced Easy Session'} - Feel adjusted`,
-      distance: base.type === 'rest' ? '' : 'Reduce planned volume by 30-50%',
-      duration: base.type === 'rest' ? (base.duration || '10-20 min optional walk') : '20-35 min',
-      pace: 'Conversational only. Stop if symptoms rise.',
-      strength: 'No high-intensity strength today. Keep 8-12 min easy activation only: glute bridges, dead bug, calf raises, side plank.',
-      notes: `Feel check flagged ${reasons.join(', ') || 'moderate readiness'}. Keep this below workout effort today. No intervals, no long run pressure, no chasing pace.`,
-    }
-  } else if (highIntensityLocked && ['hard', 'long', 'moderate'].includes(base.type)) {
-    level = 'intensity-lock'
-    adjusted = {
-      ...base,
-      type: 'easy',
-      title: 'Easy Aerobic - Feel adjusted',
-      distance: 'Reduce planned volume by 20-40%',
-      duration: '25-40 min',
-      pace: 'Conversational only. No high intensity until Feel is 7/10 or higher.',
-      strength: 'No high-intensity strength today. Use easy activation and mobility only.',
-      notes: `Feel is ${feelScore.toFixed(1)}/10. Replace high-intensity running or strength with easy aerobic work until Feel crosses 7/10.`,
-    }
-  } else if (plan[index].feelAdjustment?.original) {
-    adjusted = base
-  } else {
-    return null
-  }
-
-  const nextPlan = plan.map((day, i) => i === index
-    ? {
-        ...adjusted,
-        feelAdjustment: level === 'normal' ? null : {
-          date,
-          level,
-          feelScore: Math.round(feelScore * 10) / 10,
-          reasons,
-          adjustedAt: new Date().toISOString(),
-          original: base,
-        },
-      }
-    : day
-  )
-
-  return {
-    goal: { ...goal, plan: nextPlan, lastFeelAdjustmentAt: new Date().toISOString() },
-    summary: level === 'normal'
-      ? 'Today returned to the original running plan.'
-      : `Today adjusted to ${level} because of ${reasons.join(', ') || 'low readiness'}.`,
-  }
-}
-
-function getCycleTrainingSignal(cycleData) {
-  if (!cycleData) return null
-  const status = cycleData.menopauseStatus
-  if (status === 'perimenopause') return { reason: 'perimenopause context' }
-  if (status === 'menopause') return { reason: 'menopause context' }
-
-  const lastPeriod = cycleData.lastPeriod
-  const periodLength = Number(cycleData.periodLength) || 0
-  const cycleLength = Number(cycleData.cycleLength) || 0
-  if (!lastPeriod) return null
-
-  const start = new Date(`${lastPeriod}T00:00:00`)
-  if (Number.isNaN(start.getTime())) return null
-  const today = new Date(`${todayISO()}T00:00:00`)
-  const day = Math.floor((today - start) / 86400000) + 1
-  if (day >= 1 && periodLength && day <= periodLength) return { reason: 'period phase' }
-  if (cycleLength && day >= cycleLength - 3 && day <= cycleLength + 1) return { reason: 'late-cycle / expected period window' }
-  return null
 }
