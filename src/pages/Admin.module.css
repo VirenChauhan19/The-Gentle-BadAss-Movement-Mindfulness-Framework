@@ -1305,6 +1305,23 @@
   line-height: 1.6;
 }
 
+.cycleWindowList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.cycleWindowList span {
+  background: rgba(99, 127, 95, 0.10);
+  border: 1px solid rgba(99, 127, 95, 0.22);
+  border-radius: 999px;
+  color: var(--sage-dark);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 9px;
+}
+
 .overviewSubhead {
   margin: 16px 0 9px;
   color: var(--ink);
@@ -1535,6 +1552,26 @@
   font-size: 0.85rem;
   color: var(--ink);
   line-height: 1.65;
+}
+
+.entryCycleGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.entryCycleGrid span {
+  display: grid;
+  gap: 2px;
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.entryCycleGrid strong {
+  color: var(--ink-faint);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ── Coach tab ─── */
@@ -2214,6 +2251,59 @@
   margin-top: 14px;
 }
 
+.profileEditSection {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  background: var(--paper-soft);
+}
+
+.profileEditSection h3 {
+  color: var(--ink);
+  font-size: 0.98rem;
+  margin-bottom: 4px;
+}
+
+.profileEditSection > p,
+.profileEditNote {
+  color: var(--ink-faint);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.cyclePreview {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.cyclePreview > span {
+  color: var(--ink-faint);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.cyclePreview div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.cyclePreview em {
+  font-style: normal;
+  background: rgba(99, 127, 95, 0.12);
+  border: 1px solid rgba(99, 127, 95, 0.24);
+  border-radius: 999px;
+  color: var(--sage-dark);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 9px;
+}
+
 /* ── Clear goal row ─── */
 .clearGoalRow {
   display: flex;
@@ -2328,6 +2418,48 @@
   letter-spacing: 0.09em;
   text-transform: uppercase;
   flex-shrink: 0;
+}
+
+.planCycleBadge,
+.planFeelBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.planCycleBadge {
+  color: var(--sage-dark);
+  background: rgba(99, 127, 95, 0.14);
+  border: 1px solid rgba(99, 127, 95, 0.24);
+}
+
+.planFeelBadge {
+  color: #8a6a20;
+  background: rgba(190,155,80,0.14);
+  border: 1px solid rgba(190,155,80,0.24);
+}
+
+.planAdjustmentMeta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.planAdjustmentMeta span {
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  color: var(--ink-light);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 5px 9px;
 }
 
 .planReadStats {

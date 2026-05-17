@@ -397,6 +397,14 @@
   animation: floatIn 540ms var(--ease-elastic) both;
 }
 
+.actionPrimary {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.13), transparent 50%),
+    var(--brand-gradient);
+  color: var(--on-dark);
+  border-color: transparent;
+}
+
 .action:nth-child(1) { animation-delay: 240ms; }
 .action:nth-child(2) { animation-delay: 290ms; }
 .action:nth-child(3) { animation-delay: 340ms; }
@@ -434,11 +442,34 @@
   line-height: 1.18;
 }
 
+.actionPrimary .actionTitle {
+  color: var(--on-dark);
+}
+
+.actionEyebrow {
+  position: absolute;
+  top: 13px;
+  right: 14px;
+  color: var(--sage-dark);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.actionPrimary .actionEyebrow {
+  color: rgba(245, 240, 232, 0.58);
+}
+
 .actionSub {
   color: var(--ink-faint);
   font-size: 0.74rem;
   font-weight: 600;
   line-height: 1.35;
+}
+
+.actionPrimary .actionSub {
+  color: rgba(245, 240, 232, 0.68);
 }
 
 .actionLocked {
@@ -871,6 +902,12 @@
   .actionTitle {
     font-size: 0.92rem;
     line-height: 1.18;
+  }
+
+  .actionEyebrow {
+    top: 10px;
+    right: 12px;
+    font-size: 0.5rem;
   }
 
   .actionSub {

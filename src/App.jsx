@@ -227,6 +227,7 @@ function SignInGate() {
 
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('gb_theme') || 'dark')
+  const [themeOpen, setThemeOpen] = useState(false)
   const activeTheme = THEME_PRESETS.find(item => item.id === theme) || THEME_PRESETS[0]
 
   useEffect(() => {
@@ -272,20 +273,48 @@ export default function App() {
       <DataProvider>
         <div className={styles.app}>
           <div className={styles.ambientLayer} aria-hidden="true" />
+          <div className={styles.motionField} aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
           <main id="main-content" className={styles.main}>
             <AppRoutes />
           </main>
           <SignInGate />
-          <button
-            className={styles.themeToggle}
-            onClick={() => setTheme(t => THEME_PRESETS[(THEME_PRESETS.findIndex(item => item.id === t) + 1) % THEME_PRESETS.length].id)}
-            aria-label={`Current theme: ${activeTheme.label}. Switch theme`}
-            title={`Theme: ${activeTheme.label}`}
-          >
-            <span className={styles.themeIcon} aria-hidden="true">
-              <span className={styles.themeSwatch} data-theme-swatch={theme} />
-            </span>
-          </button>
+          <div className={styles.themeDock}>
+            <button
+              className={styles.themeToggle}
+              onClick={() => setThemeOpen(open => !open)}
+              aria-expanded={themeOpen}
+              aria-label={`Current theme: ${activeTheme.label}. Open theme picker`}
+              title={`Theme: ${activeTheme.label}`}
+            >
+              <span className={styles.themeIcon} aria-hidden="true">
+                <span className={styles.themeSwatch} data-theme-swatch={theme} />
+              </span>
+            </button>
+            {themeOpen && (
+              <div className={styles.themePanel} role="menu" aria-label="Choose theme">
+                {THEME_PRESETS.map(item => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`${styles.themeChoice} ${theme === item.id ? styles.themeChoiceActive : ''}`}
+                    onClick={() => {
+                      setTheme(item.id)
+                      setThemeOpen(false)
+                    }}
+                    role="menuitemradio"
+                    aria-checked={theme === item.id}
+                  >
+                    <span className={styles.themeSwatch} data-theme-swatch={item.id} aria-hidden="true" />
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <Nav />
           <FloatingChat />
         </div>

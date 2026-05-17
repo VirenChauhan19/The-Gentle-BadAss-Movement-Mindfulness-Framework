@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
 import { JOURNAL_FACTORS } from '../data/journalFactors'
+import { applyCycleAdaptationToPlan, getCycleWindows } from '../data/trainingAdaptation'
 import { generateSingleWeek } from './Coach'
 import styles from './Admin.module.css'
 
@@ -16,6 +17,13 @@ const PATH_NAMES = {
   rehab: 'The Rehab Path',
   beginner: 'The Beginner Path',
   performance: 'The Performance Path',
+}
+
+const MENOPAUSE_LABELS = {
+  no: 'No',
+  perimenopause: 'Perimenopause',
+  menopause: 'Menopause',
+  unsure: 'Not sure',
 }
 
 const SCORE_COLOR = v =>
@@ -624,7 +632,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
   const coach       = user.coach
   const goal        = coach?.goal
   const checkins    = coach?.checkins || []
-  const plan        = useMemo(() => getFullCoachPlan(goal), [goal])
+  const plan        = useMemo(() => applyCycleAdaptationToPlan(getFullCoachPlan(goal), userProfile), [goal, userProfile])
   const insights    = useMemo(() => getUserInsights(user, plan, checkins), [user, plan, checkins])
 
   useEffect(() => {
@@ -704,8 +712,9 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
     setSavingProfile(true)
     setProfileError(null)
     try {
-      await setDoc(doc(db, 'users', user.uid, 'config', 'profile'), profileDraft, { merge: true })
-      onProfileUpdated?.(profileDraft)
+      const nextProfile = { ...profileDraft, updatedAt: new Date().toISOString() }
+      await setDoc(doc(db, 'users', user.uid, 'config', 'profile'), nextProfile, { merge: true })
+      onProfileUpdated?.(nextProfile)
       setProfileDraft(null)
     } catch (err) {
       setProfileError('Could not save profile: ' + err.message)
@@ -1002,7 +1011,6 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
                   ['Name',         'name',         'text',   draft.name || ''],
                   ['Email',        'email',        'email',  draft.email || ''],
                   ['Age range',    'ageRange',     'text',   draft.ageRange || ''],
-                  ['Gender',       'gender',       'text',   draft.gender || draft.sex || ''],
                   ['Heard about',  'heardAbout',   'text',   draft.heardAbout || ''],
                 ].map(([label, key, type, val]) => (
                   <label key={key} className={styles.profileEditField}>
@@ -1014,6 +1022,20 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
                     />
                   </label>
                 ))}
+                <label className={styles.profileEditField}>
+                  <span>Gender</span>
+                  <select
+                    value={draft.gender || draft.sex || ''}
+                    onChange={e => { set('gender', e.target.value); set('sex', e.target.value) }}
+                  >
+                    <option value="">not set</option>
+                    <option value="woman">Woman</option>
+                    <option value="man">Man</option>
+                    <option value="non-binary">Non-binary</option>
+                    <option value="self-described">Self-described</option>
+                    <option value="prefer-not">Prefer not to say</option>
+                  </select>
+                </label>
                 <label className={styles.profileEditField}>
                   <span>Path</span>
                   <select value={draft.path || ''} onChange={e => set('path', e.target.value)}>
@@ -1027,6 +1049,39 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
                   <span>Commitment (days)</span>
                   <input type="number" value={draft.commitment || ''} onChange={e => set('commitment', Number(e.target.value) || '')} />
                 </label>
+              </div>
+              <div className={styles.profileEditSection}>
+                <h3>Cycle and physiology</h3>
+                <p>These optional fields drive period-window de-escalation across the Running plan.</p>
+                <div className={styles.profileEditGrid}>
+                  <label className={styles.profileEditField}>
+                    <span>Last period start</span>
+                    <input type="date" value={draft.lastPeriod || ''} onChange={e => set('lastPeriod', e.target.value)} />
+                  </label>
+                  <label className={styles.profileEditField}>
+                    <span>Expected next period</span>
+                    <input type="date" value={draft.nextPeriod || ''} onChange={e => set('nextPeriod', e.target.value)} />
+                  </label>
+                  <label className={styles.profileEditField}>
+                    <span>Average cycle length</span>
+                    <input type="number" min="15" max="90" value={draft.cycleLength || ''} onChange={e => set('cycleLength', e.target.value)} placeholder="28" />
+                  </label>
+                  <label className={styles.profileEditField}>
+                    <span>Average period duration</span>
+                    <input type="number" min="1" max="14" value={draft.periodLength || ''} onChange={e => set('periodLength', e.target.value)} placeholder="5" />
+                  </label>
+                  <label className={styles.profileEditField}>
+                    <span>Perimenopause / menopause</span>
+                    <select value={draft.menopauseStatus || ''} onChange={e => set('menopauseStatus', e.target.value)}>
+                      <option value="">not set</option>
+                      <option value="no">No</option>
+                      <option value="perimenopause">Perimenopause</option>
+                      <option value="menopause">Menopause</option>
+                      <option value="unsure">Not sure</option>
+                    </select>
+                  </label>
+                </div>
+                <CycleWindowPreview profile={draft} goal={goal} />
               </div>
               <label className={styles.profileEditField} style={{ marginTop: 12 }}>
                 <span>Program goal</span>
@@ -1274,7 +1329,43 @@ function computeEntryStreak(entries) {
   return streak
 }
 
+function CycleWindowPreview({ profile, goal }) {
+  const startDate = goal?.startDate || new Date().toISOString().split('T')[0]
+  const totalDays = goal?.commitmentDays || 91
+  const windows = getCycleWindows(profile, startDate, totalDays).slice(0, 6)
+  const hasCycleData = profile?.lastPeriod || profile?.nextPeriod || profile?.cycleLength || profile?.periodLength || profile?.menopauseStatus
+
+  if (!hasCycleData) {
+    return <p className={styles.profileEditNote}>No cycle details entered yet.</p>
+  }
+
+  if (!windows.length) {
+    return <p className={styles.profileEditNote}>No projected period windows. Check gender, dates, cycle length, or menopause status.</p>
+  }
+
+  return (
+    <div className={styles.cyclePreview}>
+      <span>Projected low-intensity windows</span>
+      <div>
+        {windows.map(window => (
+          <em key={window.start}>{window.start} to {window.end}</em>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function AdminUserOverview({ user, userProfile, insights, plan, checkins }) {
+  const cycleRows = [
+    ['Last period start', userProfile?.lastPeriod],
+    ['Expected next period', userProfile?.nextPeriod],
+    ['Average cycle length', userProfile?.cycleLength ? `${userProfile.cycleLength} days` : null],
+    ['Average period duration', userProfile?.periodLength ? `${userProfile.periodLength} days` : null],
+    ['Perimenopause / menopause', MENOPAUSE_LABELS[userProfile?.menopauseStatus] || userProfile?.menopauseStatus],
+  ]
+  const cycleWindows = plan.length
+    ? getCycleWindows(userProfile, plan[0]?.date, plan.length).slice(0, 6)
+    : []
   const signupRows = [
     ['Name', userProfile?.name || user.name],
     ['Age range', userProfile?.ageRange],
@@ -1317,6 +1408,26 @@ function AdminUserOverview({ user, userProfile, insights, plan, checkins }) {
               <span>Self-commitment</span>
               <p>{userProfile.commitmentStatement}</p>
             </div>
+          )}
+          {(cycleRows.some(([, value]) => value) || cycleWindows.length > 0) && (
+            <>
+              <h4 className={styles.overviewSubhead}>Cycle context</h4>
+              <div className={styles.signupRows}>
+                {cycleRows.filter(([, value]) => value).map(([label, value]) => (
+                  <div key={label} className={styles.signupRow}>
+                    <span>{label}</span>
+                    <strong>{value}</strong>
+                  </div>
+                ))}
+              </div>
+              {cycleWindows.length > 0 && (
+                <div className={styles.cycleWindowList}>
+                  {cycleWindows.map(window => (
+                    <span key={window.start}>{window.start} to {window.end}</span>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -1564,6 +1675,8 @@ function AdminPlanEditor({
                             <span className={styles.planTypeBadge} style={{ background: tc.bg, color: tc.color }}>
                               {day.type || 'rest'}
                             </span>
+                            {day.cycleFlag && <span className={styles.planCycleBadge}>Cycle adjusted</span>}
+                            {day.feelAdjustment && <span className={styles.planFeelBadge}>Feel adjusted</span>}
                             <strong className={styles.adminDayNum}>Day {day.dayNumber || idx + 1}</strong>
                             <span className={styles.adminDayMeta}>{day.day} · {day.date || 'Unscheduled'}</span>
                           </div>
@@ -1598,6 +1711,12 @@ function AdminPlanEditor({
                             <textarea value={day.strength || ''} onChange={e => onUpdateDay(idx, 'strength', e.target.value)} placeholder="Strength circuit" rows={2} />
                             <textarea value={day.mobility || ''} onChange={e => onUpdateDay(idx, 'mobility', e.target.value)} placeholder="Mobility routine" rows={2} />
                             <textarea value={day.notes || ''} onChange={e => onUpdateDay(idx, 'notes', e.target.value)} placeholder="Workout notes & instructions" rows={3} />
+                            {(day.cycleAdjustment || day.feelAdjustment) && (
+                              <div className={styles.planAdjustmentMeta}>
+                                {day.cycleAdjustment && <span>Cycle reason: {day.cycleAdjustment.reason || 'period window'}</span>}
+                                {day.feelAdjustment && <span>Feel score: {day.feelAdjustment.feelScore}/10</span>}
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <div className={styles.adminDayContent}>
@@ -1610,6 +1729,12 @@ function AdminPlanEditor({
                               </div>
                             )}
                             {day.notes && <p className={styles.planReadNotes}>{day.notes}</p>}
+                            {(day.cycleAdjustment || day.feelAdjustment) && (
+                              <div className={styles.planAdjustmentMeta}>
+                                {day.cycleAdjustment && <span>Cycle reason: {day.cycleAdjustment.reason || 'period window'}</span>}
+                                {day.feelAdjustment && <span>Feel score: {day.feelAdjustment.feelScore}/10</span>}
+                              </div>
+                            )}
                             {(day.crossTraining || day.strength || day.mobility) && (
                               <div className={styles.planReadDetailGrid}>
                                 {day.crossTraining && <div className={styles.planReadDetail}><span className={styles.planDetailLabel}>Cross-training</span><p>{day.crossTraining}</p></div>}
@@ -1788,6 +1913,28 @@ function EntryCard({ entry, expanded, onToggle, onDelete, deleting }) {
             <div className={styles.entryNote}>
               <p className={styles.entryNoteLabel}>Reflection</p>
               <p className={styles.entryNoteText}>{entry.note}</p>
+            </div>
+          )}
+          {entry.cycle && (
+            <div className={styles.entryNote}>
+              <p className={styles.entryNoteLabel}>Cycle context captured that day</p>
+              <div className={styles.entryCycleGrid}>
+                {[
+                  ['Last period', entry.cycle.lastPeriod],
+                  ['Expected next', entry.cycle.nextPeriod],
+                  ['Cycle length', entry.cycle.cycleLength ? `${entry.cycle.cycleLength} days` : null],
+                  ['Period length', entry.cycle.periodLength ? `${entry.cycle.periodLength} days` : null],
+                  ['Menopause status', MENOPAUSE_LABELS[entry.cycle.menopauseStatus] || entry.cycle.menopauseStatus],
+                ].filter(([, value]) => value).map(([label, value]) => (
+                  <span key={label}><strong>{label}</strong>{value}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          {entry.runningAdjustment && (
+            <div className={styles.entryNote}>
+              <p className={styles.entryNoteLabel}>Running adjustment</p>
+              <p className={styles.entryNoteText}>{entry.runningAdjustment}</p>
             </div>
           )}
         </div>

@@ -170,9 +170,27 @@ export default function Home() {
 
       <section className={styles.actionGrid}>
         <Link
+          to="/library"
+          className={styles.action + ' ' + styles.actionPrimary + (guestLocked ? ' ' + styles.actionLocked : '')}
+        >
+          <span className={styles.actionEyebrow}>Next</span>
+          <span className={styles.actionTitle}>Open Today&apos;s Plan</span>
+          <span className={styles.actionSub}>Running, mobility, and strength</span>
+          {guestLocked && <span className={styles.actionLock}>Locked</span>}
+        </Link>
+        <Link
+          to="/breathing"
+          className={styles.action}
+        >
+          <span className={styles.actionEyebrow}>Reset</span>
+          <span className={styles.actionTitle}>Breathe at 5 BPM</span>
+          <span className={styles.actionSub}>Settle before training</span>
+        </Link>
+        <Link
           to="/functional-tests"
           className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
         >
+          <span className={styles.actionEyebrow}>Weekly</span>
           <span className={styles.actionTitle}>Take Functional Test</span>
           <span className={styles.actionSub}>Activated weekly</span>
           {guestLocked && <span className={styles.actionLock}>Locked</span>}
@@ -181,6 +199,7 @@ export default function Home() {
           to="/history"
           className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
         >
+          <span className={styles.actionEyebrow}>Trends</span>
           <span className={styles.actionTitle}>Progress</span>
           <span className={styles.actionSub}>Feel, workouts, and change</span>
           {guestLocked && <span className={styles.actionLock}>Locked</span>}
