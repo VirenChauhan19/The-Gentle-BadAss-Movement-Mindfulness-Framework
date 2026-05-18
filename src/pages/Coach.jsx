@@ -9,6 +9,9 @@ import {
 import styles from './Coach.module.css'
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+// One week per generation call. Small chunks generate in parallel (fast) and
+// stay well under the model's output limit (no truncated / invalid JSON).
+const PLAN_CHUNK_SIZE = 7
 const DAYS_FULL  = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
@@ -832,11 +835,13 @@ function formatPath(path) {
 function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, currentKm, benchmarkDistance, benchmarkTime, goalPace, paceGuide, progressStages = [], initialWeeks = 2 }) {
   const totalWeeks = Math.ceil(commitmentDays / 7)
   const generateUpToDays = Math.min(initialWeeks * 7, commitmentDays)
-  const expectedChunks = Math.max(1, Math.ceil(generateUpToDays / 28))
+  const expectedChunks = Math.max(1, Math.ceil(generateUpToDays / PLAN_CHUNK_SIZE))
   const totalStages = 1 + expectedChunks
   const [elapsed, setElapsed] = useState(0)
   const [thoughtIndex, setThoughtIndex] = useState(0)
-  const expectedSeconds = Math.max(20, Math.min(180, 8 + expectedChunks * 12))
+  // Chunks run in parallel, so wall time ≈ macrocycle + slowest week, not the
+  // sum. Estimate grows slowly with chunk count to stay honest.
+  const expectedSeconds = Math.max(25, Math.min(120, 18 + expectedChunks * 6))
 
   const renderedStages = (() => {
     const out = []
@@ -848,8 +853,9 @@ function GeneratingPlan({ commitmentDays, focus, experience, daysPerWeek, curren
     })
     for (let i = 1; i <= expectedChunks; i++) {
       const stage = progressStages.find(s => s.key === `chunk-${i}`)
-      const startWeek = (i - 1) * 4 + 1
-      const endWeek = Math.min(totalWeeks, i * 4)
+      const weeksPerChunk = Math.max(1, Math.round(PLAN_CHUNK_SIZE / 7))
+      const startWeek = (i - 1) * weeksPerChunk + 1
+      const endWeek = Math.min(totalWeeks, i * weeksPerChunk)
       out.push({
         key: `chunk-${i}`,
         label: stage?.label || `Writing weeks ${startWeek}-${endWeek} workouts`,
@@ -2461,7 +2467,9 @@ ${r.paceRules}
 ${r.workoutRules}
 ${r.trackRules}`
 
-  const tokenBudget = Math.min(7000, Math.max(2200, chunkDays * 220))
+  // ~520 tokens/day covers the full per-day schema (warm-up/main/cool-down +
+  // strength + mobility) with headroom so the JSON is never cut off.
+  const tokenBudget = Math.min(5000, Math.max(2400, chunkDays * 520))
   const userMsg = `Write days ${chunkStart}-${chunkEnd} as instructed. Make every workout feel like a real coach wrote it.`
 
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -2513,8 +2521,9 @@ async function generateProgram({ focus, experience, daysPerWeek, currentKm, week
   const macro = await generateMacrocycle({ focus, experience, daysPerWeek, currentKm, commitmentDays, notes, paceGuide, goalPace, prefix })
   onProgress?.({ key: 'macro', status: 'done' })
 
-  // Build the list of chunks upfront, then generate all in parallel
-  const chunkSize = 28
+  // Build the list of chunks upfront, then generate all in parallel.
+  // One week per chunk → small, fast, parallel calls that never truncate.
+  const chunkSize = PLAN_CHUNK_SIZE
   const chunks = []
   let cursor = 1
   let chunkNum = 0
@@ -2738,5 +2747,32 @@ function extractJSON(text) {
   // Last-ditch: strip any leading prose before the first { or [
   const stripped = text.replace(/^[\s\S]*?(?=\{|\[)/, '')
   try { return JSON.parse(stripped) } catch {}
+  // Salvage a response that was cut off by the token limit: rebuild from the
+  // last complete day entry and re-close the JSON so the week is still usable.
+  const repaired = repairTruncatedJSON(stripped)
+  if (repaired) { try { return JSON.parse(repaired) } catch {} }
   throw new Error('Could not read program from AI — the response was not valid JSON. Please try again.')
+}
+
+// Repairs JSON truncated mid-array (e.g. a "plan": [ ... cut off here).
+// Trims back to the last balanced array element and closes open braces.
+function repairTruncatedJSON(text) {
+  if (!text || (!text.includes('"plan"') && !text.trimStart().startsWith('['))) return null
+  const lastClose = text.lastIndexOf('}')
+  if (lastClose === -1) return null
+  let head = text.slice(0, lastClose + 1)
+  // Count unclosed [ and { from the start of the kept text.
+  let inStr = false, esc = false, braces = 0, brackets = 0
+  for (const ch of head) {
+    if (esc) { esc = false; continue }
+    if (ch === '\\') { esc = true; continue }
+    if (ch === '"') inStr = !inStr
+    if (inStr) continue
+    if (ch === '{') braces++
+    else if (ch === '}') braces--
+    else if (ch === '[') brackets++
+    else if (ch === ']') brackets--
+  }
+  head += ']'.repeat(Math.max(0, brackets)) + '}'.repeat(Math.max(0, braces))
+  return head
 }
