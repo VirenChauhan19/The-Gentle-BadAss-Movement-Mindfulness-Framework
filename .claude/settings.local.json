@@ -63,11 +63,13 @@
       "Bash(grep -E \"\\\\.\\(jsx|js|css\\)$\")",
       "Bash(xargs wc -l)",
       "Bash(firebase --version)",
-      "Bash(firebase projects:list)"
+      "Bash(firebase projects:list)",
+      "Bash(git revert *)",
+      "Bash(git rm *)"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "ruflo"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

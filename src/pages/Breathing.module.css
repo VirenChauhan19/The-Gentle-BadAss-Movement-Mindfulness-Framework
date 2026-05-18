@@ -5,48 +5,36 @@
 
 /* ── Header ──────────────────────────────────────────── */
 .header {
-  padding: 84px 24px 34px;
+  padding: 48px 24px 22px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   animation: fadeUp 360ms var(--ease-out) both;
 }
 
-.header::before {
-  content: '';
-  display: block;
-  width: 44px;
-  height: 2px;
-  margin-bottom: 22px;
-  background: var(--sage-dark);
-  opacity: 0.6;
-}
-
 .label {
   font-size: 0.66rem;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--sage-dark);
+  color: var(--ink-faint);
   font-weight: 700;
-  margin-bottom: 14px;
+  margin-bottom: 6px;
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 7.5vw, 3.6rem);
+  font-size: clamp(1.85rem, 6.4vw, 2.4rem);
   font-weight: 700;
-  line-height: 1.0;
-  letter-spacing: -0.035em;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
 }
 
 .subtitle {
-  margin-top: 18px;
-  max-width: 32ch;
-  font-family: var(--font-display);
-  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
-  font-style: italic;
+  margin-top: 8px;
+  max-width: 620px;
+  font-size: 0.92rem;
   color: var(--ink-light);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 /* ── Practice grid ───────────────────────────────────── */
@@ -63,10 +51,10 @@
   background:
     radial-gradient(circle at 82% 8%, rgba(99, 127, 95, 0.16), transparent 18rem),
     linear-gradient(145deg, var(--paper), var(--paper-soft));
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-3xl);
-  padding: 36px;
-  box-shadow: var(--elev-2);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-2xl);
+  padding: 22px;
+  box-shadow: 0 14px 36px var(--shadow-xs);
   position: relative;
   overflow: hidden;
   animation: floatIn 560ms var(--ease-elastic) both 80ms;
@@ -433,11 +421,10 @@
 
 .stats span {
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--ink);
   white-space: nowrap;
-  letter-spacing: -0.03em;
 }
 
 .stats p {

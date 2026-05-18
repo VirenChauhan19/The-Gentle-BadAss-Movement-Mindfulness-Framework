@@ -5,61 +5,47 @@
 
 /* ── Header ──────────────────────────────────────────── */
 .header {
-  padding: 84px 24px 34px;
+  padding: 48px 24px 22px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   animation: fadeUp 360ms var(--ease-out) both;
 }
 
-.header::before {
-  content: '';
-  display: block;
-  width: 44px;
-  height: 2px;
-  margin-bottom: 22px;
-  background: var(--sage-dark);
-  opacity: 0.6;
-}
-
 .label {
   font-size: 0.66rem;
-  letter-spacing: 0.26em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--sage-dark);
+  color: var(--ink-faint);
   font-weight: 700;
-  margin-bottom: 14px;
+  margin-bottom: 6px;
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 7.5vw, 3.6rem);
+  font-size: clamp(1.85rem, 6.4vw, 2.4rem);
   color: var(--ink);
   font-weight: 700;
-  line-height: 1.0;
-  letter-spacing: -0.035em;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
 }
 
 .subtitle {
-  margin-top: 18px;
-  font-family: var(--font-display);
-  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
-  font-style: italic;
+  margin-top: 8px;
+  font-size: 0.92rem;
   color: var(--ink-light);
-  line-height: 1.5;
-  max-width: 32ch;
+  line-height: 1.55;
+  max-width: 540px;
 }
 
 /* ── Pillar banner ───────────────────────────────────── */
 .pillarBanner {
-  margin: 18px 16px 0;
-  padding: 26px 28px;
-  background: color-mix(in srgb, var(--paper) 68%, transparent);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-2xl);
-  box-shadow: var(--elev-1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  margin: 6px 16px 0;
+  padding: 16px 18px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px var(--shadow-xs);
   animation: fadeUp 420ms var(--ease-out) both 80ms;
 }
 
@@ -110,16 +96,16 @@
 
 /* ── Weekly module ───────────────────────────────────── */
 .weeklyModule {
-  margin: 16px 16px 0;
-  padding: 32px;
+  margin: 12px 16px 0;
+  padding: 18px;
   background: var(--brand-gradient);
   color: var(--on-dark);
-  border-radius: var(--r-3xl);
+  border-radius: var(--r-2xl);
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 18px;
+  gap: 14px;
   align-items: center;
-  box-shadow: var(--elev-3);
+  box-shadow: 0 14px 32px var(--shadow-md);
   animation: fadeUp 460ms var(--ease-out) both 140ms;
   position: relative;
   overflow: hidden;
@@ -172,11 +158,9 @@
 }
 
 .weeklyModule h2 {
-  font-family: var(--font-display);
-  font-size: 1.55rem;
-  margin-bottom: 6px;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
   color: var(--on-dark);
-  letter-spacing: -0.02em;
 }
 
 .weeklyModule p {
@@ -295,16 +279,14 @@
 }
 
 .breathePanel {
-  margin: 16px 16px 0;
-  padding: 32px;
-  background: color-mix(in srgb, var(--paper) 68%, transparent);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-2xl);
-  box-shadow: var(--elev-1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  margin: 14px 16px 0;
+  padding: 18px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px var(--shadow-xs);
   display: grid;
-  gap: 16px;
+  gap: 14px;
   animation: fadeUp 360ms var(--ease-out) both;
 }
 
@@ -320,9 +302,8 @@
 .breathePanel h2 {
   font-family: var(--font-display);
   color: var(--ink);
-  font-size: 1.5rem;
-  line-height: 1.16;
-  letter-spacing: -0.02em;
+  font-size: 1.08rem;
+  line-height: 1.2;
   margin-bottom: 6px;
 }
 
@@ -414,14 +395,12 @@
 
 /* ── Principles ──────────────────────────────────────── */
 .principlesBanner {
-  margin: 16px 16px 0;
-  padding: 32px;
-  background: color-mix(in srgb, var(--paper) 68%, transparent);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-2xl);
-  box-shadow: var(--elev-1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  margin: 14px 16px 0;
+  padding: 18px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 8px 22px var(--shadow-xs);
   animation: fadeUp 360ms var(--ease-out) both;
 }
 
@@ -472,19 +451,17 @@
 
 .card {
   display: block;
-  background: color-mix(in srgb, var(--paper) 68%, transparent);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-2xl);
-  padding: 30px 30px 26px 32px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  padding: 18px 20px 16px 22px;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--elev-1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 22px var(--shadow-xs);
   animation: floatIn 480ms var(--ease-elastic) both;
-  transition: transform var(--d-slow) var(--ease-smooth),
+  transition: transform var(--d-base) var(--ease-out),
               border-color var(--d-base) var(--ease-out),
-              box-shadow var(--d-slow) var(--ease-smooth);
+              box-shadow var(--d-base) var(--ease-out);
 }
 
 .cardAccent {
@@ -511,9 +488,9 @@
 
 @media (hover: hover) {
   .card:hover {
-    transform: translateY(-5px);
-    border-color: color-mix(in srgb, var(--sage) 42%, transparent);
-    box-shadow: var(--elev-3);
+    transform: translateY(-4px);
+    border-color: rgba(99, 127, 95, 0.36);
+    box-shadow: 0 18px 36px var(--shadow);
   }
   .card:hover .cardAccent {
     opacity: 1;
@@ -569,12 +546,11 @@
 
 .cardName {
   font-family: var(--font-display);
-  font-size: 1.42rem;
+  font-size: 1.05rem;
   color: var(--ink);
   font-weight: 700;
-  margin-bottom: 8px;
-  line-height: 1.16;
-  letter-spacing: -0.022em;
+  margin-bottom: 6px;
+  line-height: 1.25;
 }
 
 .cardPurpose {
@@ -655,17 +631,6 @@
 }
 
 @media (max-width: 767px) {
-  /* Frosted glass is desktop-only — phones use a solid surface so
-     backdrop-filter never repaints during scroll. */
-  .pillarBanner,
-  .breathePanel,
-  .principlesBanner,
-  .card {
-    background: var(--paper);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
   /* Stop cascading entry animations. */
   .header,
   .pillarBanner,

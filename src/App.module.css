@@ -27,14 +27,14 @@
   z-index: -1;
   pointer-events: none;
   background:
-    linear-gradient(115deg, transparent 0 32%, var(--ambient-sheen) 50%, transparent 68%),
-    radial-gradient(52rem 38rem at var(--pointer-x, 68%) var(--pointer-y, 28%), var(--ambient-glow), transparent 64%),
-    radial-gradient(40rem 40rem at 14% 88%, var(--ambient-glow-2), transparent 70%);
-  background-size: 240% 240%, 100% 100%, 100% 100%;
+    linear-gradient(115deg, transparent 0 35%, var(--ambient-sheen) 49%, transparent 63%),
+    radial-gradient(46rem 34rem at var(--pointer-x, 68%) var(--pointer-y, 28%), var(--ambient-glow), transparent 62%),
+    repeating-linear-gradient(105deg, var(--ambient-line) 0 1px, transparent 1px 18px);
+  background-size: 220% 220%, 100% 100%, 100% 100%;
   mix-blend-mode: var(--ambient-mix);
   opacity: var(--ambient-opacity);
-  animation: ambientDrift 24s var(--ease-smooth) infinite alternate,
-             ambientBreath 11s ease-in-out infinite;
+  animation: ambientDrift 15s var(--ease-out) infinite alternate,
+             ambientBreath 7.5s ease-in-out infinite;
 }
 
 .ambientLayer::before,
@@ -48,9 +48,9 @@
 .ambientLayer::before {
   background:
     radial-gradient(18rem 18rem at var(--pointer-x, 68%) var(--pointer-y, 28%), var(--ambient-glow-2), transparent 66%);
-  filter: blur(14px);
-  opacity: 0.82;
-  animation: cursorAura 5.4s ease-in-out infinite;
+  filter: blur(10px);
+  opacity: 0.88;
+  animation: cursorAura 3.6s ease-in-out infinite;
 }
 
 .ambientLayer::after {
@@ -59,7 +59,7 @@
   background-size: 260% 260%;
   opacity: 0.58;
   transform: rotate(-4deg);
-  animation: ambientRibbon 17s var(--ease-smooth) infinite;
+  animation: ambientRibbon 11s var(--ease-out) infinite;
 }
 
 @keyframes ambientDrift {
@@ -83,60 +83,37 @@
   76%, 100% { background-position: 130% 50%; opacity: 0; }
 }
 
-/* Editorial spa: large, slow organic blobs drifting behind content. */
 .motionField {
   position: fixed;
-  inset: -10vmax;
+  inset: 0;
   z-index: -2;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.9;
+  opacity: 0.72;
 }
 
 .motionField span {
   position: absolute;
-  width: 60vmax;
-  height: 60vmax;
-  border-radius: 42% 58% 56% 44% / 50% 46% 54% 50%;
+  left: -12vw;
+  right: -12vw;
+  height: 32vh;
+  border-radius: 44% 56% 48% 52% / 100% 100% 0 0;
   background:
-    radial-gradient(circle at 36% 34%, var(--ambient-glow), transparent 62%),
-    radial-gradient(circle at 70% 70%, var(--ambient-glow-2), transparent 66%);
-  filter: blur(64px);
+    linear-gradient(90deg, transparent 0%, var(--ambient-glow) 18%, var(--ambient-glow-2) 48%, transparent 82%),
+    linear-gradient(180deg, transparent, var(--ambient-sheen), transparent);
+  filter: blur(18px);
   mix-blend-mode: var(--ambient-mix);
-  will-change: transform;
-  animation: blobFloat 38s var(--ease-smooth) infinite alternate;
+  transform: rotate(-8deg);
+  animation: fieldWave 18s ease-in-out infinite alternate;
 }
 
-.motionField span:nth-child(1) {
-  top: -16vmax;
-  left: -14vmax;
-}
+.motionField span:nth-child(1) { top: 7vh; }
+.motionField span:nth-child(2) { top: 38vh; opacity: 0.58; transform: rotate(7deg); animation-delay: -5s; }
+.motionField span:nth-child(3) { top: 68vh; opacity: 0.42; transform: rotate(-4deg); animation-delay: -10s; }
 
-.motionField span:nth-child(2) {
-  bottom: -22vmax;
-  right: -16vmax;
-  width: 70vmax;
-  height: 70vmax;
-  opacity: 0.7;
-  border-radius: 56% 44% 48% 52% / 44% 56% 44% 56%;
-  animation-duration: 46s;
-  animation-delay: -14s;
-}
-
-.motionField span:nth-child(3) {
-  top: 30%;
-  right: 6%;
-  width: 44vmax;
-  height: 44vmax;
-  opacity: 0.5;
-  animation-duration: 52s;
-  animation-delay: -28s;
-}
-
-@keyframes blobFloat {
-  from { transform: translate3d(-3vw, -2vh, 0) rotate(0deg) scale(1); }
-  50%  { transform: translate3d(2vw, 3vh, 0) rotate(8deg) scale(1.08); }
-  to   { transform: translate3d(4vw, -1vh, 0) rotate(-6deg) scale(0.96); }
+@keyframes fieldWave {
+  from { translate: -4vw 0; scale: 1 0.9; }
+  to { translate: 5vw 2vh; scale: 1.06 1.08; }
 }
 
 /* ── Theme toggle ────────────────────────────────────── */
