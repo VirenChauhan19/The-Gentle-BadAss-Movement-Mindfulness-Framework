@@ -1779,8 +1779,9 @@
   flex-direction: column;
   gap: 6px;
   padding: 12px 12px 14px;
-  max-height: 720px;
-  overflow-y: auto;
+  /* No inner scrollbox — the user-detail panel is the single scroll context.
+     A nested max-height/overflow here trapped the wheel and clipped the week
+     to ~2 (tall, edit-mode) days. Weeks stay compact via collapse instead. */
 }
 
 .adminWeekGroup {
