@@ -65,5 +65,9 @@
       "Bash(firebase --version)",
       "Bash(firebase projects:list)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "ruflo"
+  ],
+  "enableAllProjectMcpServers": true
 }

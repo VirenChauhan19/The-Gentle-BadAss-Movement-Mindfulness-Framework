@@ -5,30 +5,40 @@
 
 /* ── Header ──────────────────────────────────────────── */
 .header {
-  padding: 48px 24px 22px;
+  padding: 84px 24px 34px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   animation: fadeUp 360ms var(--ease-out) both;
 }
 
+.header::before {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 2px;
+  margin-bottom: 22px;
+  background: var(--sage-dark);
+  opacity: 0.6;
+}
+
 .label {
   font-size: 0.66rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--sage-dark);
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 14px;
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 6.4vw, 2.4rem);
+  font-size: clamp(2.4rem, 7.5vw, 3.6rem);
   color: var(--ink);
   font-weight: 700;
-  margin-bottom: 8px;
-  line-height: 1.12;
-  letter-spacing: -0.01em;
+  margin-bottom: 14px;
+  line-height: 1.0;
+  letter-spacing: -0.035em;
 }
 
 .commitment {
@@ -52,29 +62,32 @@
 }
 
 .summaryCard {
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  padding: 16px 12px;
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  padding: 28px 18px;
   text-align: center;
-  box-shadow: 0 8px 22px var(--shadow-xs);
-  transition: transform var(--d-base) var(--ease-out),
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform var(--d-slow) var(--ease-smooth),
               border-color var(--d-base) var(--ease-out),
-              box-shadow var(--d-base) var(--ease-out);
+              box-shadow var(--d-slow) var(--ease-smooth);
 }
 
 .summaryCard:hover {
-  transform: translateY(-2px);
-  border-color: rgba(99, 127, 95, 0.28);
-  box-shadow: 0 14px 28px var(--shadow);
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--sage) 40%, transparent);
+  box-shadow: var(--elev-3);
 }
 
 .summaryCard span {
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: clamp(2rem, 5vw, 2.8rem);
   font-weight: 700;
   color: var(--ink);
   display: block;
+  letter-spacing: -0.03em;
 }
 
 .summaryCard p {
@@ -96,18 +109,21 @@
 }
 
 .insightCard {
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  padding: 18px;
-  box-shadow: 0 8px 22px var(--shadow-xs);
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  padding: 30px;
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .insightCard h2 {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 1.4rem;
   color: var(--ink);
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
 }
 
 .insightCard p {
@@ -135,28 +151,31 @@
 }
 
 .chartCard {
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  padding: 22px;
-  box-shadow: 0 8px 22px var(--shadow-xs);
-  transition: transform var(--d-base) var(--ease-out),
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  padding: 34px;
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform var(--d-slow) var(--ease-smooth),
               border-color var(--d-base) var(--ease-out),
-              box-shadow var(--d-base) var(--ease-out);
+              box-shadow var(--d-slow) var(--ease-smooth);
 }
 
 .chartCard:hover {
-  transform: translateY(-2px);
-  border-color: rgba(66, 105, 125, 0.26);
-  box-shadow: 0 16px 32px var(--shadow);
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--slate) 38%, transparent);
+  box-shadow: var(--elev-3);
 }
 
 .chartTitle {
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--ink);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 
 .chartDesc {
@@ -174,15 +193,17 @@
 /* ── Empty state ─────────────────────────────────────── */
 .empty {
   margin: 24px 16px;
-  padding: 56px 24px;
+  padding: 84px 28px;
   text-align: center;
   color: var(--ink-light);
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.7;
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-2xl);
-  box-shadow: 0 14px 32px var(--shadow-xs);
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-3xl);
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   animation: fadeUp 460ms var(--ease-out) both;
 }
 
@@ -214,12 +235,13 @@
 /* ── Entry list ──────────────────────────────────────── */
 .listTitle {
   padding: 0 20px;
-  margin-top: 8px;
-  margin-bottom: 14px;
+  margin-top: 28px;
+  margin-bottom: 22px;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: clamp(1.5rem, 4.4vw, 2rem);
   font-weight: 700;
   color: var(--ink);
+  letter-spacing: -0.025em;
   animation: fadeUp 360ms var(--ease-out) both;
 }
 
@@ -230,15 +252,17 @@
 }
 
 .row {
-  padding: 18px;
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  background: var(--paper);
-  box-shadow: 0 8px 22px var(--shadow-xs);
-  margin-bottom: 10px;
-  transition: transform var(--d-base) var(--ease-out),
+  padding: 26px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  background: color-mix(in srgb, var(--paper) 68%, transparent);
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  margin-bottom: 14px;
+  transition: transform var(--d-slow) var(--ease-smooth),
               border-color var(--d-base) var(--ease-out),
-              box-shadow var(--d-base) var(--ease-out);
+              box-shadow var(--d-slow) var(--ease-smooth);
   animation: fadeUp 320ms var(--ease-out) both;
   position: relative;
   overflow: hidden;
@@ -257,9 +281,9 @@
 }
 
 .row:hover {
-  transform: translateY(-2px);
-  border-color: rgba(99, 127, 95, 0.28);
-  box-shadow: 0 14px 28px var(--shadow);
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--sage) 40%, transparent);
+  box-shadow: var(--elev-3);
 }
 
 .row:hover::before {
@@ -345,23 +369,26 @@
   justify-content: space-between;
   gap: 14px;
   align-items: center;
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  padding: 14px 18px;
-  box-shadow: 0 8px 22px var(--shadow-xs);
-  transition: transform var(--d-base) var(--ease-out),
-              box-shadow var(--d-base) var(--ease-out);
+  background: color-mix(in srgb, var(--paper) 68%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  padding: 20px 26px;
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform var(--d-slow) var(--ease-smooth),
+              box-shadow var(--d-slow) var(--ease-smooth);
 }
 
 .moveRow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px var(--shadow);
+  transform: translateY(-4px);
+  box-shadow: var(--elev-3);
 }
 
 .moveRow strong {
-  font-size: 0.92rem;
+  font-size: 1.05rem;
   font-family: var(--font-display);
+  letter-spacing: -0.015em;
 }
 
 .moveRow p {
@@ -433,6 +460,19 @@
 }
 
 @media (max-width: 767px) {
+  /* Frosted glass is desktop-only — backdrop-filter wrecks Android scroll.
+     Phones fall back to a near-opaque solid surface. */
+  .summaryCard,
+  .insightCard,
+  .chartCard,
+  .row,
+  .moveRow,
+  .empty {
+    background: var(--paper);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
   /* Disable cascading entry animations — they pile up on long lists. */
   .header,
   .summaryGrid,

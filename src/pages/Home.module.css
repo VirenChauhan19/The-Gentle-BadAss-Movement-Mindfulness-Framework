@@ -6,7 +6,7 @@
 }
 
 .hero {
-  padding: 48px 24px 18px;
+  padding: 76px 24px 26px;
   animation: floatIn 560ms var(--ease-elastic) both;
 }
 
@@ -15,6 +15,17 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
+}
+
+/* Editorial eyebrow rule above the kicker */
+.hero::before {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 2px;
+  margin-bottom: 22px;
+  background: var(--sage-dark);
+  opacity: 0.6;
 }
 
 .subtitle,
@@ -30,54 +41,60 @@
 }
 
 .subtitle {
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
   align-self: flex-start;
-  padding: 7px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--sage) 14%, var(--paper));
-  border: 1px solid color-mix(in srgb, var(--sage) 34%, var(--border-light));
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
   color: var(--sage-dark);
-  box-shadow: 0 8px 20px var(--shadow-xs);
-  margin-bottom: 12px;
+  letter-spacing: 0.26em;
+  font-size: 0.66rem;
+  margin-bottom: 16px;
 }
 
 .greeting {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 7vw, 3.2rem);
+  font-size: clamp(2.6rem, 8.5vw, 4.4rem);
   color: var(--ink);
-  line-height: 1.04;
+  line-height: 1.0;
   font-weight: 700;
+  letter-spacing: -0.035em;
+  max-width: 14ch;
 }
 
 .date {
   flex: 0 0 auto;
   max-width: 132px;
-  padding: 8px 10px;
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--paper) 76%, transparent);
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
   color: var(--ink-faint);
-  font-size: 0.74rem;
-  font-weight: 800;
-  line-height: 1.35;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
   text-align: right;
-  box-shadow: 0 8px 22px var(--shadow-xs);
+  margin-top: 8px;
 }
 
 .heroCopy {
-  max-width: 660px;
-  margin-top: 18px;
+  max-width: 30ch;
+  margin-top: 26px;
   color: var(--ink-light);
-  font-size: clamp(0.96rem, 2.4vw, 1.08rem);
-  line-height: 1.65;
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 3vw, 1.5rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.5;
 }
 
 .todayPanel {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
-  padding: 0 16px 14px;
+  gap: 18px;
+  padding: 0 24px 26px;
 }
 
 .feelCard {
@@ -85,17 +102,17 @@
   grid-template-columns: 126px minmax(0, 1fr);
   align-items: center;
   gap: 18px;
-  min-height: 176px;
+  min-height: 220px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 42%),
     var(--brand-gradient);
   color: var(--on-dark);
   border-radius: var(--r-3xl);
-  padding: 20px;
+  padding: 34px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 18px 42px var(--shadow-md);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: var(--elev-3);
+  transition: transform var(--d-slow) var(--ease-smooth), box-shadow var(--d-slow) var(--ease-smooth);
   animation: floatIn 620ms var(--ease-elastic) both 80ms;
 }
 
@@ -210,10 +227,11 @@
 
 .feelHeading {
   font-family: var(--font-display);
-  font-size: clamp(1.22rem, 4.6vw, 1.55rem);
+  font-size: clamp(1.55rem, 4.8vw, 2.15rem);
   font-weight: 700;
   color: var(--on-dark);
-  line-height: 1.12;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
 }
 
 .feelLabel {
@@ -272,35 +290,45 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 5px;
-  padding: 12px;
-  border-radius: var(--r-lg);
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  box-shadow: 0 8px 22px var(--shadow-xs);
+  gap: 8px;
+  padding: 18px 16px;
+  border-radius: 0;
+  background: none;
+  border: none;
+  border-left: 1px solid var(--hairline);
+  box-shadow: none;
+}
+
+.metric:first-child {
+  border-left: none;
+  padding-left: 0;
 }
 
 .metricValue {
   font-family: var(--font-display);
   color: var(--ink);
-  font-size: 1.35rem;
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
   font-weight: 700;
-  line-height: 1;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
 }
 
 .metricLabel {
   color: var(--ink-faint);
-  font-size: 0.54rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
   line-height: 1.25;
 }
 
 .progressBlock {
-  margin: 0 16px 14px;
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  padding: 17px;
-  box-shadow: 0 8px 22px var(--shadow-xs);
+  margin: 0 24px 26px;
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  padding: 28px 30px;
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   animation: floatIn 560ms var(--ease-elastic) both 200ms;
 }
 
@@ -374,26 +402,28 @@
 .actionGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding: 0 16px 14px;
+  gap: 16px;
+  padding: 0 24px 26px;
 }
 
 .action {
-  min-height: 104px;
+  min-height: 150px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: 6px;
-  padding: 16px;
+  gap: 8px;
+  padding: 26px;
   background:
-    linear-gradient(145deg, rgba(99, 127, 95, 0.1), transparent 54%),
-    var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  box-shadow: 0 8px 22px var(--shadow-xs);
+    linear-gradient(160deg, rgba(99, 127, 95, 0.08), transparent 58%),
+    color-mix(in srgb, var(--paper) 78%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   position: relative;
   overflow: hidden;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  transition: transform var(--d-slow) var(--ease-smooth), border-color var(--d-base) var(--ease-out), box-shadow var(--d-slow) var(--ease-smooth);
   animation: floatIn 540ms var(--ease-elastic) both;
 }
 
@@ -424,9 +454,9 @@
 
 @media (hover: hover) {
   .action:hover {
-    transform: translateY(-2px);
-    border-color: rgba(99, 127, 95, 0.32);
-    box-shadow: 0 14px 28px var(--shadow);
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--sage) 40%, transparent);
+    box-shadow: var(--elev-3);
   }
 }
 
@@ -437,9 +467,10 @@
 .actionTitle {
   font-family: var(--font-display);
   color: var(--ink);
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  line-height: 1.18;
+  line-height: 1.16;
+  letter-spacing: -0.02em;
 }
 
 .actionPrimary .actionTitle {
@@ -485,17 +516,19 @@
 }
 
 .historyVisual {
-  margin: 0 16px 14px;
-  min-height: 148px;
+  margin: 0 24px 26px;
+  min-height: 180px;
   display: grid;
-  grid-template-columns: minmax(140px, 0.7fr) minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(160px, 0.7fr) minmax(0, 1fr);
+  gap: 24px;
   align-items: end;
-  padding: 18px;
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-lg);
-  box-shadow: 0 8px 22px var(--shadow-xs);
+  padding: 30px;
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-2xl);
+  box-shadow: var(--elev-1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .historyKicker {
@@ -534,29 +567,33 @@
 }
 
 .intention {
-  margin: 0 16px;
-  padding: 20px 18px;
+  margin: 12px 24px 0;
+  padding: 64px 24px;
   text-align: center;
-  border-radius: var(--r-lg);
-  background: color-mix(in srgb, var(--paper) 78%, transparent);
-  border: 1px solid var(--border-light);
-  box-shadow: 0 8px 22px var(--shadow-xs);
+  border-radius: 0;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--hairline);
+  box-shadow: none;
   animation: floatIn 540ms var(--ease-elastic) both 440ms;
 }
 
 .intentionKicker {
-  color: var(--ink-faint);
-  margin-bottom: 9px;
+  color: var(--sage-dark);
+  letter-spacing: 0.26em;
+  margin-bottom: 22px;
 }
 
 .intentionText {
-  max-width: 520px;
+  max-width: 18ch;
   margin: 0 auto;
   font-family: var(--font-display);
-  color: var(--ink-light);
-  font-size: 1.03rem;
+  color: var(--ink);
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
   font-style: italic;
-  line-height: 1.55;
+  font-weight: 500;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
 }
 
 .footer {
@@ -575,100 +612,111 @@
 
 @media (min-width: 640px) {
   .todayPanel {
-    grid-template-columns: minmax(0, 1fr) 168px;
+    grid-template-columns: minmax(0, 1fr) 200px;
     align-items: stretch;
   }
 
   .metricGrid {
     grid-template-columns: 1fr;
+    align-content: center;
   }
 
+  /* Stacked beside the feel card — switch separators to horizontal rules. */
   .metric {
     min-height: 0;
+    padding: 18px 0;
+    border-left: none;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .metric:first-child {
+    padding: 0 0 18px;
+    border-top: none;
   }
 }
 
 @media (min-width: 768px) {
-  .hero { padding: 52px 28px 22px; }
-  .todayPanel { padding: 0 20px 16px; }
-  .progressBlock { margin: 0 20px 16px; }
-  .actionGrid { padding: 0 20px 16px; }
-  .intention { margin: 0 20px; }
+  .hero { padding: 84px 32px 30px; }
+  .todayPanel { padding: 0 32px 30px; }
+  .progressBlock { margin: 0 32px 30px; }
+  .actionGrid { padding: 0 32px 30px; }
+  .intention { margin: 16px 32px 0; }
 }
 
 @media (min-width: 1024px) {
   .page {
     width: 100%;
-    max-width: 1180px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 56px 48px;
+    padding: 0 72px 72px;
   }
 
   .hero {
-    padding: 62px 0 28px;
+    padding: 104px 0 44px;
   }
 
   .date {
     max-width: none;
-    padding: 10px 12px;
+    padding: 0;
   }
 
   .todayPanel {
-    grid-template-columns: minmax(0, 1fr) 220px;
-    padding: 0 0 18px;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    padding: 0 0 32px;
+    gap: 24px;
   }
 
   .feelCard {
-    grid-template-columns: 158px minmax(0, 1fr);
-    min-height: 232px;
-    padding: 30px;
-    gap: 30px;
+    grid-template-columns: 180px minmax(0, 1fr);
+    min-height: 280px;
+    padding: 44px;
+    gap: 40px;
   }
 
   .ring {
-    width: 158px;
-    height: 158px;
+    width: 180px;
+    height: 180px;
   }
 
   .ringScore {
-    font-size: 2.75rem;
+    font-size: 3.1rem;
   }
 
   .feelSub {
-    font-size: 0.94rem;
+    font-size: 1rem;
   }
 
   .metric {
-    padding: 16px;
+    padding: 22px 0;
   }
 
-  .metricValue {
-    font-size: 1.55rem;
+  .metric:first-child {
+    padding: 0 0 22px;
   }
 
   .progressBlock {
-    margin: 0 0 18px;
-    padding: 20px 22px;
+    margin: 0 0 32px;
+    padding: 34px 38px;
   }
 
   .actionGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 0 0 18px;
-    gap: 14px;
+    padding: 0 0 32px;
+    gap: 20px;
   }
 
   .action {
-    min-height: 118px;
-    padding: 18px;
+    min-height: 168px;
+    padding: 32px;
   }
 
   .intention {
-    margin: 0;
+    margin: 24px 0 0;
+    padding: 88px 24px;
   }
 
   .historyVisual {
-    margin: 0 0 18px;
+    margin: 0 0 32px;
   }
 }
 

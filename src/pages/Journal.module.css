@@ -7,12 +7,12 @@
 /* ── Hero ────────────────────────────────────────────── */
 .hero {
   position: relative;
-  padding: calc(38px + env(safe-area-inset-top)) 24px 26px;
+  padding: calc(70px + env(safe-area-inset-top)) 24px 44px;
   background:
-    radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--factor-tone, var(--sage)) 22%, transparent), transparent 38%),
-    radial-gradient(circle at 86% 18%, var(--ambient-glow), transparent 42%),
+    radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--factor-tone, var(--sage)) 18%, transparent), transparent 42%),
+    radial-gradient(circle at 86% 18%, var(--ambient-glow), transparent 46%),
     var(--paper-soft);
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--hairline);
   overflow: hidden;
   animation: floatIn 520ms var(--ease-elastic) both;
 }
@@ -55,11 +55,11 @@
 }
 
 .heroLabel > span:first-child {
-  color: var(--ink);
-  font-family: var(--font-display);
+  color: var(--sage-dark);
+  font-family: var(--font-body);
   font-weight: 800;
-  font-size: 0.78rem;
-  letter-spacing: 0.22em;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
 }
 
 .heroDate {
@@ -208,12 +208,12 @@
 
 /* ── Cycle card (collapsible) ────────────────────────── */
 .cycleCard {
-  margin: 18px 16px 0;
+  margin: 26px 16px 0;
   background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: var(--r-2xl);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-3xl);
   overflow: hidden;
-  box-shadow: 0 10px 26px var(--shadow-xs);
+  box-shadow: var(--elev-2);
 }
 
 .cycleToggle {
@@ -368,12 +368,12 @@
 .catBadge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 800;
+  font-size: clamp(1.5rem, 4vw, 1.9rem);
+  font-weight: 700;
   color: var(--ink);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
   position: relative;
 }
 
@@ -439,22 +439,22 @@
 /* ── Factor card ─────────────────────────────────────── */
 .factor {
   position: relative;
-  padding: 16px 16px 14px;
+  padding: 26px 24px 22px;
   background: var(--paper);
-  border: 1px solid var(--border-light);
-  border-radius: 22px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-3xl);
   display: grid;
-  gap: 12px;
+  gap: 14px;
   overflow: hidden;
   isolation: isolate;
   animation: floatIn 480ms var(--ease-elastic) both;
-  transition: transform var(--d-base) var(--ease-out),
+  transition: transform var(--d-slow) var(--ease-smooth),
               border-color var(--d-base) var(--ease-out),
-              box-shadow var(--d-base) var(--ease-out);
+              box-shadow var(--d-slow) var(--ease-smooth);
   --factor-color: var(--sage);
   --factor-fill: 50%;
   box-shadow:
-    0 10px 26px var(--shadow-xs),
+    var(--elev-2),
     0 0 0 1px color-mix(in srgb, var(--factor-color) 6%, transparent) inset;
 }
 
@@ -477,9 +477,9 @@
 
 @media (hover: hover) {
   .factor:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     box-shadow:
-      0 18px 36px var(--shadow),
+      var(--elev-3),
       0 0 0 1px color-mix(in srgb, var(--factor-color) 14%, transparent) inset;
   }
 }
@@ -506,11 +506,12 @@
 
 .factorTitle h3 {
   font-family: var(--font-display);
-  font-size: 1.02rem;
+  font-size: 1.24rem;
   font-weight: 700;
   color: var(--ink);
-  line-height: 1.18;
-  margin-bottom: 2px;
+  line-height: 1.16;
+  letter-spacing: -0.018em;
+  margin-bottom: 4px;
 }
 
 .factorTitle p {
@@ -742,15 +743,15 @@
 /* ── Reflection (journal page) ───────────────────────── */
 .reflection {
   position: relative;
-  margin: 22px 16px 0;
-  padding: 26px 24px 22px;
+  margin: 34px 16px 0;
+  padding: 48px 36px 40px;
   background:
     radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--sage) 14%, transparent), transparent 38%),
     linear-gradient(180deg, var(--paper) 0%, color-mix(in srgb, var(--cream) 60%, var(--paper)) 100%);
-  border: 1px solid var(--border-light);
-  border-radius: 26px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-3xl);
   box-shadow:
-    0 18px 38px var(--shadow-xs),
+    var(--elev-3),
     0 0 0 1px rgba(255, 255, 255, 0.4) inset;
   display: grid;
   gap: 16px;
@@ -794,11 +795,11 @@
 
 .reflectionTitle {
   font-family: var(--font-display);
-  font-size: clamp(1.3rem, 4.5vw, 1.55rem);
+  font-size: clamp(1.7rem, 5vw, 2.4rem);
   font-weight: 700;
   color: var(--ink);
-  letter-spacing: -0.01em;
-  line-height: 1.18;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
 }
 
 .reflectionTagline {
