@@ -1,51 +1,45 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useData } from '../context/DataContext'
 import Metronome from '../components/Metronome'
+import {
+  breathingProgram,
+  buildPhaseSequence,
+  cycleSecondsFor,
+  deriveCurrentWeek,
+  getWeekConfig,
+  isSighWeek,
+  phaseInfo,
+  SESSIONS_PER_WEEK,
+  tallyWeekSessions,
+  TOTAL_WEEKS,
+} from '../data/breathingProgram'
 import styles from './Breathing.module.css'
 
-const RHYTHM_PRESETS = [
-  { id: 'reset', label: 'Reset', sub: 'Long exhale', inhale: 4, topHold: 0, exhale: 8, bottomHold: 0 },
-  { id: 'box', label: 'Box', sub: 'Even focus', inhale: 4, topHold: 4, exhale: 4, bottomHold: 4 },
-  { id: 'calm', label: 'Calm', sub: 'Soft hold', inhale: 4, topHold: 2, exhale: 6, bottomHold: 0 },
-  { id: 'sleep', label: 'Sleep', sub: 'Downshift', inhale: 4, topHold: 7, exhale: 8, bottomHold: 0 },
-]
-
-const SESSION_LENGTHS = [1, 3, 5]
-
 export default function Breathing() {
-  const { getTodayEntry, saveEntry } = useData()
+  const { entries, getTodayEntry, saveEntry } = useData()
+
+  const weekTally = useMemo(() => tallyWeekSessions(entries), [entries])
+  const currentWeek = useMemo(() => deriveCurrentWeek(weekTally), [weekTally])
+  const weekConfig = getWeekConfig(currentWeek)
+  const sessionsThisWeek = weekTally[currentWeek] || 0
+  const allComplete =
+    currentWeek === TOTAL_WEEKS && (weekTally[TOTAL_WEEKS] || 0) >= SESSIONS_PER_WEEK
+
   const [running, setRunning] = useState(false)
   const [elapsed, setElapsed] = useState(0)
-  const [activePreset, setActivePreset] = useState('reset')
-  const [targetMinutes, setTargetMinutes] = useState(3)
-  const [inhaleSeconds, setInhaleSeconds] = useState(4)
-  const [topHoldSeconds, setTopHoldSeconds] = useState(0)
-  const [exhaleSeconds, setExhaleSeconds] = useState(8)
-  const [bottomHoldSeconds, setBottomHoldSeconds] = useState(0)
   const [saved, setSaved] = useState(false)
+  const [justUnlocked, setJustUnlocked] = useState(false)
 
-  const phases = [
-    { id: 'inhale', label: 'Inhale', seconds: inhaleSeconds, progressStart: 0, progressEnd: 1 },
-    { id: 'top-hold', label: 'Hold', seconds: topHoldSeconds, progressStart: 1, progressEnd: 1 },
-    { id: 'exhale', label: 'Exhale', seconds: exhaleSeconds, progressStart: 1, progressEnd: 0 },
-    { id: 'bottom-hold', label: 'Hold', seconds: bottomHoldSeconds, progressStart: 0, progressEnd: 0 },
-  ].filter(item => item.seconds > 0)
-  const cycleSeconds = phases.reduce((sum, item) => sum + item.seconds, 0)
+  const phases = useMemo(() => buildPhaseSequence(weekConfig), [weekConfig])
+  const cycleSeconds = useMemo(() => cycleSecondsFor(weekConfig), [weekConfig])
   const phaseState = getPhaseState(phases, elapsed)
   const phase = phaseState.label
   const phaseSecond = phaseState.second
   const phaseTotal = phaseState.total
   const cycles = cycleSeconds > 0 ? Math.floor(elapsed / cycleSeconds) : 0
   const progress = phaseState.progress
-  const targetSeconds = targetMinutes * 60
-  const sessionPct = targetSeconds > 0 ? Math.min(100, (elapsed / targetSeconds) * 100) : 0
-  const nextPhase = phaseState.nextLabel
-  const breathCue =
-    phase === 'Inhale' ? 'Breathe in low and wide.' :
-    phase === 'Exhale' ? 'Let the air leave slowly.' :
-    phase === 'Hold' && progress > 0.5 ? 'Stay relaxed at the top.' :
-    phase === 'Hold' ? 'Rest softly at the bottom.' :
-    'Choose a rhythm.'
+  const breathsPerMinute = cycleSeconds > 0 ? Math.round((600 / cycleSeconds)) / 10 : 0
+  const breathCue = phaseState.cue || 'Settle in. The orb will lead you.'
 
   useEffect(() => {
     if (!running || cycleSeconds <= 0) return
@@ -54,97 +48,83 @@ export default function Breathing() {
   }, [running, cycleSeconds])
 
   useEffect(() => {
-    if (running && targetSeconds > 0 && elapsed >= targetSeconds) {
-      setRunning(false)
-    }
-  }, [elapsed, running, targetSeconds])
-
-  function choosePreset(preset) {
-    if (running) return
-    setActivePreset(preset.id)
-    setInhaleSeconds(preset.inhale)
-    setTopHoldSeconds(preset.topHold)
-    setExhaleSeconds(preset.exhale)
-    setBottomHoldSeconds(preset.bottomHold)
     setElapsed(0)
+    setRunning(false)
     setSaved(false)
-    if (navigator.vibrate && window.innerWidth <= 767) navigator.vibrate(8)
-  }
-
-  function updateCustom(setter, value) {
-    setActivePreset('custom')
-    setter(value)
-    setElapsed(0)
-    setSaved(false)
-  }
+    setJustUnlocked(false)
+  }, [currentWeek])
 
   async function saveBreathSession() {
+    if (elapsed < cycleSeconds || saved) return
     const today = getTodayEntry() || { scores: {}, note: '', sessions: [] }
+    const willUnlock = sessionsThisWeek + 1 >= SESSIONS_PER_WEEK && currentWeek < TOTAL_WEEKS
+
     await saveEntry({
       ...today,
       sessions: [
         ...(today.sessions || []),
         {
           type: 'breathing',
-          exerciseId: 'breathing-5bpm',
-          exerciseName: '5 breaths/min breathing',
+          weekNumber: currentWeek,
+          weekTitle: weekConfig.title,
+          phase: weekConfig.phase,
+          exerciseKind: isSighWeek(weekConfig) ? 'sigh' : 'standard',
           durationSeconds: elapsed,
           cycles,
-          inhaleSeconds,
-          topHoldSeconds,
-          exhaleSeconds,
-          bottomHoldSeconds,
-          targetMinutes,
+          inhale: weekConfig.inhale,
+          holdFull: weekConfig.holdFull ?? 0,
+          exhale: weekConfig.exhale,
+          holdEmpty: weekConfig.holdEmpty ?? 0,
+          microInhale: weekConfig.microInhale ?? 0,
           completedAt: new Date().toISOString(),
         },
       ],
     })
     setSaved(true)
+    setRunning(false)
+    setJustUnlocked(willUnlock)
   }
+
+  function toggleRunning() {
+    if (cycleSeconds <= 0) return
+    setRunning(v => !v)
+  }
+
+  function resetTimer() {
+    setRunning(false)
+    setElapsed(0)
+    setSaved(false)
+  }
+
+  const phaseMeta = phaseInfo[weekConfig.phase]
+  const sighThisWeek = isSighWeek(weekConfig)
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <p className={styles.label}>Daily Foundation</p>
         <h1 className={styles.title}>Breathe</h1>
-        <p className={styles.subtitle}>{inhaleSeconds}s inhale. {topHoldSeconds}s hold. {exhaleSeconds}s exhale. {bottomHoldSeconds}s hold. Breathing pace is shown in breaths per minute; the click stays at 60 BPM so every beat is one honest second.</p>
+        <p className={styles.subtitle}>
+          One curriculum. One breath at a time. The orb dictates the cadence — your feet land
+          softly on their own timing, completely independent of the breath.
+        </p>
       </header>
 
       <section className={styles.practice}>
+        <ProgressCard
+          weekNumber={currentWeek}
+          weekConfig={weekConfig}
+          phaseMeta={phaseMeta}
+          sessionsThisWeek={sessionsThisWeek}
+          allComplete={allComplete}
+          justUnlocked={justUnlocked}
+          breathsPerMinute={breathsPerMinute}
+        />
+
         <div className={styles.breathCard}>
-          <div className={styles.presetRail} data-swipe-lock>
-            {RHYTHM_PRESETS.map(preset => (
-              <button
-                key={preset.id}
-                type="button"
-                className={`${styles.presetBtn} ${activePreset === preset.id ? styles.presetActive : ''}`}
-                onClick={() => choosePreset(preset)}
-                disabled={running}
-              >
-                <span>{preset.label}</span>
-                <small>{preset.sub}</small>
-              </button>
-            ))}
-          </div>
-
-          <div className={styles.sessionRail}>
-            {SESSION_LENGTHS.map(minutes => (
-              <button
-                key={minutes}
-                type="button"
-                className={targetMinutes === minutes ? styles.sessionActive : ''}
-                onClick={() => { setTargetMinutes(minutes); setSaved(false) }}
-              >
-                {minutes} min
-              </button>
-            ))}
-          </div>
-
           <div
             className={`${styles.orbWrap} ${running ? styles.orbWrapActive : ''}`}
-            style={{ '--session-progress': `${sessionPct}%` }}
           >
-            <div className={styles.sessionRing} aria-hidden="true" />
             <div
               className={`${styles.orb} ${running ? styles.orbActive : ''}`}
               style={{ transform: `scale(${0.72 + progress * 0.34})` }}
@@ -152,12 +132,12 @@ export default function Breathing() {
             <div className={styles.phaseText}>
               <span>{phase}</span>
               <strong>{phaseSecond}</strong>
-              <small>{phaseTotal > 0 ? `of ${phaseTotal}` : 'set a rhythm'}</small>
+              <small>{phaseTotal > 0 ? `of ${phaseTotal}` : 'tap start'}</small>
               <p>{breathCue}</p>
             </div>
           </div>
 
-          <div className={styles.phaseTrail} aria-label="Breath rhythm">
+          <div className={`${styles.phaseTrail} ${sighThisWeek ? styles.phaseTrailSigh : ''}`} aria-label="Breath rhythm">
             {phases.map(item => (
               <div
                 key={item.id}
@@ -180,75 +160,184 @@ export default function Breathing() {
               <p>time</p>
             </div>
             <div>
-              <span>{formatTime(Math.max(0, targetSeconds - elapsed))}</span>
-              <p>left</p>
+              <span>{breathsPerMinute || '—'}</span>
+              <p>br/min</p>
             </div>
             <div>
-              <span>{nextPhase}</span>
+              <span>{phaseState.nextLabel}</span>
               <p>next</p>
             </div>
           </div>
 
-          <div className={styles.rhythmControls}>
-            <p className={styles.controlsTitle}>Fine tune rhythm</p>
-            <PhaseSlider label="Inhale" value={inhaleSeconds} onChange={val => updateCustom(setInhaleSeconds, val)} running={running} />
-            <PhaseSlider label="Top hold" value={topHoldSeconds} onChange={val => updateCustom(setTopHoldSeconds, val)} running={running} />
-            <PhaseSlider label="Exhale" value={exhaleSeconds} onChange={val => updateCustom(setExhaleSeconds, val)} running={running} />
-            <PhaseSlider label="Bottom hold" value={bottomHoldSeconds} onChange={val => updateCustom(setBottomHoldSeconds, val)} running={running} />
-          </div>
-
           <div className={styles.controls}>
-            <button onClick={() => setRunning(v => cycleSeconds > 0 ? !v : false)} disabled={cycleSeconds <= 0}>
+            <button onClick={toggleRunning} disabled={cycleSeconds <= 0}>
               {running ? 'Pause' : 'Start'}
             </button>
-            <button onClick={() => { setRunning(false); setElapsed(0); setSaved(false) }} className={styles.secondaryBtn}>
+            <button onClick={resetTimer} className={styles.secondaryBtn}>
               Reset
             </button>
           </div>
 
-          <button className={styles.saveBtn} onClick={saveBreathSession} disabled={elapsed < cycleSeconds || saved}>
-            {saved ? 'Saved' : elapsed < cycleSeconds ? 'Save after one cycle' : 'Save breathing session'}
+          <button
+            className={styles.saveBtn}
+            onClick={saveBreathSession}
+            disabled={elapsed < cycleSeconds || saved}
+          >
+            {saved ? 'Session saved' : elapsed < cycleSeconds ? 'Save after one full cycle' : 'Log this session'}
           </button>
         </div>
 
         <Metronome playing={running} onPlayingChange={setRunning} fixedBpm={60} compact />
+
+        <Curriculum currentWeek={currentWeek} weekTally={weekTally} />
       </section>
     </div>
   )
 }
 
-function PhaseSlider({ label, value, onChange, running, onReset }) {
+function ProgressCard({
+  weekNumber,
+  weekConfig,
+  phaseMeta,
+  sessionsThisWeek,
+  allComplete,
+  justUnlocked,
+  breathsPerMinute,
+}) {
+  const cappedSessions = Math.min(sessionsThisWeek, SESSIONS_PER_WEEK)
+  const remaining = Math.max(0, SESSIONS_PER_WEEK - cappedSessions)
+
   return (
-    <label>
+    <div className={styles.progressCard}>
+      <p className={styles.weekKicker}>
+        {phaseMeta?.label || `Phase ${weekConfig.phase}`} · Week {weekNumber} of {TOTAL_WEEKS}
+      </p>
+      <h2 className={styles.weekTitle}>{weekConfig.title}</h2>
+      <p className={styles.weekFocus}>{weekConfig.focus}</p>
+
+      <div className={styles.weekRatios}>
+        <RatioPill label="Inhale" seconds={weekConfig.inhale} />
+        {isSighWeek(weekConfig)
+          ? <RatioPill label="Sip" seconds={weekConfig.microInhale} accent />
+          : <RatioPill label="Hold" seconds={weekConfig.holdFull || 0} muted={!weekConfig.holdFull} />}
+        <RatioPill label={isSighWeek(weekConfig) ? 'Sigh' : 'Exhale'} seconds={weekConfig.exhale} />
+        {!isSighWeek(weekConfig) && (
+          <RatioPill label="Hold" seconds={weekConfig.holdEmpty || 0} muted={!weekConfig.holdEmpty} />
+        )}
+        {breathsPerMinute > 0 && (
+          <RatioPill label="Rate" value={`${breathsPerMinute} br/min`} muted />
+        )}
+      </div>
+
+      <div className={styles.dayDots} role="img" aria-label={`${cappedSessions} of ${SESSIONS_PER_WEEK} sessions completed this week`}>
+        {Array.from({ length: SESSIONS_PER_WEEK }, (_, i) => (
+          <span key={i} className={i < cappedSessions ? styles.dayDotFilled : styles.dayDotEmpty} />
+        ))}
+        <p className={styles.dayDotsLabel}>
+          {allComplete
+            ? 'Curriculum complete. Stay here as long as you like.'
+            : justUnlocked
+              ? 'Week complete — next week unlocked.'
+              : `Day ${cappedSessions} of ${SESSIONS_PER_WEEK} this week · ${remaining} to unlock next`}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function RatioPill({ label, seconds, value, muted, accent }) {
+  const display = value != null ? value : `${seconds}s`
+  return (
+    <div className={`${styles.ratioPill} ${muted ? styles.ratioPillMuted : ''} ${accent ? styles.ratioPillAccent : ''}`}>
       <span>{label}</span>
-      <input
-        type="range"
-        min="0"
-        max="30"
-        step="1"
-        value={value}
-        onChange={e => { onChange(Number(e.target.value)); onReset?.() }}
-        disabled={running}
-        aria-label={`${label} seconds`}
-        aria-valuemin="0"
-        aria-valuemax="30"
-        aria-valuenow={value}
-        aria-valuetext={`${value} seconds`}
-      />
-      <strong>{value}s</strong>
-    </label>
+      <strong>{display}</strong>
+    </div>
+  )
+}
+
+function Curriculum({ currentWeek, weekTally }) {
+  const byPhase = useMemo(() => {
+    const groups = {}
+    for (let w = 1; w <= TOTAL_WEEKS; w++) {
+      const cfg = breathingProgram[w]
+      if (!cfg) continue
+      if (!groups[cfg.phase]) groups[cfg.phase] = []
+      groups[cfg.phase].push({ week: w, cfg })
+    }
+    return groups
+  }, [])
+
+  return (
+    <div className={styles.curriculum}>
+      <header className={styles.curriculumHeader}>
+        <p className={styles.curriculumKicker}>The path</p>
+        <h2 className={styles.curriculumTitle}>3 months. Extending to 6 and 9.</h2>
+        <p className={styles.curriculumSub}>
+          Log {SESSIONS_PER_WEEK} sessions to unlock the next week. Future weeks stay blurred until then.
+        </p>
+      </header>
+
+      {Object.keys(byPhase).sort().map(phaseId => {
+        const meta = phaseInfo[phaseId]
+        return (
+          <div key={phaseId} className={styles.phaseGroup}>
+            <div className={styles.phaseHeader}>
+              <span className={styles.phaseHeaderLabel}>{meta?.label || `Phase ${phaseId}`}</span>
+              <h3>{meta?.title}</h3>
+              <p>{meta?.description}</p>
+            </div>
+            <ol className={styles.weekList}>
+              {byPhase[phaseId].map(({ week, cfg }) => {
+                const count = weekTally[week] || 0
+                const done = count >= SESSIONS_PER_WEEK
+                const isCurrent = week === currentWeek
+                const isLocked = week > currentWeek
+                const stateClass = done
+                  ? styles.weekRowDone
+                  : isCurrent
+                    ? styles.weekRowCurrent
+                    : isLocked
+                      ? styles.weekRowLocked
+                      : ''
+                return (
+                  <li key={week} className={`${styles.weekRow} ${stateClass}`} aria-current={isCurrent ? 'step' : undefined}>
+                    <span className={styles.weekRowBadge}>
+                      {done ? '✓' : isLocked ? '🔒' : week}
+                    </span>
+                    <div className={styles.weekRowBody}>
+                      <p className={styles.weekRowKicker}>Week {week}{cfg.type === 'sigh' ? ' · Sigh' : ''}</p>
+                      <strong>{cfg.title}</strong>
+                    </div>
+                    <span className={styles.weekRowStatus}>
+                      {done
+                        ? 'Complete'
+                        : isCurrent
+                          ? `${count}/${SESSIONS_PER_WEEK}`
+                          : isLocked
+                            ? 'Locked'
+                            : `${count}/${SESSIONS_PER_WEEK}`}
+                    </span>
+                  </li>
+                )
+              })}
+            </ol>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
 function getPhaseState(phases, elapsed) {
   if (!phases.length) {
-    return { label: 'Set time', second: 0, total: 0, progress: 0, nextLabel: 'Start' }
+    return { label: 'Settle', second: 0, total: 0, progress: 0, nextLabel: 'Start', cue: '' }
   }
 
   const cycleSeconds = phases.reduce((sum, item) => sum + item.seconds, 0)
   let position = elapsed % cycleSeconds
 
-  for (const item of phases) {
+  for (let idx = 0; idx < phases.length; idx++) {
+    const item = phases[idx]
     if (position < item.seconds) {
       const second = position + 1
       const pct = item.seconds > 0 ? second / item.seconds : 0
@@ -257,14 +346,22 @@ function getPhaseState(phases, elapsed) {
         second,
         total: item.seconds,
         progress: item.progressStart + (item.progressEnd - item.progressStart) * pct,
-        nextLabel: phases[(phases.indexOf(item) + 1) % phases.length]?.label || item.label,
+        nextLabel: phases[(idx + 1) % phases.length].label,
+        cue: item.cue,
       }
     }
     position -= item.seconds
   }
 
   const fallback = phases[0]
-  return { label: fallback.label, second: 1, total: fallback.seconds, progress: fallback.progressStart, nextLabel: fallback.label }
+  return {
+    label: fallback.label,
+    second: 1,
+    total: fallback.seconds,
+    progress: fallback.progressStart,
+    nextLabel: fallback.label,
+    cue: fallback.cue,
+  }
 }
 
 function formatTime(seconds) {
