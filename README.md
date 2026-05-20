@@ -297,7 +297,7 @@ The presentation covers:
 > [30-40s] Every morning: ten questions. Two minutes. One number that tells you how ready your body actually is.
 > [40-50s] It adjusts your training plan. It teaches you to move with form. It brings you back to your body.
 > [50-55s] Not a fitness app. A practice.
-> [55-60s] gentlebadass.com — Start listening.
+> [55-60s] laultrarunandbee.com — Start listening.
 
 **Production notes:**
 - YouTube cut: 16:9 landscape, titles centered, voiceover + ambient sound (morning birds, footsteps on a path)
