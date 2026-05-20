@@ -106,6 +106,17 @@ const MENOPAUSE_LEGACY_TO_NEW = {
   menopause: 'postmenopause',
 }
 
+// Map any earlier gender vocabulary to the three options we now expose so a
+// returning user lands on a matching <option> instead of an empty select.
+function normalizeGender(value) {
+  if (!value) return ''
+  const v = String(value).toLowerCase()
+  if (v === 'woman' || v === 'female') return 'female'
+  if (v === 'man' || v === 'male') return 'male'
+  if (v === 'prefer-not' || v === 'prefer not to say' || v === 'prefer not') return 'prefer-not'
+  return ''
+}
+
 function toggleInList(list, value) {
   const set = new Set(list || [])
   if (value === 'None') return set.has('None') ? [] : ['None']
@@ -123,7 +134,7 @@ export default function Onboarding() {
     name: profile?.name || '',
     age: profile?.age || '',
     ageRange: profile?.ageRange || '',
-    gender: profile?.gender || profile?.sex || '',
+    gender: normalizeGender(profile?.gender || profile?.sex),
     heightCm: profile?.heightCm || '',
     weightKg: profile?.weightKg || '',
     waistCm: profile?.waistCm || '',
@@ -151,7 +162,7 @@ export default function Onboarding() {
     commitment: profile?.commitment || 90,
   })
   const plan = PLANS[data.commitment] || PLANS[90]
-  const isFemale = data.gender === 'woman' || data.gender === 'female'
+  const isFemale = data.gender === 'female'
   const showCycleFields =
     isFemale && (data.menopausalStatus === 'regular' || data.menopausalStatus === 'perimenopause')
 

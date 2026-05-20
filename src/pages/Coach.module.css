@@ -313,6 +313,64 @@
   padding: 18px;
 }
 
+/* ── Adaptation banners (Feel / safety / breathing overrides) ─ */
+.adaptationBanners {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+
+.adaptationBanner {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  background: var(--cream);
+  display: grid;
+  gap: 3px;
+}
+
+.adaptationBanner p {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0;
+}
+
+.adaptationBannerLabel {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.adaptationBanner[data-tone="feel"] {
+  background: rgba(217, 193, 138, 0.18);
+  border-color: rgba(217, 193, 138, 0.55);
+}
+
+.adaptationBanner[data-tone="feel"] .adaptationBannerLabel {
+  color: #907830;
+}
+
+.adaptationBanner[data-tone="safety"] {
+  background: rgba(217, 138, 138, 0.14);
+  border-color: rgba(217, 138, 138, 0.45);
+}
+
+.adaptationBanner[data-tone="safety"] .adaptationBannerLabel {
+  color: #a04040;
+}
+
+.adaptationBanner[data-tone="breathe"] {
+  background: rgba(138, 154, 217, 0.14);
+  border-color: rgba(138, 154, 217, 0.45);
+}
+
+.adaptationBanner[data-tone="breathe"] .adaptationBannerLabel {
+  color: #4050a0;
+}
+
 .todayHeroTop,
 .planBoardHeader {
   display: flex;

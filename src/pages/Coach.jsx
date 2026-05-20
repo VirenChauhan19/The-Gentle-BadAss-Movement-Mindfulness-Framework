@@ -1521,6 +1521,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
                 {todayStyle.label}
               </span>
             </div>
+            <AdaptationBanners session={todaySession} />
             <div className={styles.todayMetrics}>
               <span>{todaySession.distance || 'No distance'}</span>
               <span>{todaySession.duration || 'Open duration'}</span>
@@ -1847,6 +1848,26 @@ function AttachedRemarks({ remarks }) {
             <span>{r.runDate || r.date}</span>
           </div>
           <p className={styles.dailyRemarkText}>{r.text}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function AdaptationBanners({ session }) {
+  if (!session) return null
+  const banners = [
+    session.alertCard && { tone: 'feel', label: 'Today only', text: session.alertCard },
+    session.safetyBanner && { tone: 'safety', label: 'Structural buffer', text: session.safetyBanner },
+    session.breathe && { tone: 'breathe', label: 'Breathing override', text: session.breathe },
+  ].filter(Boolean)
+  if (!banners.length) return null
+  return (
+    <div className={styles.adaptationBanners}>
+      {banners.map(b => (
+        <div key={b.tone} className={styles.adaptationBanner} data-tone={b.tone}>
+          <span className={styles.adaptationBannerLabel}>{b.label}</span>
+          <p>{b.text}</p>
         </div>
       ))}
     </div>

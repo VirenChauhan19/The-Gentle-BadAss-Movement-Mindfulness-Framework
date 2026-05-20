@@ -833,3 +833,30 @@
   font-weight: 700;
   box-shadow: 0 4px 12px var(--shadow-md);
 }
+
+/* ── Mobile polish for new sections ───────────────────── */
+@media (max-width: 480px) {
+  .checkboxGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sliderRangeLabels {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .sliderRangeLabels > :first-child,
+  .sliderRangeLabels > :last-child {
+    text-align: center;
+  }
+
+  .sliderValue {
+    justify-self: center;
+  }
+
+  .subsection {
+    margin-bottom: 1.4rem;
+    padding-bottom: 1rem;
+  }
+}
