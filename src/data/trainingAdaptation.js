@@ -3,6 +3,18 @@ import { computeFeelScore } from './storage'
 const MS_PER_DAY = 86400000
 const HARD_TYPES = new Set(['hard', 'moderate', 'long', 'interval', 'tempo', 'speed'])
 
+const STRUCTURAL_BACK_BANNER =
+  'Prioritize core stability activation drills pre-run and execute the Soft Kiss silent landing test immediately on stepping out.'
+const ASTHMA_BREATHE_OVERRIDE =
+  "Maintain strict closed-mouth nasal breathing boundaries throughout today's entire cycle. If forced to mouth-breathe, de-escalate your speed immediately."
+const PELVIC_RECOVERY_STRENGTH =
+  'Pelvic Alignment & Spine Mobility routine: supine pelvic tilts 2x10, supported bridge 2x10 with breath, side-lying clamshells 2x12/side, cat-cow 2x8, thread-the-needle 5 breaths/side, child’s pose with diaphragmatic breathing 2 min.'
+const PELVIC_RECOVERY_TITLE = 'Pelvic Alignment & Spine Mobility routine.'
+const LOW_FEEL_ALERT =
+  'Your internal sensors are reporting low energy today. We have adjusted your plan to keep your frame safe. Listen to your body.'
+const LOW_FEEL_RUN_NOTE =
+  'Gentle, silent 20-minute recovery walk focusing entirely on the Soft Kiss landing and slow nasal breathing.'
+
 export function todayISO() {
   return new Date().toISOString().split('T')[0]
 }
@@ -23,19 +35,29 @@ export function daysBetweenISO(from, to) {
 export function normalizeCycleProfile(profile = {}) {
   const lastPeriod = profile.lastPeriod || ''
   const nextPeriod = profile.nextPeriod || ''
-  const periodLength = clampInt(profile.periodLength, 1, 14) || 0
+  const bleedingDuration = clampInt(profile.bleedingDuration, 1, 14)
+  const legacyPeriodLength = clampInt(profile.periodLength, 1, 14)
+  const periodLength = bleedingDuration || legacyPeriodLength || 0
   const explicitCycleLength = clampInt(profile.cycleLength, 15, 90) || 0
   const inferredCycleLength =
     lastPeriod && nextPeriod ? daysBetweenISO(lastPeriod, nextPeriod) : null
   const cycleLength = clampInt(inferredCycleLength, 15, 90) || explicitCycleLength || 28
+
+  // Accept both the new vocabulary (regular / perimenopause / postmenopause)
+  // and the legacy strings (no / perimenopause / menopause).
+  const rawStatus = profile.menopausalStatus || profile.menopauseStatus || ''
+  const menopauseStatus =
+    rawStatus === 'postmenopause' ? 'menopause' :
+    rawStatus === 'regular' ? 'no' :
+    rawStatus
 
   return {
     lastPeriod,
     nextPeriod,
     periodLength: periodLength || 5,
     cycleLength,
-    menopauseStatus: profile.menopauseStatus || '',
-    sex: profile.sex || profile.gender || '',
+    menopauseStatus,
+    sex: (profile.sex === 'woman' || profile.gender === 'woman' || profile.gender === 'female') ? 'woman' : (profile.sex || profile.gender || ''),
   }
 }
 
@@ -149,8 +171,9 @@ export function buildFeelOverrideSession(session, feelScore, reasons = []) {
     distance: '',
     duration: '20 min',
     pace: 'Very easy. Keep effort at 2-3/10.',
-    notes: `Your internal sensors are reporting low energy today (${feelScore.toFixed(1)}/10; ${reasonText}). We have adjusted your plan to keep your frame safe. Take a gentle, silent 20-minute recovery walk focusing entirely on Soft Kiss landing and slow nasal breathing.`,
+    notes: `${LOW_FEEL_ALERT} (Feel ${feelScore.toFixed(1)}/10; ${reasonText}.) ${LOW_FEEL_RUN_NOTE}`,
     strength: 'Skip intensity today. Optional 6-8 min easy mobility only.',
+    alertCard: LOW_FEEL_ALERT,
     feelAdjustment: {
       date: todayISO(),
       level: 'today-override',
@@ -160,6 +183,137 @@ export function buildFeelOverrideSession(session, feelScore, reasons = []) {
       original: base,
     },
   }
+}
+
+/**
+ * Average score across the three primary subjective FEEL dimensions
+ * called out by the framework: Sleep, Nutrition, Energy.
+ */
+export function computeSubjectiveFeelAverage(scores = {}) {
+  const picks = ['sleep', 'nutrition', 'energy']
+    .map(k => Number(scores[k]))
+    .filter(Number.isFinite)
+  if (!picks.length) return null
+  return picks.reduce((a, b) => a + b, 0) / picks.length
+}
+
+/**
+ * Structural-leak protective buffers from the onboarding profile:
+ * - Lower back pain → mandatory banner on running blocks.
+ * - Asthma / flagged cardiorespiratory markers → nasal-only breathing override.
+ */
+export function applyStructuralBuffers(session, profile = {}) {
+  if (!session) return session
+  const isRunning = session.type && session.type !== 'rest'
+  let next = session
+
+  const lowerBack = profile.lowerBackPain
+    || (Array.isArray(profile.jointPain) && profile.jointPain.includes('Lower Back Pain'))
+  if (lowerBack && isRunning) {
+    next = {
+      ...next,
+      safetyBanner: STRUCTURAL_BACK_BANNER,
+      notes: prependBanner(next.notes, STRUCTURAL_BACK_BANNER),
+      structuralAdjustment: { ...(next.structuralAdjustment || {}), lowerBackPain: true },
+    }
+  }
+
+  const asthma = profile.asthma
+    || (Array.isArray(profile.conditions) && profile.conditions.includes('Asthma'))
+  const cardiorespFlag = profile.cardiorespiratoryFlag || asthma
+  if (cardiorespFlag) {
+    next = {
+      ...next,
+      breathe: ASTHMA_BREATHE_OVERRIDE,
+      structuralAdjustment: { ...(next.structuralAdjustment || {}), asthma: Boolean(asthma) },
+    }
+  }
+
+  return next
+}
+
+/**
+ * Cycle Sync override layer: if the runner logs cramping or cycle-related
+ * fatigue at 6 or higher, swap heavy lower-body / core strength work for the
+ * Pelvic Alignment & Spine Mobility recovery circuit.
+ */
+export function applyCycleMetricsAdjustment(session, cycleMetrics) {
+  if (!session || !cycleMetrics) return session
+  const cramp = Number(cycleMetrics.cramping) || 0
+  const fatigue = Number(cycleMetrics.fatigue) || 0
+  const bleeding = cycleMetrics.phase === 'bleeding'
+
+  if (cramp < 6 && fatigue < 6 && !bleeding) return session
+
+  const next = { ...session }
+  if (cramp >= 6 || fatigue >= 6) {
+    next.strengthTitle = PELVIC_RECOVERY_TITLE
+    next.strength = PELVIC_RECOVERY_STRENGTH
+    next.cycleMetricsAdjustment = {
+      reason: cramp >= 6 ? 'high cramping' : 'high cycle fatigue',
+      cramping: cramp,
+      fatigue,
+    }
+  }
+  if (bleeding) {
+    next.cycleMetricsAdjustment = {
+      ...(next.cycleMetricsAdjustment || {}),
+      phase: 'bleeding',
+    }
+  }
+  return next
+}
+
+/**
+ * Mental-health stress buffer. If the onboarding baseline (0-10) was 4 or
+ * below, reduce planned run volume by 15% during weeks 1-3 so the nervous
+ * system has space to stabilise.
+ */
+export function applyMentalBaselineVolumeReduction(plan, profile = {}) {
+  if (!Array.isArray(plan) || !plan.length) return plan
+  const baseline = Number(profile.mentalBaseline)
+  if (!Number.isFinite(baseline) || baseline > 4) return plan
+  const SCALE = 0.85
+
+  return plan.map(day => {
+    const week = Number(day.week) || 1
+    if (week > 3) return day
+    if (!day.type || day.type === 'rest') return day
+    if (day.mentalBaselineAdjustment) return day
+    return {
+      ...day,
+      distance: scaleVolume(day.distance, SCALE, 'km'),
+      duration: scaleVolume(day.duration, SCALE, 'min'),
+      notes: appendNote(
+        day.notes,
+        'Volume reduced by 15% (weeks 1-3) to give your nervous system space to stabilise.',
+      ),
+      mentalBaselineAdjustment: { scale: SCALE, baseline, week },
+    }
+  })
+}
+
+function prependBanner(text, banner) {
+  const body = (text || '').trim()
+  return body ? `${banner}\n\n${body}` : banner
+}
+
+function appendNote(text, addition) {
+  const body = (text || '').trim()
+  return body ? `${body} ${addition}` : addition
+}
+
+function scaleVolume(value, scale, suffix) {
+  const text = String(value || '').trim()
+  if (!text || !Number.isFinite(scale) || scale <= 0) return text
+  return text.replace(/(\d+(?:\.\d+)?)/g, match => {
+    const n = Number(match)
+    if (!Number.isFinite(n)) return match
+    const scaled = n * scale
+    if (suffix === 'km') return scaled < 5 ? scaled.toFixed(1).replace(/\.0$/, '') : Math.round(scaled).toString()
+    if (suffix === 'min') return Math.round(scaled).toString()
+    return Math.round(scaled).toString()
+  })
 }
 
 export function getFeelOverrideReasons(scores = {}) {
@@ -187,24 +341,39 @@ export function adaptSessionForFeel(session, entries, profile = null) {
   return buildFeelOverrideSession(session, feelScore, reasons)
 }
 
-export function applyTodayFeelOverrideToGoal(goal, scores, profile = null) {
+export function applyTodayFeelOverrideToGoal(goal, scores, profile = null, options = {}) {
   if (!goal || !Array.isArray(goal.plan)) return null
   const date = todayISO()
   const feelScore = computeFeelScore(scores || {})
-  const plan = applyCycleAdaptationToPlan(goal.plan, profile)
+  const subjectiveAvg = computeSubjectiveFeelAverage(scores || {})
+  const triggerScore = subjectiveAvg != null ? Math.min(subjectiveAvg, feelScore) : feelScore
+
+  // 1. Cycle calendar layer (period window) applied to the whole plan.
+  // 4. Mental-baseline volume reduction layer applied to weeks 1-3.
+  let plan = applyCycleAdaptationToPlan(goal.plan, profile)
+  plan = applyMentalBaselineVolumeReduction(plan, profile || {})
+
   const index = plan.findIndex(day => day.date === date)
   if (index < 0) return null
 
   const reasons = getFeelOverrideReasons(scores)
   const base = plan[index].feelAdjustment?.original || plan[index]
-  const nextToday = feelScore <= 7
-    ? buildFeelOverrideSession(base, feelScore, reasons)
+
+  // 1. Low-FEEL recovery override (uses avg of Sleep, Nutrition, Energy when
+  //    available; falls back to the full Feel composite).
+  let todaySession = triggerScore <= 7
+    ? buildFeelOverrideSession(base, triggerScore, reasons)
     : adaptSessionForCycle(base, getCycleTrainingSignal(profile, date))
 
-  const nextPlan = plan.map((day, i) => i === index ? nextToday : day)
-  const summary = feelScore <= 7
-    ? 'Your internal sensors are reporting low energy today. We have adjusted your plan to keep your frame safe. Listen to your body.'
-    : null
+  // 2. Cycle Sync (today's journal phase + cramping/fatigue sliders).
+  todaySession = applyCycleMetricsAdjustment(todaySession, options.cycleMetrics)
+
+  // 3. Structural buffers (lower back, asthma) applied last so banners
+  //    persist on top of any earlier override.
+  todaySession = applyStructuralBuffers(todaySession, profile || {})
+
+  const nextPlan = plan.map((day, i) => i === index ? todaySession : applyStructuralBuffers(day, profile || {}))
+  const summary = triggerScore <= 7 ? LOW_FEEL_ALERT : null
 
   return {
     goal: {

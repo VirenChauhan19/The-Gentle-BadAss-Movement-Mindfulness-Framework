@@ -680,3 +680,156 @@
 }
 
 .backLink:hover { color: var(--ink-light); }
+
+/* ── Subsections (Body / History steps) ───────────────── */
+.subsection {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px dashed var(--border-light);
+  animation: fadeUp 320ms var(--ease-out) both;
+}
+
+.subsection:last-of-type {
+  border-bottom: none;
+}
+
+.subsectionTitle {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.subsectionDesc {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.55;
+  margin-bottom: 1rem;
+}
+
+/* ── Checkbox grid (multi-select) ─────────────────────── */
+.checkboxGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.75rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--paper);
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink);
+  transition: border-color var(--d-fast) var(--ease-out),
+              background var(--d-fast) var(--ease-out),
+              transform var(--d-fast) var(--ease-out);
+}
+
+.checkboxItem input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--sage-dark);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.checkboxItem:hover {
+  border-color: rgba(99, 127, 95, 0.4);
+}
+
+.checkboxItemActive {
+  border-color: var(--sage-dark);
+  background: rgba(99, 127, 95, 0.08);
+}
+
+/* ── Radio fieldset (running history) ─────────────────── */
+.radioFieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.radioFieldset legend {
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.radioGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.radioItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.85rem 0.95rem;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--paper);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink);
+  transition: border-color var(--d-fast) var(--ease-out),
+              background var(--d-fast) var(--ease-out);
+}
+
+.radioItem input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--sage-dark);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.radioItem:hover { border-color: rgba(99, 127, 95, 0.4); }
+
+.radioItemActive {
+  border-color: var(--sage-dark);
+  background: rgba(99, 127, 95, 0.08);
+  font-weight: 700;
+}
+
+/* ── Slider range labels (mental baseline etc.) ───────── */
+.sliderRangeLabels {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.sliderRangeLabels > :first-child { text-align: left; }
+.sliderRangeLabels > :last-child  { text-align: right; }
+
+.sliderValue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: var(--on-dark);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px var(--shadow-md);
+}

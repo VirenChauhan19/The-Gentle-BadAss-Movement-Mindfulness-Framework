@@ -65,7 +65,13 @@
       "Bash(firebase --version)",
       "Bash(firebase projects:list)",
       "Bash(git revert *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(node --check src/data/trainingAdaptation.js)",
+      "Bash(node -e \"import\\('./src/data/trainingAdaptation.js'\\).then\\(m => console.log\\(Object.keys\\(m\\).join\\(','\\)\\)\\)\")",
+      "Bash(node --check src/pages/Onboarding.jsx)",
+      "Bash(node --check src/pages/Journal.jsx)",
+      "Bash(npx --no-install vite build --logLevel error)",
+      "Bash(npx --no-install vite build)"
     ]
   },
   "enableAllProjectMcpServers": true,

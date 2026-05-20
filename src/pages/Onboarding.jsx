@@ -36,11 +36,6 @@ const PLANS = {
   270: { label: '270-Day La Ultra',      desc: 'The full La Ultra journey - the ultimate commitment.',   price: 2999 },
 }
 
-const AGE_RANGES = [
-  '18-24', '25-29', '30-34', '35-39', '40-44', '45-49',
-  '50-54', '55-59', '60-64', '65-69', '70+',
-]
-
 const HEARD_ABOUT = [
   'Instagram',
   'Facebook',
@@ -50,65 +45,178 @@ const HEARD_ABOUT = [
   'Friend referral',
 ]
 
+const JOINT_PAINS = [
+  'Lower Back Pain',
+  'Knee Pain',
+  'Ankle Pain',
+  'Plantar Fascia Issues',
+  'None',
+]
+
+const CONDITIONS = [
+  'Hypertension',
+  'Diabetes',
+  'Asthma',
+  'PCOS / PCOD',
+  'None',
+]
+
+const DAILY_MOVEMENT = [
+  { value: 'sedentary', label: 'Under 5,000 steps / Sedentary' },
+  { value: 'moderate',  label: '5,000 - 10,000 steps / Moderately Active' },
+  { value: 'active',    label: '10,000+ steps / Active' },
+]
+
+const RUNNING_HISTORY = [
+  { value: 'never',       label: 'Never' },
+  { value: 'recent-gap',  label: 'Yes, but not in the last 6 months' },
+  { value: 'active',      label: 'Yes, active within the last 3 months' },
+]
+
+const STRENGTH_FREQUENCY = [
+  { value: '0',    label: '0 days/week' },
+  { value: '1-2',  label: '1-2 days/week' },
+  { value: '3+',   label: '3+ days/week' },
+]
+
+const TOTAL_STEPS = 5
+const STEP_TITLES = {
+  1: 'Your Sign Up Details',
+  2: 'Your Body',
+  3: 'Your History',
+  4: 'Choose Your Path',
+  5: 'Your Commitment',
+}
+const STEP_SUBTITLES = {
+  1: 'Tell us who you are and what you are committing to.',
+  2: 'Biometrics and biological rhythms help us scale loads safely.',
+  3: 'A clear picture of past wear lets us protect your structure.',
+  4: 'Pick the focus that fits your current state.',
+  5: 'Slide to choose your journey length.',
+}
+
+const MENOPAUSE_NEW_TO_LEGACY = {
+  regular: 'no',
+  perimenopause: 'perimenopause',
+  postmenopause: 'menopause',
+}
+const MENOPAUSE_LEGACY_TO_NEW = {
+  no: 'regular',
+  perimenopause: 'perimenopause',
+  menopause: 'postmenopause',
+}
+
+function toggleInList(list, value) {
+  const set = new Set(list || [])
+  if (value === 'None') return set.has('None') ? [] : ['None']
+  set.delete('None')
+  if (set.has(value)) set.delete(value)
+  else set.add(value)
+  return Array.from(set)
+}
+
 export default function Onboarding() {
   const { saveProfile, profile } = useData()
   const navigate = useNavigate()
   const [step, setStep] = useState(() => (profile?.onboardingComplete && !profile?.sex ? 2 : 1))
   const [data, setData] = useState({
     name: profile?.name || '',
+    age: profile?.age || '',
     ageRange: profile?.ageRange || '',
     gender: profile?.gender || profile?.sex || '',
+    heightCm: profile?.heightCm || '',
+    weightKg: profile?.weightKg || '',
+    waistCm: profile?.waistCm || '',
     fitnessHistory: profile?.fitnessHistory || '',
     commitmentStatement: profile?.commitmentStatement || '',
     heardAbout: profile?.heardAbout || '',
     programGoal: profile?.programGoal || '',
     sex: profile?.sex || '',
+    menopausalStatus:
+      profile?.menopausalStatus ||
+      MENOPAUSE_LEGACY_TO_NEW[profile?.menopauseStatus] ||
+      '',
+    cycleLength: profile?.cycleLength || '',
+    bleedingDuration: profile?.bleedingDuration || profile?.periodLength || '',
     lastPeriod: profile?.lastPeriod || '',
     nextPeriod: profile?.nextPeriod || '',
-    periodLength: profile?.periodLength || '',
-    cycleLength: profile?.cycleLength || '',
-    menopauseStatus: profile?.menopauseStatus || '',
+    jointPain: Array.isArray(profile?.jointPain) ? profile.jointPain : [],
+    conditions: Array.isArray(profile?.conditions) ? profile.conditions : [],
+    mentalBaseline: typeof profile?.mentalBaseline === 'number' ? profile.mentalBaseline : 5,
+    mentorNote: profile?.mentorNote || '',
+    dailyMovement: profile?.dailyMovement || '',
+    runningHistory: profile?.runningHistory || '',
+    strengthFrequency: profile?.strengthFrequency || '',
     path: profile?.path || '',
     commitment: profile?.commitment || 90,
   })
   const plan = PLANS[data.commitment] || PLANS[90]
-  const isWoman = data.sex === 'woman'
-  const skipBodyStep = data.gender === 'man'
-  const storyReady = data.name.trim() && data.ageRange && data.gender && data.fitnessHistory.trim() && data.commitmentStatement.trim()
+  const isFemale = data.gender === 'woman' || data.gender === 'female'
+  const showCycleFields =
+    isFemale && (data.menopausalStatus === 'regular' || data.menopausalStatus === 'perimenopause')
+
+  const storyReady =
+    data.name.trim() &&
+    data.age &&
+    data.gender &&
+    data.fitnessHistory.trim() &&
+    data.commitmentStatement.trim()
+  const bodyReady = data.heightCm && data.weightKg && data.waistCm && (!isFemale || data.menopausalStatus)
+  const historyReady =
+    data.jointPain.length &&
+    data.conditions.length &&
+    data.dailyMovement &&
+    data.runningHistory &&
+    data.strengthFrequency
 
   async function handleComplete() {
-    await saveProfile({ ...data, sex: data.sex || data.gender, onboardingComplete: true })
+    const resolvedSex = data.sex || (isFemale ? 'woman' : data.gender === 'man' ? 'man' : data.gender)
+    const payload = {
+      ...data,
+      sex: resolvedSex,
+      // Legacy aliases so existing systems (training adaptation, Coach) keep working.
+      menopauseStatus: MENOPAUSE_NEW_TO_LEGACY[data.menopausalStatus] || '',
+      periodLength: data.bleedingDuration,
+      // Derived flags for the adaptation engine.
+      lowerBackPain: data.jointPain.includes('Lower Back Pain'),
+      kneePain: data.jointPain.includes('Knee Pain'),
+      anklePain: data.jointPain.includes('Ankle Pain'),
+      plantarFasciaIssues: data.jointPain.includes('Plantar Fascia Issues'),
+      hypertension: data.conditions.includes('Hypertension'),
+      diabetes: data.conditions.includes('Diabetes'),
+      asthma: data.conditions.includes('Asthma'),
+      pcos: data.conditions.includes('PCOS / PCOD'),
+      onboardingComplete: true,
+    }
+    await saveProfile(payload)
     navigate('/')
+  }
+
+  function update(patch) {
+    setData(prev => ({ ...prev, ...patch }))
   }
 
   return (
     <div className={styles.page}>
       <div className={styles.progressBar}>
-        {[1, 2, 3, 4].map(n => (
+        {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map(n => (
           <div
             key={n}
             className={styles.progressDot + (step >= n ? ' ' + styles.progressDotActive : '')}
           />
         ))}
         <div className={styles.progressLine}>
-          <div className={styles.progressLineFill} style={{ width: `${((step - 1) / 3) * 100}%` }} />
+          <div
+            className={styles.progressLineFill}
+            style={{ width: `${((step - 1) / (TOTAL_STEPS - 1)) * 100}%` }}
+          />
         </div>
       </div>
 
       <header className={styles.header}>
-        <p className={styles.stepLabel}>Step {step} of 4</p>
-        <h1 className={styles.title}>
-          {step === 1 && 'Your Sign Up Details'}
-          {step === 2 && 'Your Body'}
-          {step === 3 && 'Choose Your Path'}
-          {step === 4 && 'Your Commitment'}
-        </h1>
-        <p className={styles.subtitle}>
-          {step === 1 && 'Tell us who you are and what you are committing to.'}
-          {step === 2 && 'This helps us adjust training around monthly physiology.'}
-          {step === 3 && 'Pick the focus that fits your current state.'}
-          {step === 4 && 'Slide to choose your journey length.'}
-        </p>
+        <p className={styles.stepLabel}>Step {step} of {TOTAL_STEPS}</p>
+        <h1 className={styles.title}>{STEP_TITLES[step]}</h1>
+        <p className={styles.subtitle}>{STEP_SUBTITLES[step]}</p>
       </header>
 
       {step === 1 && (
@@ -119,20 +227,21 @@ export default function Onboarding() {
               <input
                 type="text"
                 value={data.name}
-                onChange={e => setData({ ...data, name: e.target.value })}
+                onChange={e => update({ name: e.target.value })}
                 placeholder="Your name"
                 autoFocus
               />
             </label>
             <label>
-              <span>Age range</span>
-              <select
-                value={data.ageRange}
-                onChange={e => setData({ ...data, ageRange: e.target.value })}
-              >
-                <option value="">Select one</option>
-                {AGE_RANGES.map(range => <option key={range} value={range}>{range}</option>)}
-              </select>
+              <span>Age</span>
+              <input
+                type="number"
+                min="13"
+                max="100"
+                value={data.age}
+                onChange={e => update({ age: e.target.value })}
+                placeholder="Years"
+              />
             </label>
             <label>
               <span>Gender</span>
@@ -140,28 +249,26 @@ export default function Onboarding() {
                 value={data.gender}
                 onChange={e => {
                   const gender = e.target.value
-                  setData({ ...data, gender, sex: gender })
+                  update({ gender, sex: gender === 'female' ? 'woman' : gender === 'male' ? 'man' : gender })
                 }}
               >
                 <option value="">Select one</option>
-                <option value="woman">Woman</option>
-                <option value="man">Man</option>
-                <option value="non-binary">Non-binary</option>
-                <option value="self-described">Prefer to self-describe</option>
-                <option value="prefer-not">Prefer not to say</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="prefer-not">Prefer Not to Say</option>
               </select>
             </label>
           </div>
           <textarea
             className={styles.textarea}
             value={data.fitnessHistory}
-            onChange={e => setData({ ...data, fitnessHistory: e.target.value })}
+            onChange={e => update({ fitnessHistory: e.target.value })}
             placeholder="Their story: your journey so far, injuries, life events, work, children, menopause context, and anything else we should know."
           />
           <textarea
             className={styles.textareaSmall}
             value={data.commitmentStatement}
-            onChange={e => setData({ ...data, commitmentStatement: e.target.value })}
+            onChange={e => update({ commitmentStatement: e.target.value })}
             placeholder="Self-commitment: write your own mission statement in your own words."
           />
           <div className={styles.bodyFields}>
@@ -169,7 +276,7 @@ export default function Onboarding() {
               <span>How did you hear about us?</span>
               <select
                 value={data.heardAbout}
-                onChange={e => setData({ ...data, heardAbout: e.target.value })}
+                onChange={e => update({ heardAbout: e.target.value })}
               >
                 <option value="">Select one</option>
                 {HEARD_ABOUT.map(item => <option key={item} value={item}>{item}</option>)}
@@ -180,7 +287,7 @@ export default function Onboarding() {
               <input
                 type="text"
                 value={data.programGoal}
-                onChange={e => setData({ ...data, programGoal: e.target.value })}
+                onChange={e => update({ programGoal: e.target.value })}
                 placeholder="e.g. consistency, pain-free running, strength"
               />
             </label>
@@ -190,7 +297,7 @@ export default function Onboarding() {
             <button
               className={styles.primaryBtn}
               disabled={!storyReady}
-              onClick={() => setStep(skipBodyStep ? 3 : 2)}
+              onClick={() => setStep(2)}
             >
               Next
             </button>
@@ -200,83 +307,110 @@ export default function Onboarding() {
 
       {step === 2 && (
         <section className={styles.section}>
-          <div className={styles.choiceGrid}>
-            <button
-              type="button"
-              className={`${styles.choiceCard} ${data.sex === 'woman' ? styles.choiceCardActive : ''}`}
-              onClick={() => setData({ ...data, sex: 'woman', gender: data.gender || 'woman' })}
-            >
-              Woman
-            </button>
-            <button
-              type="button"
-              className={`${styles.choiceCard} ${data.sex === 'man' ? styles.choiceCardActive : ''}`}
-              onClick={() => setData({ ...data, sex: 'man', gender: data.gender || 'man' })}
-            >
-              Man
-            </button>
-          </div>
-
-          {isWoman && (
+          <div className={styles.subsection}>
+            <h2 className={styles.subsectionTitle}>Basic Biometrics</h2>
+            <p className={styles.subsectionDesc}>The Chariot needs its dimensions.</p>
             <div className={styles.bodyFields}>
               <label>
-                <span>When was your last period?</span>
-                <input
-                  type="date"
-                  value={data.lastPeriod}
-                  onChange={e => setData({ ...data, lastPeriod: e.target.value })}
-                />
-              </label>
-              <label>
-                <span>When do you expect your next period?</span>
-                <input
-                  type="date"
-                  value={data.nextPeriod}
-                  onChange={e => setData({ ...data, nextPeriod: e.target.value })}
-                />
-              </label>
-              <label>
-                <span>Average cycle length, if you prefer</span>
+                <span>Height (cm)</span>
                 <input
                   type="number"
-                  min="15"
-                  max="90"
-                  value={data.cycleLength}
-                  onChange={e => setData({ ...data, cycleLength: e.target.value })}
-                  placeholder="e.g. 28 days"
+                  min="100"
+                  max="230"
+                  value={data.heightCm}
+                  onChange={e => update({ heightCm: e.target.value })}
+                  placeholder="e.g. 168"
                 />
               </label>
               <label>
-                <span>Average period duration</span>
+                <span>Current Body Mass (for structural loading calculation)</span>
                 <input
                   type="number"
-                  min="1"
-                  max="14"
-                  value={data.periodLength}
-                  onChange={e => setData({ ...data, periodLength: e.target.value })}
-                  placeholder="e.g. 5 days"
+                  min="30"
+                  max="250"
+                  step="0.1"
+                  value={data.weightKg}
+                  onChange={e => update({ weightKg: e.target.value })}
+                  placeholder="kg"
                 />
               </label>
               <label>
-                <span>Are you in perimenopause or menopause?</span>
-                <select
-                  value={data.menopauseStatus}
-                  onChange={e => setData({ ...data, menopauseStatus: e.target.value })}
-                >
-                  <option value="">Select one</option>
-                  <option value="no">No</option>
-                  <option value="perimenopause">Perimenopause</option>
-                  <option value="menopause">Menopause</option>
-                  <option value="unsure">Not sure</option>
-                </select>
+                <span>Waist Circumference (vital marker of metabolic health and core baseline)</span>
+                <input
+                  type="number"
+                  min="40"
+                  max="200"
+                  step="0.1"
+                  value={data.waistCm}
+                  onChange={e => update({ waistCm: e.target.value })}
+                  placeholder="cm (or inches)"
+                />
               </label>
+            </div>
+          </div>
+
+          {isFemale && (
+            <div className={styles.subsection}>
+              <h2 className={styles.subsectionTitle}>Biological Rhythms & Menstrual Cycle</h2>
+              <p className={styles.subsectionDesc}>
+                We use this to keep training aligned with your monthly physiology.
+              </p>
+              <div className={styles.bodyFields}>
+                <label>
+                  <span>Menopausal Status</span>
+                  <select
+                    value={data.menopausalStatus}
+                    onChange={e => update({ menopausalStatus: e.target.value })}
+                  >
+                    <option value="">Select one</option>
+                    <option value="regular">Regular Cycles</option>
+                    <option value="perimenopause">Perimenopausal</option>
+                    <option value="postmenopause">Postmenopausal</option>
+                  </select>
+                </label>
+
+                {showCycleFields && (
+                  <>
+                    <label>
+                      <span>Average Cycle Length (days)</span>
+                      <input
+                        type="number"
+                        min="15"
+                        max="90"
+                        value={data.cycleLength || 28}
+                        onChange={e => update({ cycleLength: e.target.value })}
+                        placeholder="28"
+                      />
+                    </label>
+                    <label>
+                      <span>Date of the first day of your last period</span>
+                      <input
+                        type="date"
+                        value={data.lastPeriod}
+                        onChange={e => update({ lastPeriod: e.target.value })}
+                      />
+                    </label>
+                    <label>
+                      <span>Average Duration of Bleeding (days)</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="14"
+                        value={data.bleedingDuration || 5}
+                        onChange={e => update({ bleedingDuration: e.target.value })}
+                        placeholder="5"
+                      />
+                    </label>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
           <div className={styles.btnStack}>
             <button
               className={styles.primaryBtn}
-              disabled={!data.sex}
+              disabled={!bodyReady}
               onClick={() => setStep(3)}
             >
               Next
@@ -288,12 +422,155 @@ export default function Onboarding() {
 
       {step === 3 && (
         <section className={styles.section}>
+          <div className={styles.subsection}>
+            <h2 className={styles.subsectionTitle}>Locating Structural Leaks</h2>
+            <p className={styles.subsectionDesc}>
+              Joint or muscle pain you are currently navigating.
+            </p>
+            <div className={styles.checkboxGrid}>
+              {JOINT_PAINS.map(item => (
+                <label
+                  key={item}
+                  className={`${styles.checkboxItem} ${data.jointPain.includes(item) ? styles.checkboxItemActive : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={data.jointPain.includes(item)}
+                    onChange={() => update({ jointPain: toggleInList(data.jointPain, item) })}
+                  />
+                  <span>{item}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.subsection}>
+            <h2 className={styles.subsectionTitle}>Metabolic / Cardiovascular Conditions</h2>
+            <p className={styles.subsectionDesc}>
+              Anything we should respect in your breathing and load progression.
+            </p>
+            <div className={styles.checkboxGrid}>
+              {CONDITIONS.map(item => (
+                <label
+                  key={item}
+                  className={`${styles.checkboxItem} ${data.conditions.includes(item) ? styles.checkboxItemActive : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={data.conditions.includes(item)}
+                    onChange={() => update({ conditions: toggleInList(data.conditions, item) })}
+                  />
+                  <span>{item}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.subsection}>
+            <h2 className={styles.subsectionTitle}>Mental & Emotional Energy Spectrum</h2>
+            <p className={styles.subsectionDesc}>
+              Where is your overall mental and emotional baseline right now?
+            </p>
+            <div className={styles.sliderWrap}>
+              <input
+                type="range"
+                min="0"
+                max="10"
+                step="1"
+                value={data.mentalBaseline}
+                onChange={e => update({ mentalBaseline: Number(e.target.value) })}
+                className={styles.slider}
+              />
+              <div className={styles.sliderRangeLabels}>
+                <span>0 · Exhausted / Overwhelmed</span>
+                <span className={styles.sliderValue}>{data.mentalBaseline}</span>
+                <span>10 · Grounded / Resilient</span>
+              </div>
+            </div>
+            <textarea
+              className={styles.textareaSmall}
+              value={data.mentorNote}
+              onChange={e => update({ mentorNote: e.target.value })}
+              placeholder="Is there anything else you would like your Mentor to know about your mind or body? (Optional)"
+            />
+          </div>
+
+          <div className={styles.subsection}>
+            <h2 className={styles.subsectionTitle}>Movement & Fitness History</h2>
+            <p className={styles.subsectionDesc}>
+              Where your body is starting from today.
+            </p>
+            <div className={styles.bodyFields}>
+              <label>
+                <span>Average daily movement</span>
+                <select
+                  value={data.dailyMovement}
+                  onChange={e => update({ dailyMovement: e.target.value })}
+                >
+                  <option value="">Select one</option>
+                  {DAILY_MOVEMENT.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <fieldset className={styles.radioFieldset}>
+                <legend>Have you ever run before?</legend>
+                <div className={styles.radioGroup}>
+                  {RUNNING_HISTORY.map(opt => (
+                    <label
+                      key={opt.value}
+                      className={`${styles.radioItem} ${data.runningHistory === opt.value ? styles.radioItemActive : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name="runningHistory"
+                        value={opt.value}
+                        checked={data.runningHistory === opt.value}
+                        onChange={() => update({ runningHistory: opt.value })}
+                      />
+                      <span>{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <label>
+                <span>Current resistance training frequency</span>
+                <select
+                  value={data.strengthFrequency}
+                  onChange={e => update({ strengthFrequency: e.target.value })}
+                >
+                  <option value="">Select one</option>
+                  {STRENGTH_FREQUENCY.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div className={styles.btnStack}>
+            <button
+              className={styles.primaryBtn}
+              disabled={!historyReady}
+              onClick={() => setStep(4)}
+            >
+              Next
+            </button>
+            <button className={styles.backLink} onClick={() => setStep(2)}>Back</button>
+          </div>
+        </section>
+      )}
+
+      {step === 4 && (
+        <section className={styles.section}>
           <div className={styles.pathGrid}>
             {paths.map(p => (
               <button
                 key={p.id}
                 className={styles.pathCard + (data.path === p.id ? ' ' + styles.pathActive : '')}
-                onClick={() => setData({ ...data, path: p.id })}
+                onClick={() => update({ path: p.id })}
               >
                 <span className={styles.pathIcon}>{p.icon}</span>
                 <div className={styles.pathText}>
@@ -308,16 +585,16 @@ export default function Onboarding() {
             <button
               className={styles.primaryBtn}
               disabled={!data.path}
-              onClick={() => setStep(4)}
+              onClick={() => setStep(5)}
             >
               Next
             </button>
-            <button className={styles.backLink} onClick={() => setStep(skipBodyStep ? 1 : 2)}>Back</button>
+            <button className={styles.backLink} onClick={() => setStep(3)}>Back</button>
           </div>
         </section>
       )}
 
-      {step === 4 && (
+      {step === 5 && (
         <section className={styles.section}>
           <div className={styles.commitmentCard}>
             <div className={styles.commitDays}>{data.commitment}</div>
@@ -334,7 +611,7 @@ export default function Onboarding() {
               max="270"
               step="30"
               value={data.commitment}
-              onChange={e => setData({ ...data, commitment: Number(e.target.value) })}
+              onChange={e => update({ commitment: Number(e.target.value) })}
               className={styles.slider}
             />
             <div className={styles.sliderTicks}>
@@ -349,7 +626,7 @@ export default function Onboarding() {
             <button className={styles.startBtn} onClick={handleComplete}>
               Start My Journey
             </button>
-            <button className={styles.backLink} onClick={() => setStep(3)}>Back</button>
+            <button className={styles.backLink} onClick={() => setStep(4)}>Back</button>
           </div>
         </section>
       )}

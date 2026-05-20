@@ -330,6 +330,154 @@
   box-shadow: 0 0 0 4px rgba(99, 127, 95, 0.12);
 }
 
+/* ── Cycle Sync (daily phase + symptom sliders) ──────── */
+.cycleSyncCard {
+  margin: 14px 16px 0;
+  padding: 18px 18px 20px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-2xl);
+  box-shadow: 0 10px 26px var(--shadow-xs);
+  display: grid;
+  gap: 16px;
+}
+
+.cycleSyncHead { display: grid; gap: 4px; }
+
+.cycleSyncKicker {
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sage-dark);
+  font-weight: 800;
+}
+
+.cycleSyncTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink);
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.cycleSyncHint {
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+}
+
+.cyclePhaseSeg {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .cyclePhaseSeg { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.cyclePhaseBtn {
+  display: grid;
+  gap: 2px;
+  padding: 12px 10px;
+  border: 1.5px solid var(--border);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--d-fast) var(--ease-out),
+              background var(--d-fast) var(--ease-out),
+              transform var(--d-fast) var(--ease-out);
+}
+
+.cyclePhaseBtn:hover { border-color: rgba(99, 127, 95, 0.4); }
+
+.cyclePhaseBtnActive {
+  border-color: var(--sage-dark);
+  background: rgba(99, 127, 95, 0.1);
+}
+
+.cyclePhaseLabel {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.cyclePhaseSub {
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.cycleSliderRow {
+  display: grid;
+  gap: 6px;
+}
+
+.cycleSliderHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.cycleSliderValue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--sage-dark);
+  color: var(--on-dark);
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0 10px;
+}
+
+.cycleSlider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: linear-gradient(90deg, var(--sage-dark), var(--sage));
+  border-radius: 999px;
+  outline: none;
+}
+
+.cycleSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: var(--ink);
+  border: 3px solid var(--paper);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 3px 10px var(--shadow-md);
+}
+
+.cycleSlider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: var(--ink);
+  border: 3px solid var(--paper);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cycleSliderEnds {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
 /* ── Categorized factors ─────────────────────────────── */
 .factors {
   padding: 24px 16px 16px;

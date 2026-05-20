@@ -15,6 +15,23 @@ const REFLECTION_PROMPTS = [
   'A small win today',
 ]
 
+const CYCLE_PHASES = [
+  { value: 'bleeding', label: 'Bleeding', sub: 'Active Period' },
+  { value: 'post',     label: 'Post-Period', sub: 'High Energy Zone' },
+  { value: 'pre',      label: 'Pre-Period', sub: 'PMS / Low Energy Zone' },
+  { value: 'na',       label: 'N/A', sub: '' },
+]
+
+function showsCycleSync(profile) {
+  if (!profile) return false
+  const isFemale = profile.sex === 'woman' || profile.gender === 'woman' || profile.gender === 'female'
+  if (!isFemale) return false
+  const status = profile.menopausalStatus || profile.menopauseStatus
+  // New values: regular / perimenopause / postmenopause.
+  // Legacy values: no / perimenopause / menopause / unsure.
+  return status === 'regular' || status === 'perimenopause' || status === 'no' || status === 'unsure' || !status
+}
+
 const CATEGORY_ORDER = ['body', 'mind', 'movement']
 const CATEGORY_META = {
   body:     { label: 'Body',     hint: 'How the body feels today.' },
@@ -54,6 +71,11 @@ export default function Journal() {
     periodLength: existing?.cycle?.periodLength || profile?.periodLength || '',
     cycleLength: existing?.cycle?.cycleLength || profile?.cycleLength || '',
     menopauseStatus: existing?.cycle?.menopauseStatus || profile?.menopauseStatus || '',
+  }))
+  const [cycleMetrics, setCycleMetrics] = useState(() => ({
+    phase: existing?.cycleMetrics?.phase || '',
+    cramping: typeof existing?.cycleMetrics?.cramping === 'number' ? existing.cycleMetrics.cramping : 0,
+    fatigue:  typeof existing?.cycleMetrics?.fatigue  === 'number' ? existing.cycleMetrics.fatigue  : 0,
   }))
   const [cycleOpen, setCycleOpen] = useState(() =>
     Boolean(cycle.lastPeriod || cycle.periodLength || cycle.cycleLength || cycle.menopauseStatus)
@@ -99,7 +121,13 @@ export default function Journal() {
       return
     }
     const cycleData = profile?.sex === 'woman' ? cycle : null
-    const feelAdjustment = applyTodayFeelOverrideToGoal(coachData?.goal, scores, { ...profile, ...cycleData })
+    const cycleMetricsData = showsCycleSync(profile) && cycleMetrics.phase ? cycleMetrics : null
+    const feelAdjustment = applyTodayFeelOverrideToGoal(
+      coachData?.goal,
+      scores,
+      { ...profile, ...cycleData },
+      { cycleMetrics: cycleMetricsData },
+    )
     if (feelAdjustment?.goal) updateCoachGoal(feelAdjustment.goal)
     if (cycleData && saveProfile) saveProfile(cycleData)
     await saveEntry({
@@ -107,6 +135,7 @@ export default function Journal() {
       scoreNotes,
       note,
       cycle: cycleData,
+      cycleMetrics: cycleMetricsData,
       runningAdjustment: feelAdjustment?.summary || null,
     })
     setSaved(true)
@@ -122,10 +151,10 @@ export default function Journal() {
   const tone = scoreTone(answered ? feelScore : 5)
 
   const sharedProps = {
-    profile, scores, scoreNotes, note, cycle, cycleOpen,
+    profile, scores, scoreNotes, note, cycle, cycleOpen, cycleMetrics,
     saved, submitError, feelScore, answered, total, allAnswered,
     status, tone, dateStr, displayOrder, mobileDisplayOrder, grouped, wordCount,
-    handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setSaved,
+    handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setCycleMetrics, setSaved,
     handleSave,
   }
 
@@ -137,10 +166,10 @@ export default function Journal() {
    DESKTOP / TABLET: existing categorized layout
    ───────────────────────────────────────────────────── */
 function JournalDesktop({
-  profile, scores, scoreNotes, note, cycle, cycleOpen,
+  profile, scores, scoreNotes, note, cycle, cycleOpen, cycleMetrics,
   saved, submitError, feelScore, answered, total, allAnswered,
   status, tone, dateStr, displayOrder, grouped, wordCount,
-  handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setSaved,
+  handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setCycleMetrics, setSaved,
   handleSave,
 }) {
   function jumpToCategory(id) {
@@ -214,6 +243,14 @@ function JournalDesktop({
           setCycleOpen={setCycleOpen}
           setSaved={setSaved}
           variant="desktop"
+        />
+      )}
+
+      {showsCycleSync(profile) && (
+        <CycleSyncSection
+          cycleMetrics={cycleMetrics}
+          setCycleMetrics={setCycleMetrics}
+          setSaved={setSaved}
         />
       )}
 
@@ -297,10 +334,10 @@ function JournalDesktop({
    ───────────────────────────────────────────────────── */
 function JournalMobile(props) {
   const {
-    profile, scores, scoreNotes, note, cycle, cycleOpen,
+    profile, scores, scoreNotes, note, cycle, cycleOpen, cycleMetrics,
     saved, submitError, feelScore, answered, total, allAnswered,
     status, tone, dateStr, mobileDisplayOrder, wordCount,
-    handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setSaved,
+    handleScore, handleScoreNote, setNote, setCycle, setCycleOpen, setCycleMetrics, setSaved,
     handleSave,
   } = props
 
@@ -344,6 +381,7 @@ function JournalMobile(props) {
         note={note}
         cycle={cycle}
         cycleOpen={cycleOpen}
+        cycleMetrics={cycleMetrics}
         saved={saved}
         submitError={submitError}
         feelScore={feelScore}
@@ -358,6 +396,7 @@ function JournalMobile(props) {
         setNote={setNote}
         setCycle={setCycle}
         setCycleOpen={setCycleOpen}
+        setCycleMetrics={setCycleMetrics}
         setSaved={setSaved}
         handleSave={handleSave}
         onBackToFactors={() => {
@@ -548,10 +587,10 @@ function MobileFactorScreen({
 }
 
 function MobileReflectionScreen({
-  profile, scores, scoreNotes, note, cycle, cycleOpen,
+  profile, scores, scoreNotes, note, cycle, cycleOpen, cycleMetrics,
   saved, submitError, feelScore, answered, total, allAnswered,
   status, tone, dateStr, displayOrder, wordCount,
-  setNote, setCycle, setCycleOpen, setSaved,
+  setNote, setCycle, setCycleOpen, setCycleMetrics, setSaved,
   handleSave, onBackToFactors,
 }) {
   return (
@@ -597,6 +636,14 @@ function MobileReflectionScreen({
           setCycleOpen={setCycleOpen}
           setSaved={setSaved}
           variant="mobile"
+        />
+      )}
+
+      {showsCycleSync(profile) && (
+        <CycleSyncSection
+          cycleMetrics={cycleMetrics}
+          setCycleMetrics={setCycleMetrics}
+          setSaved={setSaved}
         />
       )}
 
@@ -691,6 +738,84 @@ function CycleSection({ cycle, setCycle, cycleOpen, setCycleOpen, setSaved }) {
           </div>
         </div>
       )}
+    </section>
+  )
+}
+
+function CycleSyncSection({ cycleMetrics, setCycleMetrics, setSaved }) {
+  function setMetric(patch) {
+    setCycleMetrics(prev => ({ ...prev, ...patch }))
+    setSaved(false)
+  }
+  return (
+    <section className={styles.cycleSyncCard} aria-labelledby="cycle-sync-heading">
+      <header className={styles.cycleSyncHead}>
+        <span className={styles.cycleSyncKicker}>Cycle Sync</span>
+        <h2 id="cycle-sync-heading" className={styles.cycleSyncTitle}>
+          Where are you in your cycle today?
+        </h2>
+        <p className={styles.cycleSyncHint}>
+          We use this to keep today’s prescription safe for your physiology.
+        </p>
+      </header>
+
+      <div className={styles.cyclePhaseSeg} role="radiogroup" aria-label="Cycle phase">
+        {CYCLE_PHASES.map(phase => (
+          <button
+            key={phase.value}
+            type="button"
+            role="radio"
+            aria-checked={cycleMetrics.phase === phase.value}
+            className={`${styles.cyclePhaseBtn} ${cycleMetrics.phase === phase.value ? styles.cyclePhaseBtnActive : ''}`}
+            onClick={() => setMetric({ phase: phase.value })}
+          >
+            <span className={styles.cyclePhaseLabel}>{phase.label}</span>
+            {phase.sub && <span className={styles.cyclePhaseSub}>{phase.sub}</span>}
+          </button>
+        ))}
+      </div>
+
+      <div className={styles.cycleSliderRow}>
+        <div className={styles.cycleSliderHead}>
+          <span>Cramping / Pelvic Discomfort</span>
+          <span className={styles.cycleSliderValue}>{cycleMetrics.cramping}</span>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={cycleMetrics.cramping}
+          onChange={e => setMetric({ cramping: Number(e.target.value) })}
+          className={styles.cycleSlider}
+          aria-label="Cramping or pelvic discomfort"
+        />
+        <div className={styles.cycleSliderEnds}>
+          <span>0 · None</span>
+          <span>10 · Severe</span>
+        </div>
+      </div>
+
+      <div className={styles.cycleSliderRow}>
+        <div className={styles.cycleSliderHead}>
+          <span>Cycle-Related Fatigue</span>
+          <span className={styles.cycleSliderValue}>{cycleMetrics.fatigue}</span>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={cycleMetrics.fatigue}
+          onChange={e => setMetric({ fatigue: Number(e.target.value) })}
+          className={styles.cycleSlider}
+          aria-label="Cycle related fatigue"
+        />
+        <div className={styles.cycleSliderEnds}>
+          <span>0 · Bursting with energy</span>
+          <span>10 · Completely drained</span>
+        </div>
+      </div>
     </section>
   )
 }
