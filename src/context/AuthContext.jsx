@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
 
   async function signInWithGoogle(method = 'popup') {
     if (!isConfigured) {
-      alert('Firebase is not set up yet. Fill in your real values in .env.local and restart the dev server.')
+      setAuthError('Firebase is not configured yet. Add your Firebase values and restart the app to enable Google sign-in.')
       return
     }
     setAuthError(null)

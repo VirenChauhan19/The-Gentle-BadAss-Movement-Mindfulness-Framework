@@ -183,7 +183,7 @@ export default function History() {
             {[...moveSessions].reverse().slice(0, 12).map((session, i) => (
               <div key={`${session.date}-${session.exerciseId}-${i}`} className={styles.moveRow}>
                 <div>
-                  <strong>{session.exerciseName}</strong>
+                  <strong>{session.exerciseName || session.weekTitle || session.title || 'Breathe'}</strong>
                   <p>{session.date} · {session.status || 'completed'}</p>
                 </div>
                 <div className={styles.moveMetrics}>
@@ -261,8 +261,8 @@ function EntryRow({ entry }) {
           {entry.sessions.map((s, i) => (
             <span key={i} className={styles.sessionBadge}>
               {s.type === 'breathing'
-                ? `${s.exerciseName}: ${Math.round((s.durationSeconds || 0) / 60)} min`
-                : `${s.exerciseName}: ${s.tpr}s TPR${typeof s.qualityScore === 'number' ? ` · Q ${s.qualityScore}/10` : ''}`}
+                ? `${s.exerciseName || s.weekTitle || 'Breathe'}: ${Math.round((s.durationSeconds || 0) / 60)} min`
+                : `${s.exerciseName || s.title || 'Movement'}: ${s.tpr}s TPR${typeof s.qualityScore === 'number' ? ` · Q ${s.qualityScore}/10` : ''}`}
             </span>
           ))}
         </div>

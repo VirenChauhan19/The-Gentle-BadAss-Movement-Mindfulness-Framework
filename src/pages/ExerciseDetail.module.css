@@ -75,6 +75,9 @@
 }
 
 .back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.85rem;
   color: var(--ink-light);
   transition: color 0.15s;
@@ -85,6 +88,21 @@
   min-height: 36px;
   padding: 0 14px;
   box-shadow: 0 6px 16px var(--shadow-xs);
+}
+
+.nextTopBtn {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--r-md);
+  background: var(--ink);
+  color: var(--on-ink);
+  font-weight: 800;
+  box-shadow: 0 6px 16px var(--shadow-xs);
+}
+
+.nextTopBtn:hover {
+  transform: translateX(2px);
+  box-shadow: 0 10px 22px var(--shadow);
 }
 
 .back:hover {
@@ -815,6 +833,11 @@
   }
 
   .back {
+    min-height: 42px;
+    border-radius: 15px;
+  }
+
+  .nextTopBtn {
     min-height: 42px;
     border-radius: 15px;
   }

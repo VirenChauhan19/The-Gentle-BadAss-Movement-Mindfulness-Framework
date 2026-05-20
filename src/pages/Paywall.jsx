@@ -33,6 +33,7 @@ export default function Paywall() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [paid, setPaid] = useState(false)
+  const [checkoutError, setCheckoutError] = useState('')
 
   const commitment = profile?.commitment || 90
   const plan = PLANS[commitment] || PLANS[90]
@@ -41,9 +42,10 @@ export default function Paywall() {
 
   function openCheckout() {
     if (!window.Razorpay) {
-      alert('Razorpay could not load. Check your internet connection.')
+      setCheckoutError('Razorpay could not load. Check your internet connection and try again.')
       return
     }
+    setCheckoutError('')
     setLoading(true)
 
     const options = {
@@ -142,6 +144,7 @@ export default function Paywall() {
             ? 'Opening payment…'
             : `Pay ₹${plan.price.toLocaleString('en-IN')} — UPI · Card · Net Banking`}
         </button>
+        {checkoutError && <p className={styles.checkoutError}>{checkoutError}</p>}
 
         <p className={styles.trust}>
           <span>🔒</span> Secured by Razorpay · Indian payments · Instant access

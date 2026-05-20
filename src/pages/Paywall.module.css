@@ -191,6 +191,18 @@
 }
 
 /* ── Test mode banner ──────────────────────────────────── */
+.checkoutError {
+  margin: 10px 1.75rem 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(186, 95, 69, 0.28);
+  border-radius: 10px;
+  background: rgba(186, 95, 69, 0.10);
+  color: var(--terracotta);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .testBanner {
   margin: 14px 1.75rem 0;
   padding: 10px 14px;

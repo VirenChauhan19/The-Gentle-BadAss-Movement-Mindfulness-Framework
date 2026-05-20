@@ -317,4 +317,5 @@ npm run dev
 
 **Environment variables required** (see `.env.example`):
 - `VITE_FIREBASE_API_KEY` and related Firebase config
+- `VITE_ADMIN_EMAILS` comma-separated admin emails
 - `VITE_OPENROUTER_API_KEY` for AI running coach

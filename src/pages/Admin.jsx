@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useDeferredValue, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { db } from '../firebase'
 import { collectionGroup, onSnapshot, query, doc, getDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore'
@@ -11,7 +11,16 @@ import { applyCycleAdaptationToPlan, getCycleWindows } from '../data/trainingAda
 import { generateSingleWeek } from './Coach'
 import styles from './Admin.module.css'
 
-const ADMIN_EMAIL = 'chauhan.viren08@gmail.com'
+const DEFAULT_ADMIN_EMAILS = [
+  'chauhan.viren08@gmail.com',
+  'drrajatchauhan@gmail.com',
+]
+const ADMIN_EMAILS = [
+  ...DEFAULT_ADMIN_EMAILS,
+  ...(import.meta.env.VITE_ADMIN_EMAILS || '').split(','),
+]
+  .map(email => email.trim().toLowerCase())
+  .filter(Boolean)
 
 const PATH_NAMES = {
   rehab: 'The Rehab Path',
@@ -152,7 +161,7 @@ function getFullCoachPlan(goal) {
 }
 
 export default function Admin() {
-  const { user, signInWithGoogle, signOut, authError } = useAuth()
+  const { user, signInWithGoogle, signOut, authError, isConfigured } = useAuth()
   const { guestName, setGuestName, profile, entries, clearAllData, adminRemarks } = useData()
   const navigate = useNavigate()
 
@@ -166,7 +175,7 @@ export default function Admin() {
   const [clearing,     setClearing]     = useState(false)
   const [theme,        setTheme]        = useState(() => localStorage.getItem('gb_theme') || 'dark')
 
-  const isAdmin = user?.email === ADMIN_EMAIL
+  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())
 
   function changeTheme(nextTheme) {
     setTheme(nextTheme)
@@ -287,9 +296,10 @@ export default function Admin() {
           <p className={styles.sub}>Sync your feel journal across devices.</p>
         </header>
         {authError && <p className={styles.authError}>{authError}</p>}
-        <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')}>
+        <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>
           <GoogleIcon /> Continue with Google
         </button>
+        {!isConfigured && <p className={styles.authError}>Firebase is not configured yet, so Google sign-in is unavailable in this environment.</p>}
         <div className={styles.divider}>or</div>
         <button className={styles.guestBtn} onClick={() => setNamePending(true)}>
           Continue as Guest
@@ -312,6 +322,15 @@ export default function Admin() {
           setAllUserData(prev => ({
             ...prev,
             [uid]: { ...prev[uid], remarks: [...(prev[uid]?.remarks || []), remark] },
+          }))
+        }
+        onRemarkDeleted={(uid, remarkId) =>
+          setAllUserData(prev => ({
+            ...prev,
+            [uid]: {
+              ...prev[uid],
+              remarks: (prev[uid]?.remarks || []).filter(remark => remark.id !== remarkId),
+            },
           }))
         }
         onCoachUpdated={(uid, coach) =>
@@ -449,7 +468,7 @@ export default function Admin() {
 
       <div className={styles.accountActions}>
         {!user && (
-          <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')}>
+          <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>
             <GoogleIcon /> Upgrade to Google Sign-In
           </button>
         )}
@@ -486,8 +505,11 @@ export default function Admin() {
 }
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
-function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent, onCoachUpdated, onUserDeleted, onProfileUpdated }) {
+function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent, onRemarkDeleted, onCoachUpdated, onUserDeleted, onProfileUpdated }) {
   const [selectedUid, setSelectedUid] = useState(null)
+  const [searchText, setSearchText] = useState('')
+  const [userFilter, setUserFilter] = useState('all')
+  const deferredSearchText = useDeferredValue(searchText)
 
   const userMap = useMemo(() => {
     const map = {}
@@ -534,9 +556,53 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
       .sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''))
   , [userMap])
 
+  const adminStats = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0]
+    const weekAgoDate = new Date()
+    weekAgoDate.setDate(weekAgoDate.getDate() - 7)
+    const weekAgo = weekAgoDate.toISOString().split('T')[0]
+    return {
+      totalUsers: userList.length,
+      withPlan: userList.filter(u => u.coach?.goal).length,
+      recent: userList.filter(u => u.lastDate && u.lastDate >= weekAgo).length,
+      checkedToday: userList.filter(u => u.lastDate === today).length,
+      lowFeel: userList.filter(u => typeof u.avgScore === 'number' && u.avgScore < 5).length,
+    }
+  }, [userList])
+
+  const filteredUsers = useMemo(() => {
+    const q = deferredSearchText.trim().toLowerCase()
+    const weekAgoDate = new Date()
+    weekAgoDate.setDate(weekAgoDate.getDate() - 7)
+    const weekAgo = weekAgoDate.toISOString().split('T')[0]
+    return userList.filter(u => {
+      if (userFilter === 'recent' && (!u.lastDate || u.lastDate < weekAgo)) return false
+      if (userFilter === 'no-plan' && u.coach?.goal) return false
+      if (userFilter === 'low-feel' && (!(typeof u.avgScore === 'number') || u.avgScore >= 5)) return false
+      if (userFilter === 'no-entries' && u.entries.length > 0) return false
+      if (!q) return true
+      const profile = u.userProfile || {}
+      return [
+        u.name,
+        u.email,
+        u.uid,
+        profile.path,
+        profile.programGoal,
+        u.coach?.goal?.focus,
+        u.coach?.goal?.raceGoal,
+      ].filter(Boolean).some(value => String(value).toLowerCase().includes(q))
+    })
+  }, [deferredSearchText, userFilter, userList])
+
+  const visibleUsers = filteredUsers.slice(0, 120)
+
   const selectedUser = selectedUid
     ? userList.find(u => u.uid === selectedUid) || null
     : null
+
+  useEffect(() => {
+    if (!selectedUid && userList.length) setSelectedUid(userList[0].uid)
+  }, [selectedUid, userList])
 
   function handleUserDeleted(uid) {
     setSelectedUid(null)
@@ -553,11 +619,13 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
           </button>
           <div>
             <p className={styles.adminPanelLabel}>Admin Control Panel</p>
-            <h1 className={styles.adminPanelTitle}>All Users</h1>
+            <h1 className={styles.adminPanelTitle}>Command Center</h1>
           </div>
         </div>
         <div className={styles.adminHeaderStats}>
-          <span className={styles.adminStatChip}>{userList.length} users</span>
+          <span className={styles.adminStatChip}>{adminStats.totalUsers} users</span>
+          <span className={styles.adminStatChip}>{adminStats.withPlan} plans</span>
+          <span className={styles.adminStatChip}>{adminStats.checkedToday} checked in today</span>
           <span className={styles.adminStatChip}>{allEntries.length} journal entries</span>
         </div>
       </div>
@@ -571,10 +639,45 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
       <div className={styles.adminLayout}>
         {/* Left: user list */}
         <aside className={styles.userListPanel}>
+          <div className={styles.userListTools}>
+            <label className={styles.userSearchBox}>
+              <span>Search users</span>
+              <input
+                type="search"
+                value={searchText}
+                onChange={e => setSearchText(e.target.value)}
+                placeholder="Name, email, goal..."
+              />
+            </label>
+            <div className={styles.userFilterRow} aria-label="Filter users">
+              {[
+                ['all', `All ${adminStats.totalUsers}`],
+                ['recent', `Recent ${adminStats.recent}`],
+                ['low-feel', `Low Feel ${adminStats.lowFeel}`],
+                ['no-plan', 'No Plan'],
+                ['no-entries', 'No Logs'],
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`${styles.userFilterBtn} ${userFilter === id ? styles.userFilterBtnActive : ''}`}
+                  onClick={() => setUserFilter(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className={styles.userListCount}>
+              Showing {visibleUsers.length} of {filteredUsers.length}
+            </p>
+          </div>
           {userList.length === 0 && (
             <p className={styles.empty}>No users yet…</p>
           )}
-          {userList.map(u => {
+          {userList.length > 0 && filteredUsers.length === 0 && (
+            <p className={styles.empty}>No users match this view.</p>
+          )}
+          {visibleUsers.map(u => {
             const color = u.avgScore === null ? 'var(--ink-faint)'
               : u.avgScore >= 7 ? '#8b9e7e' : u.avgScore >= 4 ? '#d9b38a' : '#d98a8a'
             return (
@@ -597,6 +700,9 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
               </button>
             )
           })}
+          {filteredUsers.length > visibleUsers.length && (
+            <p className={styles.userListLimit}>Narrow search to see the remaining {filteredUsers.length - visibleUsers.length} users.</p>
+          )}
         </aside>
 
         {/* Right: user detail */}
@@ -615,6 +721,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
               adminUser={adminUser}
               onCoachUpdated={coach => onCoachUpdated(selectedUser.uid, coach)}
               onRemarkSent={remark => onRemarkSent(selectedUser.uid, remark)}
+              onRemarkDeleted={remarkId => onRemarkDeleted(selectedUser.uid, remarkId)}
               onDeleted={() => handleUserDeleted(selectedUser.uid)}
               onProfileUpdated={profile => onProfileUpdated?.(selectedUser.uid, profile)}
             />
@@ -626,12 +733,15 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
 }
 
 // ── User Detail ───────────────────────────────────────────────────────────────
-function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, onProfileUpdated }) {
+function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpdated, onDeleted, onProfileUpdated }) {
   const [tab,              setTab]             = useState('overview')
   const [remarkText,       setRemarkText]      = useState('')
   const [remarkRunDate,    setRemarkRunDate]   = useState('')
   const [sending,          setSending]         = useState(false)
   const [remarkError,      setRemarkError]     = useState(null)
+  const [remarkDeleteError, setRemarkDeleteError] = useState(null)
+  const [pendingRemarkDelete, setPendingRemarkDelete] = useState(null)
+  const [deletingRemark,   setDeletingRemark]  = useState(null)
   const [expandedEntry,    setExpandedEntry]   = useState(null)
   const [localRemarks,     setLocalRemarks]    = useState(user.remarks || [])
   const [localEntries,     setLocalEntries]    = useState(user.entries || [])
@@ -727,6 +837,26 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
       setRemarkError('Could not send remark: ' + err.message)
     }
     setSending(false)
+  }
+
+  async function deleteRemark(remarkId) {
+    if (!remarkId || deletingRemark) return
+    setDeletingRemark(remarkId)
+    setRemarkDeleteError(null)
+    try {
+      const nextRemarks = localRemarks.filter(remark => remark.id !== remarkId)
+      await setDoc(
+        doc(db, 'users', user.uid, 'config', 'adminRemarks'),
+        { remarks: nextRemarks },
+        { merge: true }
+      )
+      setLocalRemarks(nextRemarks)
+      setPendingRemarkDelete(null)
+      onRemarkDeleted?.(remarkId)
+    } catch (err) {
+      setRemarkDeleteError('Could not delete remark: ' + err.message)
+    }
+    setDeletingRemark(null)
   }
 
   async function deleteUserData() {
@@ -1019,6 +1149,28 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
               Delete Account
             </button>
           )}
+        </div>
+      </div>
+
+      <div className={styles.adminBossBar}>
+        <div>
+          <span className={styles.adminBossKicker}>Admin controls</span>
+          <strong>View and change this user&apos;s profile, logs, plan, remarks, and account state.</strong>
+        </div>
+        <div className={styles.adminBossActions}>
+          <button type="button" onClick={() => setTab('profile')}>Edit Profile</button>
+          <button type="button" onClick={() => setTab('journal')}>Journal</button>
+          <button
+            type="button"
+            onClick={() => {
+              setTab('coach')
+              if (goal) setEditingPlan(true)
+            }}
+          >
+            {goal ? 'Edit Plan' : 'View Running'}
+          </button>
+          <button type="button" onClick={() => setTab('remarks')}>Send Remark</button>
+          <button type="button" className={styles.adminBossDanger} onClick={() => setConfirmDelete(true)}>Delete</button>
         </div>
       </div>
 
@@ -1348,11 +1500,47 @@ function UserDetail({ user, adminUser, onRemarkSent, onCoachUpdated, onDeleted, 
               : (
                 <div className={styles.remarksHistory}>
                   <p className={styles.remarksHistoryLabel}>Sent remarks</p>
+                  {remarkDeleteError && <p className={styles.errorMsg}>{remarkDeleteError}</p>}
                   {[...localRemarks].reverse().map(r => (
                     <div key={r.id} className={styles.remarkCard}>
-                      <div className={styles.remarkMeta}>
-                        <span className={styles.remarkFrom}>{r.from}</span>
-                        <span className={styles.remarkDate}>{r.runDate || r.date}</span>
+                      <div className={styles.remarkCardHead}>
+                        <div className={styles.remarkMeta}>
+                          <span className={styles.remarkFrom}>{r.from}</span>
+                          <span className={styles.remarkDate}>{r.runDate || r.date}</span>
+                        </div>
+                        {pendingRemarkDelete === r.id ? (
+                          <div className={styles.remarkDeleteConfirm}>
+                            <span>Delete?</span>
+                            <button
+                              type="button"
+                              className={styles.remarkDeleteYes}
+                              disabled={deletingRemark === r.id}
+                              onClick={() => deleteRemark(r.id)}
+                            >
+                              {deletingRemark === r.id ? 'Deleting...' : 'Yes'}
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.remarkDeleteNo}
+                              disabled={deletingRemark === r.id}
+                              onClick={() => setPendingRemarkDelete(null)}
+                            >
+                              No
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            className={styles.remarkDeleteBtn}
+                            onClick={() => {
+                              setRemarkDeleteError(null)
+                              setPendingRemarkDelete(r.id)
+                            }}
+                            aria-label="Delete remark"
+                          >
+                            Delete
+                          </button>
+                        )}
                       </div>
                       {r.runDate && <p className={styles.remarkRunLink}>Attached to run on {r.runDate}</p>}
                       <p className={styles.remarkText}>{r.text}</p>

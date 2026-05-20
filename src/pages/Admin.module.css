@@ -840,11 +840,24 @@
   box-shadow: 0 8px 22px var(--shadow-xs);
 }
 
+.remarkCardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
 .remarkMeta {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
+}
+
+.remarkCardHead .remarkMeta {
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .remarkFrom {
@@ -871,6 +884,51 @@
   color: var(--sage-dark);
   font-weight: 700;
   margin-bottom: 6px;
+}
+
+.remarkDeleteBtn,
+.remarkDeleteYes,
+.remarkDeleteNo {
+  min-height: 30px;
+  border-radius: 999px;
+  padding: 0 10px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.remarkDeleteBtn {
+  border: 1px solid rgba(186, 95, 69, 0.28);
+  background: rgba(186, 95, 69, 0.08);
+  color: var(--terracotta);
+}
+
+.remarkDeleteConfirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+}
+
+.remarkDeleteConfirm span {
+  color: var(--ink-light);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding-left: 6px;
+}
+
+.remarkDeleteYes {
+  background: var(--terracotta);
+  color: #fff;
+}
+
+.remarkDeleteNo {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  color: var(--ink-light);
 }
 
 /* ── Full-screen admin panel ─────────────────────────────────────── */
@@ -962,6 +1020,84 @@
   background: var(--paper);
 }
 
+.userListTools {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 14px;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  border-bottom: 1px solid var(--border-light);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.userSearchBox {
+  display: grid;
+  gap: 6px;
+}
+
+.userSearchBox span {
+  color: var(--ink-faint);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.userSearchBox input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--cream);
+  color: var(--ink);
+  padding: 0 12px;
+  font-size: 0.86rem;
+  outline: none;
+}
+
+.userSearchBox input:focus {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sage) 18%, transparent);
+}
+
+.userFilterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.userFilterBtn {
+  min-height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background: var(--paper);
+  color: var(--ink-light);
+  padding: 0 9px;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.userFilterBtnActive {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-ink);
+}
+
+.userListCount,
+.userListLimit {
+  margin-top: 9px;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.userListLimit {
+  padding: 10px 14px 18px;
+  text-align: center;
+}
+
 .userListItem {
   width: 100%;
   display: flex;
@@ -973,10 +1109,11 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
+  transition: background 0.12s;
+  contain: layout paint;
 }
 
-.userListItem:hover { background: var(--cream); transform: translateX(2px); }
+.userListItem:hover { background: var(--cream); }
 
 .userListItemActive {
   background: rgba(122, 148, 112, 0.08);
@@ -1144,6 +1281,62 @@
 }
 
 /* ── Detail tabs ─── */
+.adminBossBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 28px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.adminBossBar strong {
+  display: block;
+  color: var(--ink);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.adminBossKicker {
+  display: block;
+  color: var(--sage-dark);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.adminBossActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.adminBossActions button {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.adminBossActions button:hover {
+  background: var(--paper);
+  box-shadow: 0 8px 18px var(--shadow-xs);
+}
+
+.adminBossActions .adminBossDanger {
+  border-color: rgba(186, 95, 69, 0.30);
+  background: rgba(186, 95, 69, 0.10);
+  color: var(--terracotta);
+}
+
 .detailTabs {
   display: flex;
   gap: 4px;
@@ -2862,6 +3055,9 @@
   .adminLayout    { flex-direction: column; }
   .userListPanel  { width: 100%; border-right: none; border-bottom: 1px solid var(--border-light); max-height: 260px; }
   .userDetailHeader { padding: 16px; }
+  .adminBossBar { align-items: stretch; flex-direction: column; padding: 12px 16px; }
+  .adminBossActions { justify-content: flex-start; }
+  .adminBossActions button { flex: 1 1 auto; }
   .detailContent  { padding: 16px; }
   .detailTabs     { padding: 10px 16px 0; overflow-x: auto; scrollbar-width: none; }
   .detailTabs::-webkit-scrollbar { display: none; }
@@ -2889,6 +3085,7 @@
   .userListPanel  { width: 320px; }
   .adminPanelHeader { padding: 20px 40px 16px; }
   .userDetailHeader { padding: 28px 40px 22px; }
+  .adminBossBar { padding: 14px 40px; }
   .detailTabs     { padding: 12px 40px 0; }
   .detailContent  { padding: 24px 40px; }
 }

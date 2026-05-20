@@ -65,6 +65,7 @@ export default function Breathing() {
         ...(today.sessions || []),
         {
           type: 'breathing',
+          exerciseName: 'Breathe',
           weekNumber: currentWeek,
           weekTitle: weekConfig.title,
           phase: weekConfig.phase,

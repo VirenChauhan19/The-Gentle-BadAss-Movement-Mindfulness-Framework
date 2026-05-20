@@ -13,7 +13,7 @@ const PRINCIPLES = [
 ]
 
 export default function Library() {
-  const [activeSection, setActiveSection] = useState(null)
+  const [activeSection, setActiveSection] = useState('coach')
   const activeCategory = PLAN_CATEGORY_ORDER.includes(activeSection) ? activeSection : null
   const filtered = activeCategory ? EXERCISES.filter(e => e.category === activeCategory) : []
 

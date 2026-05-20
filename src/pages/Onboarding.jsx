@@ -181,7 +181,7 @@ export default function Onboarding() {
     data.strengthFrequency
 
   async function handleComplete() {
-    const resolvedSex = data.sex || (isFemale ? 'woman' : data.gender === 'man' ? 'man' : data.gender)
+    const resolvedSex = data.sex || (isFemale ? 'woman' : data.gender === 'male' ? 'man' : data.gender)
     const payload = {
       ...data,
       sex: resolvedSex,

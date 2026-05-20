@@ -148,8 +148,9 @@ export default function ExerciseDetail() {
       </section>
 
       <div className={styles.topBar}>
-        <button className={styles.back} onClick={goNext}>Next</button>
+        <Link className={styles.back} to="/library">Library</Link>
         <span className={styles.catBadge} style={{ color: cat.color }}>{cat.label}</span>
+        <button className={styles.nextTopBtn} onClick={goNext}>Next</button>
       </div>
 
       {!pillarsDone ? (
