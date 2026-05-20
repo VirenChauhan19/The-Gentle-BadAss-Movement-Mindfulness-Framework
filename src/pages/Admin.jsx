@@ -1788,7 +1788,7 @@ function AdminPlanEditor({
 
   // Reset open week when week numbers shift
   useEffect(() => {
-    if (!weekNumbers.includes(openWeek) && weekNumbers.length) {
+    if (openWeek !== null && !weekNumbers.includes(openWeek) && weekNumbers.length) {
       setOpenWeek(currentWeek)
     }
   }, [weekNumbers, openWeek, currentWeek])
