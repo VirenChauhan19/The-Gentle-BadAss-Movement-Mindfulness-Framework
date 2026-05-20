@@ -2,6 +2,7 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DataProvider, useData } from './context/DataContext'
+import { init3DTilt } from './utils/tilt3d'
 import Nav from './components/Nav'
 import FloatingChat from './components/FloatingChat'
 import Home from './pages/Home'
@@ -266,6 +267,11 @@ export default function App() {
       window.removeEventListener('pointermove', handlePointerMove)
       if (frame) window.cancelAnimationFrame(frame)
     }
+  }, [])
+
+  // 3D mouse-tilt across every card / tile / hero surface in the app.
+  useEffect(() => {
+    return init3DTilt()
   }, [])
 
   return (

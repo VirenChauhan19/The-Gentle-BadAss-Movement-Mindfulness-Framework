@@ -286,28 +286,74 @@
 }
 
 .orb {
+  position: relative;
   width: 180px;
   height: 180px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 28%, rgba(255,255,255,0.92), transparent 38%),
-    radial-gradient(circle at 70% 78%, rgba(63, 95, 62, 0.48), transparent 50%),
-    radial-gradient(circle at 50% 110%, rgba(0,0,0,0.18), transparent 42%),
-    linear-gradient(135deg, var(--sage-light), var(--sage));
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95), transparent 38%),
+    radial-gradient(circle at 70% 78%, rgba(63, 95, 62, 0.5), transparent 50%),
+    radial-gradient(circle at 50% 110%, rgba(0,0,0,0.22), transparent 42%),
+    conic-gradient(from 210deg at 50% 50%, var(--sage-light), var(--sage), var(--sage-dark), var(--sage), var(--sage-light));
   box-shadow:
-    0 30px 60px rgba(63, 95, 62, 0.34),
-    0 12px 22px rgba(63, 95, 62, 0.22),
+    0 36px 80px rgba(63, 95, 62, 0.38),
+    0 14px 28px rgba(63, 95, 62, 0.26),
     0 0 0 1px rgba(255, 255, 255, 0.32) inset,
-    0 -14px 36px rgba(255, 255, 255, 0.34) inset,
-    0 18px 36px rgba(0, 0, 0, 0.16) inset;
-  transition: transform 1s linear, box-shadow 600ms var(--ease-out);
+    0 -18px 42px rgba(255, 255, 255, 0.38) inset,
+    0 22px 42px rgba(0, 0, 0, 0.22) inset;
   transform-style: preserve-3d;
-  animation: orbDrift 14s ease-in-out infinite;
+  /* Use individual transform properties so each can transition / animate
+     independently: animation drives `rotate`, React drives `scale` via the
+     custom property, and they compose without conflict. */
+  scale: var(--orb-scale, 1);
+  rotate: 0.4 0.7 0.15 var(--orb-spin, 0deg);
+  transition: scale 900ms linear, box-shadow 600ms var(--ease-out);
+  animation:
+    orbSpin 24s linear infinite,
+    orbDrift 14s ease-in-out infinite;
+}
+
+/* Surface highlight — sits at the top of the sphere, suggests overhead light. */
+.orbHighlight {
+  position: absolute;
+  top: 12%;
+  left: 22%;
+  width: 46%;
+  height: 32%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 40%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.0) 70%);
+  filter: blur(3px);
+  pointer-events: none;
+  transform: translateZ(40px);
+  animation: orbHighlightDrift 12s ease-in-out infinite;
+}
+
+/* Ground shadow — under the sphere, breathes with the orb scale. */
+.orbShadow {
+  position: absolute;
+  left: 50%;
+  bottom: -38px;
+  width: 70%;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(63, 95, 62, 0.42), transparent 70%);
+  filter: blur(6px);
+  transform: translateX(-50%) translateZ(-40px) scale(calc(0.6 + var(--orb-scale, 1) * 0.4));
+  pointer-events: none;
+}
+
+@keyframes orbSpin {
+  to { --orb-spin: 360deg; }
 }
 
 @keyframes orbDrift {
   0%, 100% { filter: hue-rotate(0deg) saturate(1) brightness(1); }
-  50%      { filter: hue-rotate(-4deg) saturate(1.08) brightness(1.03); }
+  50%      { filter: hue-rotate(-6deg) saturate(1.12) brightness(1.04); }
+}
+
+@keyframes orbHighlightDrift {
+  0%, 100% { transform: translate(0, 0) translateZ(40px); opacity: 0.95; }
+  50%      { transform: translate(8%, -4%) translateZ(40px); opacity: 0.8; }
 }
 
 :global(html[data-theme="dark"]) .orb {

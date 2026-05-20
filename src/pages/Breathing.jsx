@@ -127,8 +127,11 @@ export default function Breathing() {
           >
             <div
               className={`${styles.orb} ${running ? styles.orbActive : ''}`}
-              style={{ transform: `scale(${0.72 + progress * 0.34})` }}
-            />
+              style={{ '--orb-scale': 0.72 + progress * 0.34 }}
+            >
+              <span className={styles.orbHighlight} aria-hidden="true" />
+              <span className={styles.orbShadow} aria-hidden="true" />
+            </div>
             <div className={styles.phaseText}>
               <span>{phase}</span>
               <strong>{phaseSecond}</strong>

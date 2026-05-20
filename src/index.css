@@ -664,59 +664,161 @@ button:disabled {
   background: rgba(99, 127, 95, 0.22);
 }
 
-/* ── Universal 3D surface lift ─────────────────────────────
-   Catches every CSS-module class whose name contains Card/Tile/Panel/Hero
-   (Vite hashes to e.g. _feelCard_abc_123, _heroTile_xyz_45). Specificity is
-   kept at attribute-level via :where() so page-specific :hover rules win. */
-:where([class*="Card_"], [class*="Tile_"], [class*="Panel_"], [class*="Hero_"], [class*="hero_"]) {
-  transform: translateY(var(--y-rest)) translateZ(0);
-  transition: transform 320ms var(--ease-elastic),
-              box-shadow 320ms var(--ease-out),
-              filter 320ms var(--ease-out);
+/* ────────────────────────────────────────────────────────
+   ── REAL 3D — mouse tilt + perspective + spring lift ──
+   ──────────────────────────────────────────────────────── */
+
+/* Smoothly animatable CSS custom properties. Without @property the angle
+   variables jump at keyframe midpoints instead of interpolating. */
+@property --tilt-x { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --tilt-y { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --tilt-z { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --lift-y { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --orb-scale { syntax: '<number>'; inherits: false; initial-value: 1; }
+@property --orb-spin  { syntax: '<angle>';  inherits: false; initial-value: 0deg; }
+
+/* 3D scene root. perspective on <body> so the whole viewport shares one
+   vanishing point — tilts read consistently across nested layouts. */
+html { perspective: var(--perspective); perspective-origin: 50% 30%; }
+body { transform-style: preserve-3d; }
+#root { transform-style: preserve-3d; min-height: 100vh; }
+
+/* The universal card-3D rule. JS writes --tilt-x/--tilt-y/--tilt-z based on
+   cursor position; this CSS composes them with the lift into a single
+   transform. !important is intentional: every card across all 11 pages must
+   compose 3D consistently, and we override per-page legacy transforms. */
+:where([class*="Card_"], [class*="Tile_"], [class*="Panel_"], [class*="Hero_"], [class*="hero_"], [class*="dashboard_"], [class*="Dashboard_"]) {
+  transform-style: preserve-3d;
+  transform:
+    translate3d(0, var(--lift-y, 0px), var(--tilt-z, 0px))
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg)) !important;
+  transition:
+    transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 280ms var(--ease-out),
+    filter 280ms var(--ease-out) !important;
   will-change: transform;
   backface-visibility: hidden;
 }
 
+/* Hover lifts the card up and forward in 3D space. */
 @media (hover: hover) {
-  :where([class*="Card_"]:not(button):not(a), [class*="Tile_"]:not(button):not(a), [class*="Panel_"]:not(button):not(a), [class*="Hero_"], [class*="hero_"]):hover {
-    transform: translateY(var(--y-hover)) translateZ(0);
+  :where([class*="Card_"], [class*="Tile_"], [class*="Panel_"], [class*="Hero_"], [class*="hero_"], [class*="dashboard_"], [class*="Dashboard_"]):hover {
+    --lift-y: -6px;
   }
 }
 
-/* 3D scene root — gives all descendants a shared perspective so any
-   per-component rotateX / rotateY transforms render with proper depth. */
-#root {
-  perspective: var(--perspective);
-  perspective-origin: 50% -10%;
+/* When the tilt clears (cursor leaves), settle back smoothly. */
+:where([class*="Card_"], [class*="Tile_"], [class*="Panel_"], [class*="Hero_"], [class*="hero_"])[data-tilt-settling] {
+  transition:
+    transform 480ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 480ms var(--ease-out) !important;
+}
+
+/* ── 3D button press — buttons rotate slightly into the screen on press ─ */
+button:where(:not(:disabled)) {
   transform-style: preserve-3d;
 }
 
-/* Touch press: snappy depth dip on tap (mobile-friendly).
-   Scoped to interactive surfaces only. */
-@media (hover: none) {
-  :where(button:not(:disabled), a[href], [role="button"]):active {
-    transform: translateY(2px) scale(0.985);
-    transition-duration: 80ms;
+button:where(:active:not(:disabled)) {
+  transform: translateZ(-4px) translateY(2px) rotateX(-6deg) scale(0.98) !important;
+  transition-duration: 90ms !important;
+}
+
+@media (hover: hover) {
+  button:where(:not(:disabled)):hover {
+    transform: translateZ(6px) translateY(-2px) !important;
   }
 }
 
-/* Page-level depth helpers — opt-in by adding these classnames in JSX. */
-.depth-lift     { box-shadow: var(--lift-rest); }
-.depth-lift-hover:hover { box-shadow: var(--lift-hover); transform: translateY(var(--y-hover)); }
-.depth-accent   { box-shadow: var(--lift-accent); }
-.tilt-3d        { transform-style: preserve-3d; perspective: var(--perspective); }
+/* ── 3D page entrance — every routed page rises and rotates into place ── */
+@keyframes routeEnter3D {
+  from {
+    opacity: 0;
+    transform:
+      perspective(1200px)
+      translate3d(0, 40px, -160px)
+      rotateX(14deg);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform:
+      perspective(1200px)
+      translate3d(0, 0, 0)
+      rotateX(0deg);
+    filter: blur(0);
+  }
+}
 
-/* Subtle floating animation for hero elements — applied via class .float-3d */
+.routeTransition > * {
+  animation: routeEnter3D 620ms cubic-bezier(0.16, 1, 0.3, 1) both !important;
+  transform-origin: 50% 100%;
+  transform-style: preserve-3d;
+}
+
+/* Stagger first-level children of each page. Only opacity + filter here —
+   leaving transform untouched so the card's !important 3D transform composes
+   the live tilt vars without being overridden by the entrance animation. */
+.routeTransition > * > * {
+  animation: cardStaggerIn3D 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(60ms * var(--stagger-i, 0));
+}
+
+@keyframes cardStaggerIn3D {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.routeTransition > * > *:nth-child(1)  { --stagger-i: 0; }
+.routeTransition > * > *:nth-child(2)  { --stagger-i: 1; }
+.routeTransition > * > *:nth-child(3)  { --stagger-i: 2; }
+.routeTransition > * > *:nth-child(4)  { --stagger-i: 3; }
+.routeTransition > * > *:nth-child(5)  { --stagger-i: 4; }
+.routeTransition > * > *:nth-child(6)  { --stagger-i: 5; }
+.routeTransition > * > *:nth-child(7)  { --stagger-i: 6; }
+.routeTransition > * > *:nth-child(8)  { --stagger-i: 7; }
+.routeTransition > * > *:nth-child(9)  { --stagger-i: 8; }
+.routeTransition > * > *:nth-child(n+10) { --stagger-i: 9; }
+
+/* ── Scroll-driven 3D tilt (mobile fallback for mouse-tilt) ───────────── */
+@supports (animation-timeline: view()) {
+  @media (hover: none) {
+    @keyframes scrollTilt3D {
+      from { transform: perspective(1200px) translateZ(-30px) rotateX(-10deg); opacity: 0.55; }
+      40%, 60% { transform: perspective(1200px) translateZ(0) rotateX(0deg); opacity: 1; }
+      to   { transform: perspective(1200px) translateZ(-30px) rotateX(10deg); opacity: 0.55; }
+    }
+    :where([class*="Card_"]:not(button), [class*="Tile_"]:not(button), [class*="Hero_"], [class*="hero_"]) {
+      animation: scrollTilt3D linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}
+
+/* ── Continuous float on decorative hero surfaces ────────────────────── */
 @keyframes float3d {
-  0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
-  33%      { transform: translateY(-4px) rotateX(0.6deg) rotateY(-0.4deg); }
-  66%      { transform: translateY(-2px) rotateX(-0.4deg) rotateY(0.5deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0); }
+  33%      { transform: translate3d(0, -5px, 8px) rotateX(0.8deg) rotateY(-0.6deg); }
+  66%      { transform: translate3d(0, -2px, 4px) rotateX(-0.5deg) rotateY(0.7deg); }
 }
 
 .float-3d {
   animation: float3d 9s ease-in-out infinite;
   transform-style: preserve-3d;
 }
+
+/* Opt-in utilities */
+.depth-lift     { box-shadow: var(--lift-rest); }
+.depth-accent   { box-shadow: var(--lift-accent); }
+.tilt-3d        { transform-style: preserve-3d; perspective: var(--perspective); }
 
 /* ── Sliders ──────────────────────────────────────────── */
 input[type="range"] {
@@ -801,23 +903,23 @@ input[type="range"]::-moz-range-progress {
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: perspective(1000px) translate3d(0, 18px, -40px) rotateX(8deg);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: perspective(1000px) translate3d(0, 0, 0) rotateX(0deg);
   }
 }
 
 @keyframes floatIn {
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.985);
-    filter: blur(4px);
+    transform: perspective(1200px) translate3d(0, 28px, -90px) rotateX(12deg) scale(0.96);
+    filter: blur(6px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: perspective(1200px) translate3d(0, 0, 0) rotateX(0deg) scale(1);
     filter: blur(0);
   }
 }
