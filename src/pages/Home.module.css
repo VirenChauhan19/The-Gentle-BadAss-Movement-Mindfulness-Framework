@@ -87,7 +87,6 @@
   gap: 18px;
   min-height: 176px;
   background:
-    radial-gradient(circle at 14% 8%, rgba(255, 255, 255, 0.18), transparent 16rem),
     linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 42%),
     var(--brand-gradient);
   color: var(--on-dark);
@@ -95,27 +94,9 @@
   padding: 20px;
   position: relative;
   overflow: hidden;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.18) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.32) inset,
-    0 4px 10px var(--shadow),
-    0 22px 48px var(--shadow-md),
-    0 40px 80px -22px var(--shadow-lg);
-  transition: transform 320ms var(--ease-elastic), box-shadow 320ms var(--ease-out);
+  box-shadow: 0 18px 42px var(--shadow-md);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
   animation: floatIn 620ms var(--ease-elastic) both 80ms;
-  transform-style: preserve-3d;
-}
-
-@media (hover: hover) {
-  .feelCard:hover {
-    transform: translateY(-4px) translateZ(0);
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.22) inset,
-      0 -1px 0 rgba(0, 0, 0, 0.34) inset,
-      0 6px 14px var(--shadow),
-      0 30px 56px var(--shadow-md),
-      0 56px 100px -28px var(--shadow-lg);
-  }
 }
 
 .feelCard::before {
