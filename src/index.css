@@ -69,6 +69,42 @@
   font-size: 16px;
   --pointer-x: 68%;
   --pointer-y: 28%;
+
+  /* ── 3D depth ──────────────────────────────────────────
+     Composable multi-layer shadows that auto-theme by reading
+     existing --shadow-* and --ambient-sheen tokens.
+     Use these on cards/tiles/buttons instead of single drop shadows
+     to give every surface a sculpted, lit-from-above feel. */
+  --lift-rest:
+    0 1px 0 var(--ambient-sheen) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.05) inset,
+    0 1px 2px var(--shadow-xs),
+    0 8px 22px var(--shadow),
+    0 24px 40px -16px var(--shadow-md);
+  --lift-hover:
+    0 1px 0 var(--ambient-sheen) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.06) inset,
+    0 2px 5px var(--shadow),
+    0 14px 32px var(--shadow-md),
+    0 32px 58px -20px var(--shadow-lg);
+  --lift-press:
+    0 1px 0 var(--ambient-sheen) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.10) inset,
+    0 1px 2px var(--shadow-xs),
+    0 3px 8px var(--shadow);
+  --lift-accent:
+    0 1px 0 rgba(255, 255, 255, 0.36) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.18) inset,
+    0 2px 4px var(--shadow),
+    0 12px 28px color-mix(in srgb, var(--sage) 32%, transparent),
+    0 26px 48px -18px color-mix(in srgb, var(--sage) 30%, transparent);
+
+  --perspective: 1400px;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --y-rest: 0px;
+  --y-hover: -3px;
+  --y-press: 1px;
 }
 
 :root[data-theme="dark"] {
@@ -592,8 +628,20 @@ a[href],
   will-change: transform;
 }
 
-button:active:not(:disabled) {
-  transform: scale(0.97);
+button:where(:active:not(:disabled)) {
+  transform: translateY(var(--y-press)) scale(0.97);
+}
+
+/* Default button depth — :where() keeps specificity at element-level so any
+   page-specific .className override wins automatically. */
+button:where(:not(:disabled)) {
+  box-shadow: var(--lift-rest);
+}
+
+@media (hover: hover) {
+  button:where(:not(:disabled)):hover {
+    transform: translateY(var(--y-hover));
+  }
 }
 
 button:focus-visible,
@@ -614,6 +662,60 @@ button:disabled {
 
 ::selection {
   background: rgba(99, 127, 95, 0.22);
+}
+
+/* ── Universal 3D surface lift ─────────────────────────────
+   Catches every CSS-module class whose name contains Card/Tile/Panel/Hero
+   (Vite hashes to e.g. _feelCard_abc_123, _heroTile_xyz_45). Specificity is
+   kept at attribute-level via :where() so page-specific :hover rules win. */
+:where([class*="Card_"], [class*="Tile_"], [class*="Panel_"], [class*="Hero_"], [class*="hero_"]) {
+  transform: translateY(var(--y-rest)) translateZ(0);
+  transition: transform 320ms var(--ease-elastic),
+              box-shadow 320ms var(--ease-out),
+              filter 320ms var(--ease-out);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@media (hover: hover) {
+  :where([class*="Card_"]:not(button):not(a), [class*="Tile_"]:not(button):not(a), [class*="Panel_"]:not(button):not(a), [class*="Hero_"], [class*="hero_"]):hover {
+    transform: translateY(var(--y-hover)) translateZ(0);
+  }
+}
+
+/* 3D scene root — gives all descendants a shared perspective so any
+   per-component rotateX / rotateY transforms render with proper depth. */
+#root {
+  perspective: var(--perspective);
+  perspective-origin: 50% -10%;
+  transform-style: preserve-3d;
+}
+
+/* Touch press: snappy depth dip on tap (mobile-friendly).
+   Scoped to interactive surfaces only. */
+@media (hover: none) {
+  :where(button:not(:disabled), a[href], [role="button"]):active {
+    transform: translateY(2px) scale(0.985);
+    transition-duration: 80ms;
+  }
+}
+
+/* Page-level depth helpers — opt-in by adding these classnames in JSX. */
+.depth-lift     { box-shadow: var(--lift-rest); }
+.depth-lift-hover:hover { box-shadow: var(--lift-hover); transform: translateY(var(--y-hover)); }
+.depth-accent   { box-shadow: var(--lift-accent); }
+.tilt-3d        { transform-style: preserve-3d; perspective: var(--perspective); }
+
+/* Subtle floating animation for hero elements — applied via class .float-3d */
+@keyframes float3d {
+  0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
+  33%      { transform: translateY(-4px) rotateX(0.6deg) rotateY(-0.4deg); }
+  66%      { transform: translateY(-2px) rotateX(-0.4deg) rotateY(0.5deg); }
+}
+
+.float-3d {
+  animation: float3d 9s ease-in-out infinite;
+  transform-style: preserve-3d;
 }
 
 /* ── Sliders ──────────────────────────────────────────── */
