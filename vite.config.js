@@ -7,11 +7,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'service-worker.js',
       registerType: 'autoUpdate',
-      workbox: {
-        skipWaiting: true,
-        clientsClaim: true,
-        cleanupOutdatedCaches: true,
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
       },
       manifest: {
         name: 'Gentle BadAss Movement Framework',

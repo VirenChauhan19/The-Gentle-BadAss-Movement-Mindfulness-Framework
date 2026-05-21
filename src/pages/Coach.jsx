@@ -24,6 +24,24 @@ const SESSION_STYLE = {
   cross:    { color: '#704090', bg: 'rgba(180,138,217,0.14)', border: '#c89ad9', label: 'Cross'    },
 }
 
+const AUDIO_CUE_PROFILES = [
+  {
+    id: 'spoken',
+    label: 'Spoken prompts',
+    summary: 'Voice cues for run and walk transitions.',
+  },
+  {
+    id: 'chimes',
+    label: 'Distinct chimes',
+    summary: 'Bright run tone, warm walk tone.',
+  },
+  {
+    id: 'binaural',
+    label: 'Binaural sounds',
+    summary: 'Low background tone shifts with each phase.',
+  },
+]
+
 const DEFAULT_MOBILITY = '8-12 min: ankle rocks x10/side, hip flexor stretch 45s/side, hamstring floss x10/side, thoracic rotations x8/side, easy breathing 2 min.'
 const DEFAULT_STRENGTH = '10-15 min: glute bridges 2x12, calf raises 2x15, dead bug 2x8/side, side plank 2x20s/side.'
 
@@ -1531,6 +1549,9 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
             {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
             <DailyTrainingBlocks session={todaySession} />
+            {todaySession.type !== 'rest' && (
+              <RunCuePlayer session={todaySession} week={currentWeek} />
+            )}
             {todayRemarks.length > 0 && <AttachedRemarks remarks={todayRemarks} />}
           </div>
         )}
@@ -1760,6 +1781,266 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
       <button className={styles.changeGoalBtn} onClick={onNewGoal}>← Change program</button>
     </div>
   )
+}
+
+function RunCuePlayer({ session, week }) {
+  const intervals = useMemo(() => buildRunIntervals(session), [session])
+  const [profile, setProfile] = useState(() => localStorage.getItem('gb_run_audio_profile') || 'spoken')
+  const [running, setRunning] = useState(false)
+  const [phaseIndex, setPhaseIndex] = useState(0)
+  const [secondsLeft, setSecondsLeft] = useState(intervals[0]?.seconds || 0)
+  const audioRef = useRef({ ctx: null, carrier: null, carrierGain: null, binaural: [], transient: null })
+  const timerRef = useRef(null)
+  const phaseStartedRef = useRef(0)
+  const phaseIndexRef = useRef(0)
+
+  useEffect(() => {
+    setRunning(false)
+    setPhaseIndex(0)
+    phaseIndexRef.current = 0
+    setSecondsLeft(intervals[0]?.seconds || 0)
+    stopRunAudio(audioRef)
+  }, [intervals])
+
+  useEffect(() => {
+    localStorage.setItem('gb_run_audio_profile', profile)
+    if (running) configureBinaural(audioRef, profile, intervals[phaseIndexRef.current])
+  }, [profile, running, intervals])
+
+  useEffect(() => {
+    if (!running) {
+      window.clearInterval(timerRef.current)
+      timerRef.current = null
+      return
+    }
+
+    timerRef.current = window.setInterval(() => {
+      const current = intervals[phaseIndexRef.current] || intervals[0]
+      if (!current) return
+      const elapsed = Math.floor((performance.now() - phaseStartedRef.current) / 1000)
+      const remaining = current.seconds - elapsed
+      if (remaining > 0) {
+        setSecondsLeft(remaining)
+        return
+      }
+
+      const nextIndex = (phaseIndexRef.current + 1) % intervals.length
+      const next = intervals[nextIndex]
+      phaseIndexRef.current = nextIndex
+      phaseStartedRef.current = performance.now()
+      setPhaseIndex(nextIndex)
+      setSecondsLeft(next.seconds)
+      triggerRunCue(audioRef, profile, next)
+      updateRunMediaSession(session, next, week)
+    }, 250)
+
+    return () => window.clearInterval(timerRef.current)
+  }, [running, intervals, profile, session, week])
+
+  useEffect(() => () => stopRunAudio(audioRef), [])
+
+  const currentPhase = intervals[phaseIndex] || intervals[0]
+
+  async function startWorkout() {
+    if (!currentPhase) return
+    await ensureRunAudio(audioRef, profile, currentPhase)
+    phaseStartedRef.current = performance.now() - ((currentPhase.seconds - secondsLeft) * 1000)
+    setRunning(true)
+    triggerRunCue(audioRef, profile, currentPhase)
+    updateRunMediaSession(session, currentPhase, week)
+  }
+
+  function pauseWorkout() {
+    setRunning(false)
+    audioRef.current.ctx?.suspend?.()
+    if (navigator.mediaSession) navigator.mediaSession.playbackState = 'paused'
+  }
+
+  function resetWorkout() {
+    setRunning(false)
+    phaseIndexRef.current = 0
+    setPhaseIndex(0)
+    setSecondsLeft(intervals[0]?.seconds || 0)
+    stopRunAudio(audioRef)
+  }
+
+  return (
+    <div className={styles.audioCueCard}>
+      <div className={styles.audioCueHeader}>
+        <div>
+          <span>Audio guidance</span>
+          <strong>{currentPhase?.label || 'Workout cues'}</strong>
+        </div>
+        <p>{formatTime(secondsLeft)}</p>
+      </div>
+
+      <div className={styles.audioProfileGrid} aria-label="Audio cue profiles">
+        {AUDIO_CUE_PROFILES.map(item => (
+          <button
+            key={item.id}
+            type="button"
+            className={profile === item.id ? styles.audioProfileActive : ''}
+            onClick={() => setProfile(item.id)}
+            disabled={running}
+          >
+            <strong>{item.label}</strong>
+            <span>{item.summary}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className={styles.audioCueControls}>
+        <button type="button" onClick={running ? pauseWorkout : startWorkout}>
+          {running ? 'Pause cues' : 'Start workout'}
+        </button>
+        <button type="button" onClick={resetWorkout}>Reset</button>
+      </div>
+    </div>
+  )
+}
+
+function buildRunIntervals(session) {
+  const text = [session?.title, session?.duration, session?.notes].filter(Boolean).join(' ').toLowerCase()
+  const explicit = text.match(/(\d+)\s*(?:min|minute)s?\s*(?:run|jog)[^\d]{0,40}(\d+)\s*(?:min|minute)s?\s*walk/)
+    || text.match(/run\s*(\d+)\s*(?:min|minute)s?[^\d]{0,40}walk\s*(\d+)\s*(?:min|minute)s?/)
+  const runMinutes = explicit ? Number(explicit[1]) : 2
+  const walkMinutes = explicit ? Number(explicit[2]) : 1
+  return [
+    {
+      id: 'run',
+      label: 'Run',
+      seconds: Math.max(30, runMinutes * 60),
+      spoken: 'Time to run. Focus on your Soft Kiss landing and silent feet.',
+    },
+    {
+      id: 'walk',
+      label: 'Walk',
+      seconds: Math.max(30, walkMinutes * 60),
+      spoken: 'Walk. Recover the engine. Bring the breath back to a Slow Cycle.',
+    },
+  ]
+}
+
+async function ensureRunAudio(audioRef, profile, phase) {
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext
+  if (!AudioContextCtor) return
+  let ctx = audioRef.current.ctx
+  if (!ctx || ctx.state === 'closed') {
+    ctx = new AudioContextCtor()
+    audioRef.current.ctx = ctx
+  }
+  if (ctx.state === 'suspended') await ctx.resume()
+  if (!audioRef.current.carrier) {
+    const carrier = ctx.createOscillator()
+    const gain = ctx.createGain()
+    carrier.type = 'sine'
+    carrier.frequency.value = 120
+    gain.gain.value = 0.0025
+    carrier.connect(gain).connect(ctx.destination)
+    carrier.start()
+    audioRef.current.carrier = carrier
+    audioRef.current.carrierGain = gain
+  }
+  configureBinaural(audioRef, profile, phase)
+}
+
+function configureBinaural(audioRef, profile, phase) {
+  const ctx = audioRef.current.ctx
+  if (!ctx) return
+  audioRef.current.binaural.forEach(node => {
+    try { node.stop?.() } catch {}
+    try { node.disconnect?.() } catch {}
+  })
+  audioRef.current.binaural = []
+  if (profile !== 'binaural') return
+
+  const base = phase?.id === 'run' ? 180 : 140
+  const offset = phase?.id === 'run' ? 14 : 7
+  ;[-1, 1].forEach((panValue, index) => {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    const pan = ctx.createStereoPanner?.()
+    osc.type = 'sine'
+    osc.frequency.value = base + (index === 1 ? offset : 0)
+    gain.gain.value = 0.01
+    if (pan) {
+      pan.pan.value = panValue
+      osc.connect(gain).connect(pan).connect(ctx.destination)
+    } else {
+      osc.connect(gain).connect(ctx.destination)
+    }
+    osc.start()
+    audioRef.current.binaural.push(osc, gain, pan)
+  })
+}
+
+function triggerRunCue(audioRef, profile, phase) {
+  if (profile === 'spoken') {
+    speakRunCue(phase.spoken)
+    return
+  }
+  playRunTone(audioRef, phase, profile)
+}
+
+function speakRunCue(text) {
+  if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return
+  window.speechSynthesis.cancel()
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.rate = 0.92
+  utterance.pitch = 0.95
+  utterance.volume = 0.9
+  window.speechSynthesis.speak(utterance)
+}
+
+function playRunTone(audioRef, phase, profile) {
+  const ctx = audioRef.current.ctx
+  if (!ctx) return
+  const now = ctx.currentTime
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+  const isRun = phase?.id === 'run'
+  osc.type = profile === 'binaural' ? 'triangle' : 'sine'
+  osc.frequency.setValueAtTime(isRun ? 880 : 392, now)
+  gain.gain.setValueAtTime(0.0001, now)
+  gain.gain.exponentialRampToValueAtTime(isRun ? 0.18 : 0.12, now + 0.02)
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + (isRun ? 0.42 : 0.72))
+  osc.connect(gain).connect(ctx.destination)
+  osc.start(now)
+  osc.stop(now + (isRun ? 0.46 : 0.76))
+  audioRef.current.transient = osc
+
+  if (isRun && profile !== 'single') {
+    window.setTimeout(() => playRunTone(audioRef, { id: 'run' }, 'single'), 190)
+  }
+}
+
+function stopRunAudio(audioRef) {
+  window.clearInterval(audioRef.current.timer)
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+  ;[audioRef.current.carrier, ...audioRef.current.binaural, audioRef.current.transient].forEach(node => {
+    try { node?.stop?.() } catch {}
+    try { node?.disconnect?.() } catch {}
+  })
+  try { audioRef.current.ctx?.close?.() } catch {}
+  audioRef.current = { ctx: null, carrier: null, carrierGain: null, binaural: [], transient: null }
+  if (navigator.mediaSession) navigator.mediaSession.playbackState = 'none'
+}
+
+function updateRunMediaSession(session, phase, week) {
+  if (!navigator.mediaSession || !window.MediaMetadata) return
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: `Current Phase: ${phase?.label?.toUpperCase() || 'RUN'}`,
+    artist: 'Run & Bee Trimester',
+    album: `Week ${week} Workout`,
+  })
+  navigator.mediaSession.playbackState = 'playing'
+}
+
+function formatTime(seconds) {
+  const safe = Math.max(0, Math.round(seconds || 0))
+  const mins = Math.floor(safe / 60)
+  const secs = String(safe % 60).padStart(2, '0')
+  return `${mins}:${secs}`
 }
 
 function DailyRemarks({ remarks, checkins }) {

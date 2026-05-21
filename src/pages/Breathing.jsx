@@ -15,6 +15,14 @@ import {
 } from '../data/breathingProgram'
 import styles from './Breathing.module.css'
 
+const REMINDER_STORAGE_KEY = 'gb_breath_reminders'
+const DEFAULT_REMINDER_SETTINGS = {
+  enabled: false,
+  frequency: 8,
+  startTime: '08:00',
+  endTime: '20:00',
+}
+
 export default function Breathing() {
   const { entries, getTodayEntry, saveEntry } = useData()
 
@@ -29,6 +37,10 @@ export default function Breathing() {
   const [elapsed, setElapsed] = useState(0)
   const [saved, setSaved] = useState(false)
   const [justUnlocked, setJustUnlocked] = useState(false)
+  const [sighDuration, setSighDuration] = useState(300)
+  const [reminderSettings, setReminderSettings] = useState(() => loadReminderSettings())
+  const [notificationPermission, setNotificationPermission] = useState(() => getNotificationPermission())
+  const [reminderNotice, setReminderNotice] = useState('')
 
   const phases = useMemo(() => buildPhaseSequence(weekConfig), [weekConfig])
   const cycleSeconds = useMemo(() => cycleSecondsFor(weekConfig), [weekConfig])
@@ -40,6 +52,9 @@ export default function Breathing() {
   const progress = phaseState.progress
   const breathsPerMinute = cycleSeconds > 0 ? Math.round((600 / cycleSeconds)) / 10 : 0
   const breathCue = phaseState.cue || 'Settle in. The orb will lead you.'
+  const sighThisWeek = isSighWeek(weekConfig)
+  const targetDuration = sighThisWeek ? sighDuration : (weekConfig.duration || cycleSeconds)
+  const sessionProgress = targetDuration > 0 ? Math.min(1, elapsed / targetDuration) : 0
 
   useEffect(() => {
     if (!running || cycleSeconds <= 0) return
@@ -48,14 +63,26 @@ export default function Breathing() {
   }, [running, cycleSeconds])
 
   useEffect(() => {
+    if (running && targetDuration > 0 && elapsed >= targetDuration) {
+      setRunning(false)
+    }
+  }, [elapsed, running, targetDuration])
+
+  useEffect(() => {
     setElapsed(0)
     setRunning(false)
     setSaved(false)
     setJustUnlocked(false)
+    setSighDuration(300)
   }, [currentWeek])
 
+  useEffect(() => {
+    localStorage.setItem(REMINDER_STORAGE_KEY, JSON.stringify(reminderSettings))
+    syncReminderSettings(reminderSettings)
+  }, [reminderSettings])
+
   async function saveBreathSession() {
-    if (elapsed < cycleSeconds || saved) return
+    if (elapsed < targetDuration || saved) return
     const today = getTodayEntry() || { scores: {}, note: '', sessions: [] }
     const willUnlock = sessionsThisWeek + 1 >= SESSIONS_PER_WEEK && currentWeek < TOTAL_WEEKS
 
@@ -71,12 +98,14 @@ export default function Breathing() {
           phase: weekConfig.phase,
           exerciseKind: isSighWeek(weekConfig) ? 'sigh' : 'standard',
           durationSeconds: elapsed,
+          targetDurationSeconds: targetDuration,
           cycles,
           inhale: weekConfig.inhale,
           holdFull: weekConfig.holdFull ?? 0,
           exhale: weekConfig.exhale,
           holdEmpty: weekConfig.holdEmpty ?? 0,
           microInhale: weekConfig.microInhale ?? 0,
+          reminderSettings: reminderSettings.enabled ? reminderSettings : null,
           completedAt: new Date().toISOString(),
         },
       ],
@@ -98,7 +127,23 @@ export default function Breathing() {
   }
 
   const phaseMeta = phaseInfo[weekConfig.phase]
-  const sighThisWeek = isSighWeek(weekConfig)
+
+  async function requestNotificationPermission() {
+    if (!('Notification' in window)) {
+      setReminderNotice('This browser does not support notifications.')
+      return
+    }
+
+    try {
+      const permission = await Notification.requestPermission()
+      setNotificationPermission(permission)
+      setReminderNotice(permission === 'granted'
+        ? 'Notifications are ready for your reminder window.'
+        : 'Notifications are still blocked. You can enable them in browser settings.')
+    } catch (err) {
+      setReminderNotice(err.message || 'Notification permission could not be requested.')
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -120,9 +165,33 @@ export default function Breathing() {
           allComplete={allComplete}
           justUnlocked={justUnlocked}
           breathsPerMinute={breathsPerMinute}
+          targetDuration={targetDuration}
         />
 
         <div className={styles.breathCard}>
+          {sighThisWeek && (
+            <div className={styles.sighOptions} aria-label="Sigh protocol duration">
+              <button
+                type="button"
+                className={sighDuration === 180 ? styles.sighOptionActive : ''}
+                onClick={() => setSighDuration(180)}
+                disabled={running}
+              >
+                <span>Rapid reset</span>
+                <strong>3 min</strong>
+              </button>
+              <button
+                type="button"
+                className={sighDuration === 300 ? styles.sighOptionActive : ''}
+                onClick={() => setSighDuration(300)}
+                disabled={running}
+              >
+                <span>Daily practice</span>
+                <strong>5 min</strong>
+              </button>
+            </div>
+          )}
+
           <div
             className={`${styles.orbWrap} ${running ? styles.orbWrapActive : ''}`}
           >
@@ -161,12 +230,12 @@ export default function Breathing() {
               <p>time</p>
             </div>
             <div>
-              <span>{breathsPerMinute || '—'}</span>
-              <p>br/min</p>
+              <span>{formatTime(targetDuration)}</span>
+              <p>target</p>
             </div>
             <div>
-              <span>{phaseState.nextLabel}</span>
-              <p>next</p>
+              <span>{Math.round(sessionProgress * 100)}%</span>
+              <p>done</p>
             </div>
           </div>
 
@@ -182,13 +251,21 @@ export default function Breathing() {
           <button
             className={styles.saveBtn}
             onClick={saveBreathSession}
-            disabled={elapsed < cycleSeconds || saved}
+            disabled={elapsed < targetDuration || saved}
           >
-            {saved ? 'Session saved' : elapsed < cycleSeconds ? 'Save after one full cycle' : 'Log this session'}
+            {saved ? 'Session saved' : elapsed < targetDuration ? `Save at ${formatTime(targetDuration)}` : 'Log this session'}
           </button>
         </div>
 
         <Metronome playing={running} onPlayingChange={setRunning} fixedBpm={60} compact />
+
+        <ReminderPanel
+          settings={reminderSettings}
+          onChange={setReminderSettings}
+          permission={notificationPermission}
+          onRequestPermission={requestNotificationPermission}
+          notice={reminderNotice}
+        />
 
         <Curriculum currentWeek={currentWeek} weekTally={weekTally} />
       </section>
@@ -204,6 +281,7 @@ function ProgressCard({
   allComplete,
   justUnlocked,
   breathsPerMinute,
+  targetDuration,
 }) {
   const cappedSessions = Math.min(sessionsThisWeek, SESSIONS_PER_WEEK)
   const remaining = Math.max(0, SESSIONS_PER_WEEK - cappedSessions)
@@ -227,6 +305,9 @@ function ProgressCard({
         )}
         {breathsPerMinute > 0 && (
           <RatioPill label="Rate" value={`${breathsPerMinute} br/min`} muted />
+        )}
+        {targetDuration > 0 && (
+          <RatioPill label="Timer" value={formatMinutes(targetDuration)} muted />
         )}
       </div>
 
@@ -253,6 +334,100 @@ function RatioPill({ label, seconds, value, muted, accent }) {
       <span>{label}</span>
       <strong>{display}</strong>
     </div>
+  )
+}
+
+function ReminderPanel({ settings, onChange, permission, onRequestPermission, notice }) {
+  const platform = getPwaPlatformState()
+  const nextTimes = getReminderTimes(settings)
+  const canAskPermission = platform.canAskPermission && 'Notification' in window
+  const permissionLabel = permission === 'granted'
+    ? 'Permission granted'
+    : permission === 'denied'
+      ? 'Permission blocked'
+      : 'Permission not set'
+
+  function update(patch) {
+    onChange({ ...settings, ...patch })
+  }
+
+  return (
+    <section className={styles.reminderCard} aria-labelledby="breath-reminder-title">
+      <div className={styles.reminderHeader}>
+        <div>
+          <p className={styles.reminderKicker}>Breathe reminders</p>
+          <h2 id="breath-reminder-title">Active-hour prompts</h2>
+        </div>
+        <label className={styles.reminderToggle}>
+          <input
+            type="checkbox"
+            checked={settings.enabled}
+            onChange={e => update({ enabled: e.target.checked })}
+          />
+          <span>{settings.enabled ? 'On' : 'Off'}</span>
+        </label>
+      </div>
+
+      <div className={styles.reminderControls}>
+        <label>
+          <span>Daily count</span>
+          <input
+            type="range"
+            min="5"
+            max="12"
+            value={settings.frequency}
+            onChange={e => update({ frequency: Number(e.target.value) })}
+          />
+          <strong>{settings.frequency} times</strong>
+        </label>
+        <label>
+          <span>Start</span>
+          <input
+            type="time"
+            value={settings.startTime}
+            onChange={e => update({ startTime: e.target.value })}
+          />
+        </label>
+        <label>
+          <span>End</span>
+          <input
+            type="time"
+            value={settings.endTime}
+            onChange={e => update({ endTime: e.target.value })}
+          />
+        </label>
+      </div>
+
+      {platform.needsInstall && (
+        <div className={styles.installGuide}>
+          <p className={styles.installGuideTitle}>Install first on iPhone</p>
+          <div className={styles.installSteps} aria-label="Install instructions">
+            <span>1. Safari Share</span>
+            <span>2. Add to Home Screen</span>
+            <span>3. Open from icon</span>
+          </div>
+        </div>
+      )}
+
+      <div className={styles.permissionRow}>
+        <span>{permissionLabel}</span>
+        {permission !== 'granted' && (
+          <button type="button" onClick={onRequestPermission} disabled={!canAskPermission}>
+            Grant notification permission
+          </button>
+        )}
+      </div>
+
+      {nextTimes.length > 0 && (
+        <p className={styles.reminderPreview}>
+          Today: {nextTimes.join(', ')}
+        </p>
+      )}
+      <p className={styles.reminderFoot}>
+        Each reminder opens a 60-second reset. Installed PWAs can receive push messages through the service worker.
+      </p>
+      {notice && <p className={styles.reminderNotice}>{notice}</p>}
+    </section>
   )
 }
 
@@ -365,8 +540,91 @@ function getPhaseState(phases, elapsed) {
   }
 }
 
+function loadReminderSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(REMINDER_STORAGE_KEY) || 'null')
+    return {
+      ...DEFAULT_REMINDER_SETTINGS,
+      ...(saved || {}),
+      frequency: clampReminderFrequency(saved?.frequency ?? DEFAULT_REMINDER_SETTINGS.frequency),
+    }
+  } catch {
+    return DEFAULT_REMINDER_SETTINGS
+  }
+}
+
+function getNotificationPermission() {
+  if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported'
+  return Notification.permission
+}
+
+function getPwaPlatformState() {
+  const standalone = window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true
+  const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent || '')
+  return {
+    isIOS,
+    standalone,
+    needsInstall: isIOS && !standalone,
+    canAskPermission: !isIOS || standalone,
+  }
+}
+
+function clampReminderFrequency(value) {
+  const next = Number(value)
+  if (!Number.isFinite(next)) return DEFAULT_REMINDER_SETTINGS.frequency
+  return Math.min(12, Math.max(5, Math.round(next)))
+}
+
+function getReminderTimes(settings) {
+  if (!settings?.enabled) return []
+  const start = timeToMinutes(settings.startTime)
+  const end = timeToMinutes(settings.endTime)
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return []
+  const count = clampReminderFrequency(settings.frequency)
+  if (count === 1) return [minutesToTime(start)]
+  const step = (end - start) / Math.max(1, count - 1)
+  return Array.from({ length: count }, (_, i) => minutesToTime(Math.round(start + step * i)))
+}
+
+function timeToMinutes(value) {
+  const [hours, mins] = String(value || '').split(':').map(Number)
+  if (!Number.isFinite(hours) || !Number.isFinite(mins)) return NaN
+  return hours * 60 + mins
+}
+
+function minutesToTime(total) {
+  const hours = Math.floor(total / 60) % 24
+  const mins = total % 60
+  return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`
+}
+
+function syncReminderSettings(settings) {
+  if (!('serviceWorker' in navigator)) return
+  navigator.serviceWorker.ready
+    .then(registration => {
+      registration.active?.postMessage({
+        type: 'BREATH_REMINDER_SETTINGS',
+        settings: {
+          ...settings,
+          frequency: clampReminderFrequency(settings.frequency),
+          notification: {
+            title: 'Time to Breathe',
+            body: 'Take 60 seconds. Let your breath become Slow, Long, and Deep. Drop the tension.',
+            durationSeconds: 60,
+          },
+        },
+      })
+    })
+    .catch(() => {})
+}
+
 function formatTime(seconds) {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins}:${String(secs).padStart(2, '0')}`
+}
+
+function formatMinutes(seconds) {
+  const mins = Math.round(seconds / 60)
+  return `${mins} min`
 }

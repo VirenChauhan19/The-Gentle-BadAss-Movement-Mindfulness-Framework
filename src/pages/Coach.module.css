@@ -472,6 +472,109 @@
   line-height: 1.5;
 }
 
+.audioCueCard {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--cream);
+  border: 1px solid var(--border-light);
+  display: grid;
+  gap: 12px;
+}
+
+.audioCueHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.audioCueHeader span {
+  display: block;
+  color: var(--ink-faint);
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.audioCueHeader strong {
+  display: block;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.audioCueHeader p {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.audioProfileGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.audioProfileGrid button {
+  min-height: 74px;
+  border-radius: 14px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  color: var(--ink-light);
+  padding: 10px;
+  text-align: left;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+.audioProfileGrid strong {
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.audioProfileGrid span {
+  color: var(--ink-light);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.audioProfileActive {
+  border-color: color-mix(in srgb, var(--sage) 44%, var(--border-light)) !important;
+  background: color-mix(in srgb, var(--sage) 12%, var(--paper)) !important;
+  box-shadow: 0 8px 18px var(--shadow-xs);
+}
+
+.audioCueControls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.audioCueControls button {
+  min-height: 44px;
+  border-radius: 14px;
+  font-weight: 900;
+  font-size: 0.84rem;
+}
+
+.audioCueControls button:first-child {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.audioCueControls button:last-child {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  color: var(--ink-light);
+  padding: 0 14px;
+}
+
 .planSummary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -3190,6 +3293,15 @@
 
   .statusRow {
     gap: 7px;
+  }
+
+  .audioProfileGrid,
+  .audioCueControls {
+    grid-template-columns: 1fr;
+  }
+
+  .audioCueCard {
+    border-radius: 18px;
   }
 
   .statusBtn {
