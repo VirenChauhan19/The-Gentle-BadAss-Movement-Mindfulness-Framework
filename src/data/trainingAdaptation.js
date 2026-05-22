@@ -118,6 +118,58 @@ export function getCycleTrainingSignal(profile, date = todayISO()) {
   return null
 }
 
+/**
+ * Onboarding precompute. The instant a profile is submitted we derive the full
+ * personalisation context — body-mass structural loading, the menstrual-cycle
+ * calendar, health-history buffers, and the mental-stress buffer — in one pure,
+ * synchronous pass. Persisting this on the profile means plan generation can
+ * read a ready answer instead of ever showing the runner a "thinking" step.
+ * For typical inputs this returns in well under a frame.
+ */
+export function buildAdaptationContext(profile = {}) {
+  const startDate = todayISO()
+
+  // Body-mass structural loading: heavier frames earn a gentler impact ceiling,
+  // lighter frames a touch more headroom. Centred on ~75 kg, clamped both ways.
+  const weight = Number(profile.weightKg)
+  const structuralLoadFactor = Number.isFinite(weight) && weight > 0
+    ? Math.max(0.8, Math.min(1.15, 75 / weight))
+    : 1
+
+  // Menstrual-cycle calendar: pre-resolve the upcoming period windows so the
+  // plan can de-escalate those days without recomputing on every render.
+  const cycle = normalizeCycleProfile(profile)
+  const cycleWindows = getCycleWindows(profile, startDate, 91)
+
+  // Health-history protective flags — the single source the plan layer reads.
+  const structuralFlags = {
+    lowerBackPain: Boolean(profile.lowerBackPain),
+    kneePain: Boolean(profile.kneePain),
+    anklePain: Boolean(profile.anklePain),
+    plantarFasciaIssues: Boolean(profile.plantarFasciaIssues),
+    asthma: Boolean(profile.asthma),
+    hypertension: Boolean(profile.hypertension),
+    diabetes: Boolean(profile.diabetes),
+    pcos: Boolean(profile.pcos),
+  }
+
+  // Mental-stress buffer: a low emotional baseline trims weeks 1-3 volume so
+  // the nervous system has space to stabilise. Mirrors the plan-time reducer.
+  const baseline = Number(profile.mentalBaseline)
+  const mentalStressBuffer = Number.isFinite(baseline) && baseline <= 4
+    ? { active: true, scale: 0.85, weeks: [1, 2, 3], baseline }
+    : { active: false }
+
+  return {
+    builtAt: new Date().toISOString(),
+    startDate,
+    structuralLoadFactor,
+    cycle: { ...cycle, windows: cycleWindows },
+    structuralFlags,
+    mentalStressBuffer,
+  }
+}
+
 export function adaptSessionForCycle(session, signal) {
   if (!session || !signal?.active) return session
   if (session.cycleAdjustment?.original) return session

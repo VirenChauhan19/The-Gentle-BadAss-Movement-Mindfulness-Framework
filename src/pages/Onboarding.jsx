@@ -1,7 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
+import { buildAdaptationContext } from '../data/trainingAdaptation'
 import styles from './Onboarding.module.css'
+
+// Submission timing. Saves that resolve faster than this never paint a loading
+// state — the runner lands straight on the dashboard. Slower (network/DB) saves
+// reveal the Mentor transition, held for a minimum so phrases never flash.
+const REVEAL_AFTER_MS = 500
+const MIN_TRANSITION_MS = 1400
+
+// Mentor-voiced phrases. No "AI", "Processing", "Calculating", or "Generating".
+const TRANSITION_PHRASES = [
+  'Reading the baseline of your Chariot...',
+  'Structuring your 13-week biological framework...',
+  'Aligning your breath and movement map...',
+]
+
+function MentorTransition() {
+  const [index, setIndex] = useState(0)
+  useEffect(() => {
+    const id = setInterval(
+      () => setIndex(i => (i + 1) % TRANSITION_PHRASES.length),
+      600,
+    )
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <div className={styles.transition} role="status" aria-live="polite">
+      <div className={styles.transitionGlow} aria-hidden="true" />
+      <p key={index} className={styles.transitionLine}>
+        {TRANSITION_PHRASES[index]}
+      </p>
+    </div>
+  )
+}
 
 const paths = [
   {
@@ -129,6 +163,8 @@ function toggleInList(list, value) {
 export default function Onboarding() {
   const { saveProfile, profile } = useData()
   const navigate = useNavigate()
+  const submittingRef = useRef(false)
+  const [transitioning, setTransitioning] = useState(false)
   const [step, setStep] = useState(() => (profile?.onboardingComplete && !profile?.sex ? 2 : 1))
   const [data, setData] = useState({
     name: profile?.name || '',
@@ -181,6 +217,9 @@ export default function Onboarding() {
     data.strengthFrequency
 
   async function handleComplete() {
+    if (submittingRef.current) return
+    submittingRef.current = true
+
     const resolvedSex = data.sex || (isFemale ? 'woman' : data.gender === 'male' ? 'man' : data.gender)
     const payload = {
       ...data,
@@ -199,13 +238,47 @@ export default function Onboarding() {
       pcos: data.conditions.includes('PCOS / PCOD'),
       onboardingComplete: true,
     }
-    await saveProfile(payload)
-    navigate('/')
+
+    // 1. Invisible processing: derive the full personalisation context
+    //    (body-mass loading, cycle calendar, health buffers, mental-stress
+    //    buffer) synchronously, the instant the profile is submitted.
+    payload.adaptationContext = buildAdaptationContext(payload)
+
+    // 2. Reveal the Mentor transition only if the save sequence is slow enough
+    //    to need one. Sub-500ms saves skip the loading state entirely.
+    let revealedAt = 0
+    const revealTimer = setTimeout(() => {
+      revealedAt = performance.now()
+      setTransitioning(true)
+    }, REVEAL_AFTER_MS)
+
+    try {
+      await saveProfile(payload)
+    } catch {
+      // saveProfile swallows Firestore errors and updates local state first, so
+      // the dashboard renders from cache regardless of network outcome.
+    } finally {
+      clearTimeout(revealTimer)
+    }
+
+    // If the transition became visible, hold it briefly so the phrases land
+    // cleanly instead of flickering on a save that finished just after 500ms.
+    if (revealedAt) {
+      const visibleFor = performance.now() - revealedAt
+      if (visibleFor < MIN_TRANSITION_MS) {
+        await new Promise(resolve => setTimeout(resolve, MIN_TRANSITION_MS - visibleFor))
+      }
+    }
+
+    // 3. Replace history so Back from the dashboard never re-opens onboarding.
+    navigate('/', { replace: true })
   }
 
   function update(patch) {
     setData(prev => ({ ...prev, ...patch }))
   }
+
+  if (transitioning) return <MentorTransition />
 
   return (
     <div className={styles.page}>

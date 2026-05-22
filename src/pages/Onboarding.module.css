@@ -7,6 +7,71 @@
   flex-direction: column;
 }
 
+/* ── Mentor submission transition ─────────────────────── */
+/* Calm dark ambient regardless of active theme, soft typographic fades,
+   and deliberately no loading spinner. */
+.transition {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(99, 127, 95, 0.18), transparent 60%),
+    linear-gradient(160deg, #11150f 0%, #0b0e09 100%);
+  animation: transitionEnter 700ms var(--ease-out) both;
+}
+
+.transitionGlow {
+  position: absolute;
+  width: 60vmin;
+  height: 60vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 158, 126, 0.16), transparent 70%);
+  filter: blur(42px);
+  animation: transitionBreathe 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.transitionLine {
+  position: relative;
+  max-width: 22ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 5.2vw, 1.7rem);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: rgba(245, 247, 242, 0.92);
+  /* keyed on phrase index in JS, so each phrase re-runs this fade */
+  animation: phraseFade 600ms var(--ease-out) both;
+}
+
+@keyframes transitionEnter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes transitionBreathe {
+  0%, 100% { transform: scale(0.92); opacity: 0.7; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes phraseFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transition,
+  .transitionGlow,
+  .transitionLine {
+    animation: none;
+  }
+}
+
 /* ── Progress bar ─────────────────────────────────────── */
 .progressBar {
   position: relative;
