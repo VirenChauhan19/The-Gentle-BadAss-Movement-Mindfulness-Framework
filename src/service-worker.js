@@ -6,6 +6,22 @@ void self.clients.claim()
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
 
+// Total cache purge on activate: delete every cache except the current
+// precache. Combined with skipWaiting + clientsClaim above (and the autoUpdate
+// page reload on the client), every user who opens or refocuses the site wipes
+// any stale cached assets and reloads straight into the latest version.
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => !key.startsWith('workbox-precache'))
+          .map(key => caches.delete(key))
+      )
+    )
+  )
+})
+
 const BREATH_NOTIFICATION = {
   title: 'Time to Breathe',
   body: 'Take 60 seconds. Let your breath become Slow, Long, and Deep. Drop the tension.',
