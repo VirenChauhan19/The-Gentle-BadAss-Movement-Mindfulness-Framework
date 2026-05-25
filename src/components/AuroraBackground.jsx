@@ -1,6 +1,7 @@
 import { useRef, useMemo, useEffect, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import styles from './AuroraBackground.module.css'
 
 /*
  * AuroraBackground — a WebGL "energetic aurora / flow" backdrop.
@@ -159,10 +160,10 @@ function Aurora({ colors, reduced, intensity = 1 }) {
   useFrame((state, delta) => {
     const u = matRef.current?.uniforms
     if (!u) return
-    if (!reduced) {
-      u.uTime.value += delta * 0.5
-      u.uScroll.value += input.scrollVel * 0.04
-    }
+    // Always animate — the flow is part of the brand. Under prefers-reduced-
+    // motion we keep it moving but slow it down rather than freezing.
+    u.uTime.value += delta * (reduced ? 0.22 : 0.5)
+    u.uScroll.value += input.scrollVel * 0.04
     u.uPointer.value.set(input.pointerX + input.tiltX, input.pointerY + input.tiltY)
   })
 
@@ -233,11 +234,11 @@ function Particles({ colors, count, reduced }) {
       grp.position.x += ((tx * 1.2) - grp.position.x) * 0.04
     }
 
-    if (reduced) return
     const geo = pointsRef.current?.geometry
     if (!geo) return
     const pos = geo.attributes.position.array
-    const boost = 1 + Math.min(Math.abs(input.scrollVel) * 6, 9)
+    const drift = reduced ? 0.45 : 1 // gentler upward drift under reduced motion
+    const boost = (1 + Math.min(Math.abs(input.scrollVel) * 6, 9)) * drift
     const dir = input.scrollVel >= 0 ? 1 : -1
     for (let i = 0; i < count; i++) {
       const iy = i * 3 + 1
@@ -294,7 +295,6 @@ export default function AuroraBackground({ theme, variant = 'app' }) {
 
   // Global interaction listeners — scroll velocity, pointer, device tilt.
   useEffect(() => {
-    if (reduced) return
     let lastY = window.scrollY
     let raf = 0
 
@@ -330,14 +330,21 @@ export default function AuroraBackground({ theme, variant = 'app' }) {
       window.removeEventListener('deviceorientation', onOrient)
       cancelAnimationFrame(raf)
     }
-  }, [reduced, isMobile])
+  }, [isMobile])
 
   if (!colors) {
     return <div aria-hidden="true" style={layerStyle(null, isOverlay)} />
   }
 
   if (isMobile) {
-    return <div aria-hidden="true" style={mobileLayerStyle(colors, isOverlay)} />
+    return (
+      <div aria-hidden="true" className={styles.mobile} style={mobileLayerStyle(colors, isOverlay)}>
+        <span className={styles.blobA} />
+        <span className={styles.blobB} />
+        <span className={styles.blobC} />
+        <span className={styles.blobD} />
+      </div>
+    )
   }
 
   return (
@@ -346,7 +353,7 @@ export default function AuroraBackground({ theme, variant = 'app' }) {
         dpr={[1, isMobile ? 1.5 : 2]}
         gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
         camera={{ position: [0, 0, 5], fov: 60 }}
-        frameloop={reduced ? 'demand' : 'always'}
+        frameloop="always"
         style={{ width: '100%', height: '100%' }}
       >
         <color attach="background" args={[colors.base.getStyle()]} key={colors.base.getStyle()} />
@@ -374,8 +381,9 @@ function rgba(color, alpha) {
 }
 
 function mobileLayerStyle(colors, isOverlay) {
-  const base = colors.base.getStyle()
-  const darkBase = colors.base.clone().multiplyScalar(0.52).getStyle()
+  // Positioning + the live theme colours, handed to AuroraBackground.module.css
+  // as custom properties so the drifting blobs re-skin with the theme.
+  const boost = isOverlay ? 1.5 : 1
   return {
     position: isOverlay ? 'absolute' : 'fixed',
     inset: 0,
@@ -385,15 +393,11 @@ function mobileLayerStyle(colors, isOverlay) {
     zIndex: isOverlay ? 0 : -1,
     pointerEvents: 'none',
     overflow: 'hidden',
-    backgroundColor: base,
-    backgroundImage: [
-      `radial-gradient(190px 240px at 18% 8%, ${rgba(colors.light, 0.08)}, transparent 76%)`,
-      `radial-gradient(220px 280px at 92% 14%, ${rgba(colors.colorA, 0.07)}, transparent 78%)`,
-      `radial-gradient(240px 300px at 54% 88%, ${rgba(colors.colorB, 0.05)}, transparent 80%)`,
-      `linear-gradient(155deg, ${base} 0%, ${darkBase} 100%)`,
-    ].join(', '),
-    backgroundRepeat: 'no-repeat',
-    backgroundSize: '100vw 100svh',
     transform: 'translateZ(0)',
+    '--bg-base': colors.base.getStyle(),
+    '--blob-a': rgba(colors.light, 0.5 * boost),
+    '--blob-b': rgba(colors.colorA, 0.45 * boost),
+    '--blob-c': rgba(colors.colorB, 0.4 * boost),
+    '--blob-d': rgba(colors.colorC, 0.4 * boost),
   }
 }
