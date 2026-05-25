@@ -17,7 +17,8 @@
 :global(html[data-theme="forest"]) .app,
 :global(html[data-theme="violet"]) .app,
 :global(html[data-theme="rose"]) .app,
-:global(html[data-theme="midnight"]) .app {
+:global(html[data-theme="midnight"]) .app,
+:global(html[data-theme="laultra"]) .app {
   background: var(--cream);
 }
 
@@ -208,7 +209,8 @@
 :global(html[data-theme="forest"]) .themeToggle,
 :global(html[data-theme="violet"]) .themeToggle,
 :global(html[data-theme="rose"]) .themeToggle,
-:global(html[data-theme="midnight"]) .themeToggle {
+:global(html[data-theme="midnight"]) .themeToggle,
+:global(html[data-theme="laultra"]) .themeToggle {
   background: var(--paper);
   color: var(--ink);
   border-color: var(--border);
@@ -281,6 +283,10 @@
   background: linear-gradient(135deg, #070a14 0%, #4078d8 52%, #80b0f8 100%);
 }
 
+.themeSwatch[data-theme-swatch="laultra"] {
+  background: linear-gradient(135deg, #050505 0%, #ffe12c 58%, #f2f2f2 100%);
+}
+
 @keyframes themeIconIn {
   from {
     opacity: 0;
@@ -327,13 +333,15 @@
 :global(html[data-theme="violet"]) .signInCard,
 :global(html[data-theme="rose"]) .signInCard,
 :global(html[data-theme="midnight"]) .signInCard,
+:global(html[data-theme="laultra"]) .signInCard,
 :global(html[data-theme="dark"]) .lockedPanel,
 :global(html[data-theme="ember"]) .lockedPanel,
 :global(html[data-theme="ocean"]) .lockedPanel,
 :global(html[data-theme="forest"]) .lockedPanel,
 :global(html[data-theme="violet"]) .lockedPanel,
 :global(html[data-theme="rose"]) .lockedPanel,
-:global(html[data-theme="midnight"]) .lockedPanel {
+:global(html[data-theme="midnight"]) .lockedPanel,
+:global(html[data-theme="laultra"]) .lockedPanel {
   background: var(--paper);
   border-color: var(--border-light);
   box-shadow: 0 32px 80px rgba(0, 0, 0, 0.62);

@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useData } from '../context/DataContext'
 import styles from './Nav.module.css'
 
 const links = [
@@ -14,10 +13,9 @@ const links = [
 ]
 
 export default function Nav() {
-  const { user, guestName } = useData()
   const location = useLocation()
   const navRef = useRef(null)
-  const guestLocked = Boolean(guestName && !user)
+  const guestLocked = false
 
   useEffect(() => {
     const active = navRef.current?.querySelector(`.${styles.active}`)

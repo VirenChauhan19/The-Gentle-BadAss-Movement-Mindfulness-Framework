@@ -19,7 +19,7 @@ const RING_C = 2 * Math.PI * RING_R
 export default function Home() {
   const { entries, getTodayEntry, profile, user, guestName } = useData()
   const today = getTodayEntry()
-  const guestLocked = Boolean(guestName && !user)
+  const guestLocked = false
   const streak = computeStreak(entries)
   const feelScore = today ? computeFeelScore(today.scores || {}) : null
   const dayOfJourney = entries.length

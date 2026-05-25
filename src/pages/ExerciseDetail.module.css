@@ -70,7 +70,8 @@
 :global(html[data-theme="forest"]) .topBar,
 :global(html[data-theme="violet"]) .topBar,
 :global(html[data-theme="rose"]) .topBar,
-:global(html[data-theme="midnight"]) .topBar {
+:global(html[data-theme="midnight"]) .topBar,
+:global(html[data-theme="laultra"]) .topBar {
   background: color-mix(in srgb, var(--paper) 76%, transparent);
 }
 
@@ -415,7 +416,8 @@
 :global(html[data-theme="forest"]) .block,
 :global(html[data-theme="violet"]) .block,
 :global(html[data-theme="rose"]) .block,
-:global(html[data-theme="midnight"]) .block {
+:global(html[data-theme="midnight"]) .block,
+:global(html[data-theme="laultra"]) .block {
   background: var(--paper);
 }
 

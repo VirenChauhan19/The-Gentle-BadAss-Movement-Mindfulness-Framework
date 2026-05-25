@@ -13,7 +13,7 @@ const PRINCIPLES = [
 ]
 
 export default function Library() {
-  const [activeSection, setActiveSection] = useState('coach')
+  const [activeSection, setActiveSection] = useState('breathe')
   const activeCategory = PLAN_CATEGORY_ORDER.includes(activeSection) ? activeSection : null
   const filtered = activeCategory ? EXERCISES.filter(e => e.category === activeCategory) : []
 
@@ -58,7 +58,7 @@ export default function Library() {
           className={styles.filter + (activeSection === 'coach' ? ' ' + styles.filterActive : '')}
           onClick={() => setActiveSection('coach')}
         >
-          Running
+          AI Plan
         </button>
         {PLAN_CATEGORY_ORDER.map(id => (
           <button

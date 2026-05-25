@@ -394,6 +394,10 @@
   background: linear-gradient(135deg, #050810 0%, #102888 52%, #88b8f8 100%);
 }
 
+.themeOptionSwatch[data-theme-swatch="laultra"] {
+  background: linear-gradient(135deg, #050505 0%, #ffe12c 58%, #f2f2f2 100%);
+}
+
 /* ─── Actions ─── */
 .accountActions {
   margin-bottom: 3rem;

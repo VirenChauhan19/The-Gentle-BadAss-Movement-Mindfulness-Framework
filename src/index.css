@@ -345,6 +345,48 @@
   --shadow-xl: rgba(0, 0, 0, 0.70);
 }
 
+/* La Ultra — the event's own palette: stark black, electric yellow, off-white.
+   Bright #ffe12c lives in --sage-dark (text / particles / glows on black);
+   --sage is a rich gold so white labels stay legible on filled buttons. */
+:root[data-theme="laultra"] {
+  --cream:        #0a0a08;
+  --cream-dark:   #050505;
+  --cream-mid:    #16150d;
+  --paper:        #18160e;
+  --paper-soft:   #110f09;
+  --ink:          #f6f4ea;
+  --ink-light:    #d8d2bd;
+  --ink-faint:    #998f6f;
+  --sage:         #b5860b;
+  --sage-dark:    #ffe12c;
+  --sage-light:   #2c2308;
+  --terracotta:   #ff7a45;
+  --slate:        #ffc400;
+  --slate-light:  #2a2207;
+  --gold:         #ffe66b;
+  --sand:         #cbb46a;
+  --sand-light:   #2b2511;
+  --border:       #3c3417;
+  --border-light: #26210e;
+  --focus:        #ffe66b;
+  --on-dark:      #fbf8ee;
+  --on-ink:       #0a0a08;
+  --on-accent:    #ffffff;
+  --ambient-sheen: rgba(255, 225, 44, 0.10);
+  --ambient-glow:  rgba(255, 225, 44, 0.18);
+  --ambient-glow-2: rgba(255, 240, 180, 0.10);
+  --ambient-line:  rgba(255, 225, 44, 0.05);
+  --ambient-mix: screen;
+  --ambient-opacity: 0.72;
+  --brand-gradient: linear-gradient(135deg, #050505 0%, #1a1505 54%, #b5860b 100%);
+  --sage-gradient: linear-gradient(135deg, #6e5200 0%, #c79e00 100%);
+  --shadow-xs: rgba(0, 0, 0, 0.26);
+  --shadow:    rgba(0, 0, 0, 0.40);
+  --shadow-md: rgba(0, 0, 0, 0.52);
+  --shadow-lg: rgba(0, 0, 0, 0.62);
+  --shadow-xl: rgba(0, 0, 0, 0.72);
+}
+
 html, body {
   height: 100%;
   background:
@@ -383,7 +425,8 @@ html[data-theme="ocean"] body::before,
 html[data-theme="forest"] body::before,
 html[data-theme="violet"] body::before,
 html[data-theme="rose"] body::before,
-html[data-theme="midnight"] body::before {
+html[data-theme="midnight"] body::before,
+html[data-theme="laultra"] body::before {
   opacity: 0.07;
   mix-blend-mode: screen;
 }
@@ -479,6 +522,18 @@ html[data-theme="midnight"] #root {
   background-attachment: fixed;
 }
 
+html[data-theme="laultra"],
+html[data-theme="laultra"] body,
+html[data-theme="laultra"] #root {
+  background:
+    radial-gradient(circle at 16% 10%, rgba(255, 225, 44, 0.20), transparent 22rem),
+    radial-gradient(circle at 86% 14%, rgba(255, 198, 0, 0.12), transparent 26rem),
+    radial-gradient(circle at 50% 58%, rgba(255, 244, 200, 0.05), transparent 30rem),
+    radial-gradient(circle at 74% 88%, rgba(255, 225, 44, 0.09), transparent 24rem),
+    linear-gradient(135deg, #050505 0%, #0b0a07 52%, #16110a 100%);
+  background-attachment: fixed;
+}
+
 html[data-theme="dark"] input,
 html[data-theme="ember"] input,
 html[data-theme="ocean"] input,
@@ -486,6 +541,7 @@ html[data-theme="forest"] input,
 html[data-theme="violet"] input,
 html[data-theme="rose"] input,
 html[data-theme="midnight"] input,
+html[data-theme="laultra"] input,
 html[data-theme="dark"] textarea,
 html[data-theme="ember"] textarea,
 html[data-theme="ocean"] textarea,
@@ -493,13 +549,15 @@ html[data-theme="forest"] textarea,
 html[data-theme="violet"] textarea,
 html[data-theme="rose"] textarea,
 html[data-theme="midnight"] textarea,
+html[data-theme="laultra"] textarea,
 html[data-theme="dark"] select,
 html[data-theme="ember"] select,
 html[data-theme="ocean"] select,
 html[data-theme="forest"] select,
 html[data-theme="violet"] select,
 html[data-theme="rose"] select,
-html[data-theme="midnight"] select {
+html[data-theme="midnight"] select,
+html[data-theme="laultra"] select {
   background: var(--paper-soft);
   color: var(--ink);
   border-color: var(--border);
@@ -512,13 +570,15 @@ html[data-theme="forest"] input::placeholder,
 html[data-theme="violet"] input::placeholder,
 html[data-theme="rose"] input::placeholder,
 html[data-theme="midnight"] input::placeholder,
+html[data-theme="laultra"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder,
 html[data-theme="ember"] textarea::placeholder,
 html[data-theme="ocean"] textarea::placeholder,
 html[data-theme="forest"] textarea::placeholder,
 html[data-theme="violet"] textarea::placeholder,
 html[data-theme="rose"] textarea::placeholder,
-html[data-theme="midnight"] textarea::placeholder {
+html[data-theme="midnight"] textarea::placeholder,
+html[data-theme="laultra"] textarea::placeholder {
   color: var(--ink-faint);
 }
 
@@ -529,13 +589,15 @@ html[data-theme="forest"] iframe,
 html[data-theme="violet"] iframe,
 html[data-theme="rose"] iframe,
 html[data-theme="midnight"] iframe,
+html[data-theme="laultra"] iframe,
 html[data-theme="dark"] img,
 html[data-theme="ember"] img,
 html[data-theme="ocean"] img,
 html[data-theme="forest"] img,
 html[data-theme="violet"] img,
 html[data-theme="rose"] img,
-html[data-theme="midnight"] img {
+html[data-theme="midnight"] img,
+html[data-theme="laultra"] img {
   color-scheme: dark;
 }
 
@@ -788,7 +850,8 @@ input[type="range"]::-moz-range-progress {
   html[data-theme="forest"], html[data-theme="forest"] body,
   html[data-theme="violet"], html[data-theme="violet"] body,
   html[data-theme="rose"], html[data-theme="rose"] body,
-  html[data-theme="midnight"], html[data-theme="midnight"] body {
+  html[data-theme="midnight"], html[data-theme="midnight"] body,
+  html[data-theme="laultra"], html[data-theme="laultra"] body {
     background-attachment: scroll;
   }
 

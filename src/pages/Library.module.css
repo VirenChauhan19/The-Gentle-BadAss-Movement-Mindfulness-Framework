@@ -83,7 +83,8 @@
 :global(html[data-theme="forest"]) .pillarBanner span,
 :global(html[data-theme="violet"]) .pillarBanner span,
 :global(html[data-theme="rose"]) .pillarBanner span,
-:global(html[data-theme="midnight"]) .pillarBanner span {
+:global(html[data-theme="midnight"]) .pillarBanner span,
+:global(html[data-theme="laultra"]) .pillarBanner span {
   color: var(--ink);
   background: var(--paper-soft);
   border-color: var(--border);
@@ -232,7 +233,8 @@
 :global(html[data-theme="forest"]) .filter,
 :global(html[data-theme="violet"]) .filter,
 :global(html[data-theme="rose"]) .filter,
-:global(html[data-theme="midnight"]) .filter {
+:global(html[data-theme="midnight"]) .filter,
+:global(html[data-theme="laultra"]) .filter {
   background: var(--paper);
   color: var(--ink);
   border-color: var(--border);

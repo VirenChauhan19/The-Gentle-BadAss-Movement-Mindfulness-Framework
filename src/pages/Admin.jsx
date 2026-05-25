@@ -67,6 +67,7 @@ const SCORE_COLOR = v =>
 const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 
 const THEME_OPTIONS = [
+  { id: 'laultra',  label: 'La Ultra',  description: 'Black and electric yellow race mode.' },
   { id: 'dark',     label: 'Dark',     description: 'Deep green training cockpit.'     },
   { id: 'ember',    label: 'Ember',    description: 'Red, warm, high-energy mode.'     },
   { id: 'ocean',    label: 'Ocean',    description: 'Cool blue focus mode.'            },

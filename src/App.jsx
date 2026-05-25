@@ -19,6 +19,7 @@ import Paywall from './pages/Paywall'
 import styles from './App.module.css'
 
 const THEME_PRESETS = [
+  { id: 'laultra',  label: 'La Ultra' },
   { id: 'dark',     label: 'Dark'     },
   { id: 'ember',    label: 'Ember'    },
   { id: 'ocean',    label: 'Ocean'    },
@@ -127,55 +128,10 @@ function AppRoutes() {
   )
 }
 
-function LockedRoute({ feature, children }) {
-  const { user, guestName } = useData()
-  const { signInWithGoogle, authError, isConfigured } = useAuth()
-  const lockedCopy = {
-    Feel: {
-      title: 'Sign in to log your Feel',
-      intro: 'A two-minute body, energy, soreness, and mood check-in that tunes your day.',
-      bullets: ['Save daily scores', 'Spot recovery patterns', 'Connect Feel to your running plan'],
-    },
-    'Your Plan': {
-      title: 'Sign in to unlock Your Plan',
-      intro: 'Weekly modules, breathing, mobility, and strength tools built around your progress.',
-      bullets: ['Unlock one week at a time', 'Use the day plan', 'Keep your exercise history'],
-    },
-    'Functional Tests': {
-      title: 'Sign in to unlock Functional Tests',
-      intro: 'Weekly tests help you notice change before you chase volume.',
-      bullets: ['Run weekly checks', 'Compare movement quality', 'Track changes over time'],
-    },
-    Progress: {
-      title: 'Sign in to keep your progress',
-      intro: 'Your long-term dashboard for training, Feel scores, breathing, and consistency.',
-      bullets: ['See trends over time', 'Review completed sessions', 'Sync progress across devices'],
-    },
-  }[feature] || {
-    title: `Sign in to unlock ${feature}`,
-    intro: 'Save your progress and keep your training data connected.',
-    bullets: ['Save progress', 'Sync across devices', 'Build a long-term record'],
-  }
-
-  if (user || !guestName) return children
-
-  return (
-    <div className={styles.lockedPage}>
-      <section className={styles.lockedPanel} aria-labelledby="locked-title">
-        <p className={styles.lockedLabel}>{feature}</p>
-        <h1 id="locked-title">{lockedCopy.title}</h1>
-        <p>{lockedCopy.intro}</p>
-        <ul className={styles.lockedBenefits}>
-          {lockedCopy.bullets.map(item => <li key={item}>{item}</li>)}
-        </ul>
-        {authError && <p className={styles.authError}>{authError}</p>}
-        <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>
-          Continue with Google
-        </button>
-        {!isConfigured && <p className={styles.lockHint}>Firebase is not configured yet, so Google sign-in is unavailable in this environment.</p>}
-      </section>
-    </div>
-  )
+function LockedRoute({ children }) {
+  // Guest mode is a local-only account, not a blocked preview. Let guests use
+  // the core app and keep Google sign-in as the cross-device sync path.
+  return children
 }
 
 function SignInGate({ theme }) {
@@ -201,7 +157,7 @@ function SignInGate({ theme }) {
         <p className={styles.signInKicker}>La Ultra: Run &amp; Bee</p>
         <h1 id="signin-title">Start with sign-in</h1>
         <p className={styles.signInCopy}>
-          Sign in to unlock Feel, Your Plan, Functional Tests, and Progress with saved activity across sessions. Guest mode is view-only for those sections.
+          Sign in to sync Feel, Your Plan, Functional Tests, and Progress across devices. Guest mode saves on this device only.
         </p>
         {authError && <p className={styles.authError}>{authError}</p>}
         <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>

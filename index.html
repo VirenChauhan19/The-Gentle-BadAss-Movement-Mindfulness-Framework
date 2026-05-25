@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = t
         // Match the mobile status/address bar to the active theme on first paint
         // (React keeps it in sync afterwards). Values mirror each theme's --cream.
-        var BG = { light: '#f7f5ef', dark: '#10130f', ember: '#160d0d', ocean: '#071419', forest: '#080f07', violet: '#0e0a18', rose: '#180a0e', midnight: '#070a14' }
+        var BG = { light: '#f7f5ef', dark: '#10130f', ember: '#160d0d', ocean: '#071419', forest: '#080f07', violet: '#0e0a18', rose: '#180a0e', midnight: '#070a14', laultra: '#0a0a08' }
         var m = document.querySelector('meta[name="theme-color"]')
         if (m) m.setAttribute('content', BG[t] || BG.ember)
       })()

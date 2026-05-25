@@ -413,7 +413,8 @@
 :global(html[data-theme="forest"]) .phaseText p,
 :global(html[data-theme="violet"]) .phaseText p,
 :global(html[data-theme="rose"]) .phaseText p,
-:global(html[data-theme="midnight"]) .phaseText p {
+:global(html[data-theme="midnight"]) .phaseText p,
+:global(html[data-theme="laultra"]) .phaseText p {
   background: rgba(0, 0, 0, 0.34);
   border-color: rgba(255, 255, 255, 0.24);
   color: #ffffff;
@@ -1104,7 +1105,8 @@
   :global(html[data-theme="forest"]) .controls,
   :global(html[data-theme="violet"]) .controls,
   :global(html[data-theme="rose"]) .controls,
-  :global(html[data-theme="midnight"]) .controls {
+  :global(html[data-theme="midnight"]) .controls,
+  :global(html[data-theme="laultra"]) .controls {
     background: rgba(16, 19, 15, 0.76);
   }
 

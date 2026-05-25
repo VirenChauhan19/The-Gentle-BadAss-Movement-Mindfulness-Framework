@@ -432,7 +432,8 @@
   :global(html[data-theme="forest"]) .nav,
   :global(html[data-theme="violet"]) .nav,
   :global(html[data-theme="rose"]) .nav,
-  :global(html[data-theme="midnight"]) .nav {
+  :global(html[data-theme="midnight"]) .nav,
+  :global(html[data-theme="laultra"]) .nav {
     background: color-mix(in srgb, var(--paper) 88%, transparent);
     border-color: var(--border);
     box-shadow:
