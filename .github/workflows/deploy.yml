@@ -5,6 +5,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# The Firebase deploy action still ships on node20 and has no Node 24 release
+# yet. Opt it into Node 24 now so it's verified working ahead of GitHub's
+# June 2, 2026 forced cutover, instead of risking a surprise on that date.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
