@@ -2828,6 +2828,38 @@
   line-height: 1.4;
 }
 
+/* ── Self-service Edit Profile ─── */
+.editProfileBtn {
+  margin-top: 14px;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background: var(--cream);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.editProfileBtn:hover {
+  border-color: var(--sage);
+  background: var(--paper-soft);
+}
+
+.editModalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 22px 22px;
+  overflow-y: auto;
+}
+
 /* ── Workout Picker Modal ─── */
 .pickerOverlay {
   position: fixed;

@@ -35,6 +35,14 @@ const MENOPAUSE_LABELS = {
   unsure: 'Not sure',
 }
 
+// Onboarding stores `gender` as female/male/prefer-not (with `sex` as woman/man).
+// The admin edit dropdown speaks the gender vocabulary, so map between the two:
+// `toGenderOption` picks the right <option> for a saved value (incl. legacy
+// profiles that only have `sex`), and SEX_FROM_GENDER keeps `sex` in step on save.
+const GENDER_FROM_SEX = { woman: 'female', man: 'male' }
+const SEX_FROM_GENDER = { female: 'woman', male: 'man' }
+const toGenderOption = value => GENDER_FROM_SEX[value] || value || ''
+
 function buildAdminProfileDraft(user = {}) {
   const profile = user.userProfile || {}
   return {
@@ -171,9 +179,10 @@ function getFullCoachPlan(goal) {
 
 export default function Admin() {
   const { user, signInWithGoogle, signOut, authError, isConfigured } = useAuth()
-  const { guestName, setGuestName, profile, entries, clearAllData, adminRemarks } = useData()
+  const { guestName, setGuestName, profile, entries, clearAllData, adminRemarks, saveProfile } = useData()
   const navigate = useNavigate()
 
+  const [editOpen,     setEditOpen]     = useState(false)
   const [adminMode,    setAdminMode]    = useState(false)
   const [allEntries,   setAllEntries]   = useState([])
   const [allUserData,  setAllUserData]  = useState({})
@@ -384,6 +393,13 @@ export default function Admin() {
           }
           <h1 className={styles.name}>{displayName}</h1>
           <p className={styles.email}>{displayEmail}</p>
+          <button className={styles.editProfileBtn} onClick={() => setEditOpen(true)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+            Edit Profile
+          </button>
         </div>
         <div className={styles.journeyStats}>
           <div className={styles.journeyRow}>
@@ -509,6 +525,157 @@ export default function Admin() {
       </div>
 
       <p className={styles.version}>La Ultra Run &amp; Bee v1.2.0</p>
+
+      {editOpen && (
+        <ProfileEditModal
+          profile={profile}
+          fallbackName={displayName}
+          onClose={() => setEditOpen(false)}
+          onSave={saveProfile}
+        />
+      )}
+    </div>
+  )
+}
+
+// ── Self-service profile editor (any signed-in / guest user) ──────────────────
+// Mirrors the fields a user set during onboarding so they can keep their bio,
+// goal, path and (for women) cycle details up to date. Saves through
+// DataContext.saveProfile, which merges into the current profile and syncs to
+// localStorage + Firestore — never another user's record.
+function ProfileEditModal({ profile, fallbackName, onClose, onSave }) {
+  const p = profile || {}
+  const [draft, setDraft] = useState({
+    name: p.name || fallbackName || '',
+    age: p.age || '',
+    gender: toGenderOption(p.gender || p.sex),
+    programGoal: p.programGoal || '',
+    path: p.path || '',
+    commitment: p.commitment || '',
+    fitnessHistory: p.fitnessHistory || p.story || '',
+    commitmentStatement: p.commitmentStatement || '',
+    lastPeriod: p.lastPeriod || '',
+    cycleLength: p.cycleLength || '',
+    periodLength: p.periodLength || '',
+    menopauseStatus: p.menopauseStatus || '',
+  })
+  const [saving, setSaving] = useState(false)
+  const set = (key, value) => setDraft(prev => ({ ...prev, [key]: value }))
+
+  const resolvedSex = SEX_FROM_GENDER[draft.gender] || draft.gender
+  const isWoman = resolvedSex === 'woman'
+
+  async function handleSave() {
+    if (saving) return
+    setSaving(true)
+    const patch = {
+      ...draft,
+      sex: resolvedSex,
+      // keep onboarding's alias in step so cycle features read the same value
+      bleedingDuration: draft.periodLength,
+    }
+    try {
+      await onSave(patch)
+      onClose()
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className={styles.pickerOverlay} onClick={onClose}>
+      <div className={styles.pickerModal} onClick={e => e.stopPropagation()}>
+        <div className={styles.pickerModalHeader}>
+          <span className={styles.pickerModalTitle}>Edit Profile</span>
+          <button className={styles.pickerCloseBtn} onClick={onClose} aria-label="Close">×</button>
+        </div>
+        <div className={styles.editModalBody}>
+          <div className={styles.profileEditGrid}>
+            <label className={styles.profileEditField}>
+              <span>Name</span>
+              <input type="text" value={draft.name} onChange={e => set('name', e.target.value)} />
+            </label>
+            <label className={styles.profileEditField}>
+              <span>Age</span>
+              <input type="number" value={draft.age} onChange={e => set('age', e.target.value)} />
+            </label>
+            <label className={styles.profileEditField}>
+              <span>Gender</span>
+              <select value={draft.gender} onChange={e => set('gender', e.target.value)}>
+                <option value="">Prefer not to say</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="non-binary">Non-binary</option>
+                <option value="self-described">Self-described</option>
+              </select>
+            </label>
+            <label className={styles.profileEditField}>
+              <span>Path</span>
+              <select value={draft.path} onChange={e => set('path', e.target.value)}>
+                <option value="">Not set</option>
+                <option value="rehab">The Rehab Path</option>
+                <option value="beginner">The Beginner Path</option>
+                <option value="performance">The Performance Path</option>
+              </select>
+            </label>
+            <label className={styles.profileEditField}>
+              <span>Commitment (days)</span>
+              <input type="number" value={draft.commitment} onChange={e => set('commitment', Number(e.target.value) || '')} />
+            </label>
+            <label className={styles.profileEditField}>
+              <span>Program goal</span>
+              <input type="text" value={draft.programGoal} onChange={e => set('programGoal', e.target.value)} />
+            </label>
+          </div>
+
+          <label className={styles.profileEditField}>
+            <span>Your story / bio</span>
+            <textarea rows={4} value={draft.fitnessHistory} onChange={e => set('fitnessHistory', e.target.value)} placeholder="Your journey so far — injuries, life events, what brought you here." />
+          </label>
+          <label className={styles.profileEditField}>
+            <span>Why you're committing</span>
+            <textarea rows={3} value={draft.commitmentStatement} onChange={e => set('commitmentStatement', e.target.value)} placeholder="What this journey means to you." />
+          </label>
+
+          {isWoman && (
+            <div className={styles.profileEditSection}>
+              <h3>Cycle and physiology</h3>
+              <p>Optional — these drive period-aware adjustments across your plan.</p>
+              <div className={styles.profileEditGrid}>
+                <label className={styles.profileEditField}>
+                  <span>Last period start</span>
+                  <input type="date" value={draft.lastPeriod} onChange={e => set('lastPeriod', e.target.value)} />
+                </label>
+                <label className={styles.profileEditField}>
+                  <span>Average cycle length</span>
+                  <input type="number" min="15" max="90" value={draft.cycleLength} onChange={e => set('cycleLength', e.target.value)} placeholder="28" />
+                </label>
+                <label className={styles.profileEditField}>
+                  <span>Average period duration</span>
+                  <input type="number" min="1" max="14" value={draft.periodLength} onChange={e => set('periodLength', e.target.value)} placeholder="5" />
+                </label>
+                <label className={styles.profileEditField}>
+                  <span>Perimenopause / menopause</span>
+                  <select value={draft.menopauseStatus} onChange={e => set('menopauseStatus', e.target.value)}>
+                    <option value="">not set</option>
+                    <option value="no">No</option>
+                    <option value="perimenopause">Perimenopause</option>
+                    <option value="menopause">Menopause</option>
+                    <option value="unsure">Not sure</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          )}
+
+          <div className={styles.profileEditActions}>
+            <button className={styles.primaryBtn} onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
+            <button className={styles.confirmCancelBtn} onClick={onClose} disabled={saving}>Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -1248,12 +1415,12 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
                 <label className={styles.profileEditField}>
                   <span>Gender</span>
                   <select
-                    value={draft.gender || draft.sex || ''}
-                    onChange={e => { set('gender', e.target.value); set('sex', e.target.value) }}
+                    value={toGenderOption(draft.gender || draft.sex)}
+                    onChange={e => { const g = e.target.value; set('gender', g); set('sex', SEX_FROM_GENDER[g] || g) }}
                   >
                     <option value="">not set</option>
-                    <option value="woman">Woman</option>
-                    <option value="man">Man</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
                     <option value="non-binary">Non-binary</option>
                     <option value="self-described">Self-described</option>
                     <option value="prefer-not">Prefer not to say</option>

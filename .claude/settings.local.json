@@ -78,7 +78,8 @@
       "Bash(git commit *)",
       "Bash(python -c \"import sys,base64;print\\(base64.b64decode\\(sys.stdin.read\\(\\)\\).decode\\(\\)\\)\")",
       "Bash(grep -iE \"\\\\.svg$|logo|icon|brand\")",
-      "Bash(node -e \"console.log\\('fiber:', require\\('fs'\\).existsSync\\('node_modules/@react-three/fiber'\\)\\); console.log\\('three:', require\\('fs'\\).existsSync\\('node_modules/three'\\)\\)\")"
+      "Bash(node -e \"console.log\\('fiber:', require\\('fs'\\).existsSync\\('node_modules/@react-three/fiber'\\)\\); console.log\\('three:', require\\('fs'\\).existsSync\\('node_modules/three'\\)\\)\")",
+      "Bash(node -e \"console.log\\('puppeteer:', require\\('fs'\\).existsSync\\('node_modules/puppeteer'\\)\\); console.log\\('playwright:', require\\('fs'\\).existsSync\\('node_modules/playwright'\\)||require\\('fs'\\).existsSync\\('node_modules/@playwright/test'\\)\\)\")"
     ]
   },
   "enableAllProjectMcpServers": true,
