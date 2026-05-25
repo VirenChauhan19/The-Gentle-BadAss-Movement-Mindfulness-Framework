@@ -50,6 +50,24 @@ export function DataProvider({ children }) {
 
     setAdminRemarks([]) // clear previous user's remarks
 
+    const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
+    const nowIso = new Date().toISOString()
+    getDoc(profileRef)
+      .then(snap => {
+        const isNewProfile = !snap.exists()
+        return setDoc(profileRef, {
+          userId: user.uid,
+          email: user.email || '',
+          displayName: user.displayName || '',
+          name: user.displayName || '',
+          photoURL: user.photoURL || '',
+          provider: 'google',
+          lastLoginAt: nowIso,
+          ...(isNewProfile ? { onboardingComplete: false, createdAt: nowIso } : {}),
+        }, { merge: true })
+      })
+      .catch(err => console.warn('Login profile sync error:', err))
+
     // ── Deletion tombstone check ──────────────────────────────────────────────
     // If the admin has tombstoned this user, wipe their local cache and sign out
     // immediately. Stops any further Firestore writes from this client and
@@ -156,7 +174,6 @@ export function DataProvider({ children }) {
       }
     } catch {}
 
-    const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
     const unsubProfile = onSnapshot(profileRef, snapshot => {
       clearTimeout(safetyTimeout)
       if (snapshot.exists()) {

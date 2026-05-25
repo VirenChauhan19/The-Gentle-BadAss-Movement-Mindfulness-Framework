@@ -61,6 +61,14 @@ function buildAdminProfileDraft(user = {}) {
   }
 }
 
+function displayUserName(userProfile = {}, fallback = '') {
+  return userProfile.name || userProfile.displayName || fallback || userProfile.email || 'New Google user'
+}
+
+function displayUserEmail(userProfile = {}, fallback = '') {
+  return userProfile.email || fallback || ''
+}
+
 const SCORE_COLOR = v =>
   v >= 8 ? '#8b9e7e' : v >= 6 ? '#a0b870' : v >= 4 ? '#d9b38a' : '#d98a8a'
 
@@ -531,16 +539,16 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
       if (!map[uid]) {
         map[uid] = {
           uid,
-          name: data.userProfile?.name || data.userProfile?.displayName || data.coach?.userName || 'Anonymous',
-          email: data.coach?.userEmail || data.userProfile?.email || '',
+          name: displayUserName(data.userProfile, data.coach?.userName),
+          email: displayUserEmail(data.userProfile, data.coach?.userEmail),
           entries: [],
         }
       }
       map[uid].userProfile = data.userProfile
       map[uid].coach       = data.coach
       map[uid].remarks     = data.remarks || []
-      // Prefer profile displayName if present
-      if (data.userProfile?.name || data.userProfile?.displayName) map[uid].name = data.userProfile.name || data.userProfile.displayName
+      map[uid].name = displayUserName(data.userProfile, map[uid].name)
+      map[uid].email = displayUserEmail(data.userProfile, map[uid].email)
     })
     return map
   }, [allEntries, allUserData])
@@ -553,8 +561,9 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
           ? Math.round(u.entries.reduce((s, e) => s + computeFeelScore(e.scores || {}), 0) / u.entries.length * 10) / 10
           : null,
         lastDate: u.entries[0]?.date || null,
+        lastSeenAt: u.userProfile?.lastLoginAt || u.userProfile?.updatedAt || u.userProfile?.createdAt || null,
       }))
-      .sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''))
+      .sort((a, b) => (b.lastDate || b.lastSeenAt || '').localeCompare(a.lastDate || a.lastSeenAt || ''))
   , [userMap])
 
   const adminStats = useMemo(() => {
@@ -692,7 +701,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
                   <span className={styles.userListName}>{u.name}</span>
                   <span className={styles.userListEmail}>{u.email}</span>
                   <span className={styles.userListMeta}>
-                    {u.entries.length} entries · {u.lastDate || 'no entries'}
+                    {u.entries.length} entries · {u.lastDate || u.lastSeenAt?.slice(0, 10) || 'new login'}
                   </span>
                 </div>
                 <span className={styles.userListScore} style={{ color }}>
@@ -1637,12 +1646,16 @@ function AdminUserOverview({ user, userProfile, insights, plan, checkins }) {
     : []
   const signupRows = [
     ['Name', userProfile?.name || user.name],
+    ['Email', userProfile?.email || user.email],
     ['Age range', userProfile?.ageRange],
     ['Gender', userProfile?.gender || userProfile?.sex],
     ['Path', PATH_NAMES[userProfile?.path] || userProfile?.path],
     ['Commitment', userProfile?.commitment ? `${userProfile.commitment} days` : null],
     ['Heard about us', userProfile?.heardAbout],
     ['Program goal', userProfile?.programGoal],
+    ['Onboarding', userProfile?.onboardingComplete ? 'Complete' : 'Not completed'],
+    ['Account created', userProfile?.createdAt],
+    ['Last login', userProfile?.lastLoginAt],
     ['Last updated', userProfile?.updatedAt],
   ]
 

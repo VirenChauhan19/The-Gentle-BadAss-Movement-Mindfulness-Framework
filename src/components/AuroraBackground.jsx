@@ -336,6 +336,10 @@ export default function AuroraBackground({ theme, variant = 'app' }) {
     return <div aria-hidden="true" style={layerStyle(null, isOverlay)} />
   }
 
+  if (isMobile) {
+    return <div aria-hidden="true" style={mobileLayerStyle(colors, isOverlay)} />
+  }
+
   return (
     <div aria-hidden="true" style={layerStyle(colors, isOverlay)}>
       <Canvas
@@ -362,5 +366,33 @@ function layerStyle(colors, isOverlay) {
     zIndex: isOverlay ? 0 : -1,
     pointerEvents: 'none',
     background: colors ? colors.base.getStyle() : 'var(--cream)',
+  }
+}
+
+function rgba(color, alpha) {
+  return `rgba(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)}, ${alpha})`
+}
+
+function mobileLayerStyle(colors, isOverlay) {
+  const base = colors.base.getStyle()
+  return {
+    position: isOverlay ? 'absolute' : 'fixed',
+    inset: 0,
+    width: '100vw',
+    height: '100svh',
+    minHeight: '100dvh',
+    zIndex: isOverlay ? 0 : -1,
+    pointerEvents: 'none',
+    overflow: 'hidden',
+    backgroundColor: base,
+    backgroundImage: [
+      `radial-gradient(220px 280px at 18% 8%, ${rgba(colors.light, 0.22)}, transparent 72%)`,
+      `radial-gradient(260px 320px at 92% 14%, ${rgba(colors.colorA, 0.18)}, transparent 74%)`,
+      `radial-gradient(280px 340px at 54% 88%, ${rgba(colors.colorB, 0.12)}, transparent 76%)`,
+      `linear-gradient(155deg, ${base} 0%, ${colors.base.clone().multiplyScalar(0.72).getStyle()} 100%)`,
+    ].join(', '),
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: '100vw 100svh',
+    transform: 'translateZ(0)',
   }
 }
