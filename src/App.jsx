@@ -186,7 +186,7 @@ function SignInGate({ theme }) {
 }
 
 export default function App() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('gb_theme') || 'ember')
+  const [theme, setTheme] = useState(() => localStorage.getItem('gb_theme') || 'laultra')
   const [themeOpen, setThemeOpen] = useState(false)
   const activeTheme = THEME_PRESETS.find(item => item.id === theme) || THEME_PRESETS[0]
 

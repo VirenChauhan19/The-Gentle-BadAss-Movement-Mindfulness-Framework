@@ -58,7 +58,7 @@ export default function Library() {
           className={styles.filter + (activeSection === 'coach' ? ' ' + styles.filterActive : '')}
           onClick={() => setActiveSection('coach')}
         >
-          AI Plan
+          Running Plan
         </button>
         {PLAN_CATEGORY_ORDER.map(id => (
           <button
