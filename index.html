@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#10130f" />
+    <meta name="theme-color" content="#160d0d" />
     <meta name="description" content="Run & Bee by Dr. Rajat Chauhan" />
     <link rel="icon" type="image/svg+xml" href="/la-ultra-icon.svg" />
     <link rel="apple-touch-icon" href="/la-ultra-icon.svg" />
@@ -14,7 +14,15 @@
   </head>
   <body>
     <script>
-      document.documentElement.dataset.theme = localStorage.getItem('gb_theme') || 'ember'
+      (function () {
+        var t = localStorage.getItem('gb_theme') || 'ember'
+        document.documentElement.dataset.theme = t
+        // Match the mobile status/address bar to the active theme on first paint
+        // (React keeps it in sync afterwards). Values mirror each theme's --cream.
+        var BG = { light: '#f7f5ef', dark: '#10130f', ember: '#160d0d', ocean: '#071419', forest: '#080f07', violet: '#0e0a18', rose: '#180a0e', midnight: '#070a14' }
+        var m = document.querySelector('meta[name="theme-color"]')
+        if (m) m.setAttribute('content', BG[t] || BG.ember)
+      })()
     </script>
     <div id="root"></div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

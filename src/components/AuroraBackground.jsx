@@ -124,7 +124,7 @@ function readThemeColors() {
   }
 }
 
-function Aurora({ colors, reduced }) {
+function Aurora({ colors, reduced, intensity = 1 }) {
   const matRef = useRef()
   const meshRef = useRef()
   const { viewport } = useThree()
@@ -137,16 +137,17 @@ function Aurora({ colors, reduced }) {
     uColorA:    { value: colors.colorA.clone() },
     uColorB:    { value: colors.colorB.clone() },
     uColorC:    { value: colors.colorC.clone() },
-    uIntensity: { value: 1 },
+    uIntensity: { value: intensity },
   }), []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Re-skin when the theme changes
+  // Re-skin (and re-tune intensity) when the theme or variant changes
   useEffect(() => {
     uniforms.uBase.value.copy(colors.base)
     uniforms.uColorA.value.copy(colors.colorA)
     uniforms.uColorB.value.copy(colors.colorB)
     uniforms.uColorC.value.copy(colors.colorC)
-  }, [colors, uniforms])
+    uniforms.uIntensity.value = intensity
+  }, [colors, intensity, uniforms])
 
   useFrame((state, delta) => {
     const u = matRef.current?.uniforms
@@ -257,7 +258,8 @@ function Particles({ colors, count, reduced }) {
   )
 }
 
-export default function AuroraBackground({ theme }) {
+export default function AuroraBackground({ theme, variant = 'app' }) {
+  const isOverlay = variant === 'overlay'
   const [colors, setColors] = useState(null)
   const reduced = useMemo(
     () => typeof window !== 'undefined' &&
@@ -316,11 +318,11 @@ export default function AuroraBackground({ theme }) {
   }, [reduced, isMobile])
 
   if (!colors) {
-    return <div aria-hidden="true" style={fixedLayerStyle(null)} />
+    return <div aria-hidden="true" style={layerStyle(null, isOverlay)} />
   }
 
   return (
-    <div aria-hidden="true" style={fixedLayerStyle(colors)}>
+    <div aria-hidden="true" style={layerStyle(colors, isOverlay)}>
       <Canvas
         dpr={[1, isMobile ? 1.5 : 2]}
         gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
@@ -329,18 +331,20 @@ export default function AuroraBackground({ theme }) {
         style={{ width: '100%', height: '100%' }}
       >
         <color attach="background" args={[colors.base.getStyle()]} />
-        <Aurora colors={colors} reduced={reduced} />
-        <Particles colors={colors} count={isMobile ? 180 : 520} reduced={reduced} />
+        <Aurora colors={colors} reduced={reduced} intensity={isOverlay ? 1.5 : 1} />
+        <Particles colors={colors} count={Math.round((isMobile ? 180 : 520) * (isOverlay ? 1.35 : 1))} reduced={reduced} />
       </Canvas>
     </div>
   )
 }
 
-function fixedLayerStyle(colors) {
+// `app` variant sits fixed behind the whole UI (z-index -1); `overlay` fills
+// its positioned parent (e.g. the sign-in gate) so the card can sit above it.
+function layerStyle(colors, isOverlay) {
   return {
-    position: 'fixed',
+    position: isOverlay ? 'absolute' : 'fixed',
     inset: 0,
-    zIndex: -1,
+    zIndex: isOverlay ? 0 : -1,
     pointerEvents: 'none',
     background: colors ? colors.base.getStyle() : 'var(--cream)',
   }

@@ -178,7 +178,7 @@ function LockedRoute({ feature, children }) {
   )
 }
 
-function SignInGate() {
+function SignInGate({ theme }) {
   const { user, signInWithGoogle, authError, isConfigured } = useAuth()
   const { guestName, setGuestName } = useData()
   const [nameInput, setNameInput] = useState('')
@@ -194,6 +194,9 @@ function SignInGate() {
 
   return (
     <div className={styles.signInGate} role="dialog" aria-modal="true" aria-labelledby="signin-title">
+      <Suspense fallback={null}>
+        <AuroraBackground theme={theme} variant="overlay" />
+      </Suspense>
       <section className={styles.signInCard}>
         <p className={styles.signInKicker}>La Ultra: Run &amp; Bee</p>
         <h1 id="signin-title">Start with sign-in</h1>
@@ -234,6 +237,11 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('gb_theme', theme)
     document.documentElement.dataset.theme = theme
+    // Keep the mobile browser status/address bar in step with the theme,
+    // rather than the single static value baked into index.html.
+    const bg = getComputedStyle(document.documentElement).getPropertyValue('--cream').trim()
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta && bg) meta.setAttribute('content', bg)
   }, [theme])
 
   useEffect(() => {
@@ -255,7 +263,7 @@ export default function App() {
           <main id="main-content" className={styles.main}>
             <AppRoutes />
           </main>
-          <SignInGate />
+          <SignInGate theme={theme} />
           <div className={styles.themeDock}>
             <button
               className={styles.themeToggle}
