@@ -74,7 +74,8 @@
       "Bash(npx --no-install vite build)",
       "Bash(npx --no-install vite build --logLevel warn)",
       "Read(//tmp/**)",
-      "Bash(xargs echo \"jsx transforms:\")"
+      "Bash(xargs echo \"jsx transforms:\")",
+      "Bash(git commit *)"
     ]
   },
   "enableAllProjectMcpServers": true,
