@@ -61,6 +61,14 @@
   animation: floatIn 520ms var(--ease-elastic) both;
 }
 
+:global(html[data-theme="laultra"]) .progressCard {
+  background:
+    radial-gradient(circle at 14% 8%, rgba(255, 225, 44, 0.10), transparent 14rem),
+    linear-gradient(145deg, color-mix(in srgb, var(--paper) 78%, #000), color-mix(in srgb, var(--sage) 32%, var(--paper)));
+  color: var(--ink);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+}
+
 .progressCard::after {
   content: '';
   position: absolute;
@@ -172,8 +180,17 @@
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.18);
 }
 
+:global(html[data-theme="laultra"]) .dayDotFilled {
+  background: var(--sage-dark);
+  box-shadow: 0 0 0 3px rgba(255, 225, 44, 0.14);
+}
+
 .dayDotEmpty {
   background: rgba(255, 255, 255, 0.18);
+}
+
+:global(html[data-theme="laultra"]) .dayDotEmpty {
+  background: rgba(255, 225, 44, 0.13);
 }
 
 .dayDotsLabel {

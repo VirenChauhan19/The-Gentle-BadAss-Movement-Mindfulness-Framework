@@ -375,6 +375,7 @@ function rgba(color, alpha) {
 
 function mobileLayerStyle(colors, isOverlay) {
   const base = colors.base.getStyle()
+  const darkBase = colors.base.clone().multiplyScalar(0.52).getStyle()
   return {
     position: isOverlay ? 'absolute' : 'fixed',
     inset: 0,
@@ -386,10 +387,10 @@ function mobileLayerStyle(colors, isOverlay) {
     overflow: 'hidden',
     backgroundColor: base,
     backgroundImage: [
-      `radial-gradient(220px 280px at 18% 8%, ${rgba(colors.light, 0.22)}, transparent 72%)`,
-      `radial-gradient(260px 320px at 92% 14%, ${rgba(colors.colorA, 0.18)}, transparent 74%)`,
-      `radial-gradient(280px 340px at 54% 88%, ${rgba(colors.colorB, 0.12)}, transparent 76%)`,
-      `linear-gradient(155deg, ${base} 0%, ${colors.base.clone().multiplyScalar(0.72).getStyle()} 100%)`,
+      `radial-gradient(190px 240px at 18% 8%, ${rgba(colors.light, 0.08)}, transparent 76%)`,
+      `radial-gradient(220px 280px at 92% 14%, ${rgba(colors.colorA, 0.07)}, transparent 78%)`,
+      `radial-gradient(240px 300px at 54% 88%, ${rgba(colors.colorB, 0.05)}, transparent 80%)`,
+      `linear-gradient(155deg, ${base} 0%, ${darkBase} 100%)`,
     ].join(', '),
     backgroundRepeat: 'no-repeat',
     backgroundSize: '100vw 100svh',
