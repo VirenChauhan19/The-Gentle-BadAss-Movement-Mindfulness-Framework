@@ -67,16 +67,21 @@ const AURORA_FRAG = /* glsl */ `
   uniform vec3  uColorB;
   uniform vec3  uColorC;
   uniform float uIntensity;
+  uniform float uAspect;
   ${SIMPLEX}
 
   // One flowing aurora ribbon at vertical position pos with given width.
+  // ys raises the vertical noise frequency on tall (portrait) screens so the
+  // ribbons read as proportional flow instead of stretched, smeared bands.
+  // On landscape (uAspect >= 1) ys is 1.0, so desktop is unchanged.
   float ribbon(vec2 uv, float pos, float width, float t){
-    float warp = snoise(vec3(uv.x * 1.6, uv.y * 0.8 + t * 0.05, t * 0.12)) * 0.32;
+    float ys = max(1.0, 1.0 / uAspect);
+    float warp = snoise(vec3(uv.x * 1.6, uv.y * 0.8 * ys + t * 0.05, t * 0.12)) * 0.32;
     float wave = snoise(vec3(uv.x * 2.4 + t * 0.18, t * 0.22, 4.0)) * 0.18;
     float d = uv.y - pos - warp - wave;
     float band = smoothstep(width, 0.0, abs(d));
     // vertical streaks within the ribbon for that shimmering curtain look
-    float streak = 0.6 + 0.4 * snoise(vec3(uv.x * 14.0, uv.y * 3.0 - t * 0.6, t * 0.3));
+    float streak = 0.6 + 0.4 * snoise(vec3(uv.x * 14.0, uv.y * 3.0 * ys - t * 0.6, t * 0.3));
     return band * streak;
   }
 
@@ -138,6 +143,7 @@ function Aurora({ colors, reduced, intensity = 1 }) {
     uColorB:    { value: colors.colorB.clone() },
     uColorC:    { value: colors.colorC.clone() },
     uIntensity: { value: intensity },
+    uAspect:    { value: 1 },
   }), []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Re-skin (and re-tune intensity) when the theme or variant changes
@@ -147,7 +153,8 @@ function Aurora({ colors, reduced, intensity = 1 }) {
     uniforms.uColorB.value.copy(colors.colorB)
     uniforms.uColorC.value.copy(colors.colorC)
     uniforms.uIntensity.value = intensity
-  }, [colors, intensity, uniforms])
+    uniforms.uAspect.value = viewport.width / viewport.height
+  }, [colors, intensity, uniforms, viewport.width, viewport.height])
 
   useFrame((state, delta) => {
     const u = matRef.current?.uniforms
@@ -176,6 +183,7 @@ function Aurora({ colors, reduced, intensity = 1 }) {
 function Particles({ colors, count, reduced }) {
   const pointsRef = useRef()
   const groupRef = useRef()
+  const matRef = useRef()
   const { viewport } = useThree()
 
   const { positions, speeds, sizes, spread } = useMemo(() => {
@@ -207,6 +215,12 @@ function Particles({ colors, count, reduced }) {
     const tex = new THREE.CanvasTexture(c)
     return tex
   }, [])
+
+  // Recolour particles when the theme changes so no stale tint from the
+  // previous theme lingers in the additive point sprites.
+  useEffect(() => {
+    if (matRef.current) matRef.current.color.copy(colors.light)
+  }, [colors])
 
   useFrame((state, delta) => {
     const grp = groupRef.current
@@ -244,6 +258,7 @@ function Particles({ colors, count, reduced }) {
           <bufferAttribute attach="attributes-size" array={sizes} count={count} itemSize={1} />
         </bufferGeometry>
         <pointsMaterial
+          ref={matRef}
           map={texture}
           color={colors.light}
           size={0.16}
@@ -330,7 +345,7 @@ export default function AuroraBackground({ theme, variant = 'app' }) {
         frameloop={reduced ? 'demand' : 'always'}
         style={{ width: '100%', height: '100%' }}
       >
-        <color attach="background" args={[colors.base.getStyle()]} />
+        <color attach="background" args={[colors.base.getStyle()]} key={colors.base.getStyle()} />
         <Aurora colors={colors} reduced={reduced} intensity={isOverlay ? 1.5 : 1} />
         <Particles colors={colors} count={Math.round((isMobile ? 180 : 520) * (isOverlay ? 1.35 : 1))} reduced={reduced} />
       </Canvas>
