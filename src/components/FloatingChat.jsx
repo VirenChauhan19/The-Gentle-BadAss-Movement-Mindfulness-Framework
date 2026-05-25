@@ -84,6 +84,8 @@ export default function FloatingChat() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   }
 
+  if (!user) return null
+
   return (
     <>
       <button

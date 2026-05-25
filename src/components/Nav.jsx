@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useData } from '../context/DataContext'
 import styles from './Nav.module.css'
 
 const links = [
@@ -15,7 +16,9 @@ const links = [
 export default function Nav() {
   const location = useLocation()
   const navRef = useRef(null)
-  const guestLocked = false
+  const { user, guestName } = useData()
+  const guestLocked = !user && !!guestName
+  const visibleLinks = guestLocked ? links.filter(link => !link.lockedForGuest) : links
 
   useEffect(() => {
     const active = navRef.current?.querySelector(`.${styles.active}`)
@@ -28,7 +31,7 @@ export default function Nav() {
 
   return (
     <nav className={styles.nav} ref={navRef} aria-label="Primary">
-      {links.map(({ to, label, shortLabel, icon: Icon, lockedForGuest, hiddenOnMobile }) => {
+      {visibleLinks.map(({ to, label, shortLabel, icon: Icon, lockedForGuest, hiddenOnMobile }) => {
         const locked = guestLocked && lockedForGuest
         return (
         <NavLink

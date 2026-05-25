@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DataProvider, useData } from './context/DataContext'
@@ -58,7 +58,7 @@ function AppRoutes() {
   }, [user, profile, navigate, location.pathname])
 
   useEffect(() => {
-    const mobileRoutes = ['/', '/journal', '/library', '/functional-tests', '/history', '/profile']
+    const mobileRoutes = user ? ['/', '/journal', '/library', '/functional-tests', '/history', '/profile'] : ['/', '/profile']
     let startX = 0
     let startY = 0
     let startTime = 0
@@ -99,7 +99,7 @@ function AppRoutes() {
       window.removeEventListener('touchstart', onTouchStart)
       window.removeEventListener('touchend', onTouchEnd)
     }
-  }, [location.pathname, navigate])
+  }, [location.pathname, navigate, user])
 
   // Gate rendering until we know the Auth and Profile status
   // user === undefined means auth is still resolving
@@ -112,25 +112,25 @@ function AppRoutes() {
     <div className="routeTransition" key={location.pathname}>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/onboarding" element={<LockedRoute><Onboarding /></LockedRoute>} />
         <Route path="/journal" element={<LockedRoute feature="Feel"><Journal /></LockedRoute>} />
-        <Route path="/breathing" element={<Breathing />} />
+        <Route path="/breathing" element={<LockedRoute feature="Breathe"><Breathing /></LockedRoute>} />
         <Route path="/history" element={<LockedRoute feature="Progress"><History /></LockedRoute>} />
         <Route path="/functional-tests" element={<LockedRoute feature="Functional Tests"><FunctionalTests /></LockedRoute>} />
         <Route path="/library" element={<LockedRoute feature="Your Plan"><Library /></LockedRoute>} />
         <Route path="/library/:id" element={<LockedRoute feature="Your Plan"><ExerciseDetail /></LockedRoute>} />
-        <Route path="/coach" element={<Coach />} />
+        <Route path="/coach" element={<LockedRoute feature="Coach"><Coach /></LockedRoute>} />
         <Route path="/profile" element={<Admin />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/paywall" element={<Paywall />} />
+        <Route path="/admin" element={<LockedRoute feature="Admin"><Admin /></LockedRoute>} />
+        <Route path="/paywall" element={<LockedRoute feature="Paywall"><Paywall /></LockedRoute>} />
       </Routes>
     </div>
   )
 }
 
 function LockedRoute({ children }) {
-  // Guest mode is a local-only account, not a blocked preview. Let guests use
-  // the core app and keep Google sign-in as the cross-device sync path.
+  const { user } = useData()
+  if (!user) return <Navigate to="/" replace />
   return children
 }
 

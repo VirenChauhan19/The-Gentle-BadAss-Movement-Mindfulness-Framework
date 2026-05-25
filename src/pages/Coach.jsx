@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useData } from '../context/DataContext'
+import PlanTabs from '../components/PlanTabs'
 import { computeFeelScore } from '../data/storage'
 import {
   adaptSessionForFeel as adaptSessionForFeelState,
@@ -681,7 +682,14 @@ export default function Coach({ embedded = false }) {
       })
   }, [goal?.generatedWeeks, goal?.startDate])
 
-  if (!goal) return <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={profile?.commitment || 30} embedded={embedded} />
+  if (!goal) {
+    return (
+      <>
+        {!embedded && <PlanTabs active="coach" />}
+        <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={profile?.commitment || 30} embedded={embedded} />
+      </>
+    )
+  }
 
   const today      = new Date().toISOString().split('T')[0]
   const now        = new Date()
@@ -774,6 +782,7 @@ export default function Coach({ embedded = false }) {
 
   return (
     <div className={`${styles.page} ${embedded ? styles.embedded : ''}`}>
+      {!embedded && <PlanTabs active="coach" />}
       <header className={styles.header}>
         <p className={styles.label}>Running</p>
         <h1 className={styles.title}>{goal.focus || goal.raceGoal}</h1>

@@ -19,7 +19,7 @@ const RING_C = 2 * Math.PI * RING_R
 export default function Home() {
   const { entries, getTodayEntry, profile, user, guestName } = useData()
   const today = getTodayEntry()
-  const guestLocked = false
+  const guestLocked = !user && !!guestName
   const streak = computeStreak(entries)
   const feelScore = today ? computeFeelScore(today.scores || {}) : null
   const dayOfJourney = entries.length
@@ -180,11 +180,12 @@ export default function Home() {
         </Link>
         <Link
           to="/breathing"
-          className={styles.action}
+          className={styles.action + (guestLocked ? ' ' + styles.actionLocked : '')}
         >
           <span className={styles.actionEyebrow}>Reset</span>
           <span className={styles.actionTitle}>Breathe at 5 BPM</span>
           <span className={styles.actionSub}>Settle before training</span>
+          {guestLocked && <span className={styles.actionLock}>Locked</span>}
         </Link>
         <Link
           to="/functional-tests"

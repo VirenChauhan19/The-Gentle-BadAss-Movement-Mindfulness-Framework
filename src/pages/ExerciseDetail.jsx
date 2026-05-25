@@ -4,6 +4,7 @@ import { EXERCISES, CATEGORIES } from '../data/exercises'
 import ExerciseAnimation from '../components/ExerciseAnimation'
 import PillarChecklist from '../components/PillarChecklist'
 import Metronome from '../components/Metronome'
+import PlanTabs from '../components/PlanTabs'
 import { useData } from '../context/DataContext'
 import styles from './ExerciseDetail.module.css'
 
@@ -135,11 +136,12 @@ export default function ExerciseDetail() {
   }
 
   function goNext() {
-    navigate(nextExercise ? `/library/${nextExercise.id}` : '/library')
+    navigate(nextExercise ? `/library/${nextExercise.id}` : `/library?section=${exercise.category}`)
   }
 
   return (
     <div className={styles.page}>
+      <PlanTabs active={exercise.category} />
       <section className={styles.pillarBanner}>
         <p className={styles.pillarTitle}>5 Pillars</p>
         <div className={styles.pillarChips}>
@@ -148,7 +150,7 @@ export default function ExerciseDetail() {
       </section>
 
       <div className={styles.topBar}>
-        <Link className={styles.back} to="/library">Library</Link>
+        <Link className={styles.back} to={`/library?section=${exercise.category}`}>Library</Link>
         <span className={styles.catBadge} style={{ color: cat.color }}>{cat.label}</span>
         <button className={styles.nextTopBtn} onClick={goNext}>Next</button>
       </div>

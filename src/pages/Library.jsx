@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { EXERCISES, CATEGORIES } from '../data/exercises'
+import PlanTabs from '../components/PlanTabs'
 import Coach from './Coach'
 import styles from './Library.module.css'
 
@@ -13,7 +14,11 @@ const PRINCIPLES = [
 ]
 
 export default function Library() {
-  const [activeSection, setActiveSection] = useState('breathe')
+  const [searchParams] = useSearchParams()
+  const requestedSection = searchParams.get('section')
+  const activeSection = ['breathe', 'coach', ...PLAN_CATEGORY_ORDER].includes(requestedSection)
+    ? requestedSection
+    : 'breathe'
   const activeCategory = PLAN_CATEGORY_ORDER.includes(activeSection) ? activeSection : null
   const filtered = activeCategory ? EXERCISES.filter(e => e.category === activeCategory) : []
 
@@ -47,29 +52,7 @@ export default function Library() {
         </div>
       </section>
 
-      <div className={styles.filters}>
-        <button
-          className={styles.filter + (activeSection === 'breathe' ? ' ' + styles.filterActive : '')}
-          onClick={() => setActiveSection('breathe')}
-        >
-          Breathe
-        </button>
-        <button
-          className={styles.filter + (activeSection === 'coach' ? ' ' + styles.filterActive : '')}
-          onClick={() => setActiveSection('coach')}
-        >
-          Running Plan
-        </button>
-        {PLAN_CATEGORY_ORDER.map(id => (
-          <button
-            key={id}
-            className={styles.filter + (activeSection === id ? ' ' + styles.filterActive : '')}
-            onClick={() => setActiveSection(id)}
-          >
-            {CATEGORIES[id].label}
-          </button>
-        ))}
-      </div>
+      <PlanTabs active={activeSection} />
 
       {activeSection === 'breathe' && (
         <section className={styles.breathePanel}>

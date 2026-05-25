@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useData } from '../context/DataContext'
 import Metronome from '../components/Metronome'
+import PlanTabs from '../components/PlanTabs'
 import {
   breathingProgram,
   buildPhaseSequence,
@@ -155,6 +156,7 @@ export default function Breathing() {
           softly on their own timing, completely independent of the breath.
         </p>
       </header>
+      <PlanTabs active="breathe" />
 
       <section className={styles.practice}>
         <ProgressCard
