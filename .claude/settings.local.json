@@ -72,7 +72,9 @@
       "Bash(node --check src/pages/Journal.jsx)",
       "Bash(npx --no-install vite build --logLevel error)",
       "Bash(npx --no-install vite build)",
-      "Bash(npx --no-install vite build --logLevel warn)"
+      "Bash(npx --no-install vite build --logLevel warn)",
+      "Read(//tmp/**)",
+      "Bash(xargs echo \"jsx transforms:\")"
     ]
   },
   "enableAllProjectMcpServers": true,

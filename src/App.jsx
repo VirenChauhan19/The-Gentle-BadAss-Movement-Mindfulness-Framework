@@ -1,9 +1,10 @@
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DataProvider, useData } from './context/DataContext'
 import Nav from './components/Nav'
 import FloatingChat from './components/FloatingChat'
+const AuroraBackground = lazy(() => import('./components/AuroraBackground'))
 import Home from './pages/Home'
 import Journal from './pages/Journal'
 import History from './pages/History'
@@ -226,7 +227,7 @@ function SignInGate() {
 }
 
 export default function App() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('gb_theme') || 'dark')
+  const [theme, setTheme] = useState(() => localStorage.getItem('gb_theme') || 'ember')
   const [themeOpen, setThemeOpen] = useState(false)
   const activeTheme = THEME_PRESETS.find(item => item.id === theme) || THEME_PRESETS[0]
 
@@ -244,40 +245,13 @@ export default function App() {
     return () => window.removeEventListener('gb-theme-change', handleThemeChange)
   }, [])
 
-  useEffect(() => {
-    // Pointer tracking only powers the desktop ambient layer. The mobile shell
-    // hides that layer entirely, so skip the listener on phones.
-    if (typeof window === 'undefined' || window.matchMedia('(max-width: 767px)').matches) return
-
-    let frame = 0
-    function handlePointerMove(event) {
-      if (frame) return
-      frame = window.requestAnimationFrame(() => {
-        const x = Math.round((event.clientX / window.innerWidth) * 100)
-        const y = Math.round((event.clientY / window.innerHeight) * 100)
-        document.documentElement.style.setProperty('--pointer-x', `${x}%`)
-        document.documentElement.style.setProperty('--pointer-y', `${y}%`)
-        frame = 0
-      })
-    }
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true })
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove)
-      if (frame) window.cancelAnimationFrame(frame)
-    }
-  }, [])
-
   return (
     <AuthProvider>
       <DataProvider>
         <div className={styles.app}>
-          <div className={styles.ambientLayer} aria-hidden="true" />
-          <div className={styles.motionField} aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
+          <Suspense fallback={null}>
+            <AuroraBackground theme={theme} />
+          </Suspense>
           <main id="main-content" className={styles.main}>
             <AppRoutes />
           </main>

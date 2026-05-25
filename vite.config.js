@@ -4,6 +4,18 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: '/',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Three.js + R3F is large and only needed for the aurora background.
+          // Keep it in its own chunk so the main bundle stays lean and it can
+          // be loaded lazily / cached independently.
+          three: ['three', '@react-three/fiber'],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({
@@ -13,6 +25,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
       manifest: {
         name: 'Gentle BadAss Movement Framework',
