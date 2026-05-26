@@ -10,6 +10,9 @@ import {
 import styles from './Coach.module.css'
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+// Every running plan is a fixed 90-day program. We never ask for a length and
+// never read a stored commitment, so new and legacy plans both render as 90.
+const PROGRAM_DAYS = 90
 // One week per generation call. Small chunks generate in parallel (fast) and
 // stay well under the model's output limit (no truncated / invalid JSON).
 const PLAN_CHUNK_SIZE = 7
@@ -261,7 +264,7 @@ function getPlan(goal) {
   const template = goal?.weekTemplate || []
   const weeklyTargets = goal?.weeklyTargets || []
   const startDate = goal.startDate || new Date().toISOString().split('T')[0]
-  const totalDays = goal.commitmentDays || ((goal.weeks || 4) * 7)
+  const totalDays = PROGRAM_DAYS
   const storedPlan = normalizePlan(goal.plan, startDate, totalDays)
   if (storedPlan.length >= totalDays) return storedPlan
   const templatePlan = expandProgramPlan(template, startDate, totalDays, weeklyTargets)
@@ -637,7 +640,7 @@ export default function Coach({ embedded = false }) {
     if (!goal || !updateCoachGoal) return
     const genWeeks = goal.generatedWeeks
     if (genWeeks === undefined || genWeeks === null) return
-    const totalWeeks = Math.ceil((goal.commitmentDays || 90) / 7)
+    const totalWeeks = Math.ceil(PROGRAM_DAYS / 7)
     if (genWeeks >= totalWeeks) return
     if (expandingWeekRef.current) return
 
@@ -672,7 +675,9 @@ export default function Coach({ embedded = false }) {
         const merged = [
           ...existing.filter(d => (d.dayNumber || 0) <= dayOffset),
           ...newDays,
-        ].sort((a, b) => (a.dayNumber || 0) - (b.dayNumber || 0))
+        ]
+          .filter(d => (d.dayNumber || 0) <= PROGRAM_DAYS)
+          .sort((a, b) => (a.dayNumber || 0) - (b.dayNumber || 0))
         updateCoachGoal({ ...goal, plan: merged, generatedWeeks: nextWeekNum })
       })
       .catch(err => console.warn('Auto-expand week failed:', err))
@@ -686,7 +691,7 @@ export default function Coach({ embedded = false }) {
     return (
       <>
         {!embedded && <PlanTabs active="coach" />}
-        <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={profile?.commitment || 30} embedded={embedded} />
+        <GoalSetup onSave={saveCoachGoal} profile={profile} defaultCommitment={PROGRAM_DAYS} embedded={embedded} />
       </>
     )
   }
@@ -695,7 +700,7 @@ export default function Coach({ embedded = false }) {
   const now        = new Date()
   const startDate  = new Date(goal.startDate)
   const plan       = applyCycleAdaptationToPlan(getPlan(goal), profile)
-  const totalDays  = goal.commitmentDays || plan.length || ((goal.weeks || 12) * 7)
+  const totalDays  = PROGRAM_DAYS
   const dayNum     = Math.floor((now - startDate) / 86400000) + 1
   const remaining  = Math.max(0, totalDays - dayNum + 1)
   const progress   = Math.min(1, (dayNum - 1) / totalDays)
@@ -1053,7 +1058,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
 
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
   // Every plan is a fixed 90-day program; we never ask the runner for a length.
-  const commitmentDays = 90
+  const commitmentDays = PROGRAM_DAYS
   const profilePath = profile?.path || 'not set'
   const profileStory = profile?.fitnessHistory || ''
   const paceGuide = calculatePaceGuide(benchmarkDistance, benchmarkTime)
@@ -1593,7 +1598,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
 
       {expandingWeek && (() => {
         const genW = goal.generatedWeeks || 0
-        const totalW = Math.ceil((goal.commitmentDays || 90) / 7)
+        const totalW = Math.ceil(PROGRAM_DAYS / 7)
         return (
           <div className={styles.buildingNotice}>
             <div className={styles.buildingDot} />
@@ -1709,7 +1714,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
           })()}
 
           <p className={styles.weekProgressText}>
-            {goal.commitmentDays || visiblePlan.length} days mapped · {trainingDays} workouts · {completedDates.size} logged
+            {PROGRAM_DAYS} days mapped · {trainingDays} workouts · {completedDates.size} logged
           </p>
         </div>
       )}
@@ -1764,7 +1769,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
       {/* Check-in or completion */}
       {isComplete ? (
         <div className={styles.completionCard}>
-          <p className={styles.completionMsg}>You finished your {goal.commitmentDays || visiblePlan.length}-day {goal.focus || goal.raceGoal} program. That's the work.</p>
+          <p className={styles.completionMsg}>You finished your {PROGRAM_DAYS}-day {goal.focus || goal.raceGoal} program. That's the work.</p>
           <button className={styles.primaryBtn} onClick={onNewGoal}>Start a New Program</button>
         </div>
       ) : todayCheckin ? (
@@ -2410,7 +2415,7 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
   const completedRuns = (checkins || []).filter(item => item.status === 'done').length
   const partialRuns = (checkins || []).filter(item => item.status === 'partial').length
   const missedRuns = (checkins || []).filter(item => item.status === 'missed').length
-  const planLength = goal?.commitmentDays || ((goal?.weeks || 0) * 7) || getPlan(goal).length || 0
+  const planLength = PROGRAM_DAYS
   const chatPrompts = [
     'Read my recent training and tell me what pattern you see.',
     'Should I do the full session today or adjust it?',
@@ -2801,7 +2806,7 @@ ${r.trackRules}`
 // ── Generate a single week (used for auto-expansion and admin) ────────────────
 export async function generateSingleWeek({ goal, weekNum }) {
   const chunkStart  = (weekNum - 1) * 7 + 1
-  const chunkEnd    = Math.min(weekNum * 7, goal.commitmentDays || 9999)
+  const chunkEnd    = Math.min(weekNum * 7, PROGRAM_DAYS)
   const chunkTargets = (goal.weeklyTargets || []).filter(w => Number(w.week) === weekNum)
   const priorTitles  = (goal.plan || []).slice(-14)
     .map(d => `D${d.dayNumber} ${d.type}: ${d.title}`).join(' · ')
@@ -2897,7 +2902,7 @@ async function getCheckinReply(goal, checkins, entries, status, note, todaySessi
     { role: 'system', content:
 `You are a dedicated running coach. Direct, warm, specific. Max 120 words.
 ${RUNNING_SCOPE_RULE}
-Runner focus: ${goal.focus || goal.raceGoal}, ${goal.experience}, ${goal.daysPerWeek} days/week, ${goal.commitmentDays || ((goal.weeks || 0) * 7)}-day plan.
+Runner focus: ${goal.focus || goal.raceGoal}, ${goal.experience}, ${goal.daysPerWeek} days/week, ${PROGRAM_DAYS}-day plan.
 Today's plan: ${session}
 Recent feel scores: ${scores}
 Recent run log:
@@ -2984,7 +2989,7 @@ async function getChatReply(goal, checkins, entries, messages) {
   const isPlanQuery = /(\d+[\s-]*day|week|schedule|plan|program|cross[\s-]?train|gym|workout|session|routine|what.*do|today|tomorrow)/i.test(lastMsg)
   const isPaceQuery = /(pace|split|time|how fast|seconds|secs|target|effort)/i.test(lastMsg)
 
-  const profile = `Runner focus: ${goal.focus || goal.raceGoal} · ${goal.experience} · ${goal.daysPerWeek} days/week · ${goal.commitmentDays || ((goal.weeks || 0) * 7)}-day plan.
+  const profile = `Runner focus: ${goal.focus || goal.raceGoal} · ${goal.experience} · ${goal.daysPerWeek} days/week · ${PROGRAM_DAYS}-day plan.
 Weekly template: ${weekInfo}
 Recent feel scores: ${scores}
 Recent sessions: ${recentLog}`
