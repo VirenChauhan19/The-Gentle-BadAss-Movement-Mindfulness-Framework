@@ -38,7 +38,7 @@ export default function Library() {
       <header className={styles.header}>
         <p className={styles.label}>Your Plan</p>
         <h1 className={styles.title}>Weekly modules</h1>
-        <p className={styles.subtitle}>Choose Breathe, Running, Mobility, or Strength Tools to begin.</p>
+        <p className={styles.subtitle}>Choose Breathe, Mobility, Strength, or Running to begin.</p>
       </header>
 
       <section className={styles.weeklyModule}>
@@ -46,7 +46,7 @@ export default function Library() {
         <div className={styles.weeklyCopy}>
           <p className={styles.weeklyLabel}>Main course</p>
           <h2>Your Plan</h2>
-          <p>Start with Breathe, build your Running plan, then open Mobility or Strength Tools when you are ready.</p>
+          <p>Start with Breathe, move through Mobility and Strength, then build your Running plan when you are ready.</p>
         </div>
       </section>
 
@@ -57,7 +57,7 @@ export default function Library() {
           <div>
             <p className={styles.breatheLabel}>Breathe</p>
             <h2>5 BPM breathing practice</h2>
-            <p>Use this before Mobility or Strength Tools to settle your rhythm and start clean.</p>
+            <p>Use this before Mobility or Strength to settle your rhythm and start clean.</p>
           </div>
           <Link to="/breathing" className={styles.breatheButton}>Open breathing timer</Link>
         </section>

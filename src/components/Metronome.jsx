@@ -9,7 +9,7 @@ const TEMPOS = [
   { bpm: 190, purpose: 'Running drills', vibe: 'High-turnover drill work.' },
 ]
 
-export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null, allowedBpms = null, compact = false, syncTick = null }) {
+export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null, allowedBpms = null, compact = false, syncTick = null, tempoLabel = null }) {
   // Controlled mode: a parent (e.g. the Breathe page) owns the clock and passes
   // an advancing `syncTick`. We click exactly when it changes, so the sound and
   // whatever the parent is counting stay locked together instead of drifting on
@@ -160,25 +160,27 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
       <div className={styles.header}>
         <div>
           <p className={styles.kicker}>Metronome Engine</p>
-          <h3>{selectedTempo.bpm} BPM</h3>
+          <h3>{tempoLabel || `${selectedTempo.bpm} BPM`}</h3>
         </div>
         <div className={`${styles.pulse} ${playing ? styles.pulseActive : ''}`}>
           <span style={{ animationDuration: `${60000 / selectedTempo.bpm}ms` }} />
         </div>
       </div>
 
-      <div className={styles.tempoGrid}>
-        {availableTempos.map(t => (
-          <button
-            key={t.bpm}
-            className={styles.tempoBtn + (selectedTempo.bpm === t.bpm ? ' ' + styles.active : '')}
-            onClick={() => selectTempo(t)}
-          >
-            <span className={styles.bpm}>{t.bpm}</span>
-            <span className={styles.label}>BPM</span>
-          </button>
-        ))}
-      </div>
+      {!tempoLabel && (
+        <div className={styles.tempoGrid}>
+          {availableTempos.map(t => (
+            <button
+              key={t.bpm}
+              className={styles.tempoBtn + (selectedTempo.bpm === t.bpm ? ' ' + styles.active : '')}
+              onClick={() => selectTempo(t)}
+            >
+              <span className={styles.bpm}>{t.bpm}</span>
+              <span className={styles.label}>BPM</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className={styles.info}>
         <h4>{selectedTempo.purpose}</h4>

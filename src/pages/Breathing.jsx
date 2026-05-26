@@ -27,7 +27,6 @@ const DEFAULT_REMINDER_SETTINGS = {
 export default function Breathing() {
   const { entries, getTodayEntry, saveEntry } = useData()
   const navigate = useNavigate()
-  const autoNavRef = useRef(false)
   const elapsedRef = useRef(0)
 
   const weekTally = useMemo(() => tallyWeekSessions(entries), [entries])
@@ -58,7 +57,9 @@ export default function Breathing() {
   const breathsPerMinute = cycleSeconds > 0 ? Math.round((600 / cycleSeconds)) / 10 : 0
   const breathCue = phaseState.cue || 'Settle in. The orb will lead you.'
   const sighThisWeek = isSighWeek(weekConfig)
-  const targetDuration = sighThisWeek ? sighDuration : (weekConfig.duration || cycleSeconds)
+  // One minute is the daily target. Reaching it logs the session, but the timer
+  // keeps running so the practice can be done for as long as the runner likes.
+  const targetDuration = 60
   const sessionProgress = targetDuration > 0 ? Math.min(1, elapsed / targetDuration) : 0
 
   useEffect(() => { elapsedRef.current = elapsed }, [elapsed])
@@ -85,26 +86,13 @@ export default function Breathing() {
     return () => window.clearTimeout(timeoutId)
   }, [running, cycleSeconds])
 
-  useEffect(() => {
-    if (running && targetDuration > 0 && elapsed >= targetDuration) {
-      setRunning(false)
-    }
-  }, [elapsed, running, targetDuration])
-
-  // Once the target is reached, log the session automatically, no Save tap.
+  // Reaching the one-minute target logs the session automatically. The timer is
+  // not stopped, so the runner can keep breathing for as long as they like.
   useEffect(() => {
     if (targetDuration > 0 && elapsed >= targetDuration && !saved) {
       saveBreathSession()
     }
   }, [elapsed, targetDuration, saved])
-
-  // After the session is logged, glide straight on to Mobility (before Running).
-  useEffect(() => {
-    if (!saved || autoNavRef.current) return
-    autoNavRef.current = true
-    const id = setTimeout(() => navigate('/library?section=running'), 1100)
-    return () => clearTimeout(id)
-  }, [saved, navigate])
 
   useEffect(() => {
     setElapsed(0)
@@ -112,7 +100,6 @@ export default function Breathing() {
     setSaved(false)
     setJustUnlocked(false)
     setSighDuration(300)
-    autoNavRef.current = false
   }, [currentWeek])
 
   useEffect(() => {
@@ -150,7 +137,6 @@ export default function Breathing() {
       ],
     })
     setSaved(true)
-    setRunning(false)
     setJustUnlocked(willUnlock)
   }
 
@@ -163,7 +149,6 @@ export default function Breathing() {
     setRunning(false)
     setElapsed(0)
     setSaved(false)
-    autoNavRef.current = false
   }
 
   const phaseMeta = phaseInfo[weekConfig.phase]
@@ -233,29 +218,6 @@ export default function Breathing() {
         />
 
         <div className={styles.breathCard}>
-          {sighThisWeek && (
-            <div className={styles.sighOptions} aria-label="Sigh protocol duration">
-              <button
-                type="button"
-                className={sighDuration === 180 ? styles.sighOptionActive : ''}
-                onClick={() => setSighDuration(180)}
-                disabled={running}
-              >
-                <span>Rapid reset</span>
-                <strong>3 min</strong>
-              </button>
-              <button
-                type="button"
-                className={sighDuration === 300 ? styles.sighOptionActive : ''}
-                onClick={() => setSighDuration(300)}
-                disabled={running}
-              >
-                <span>Daily practice</span>
-                <strong>5 min</strong>
-              </button>
-            </div>
-          )}
-
           <div
             className={`${styles.orbWrap} ${running ? styles.orbWrapActive : ''}`}
           >
@@ -312,13 +274,25 @@ export default function Breathing() {
             </button>
           </div>
 
-          <button
-            className={styles.saveBtn}
-            onClick={saveBreathSession}
-            disabled={elapsed < targetDuration || saved}
-          >
-            {saved ? 'Session saved' : elapsed < targetDuration ? `Save at ${formatTime(targetDuration)}` : 'Log this session'}
-          </button>
+          {saved ? (
+            <>
+              <p className={styles.savedHint}>Logged. Keep breathing as long as you like, or move on.</p>
+              <button
+                className={styles.saveBtn}
+                onClick={() => navigate('/library?section=running')}
+              >
+                Continue to Mobility
+              </button>
+            </>
+          ) : (
+            <button
+              className={styles.saveBtn}
+              onClick={saveBreathSession}
+              disabled={elapsed < targetDuration}
+            >
+              {elapsed < targetDuration ? `1 minute target · ${formatTime(Math.max(0, targetDuration - elapsed))} left` : 'Log this session'}
+            </button>
+          )}
         </div>
 
         <Metronome playing={running} onPlayingChange={setRunning} fixedBpm={60} compact syncTick={elapsed} />

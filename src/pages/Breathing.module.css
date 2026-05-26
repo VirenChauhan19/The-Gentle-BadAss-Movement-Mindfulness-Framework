@@ -622,6 +622,13 @@
   opacity: 0.42;
 }
 
+.savedHint {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ink-light);
+}
+
 /* Collapsed entry into the reminders view */
 .reminderEditBtn {
   display: flex;

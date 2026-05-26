@@ -3,9 +3,9 @@ import styles from './PlanTabs.module.css'
 
 const PLAN_TABS = [
   { id: 'breathe', label: 'Breathe', to: '/breathing' },
-  { id: 'coach', label: 'Running Plan', to: '/library?section=coach' },
   { id: 'running', label: 'Mobility', to: '/library?section=running' },
-  { id: 'strength', label: 'Strength Tools', to: '/library?section=strength' },
+  { id: 'strength', label: 'Strength', to: '/library?section=strength' },
+  { id: 'coach', label: 'Running', to: '/library?section=coach' },
 ]
 
 export default function PlanTabs({ active }) {

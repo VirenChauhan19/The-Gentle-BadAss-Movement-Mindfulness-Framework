@@ -112,7 +112,7 @@ export const EXERCISES = [
     id: 'deadlift',
     category: 'strength',
     name: 'Deadlift',
-    cadence: '5 seconds up, 5 seconds down',
+    cadence: '4s up · 2s hold · 4s down',
     purpose: 'Build posterior chain strength, the hip engine in its most powerful expression.',
     cue: 'Push the floor away from you. The bar travels in a straight line. The back never rounds.',
     animation: 'deadlift',
@@ -121,8 +121,8 @@ export const EXERCISES = [
       'Stand over the bar, feet hip-width, shins close to it.',
       'Hinge from the hips to grip the bar, back flat, chest proud.',
       'Take a big breath into your belly, brace your core (the bridge).',
-      'Drive through the heels and push the floor away, 5 counts up.',
-      'Lower in 5 counts: hips back first, then knees bend.'
+      'Drive through the heels and push the floor away, 4 counts up.',
+      'Hold for 2 counts at the top, then lower in 4 counts: hips back first, then knees bend.'
     ],
     antiRotationNote: 'The lumbar spine is the stable pillar. It does not round or rotate at any point in the lift.'
   },
@@ -147,7 +147,7 @@ export const EXERCISES = [
     id: 'clean-to-press',
     category: 'strength',
     name: 'Clean to Press',
-    cadence: '5 seconds press, 5 seconds lower',
+    cadence: '4s press · 2s hold · 4s lower',
     purpose: 'Integrate hip power with shoulder stability, the full kinetic chain.',
     cue: 'The power comes from the hip snap, not the arms. The press is a shoulder movement, the lumbar does not arch.',
     animation: 'cleanToPress',
@@ -156,8 +156,8 @@ export const EXERCISES = [
       'Start with kettlebell at hip level, hinge slightly.',
       'Drive hips forward explosively, this momentum brings the bell to rack position (shoulder).',
       'Pause. Set the core (the bridge).',
-      'Press overhead in 5 counts, do not arch the lower back.',
-      'Lower in 5 counts back to rack, then to start.'
+      'Press overhead in 4 counts, do not arch the lower back.',
+      'Hold for 2 counts at the top, then lower in 4 counts back to rack, then to start.'
     ],
     antiRotationNote: 'During the press: if the lower back arches, the core has disengaged. Reduce weight.'
   },
@@ -165,7 +165,7 @@ export const EXERCISES = [
     id: 'bench-press',
     category: 'strength',
     name: 'Bench Press',
-    cadence: '5 seconds down, 5 seconds up',
+    cadence: '4s down · 2s hold · 4s up',
     purpose: 'Upper-body push strength with a stable, grounded base.',
     cue: 'Press the floor with your feet. The upper back stays pinned to the bench. No excessive arch.',
     animation: 'benchPress',
@@ -173,8 +173,8 @@ export const EXERCISES = [
     steps: [
       'Lie on the bench, feet flat on the floor.',
       'Retract shoulder blades, they are pinned to the bench.',
-      'Lower the bar in 5 counts to mid-chest.',
-      'Press back up in 5 counts, drive the floor with your feet.'
+      'Lower the bar in 4 counts to mid-chest.',
+      'Hold for 2 counts, then press back up in 4 counts, drive the floor with your feet.'
     ],
     antiRotationNote: 'A natural arch is fine; excessive lumbar arch to gain range is a compensation.'
   },
@@ -182,7 +182,7 @@ export const EXERCISES = [
     id: 'bent-over-row',
     category: 'strength',
     name: 'Bent Over Row',
-    cadence: '5 seconds pull, 5 seconds lower',
+    cadence: '4s pull · 2s hold · 4s lower',
     purpose: 'Upper-back pulling strength while maintaining the hip-hinge.',
     cue: 'You are in a hinge, the same position as a deadlift. The back is flat. Pull with your elbows, not your hands.',
     animation: 'bentOverRow',
@@ -190,8 +190,8 @@ export const EXERCISES = [
     steps: [
       'Hinge forward until torso is roughly parallel to the floor, back flat.',
       'Let the barbell hang at arm\'s length.',
-      'Pull the bar to your lower ribcage in 5 counts, squeeze shoulder blades.',
-      'Lower in 5 counts. The torso does not move throughout.'
+      'Pull the bar to your lower ribcage in 4 counts, squeeze shoulder blades.',
+      'Hold for 2 counts, then lower in 4 counts. The torso does not move throughout.'
     ],
     antiRotationNote: 'The lumbar spine must not rotate or flex/extend during the pull.'
   },
@@ -216,15 +216,15 @@ export const EXERCISES = [
     id: 'reverse-lunge',
     category: 'strength',
     name: 'Reverse Lunge',
-    cadence: '5 seconds down, 5 seconds up',
+    cadence: '4s down · 2s hold · 4s up',
     purpose: 'Single-leg hip strength with frontal-plane stability.',
     cue: 'The front knee tracks over the second toe. The torso stays vertical, do not lean forward.',
     animation: 'reverseLunge',
     steps: [
       'Stand tall, feet together.',
-      'Step one foot back and lower in 5 counts until back knee nearly touches the floor.',
+      'Step one foot back and lower in 4 counts until back knee nearly touches the floor.',
       'The front shin stays vertical, weight through the front heel.',
-      'Drive through the front heel to rise in 5 counts.'
+      'Hold for 2 counts, then drive through the front heel to rise in 4 counts.'
     ],
     antiRotationNote: 'The torso stays upright throughout. Any forward lean shifts load to the knee.'
   },
@@ -232,7 +232,7 @@ export const EXERCISES = [
     id: 'overhead-press',
     category: 'strength',
     name: 'Overhead Press',
-    cadence: '5 seconds up, 5 seconds down',
+    cadence: '4s up · 2s hold · 4s down',
     purpose: 'Shoulder strength with the lumbar as the stable pillar.',
     cue: 'Before you press, brace your core. The ribs stay down, do not let them flare.',
     animation: 'overheadPress',
@@ -240,9 +240,9 @@ export const EXERCISES = [
     steps: [
       'Stand tall, bar at shoulder height, elbows in front.',
       'Take a breath, brace the core (the bridge).',
-      'Press the bar overhead in 5 counts, the bar passes the face, then the ears.',
-      'At the top: biceps by ears, everything stacked.',
-      'Lower in 5 counts back to shoulders.'
+      'Press the bar overhead in 4 counts, the bar passes the face, then the ears.',
+      'At the top: biceps by ears, everything stacked. Hold for 2 counts.',
+      'Lower in 4 counts back to shoulders.'
     ],
     antiRotationNote: 'If the lower back arches and the ribs flare during the press, the core bridge has failed. Reset.'
   },
@@ -250,16 +250,16 @@ export const EXERCISES = [
     id: 'bicep-curl',
     category: 'strength',
     name: 'Bicep Curl',
-    cadence: '5 seconds up, 5 seconds down',
+    cadence: '4s up · 2s hold · 4s down',
     purpose: 'Elbow flexor strength with strict technique, no momentum.',
     cue: 'The elbows stay pinned at your sides. The only thing moving is the forearm.',
     animation: 'bicepCurl',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Biceps%20Curl%20WebApp%206.mp4?alt=media&token=8dc69dc0-795f-41e4-abbb-b52b6407aab9',
     steps: [
       'Stand tall, dumbbells at your sides, palms facing forward.',
-      'Curl in 5 counts, elbows stay against your torso.',
-      'Squeeze at the top for 1 second.',
-      'Lower in 5 counts, resist the weight all the way down.'
+      'Curl in 4 counts, elbows stay against your torso.',
+      'Hold and squeeze at the top for 2 counts.',
+      'Lower in 4 counts, resist the weight all the way down.'
     ],
     antiRotationNote: 'No swinging, no lumbar extension to initiate the curl. Control over momentum.'
   },
@@ -267,16 +267,16 @@ export const EXERCISES = [
     id: 'squat-strength',
     category: 'strength',
     name: 'Squat (Strength)',
-    cadence: '5 seconds down, 5 seconds up',
+    cadence: '4s down · 2s hold · 4s up',
     purpose: 'Build lower-body strength with the hip as the primary engine.',
     cue: 'Sit back into the squat, your hips reach behind your heels. The knees follow the hips, not the other way around.',
     animation: 'squat',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Squats%20WebApp%201.mp4?alt=media&token=f14fc920-a107-4b2a-a616-c08938d390da',
     steps: [
       'Bar across upper back, feet shoulder-width.',
-      'Sit back and down in 5 counts, hips back first, then knees track out.',
+      'Sit back and down in 4 counts, hips back first, then knees track out.',
       'Keep chest tall, lumbar neutral.',
-      'Drive through heels to rise in 5 counts.'
+      'Hold for 2 counts at the bottom, then drive through heels to rise in 4 counts.'
     ],
     antiRotationNote: 'The lumbar spine is the stable pillar from start to finish.'
   },
@@ -382,6 +382,6 @@ export const EXERCISES = [
 
 export const CATEGORIES = {
   functional: { label: 'Functional Tests', color: '#8b9e7e', description: 'Assess your baseline, where you are today.' },
-  strength: { label: 'Strength Tools', color: '#9e8b7e', description: 'Build the engine. 10-second cadence: control over momentum.' },
+  strength: { label: 'Strength', color: '#9e8b7e', description: 'Build the engine. 10-second cadence: control over momentum.' },
   running: { label: 'Mobility', color: '#7e8b9e', description: 'Learn the soft landing and the hip engine.' }
 }
