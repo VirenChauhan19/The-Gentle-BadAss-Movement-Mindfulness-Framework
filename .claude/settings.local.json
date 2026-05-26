@@ -114,7 +114,12 @@
       "Bash(node_modules/.bin/remotion still *)",
       "Bash(rm -f out/render.log out/chunks/chunk_*.mp4 out/concat.txt)",
       "Bash(echo \"relaunched chunked render pid $!\")",
-      "Bash(echo \"launched final render pid $!\")"
+      "Bash(echo \"launched final render pid $!\")",
+      "Bash(pdftotext -layout \"Running Problem - SCAD.pdf\" -)",
+      "Bash(cp la-ultra-3d-walkthrough.mp4 la-ultra-main-video.mp4)",
+      "Read(//c/c/Users/Administrator/Desktop/gb-showcase-video/**)",
+      "Bash(nohup bash render-all.sh)",
+      "Bash(echo \"launched render-all pid $!\")"
     ]
   },
   "enableAllProjectMcpServers": true,
