@@ -23,7 +23,7 @@ export default function Home() {
   const streak = computeStreak(entries)
   const feelScore = today ? computeFeelScore(today.scores || {}) : null
   const dayOfJourney = entries.length
-  const commitment = profile?.commitment || 270
+  const commitment = 90
   const daysToGo = Math.max(0, commitment - dayOfJourney)
   const progressPct = Math.min(100, Math.round((dayOfJourney / commitment) * 100))
 

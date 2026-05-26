@@ -1052,7 +1052,8 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
   }
 
   const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
-  const commitmentDays = Math.max(7, Number(defaultCommitment) || 30)
+  // Every plan is a fixed 90-day program; we never ask the runner for a length.
+  const commitmentDays = 90
   const profilePath = profile?.path || 'not set'
   const profileStory = profile?.fitnessHistory || ''
   const paceGuide = calculatePaceGuide(benchmarkDistance, benchmarkTime)
@@ -1175,7 +1176,7 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
         <p className={styles.wizardSub}>{STEP_SUBS[step - 1]}</p>
         <div className={styles.commitmentRibbon}>
           <span>{commitmentDays}</span>
-          <small>days from onboarding</small>
+          <small>day program</small>
         </div>
         <div className={styles.wizardDots}>
           {Array.from({ length: TOTAL_STEPS }, (_, i) => (

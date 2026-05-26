@@ -363,13 +363,6 @@ function ProgressCard({
         {Array.from({ length: SESSIONS_PER_WEEK }, (_, i) => (
           <span key={i} className={i < cappedSessions ? styles.dayDotFilled : styles.dayDotEmpty} />
         ))}
-        <p className={styles.dayDotsLabel}>
-          {allComplete
-            ? 'Curriculum complete. Stay here as long as you like.'
-            : justUnlocked
-              ? 'Week complete, next week unlocked.'
-              : `Day ${cappedSessions} of ${SESSIONS_PER_WEEK} this week · ${remaining} to unlock next`}
-        </p>
       </div>
     </div>
   )

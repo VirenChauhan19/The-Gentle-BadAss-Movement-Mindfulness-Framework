@@ -58,17 +58,8 @@ const paths = [
   },
 ]
 
-const PLANS = {
-  30:  { label: '30-Day Reset',          desc: 'A focused month to reset your movement habits.',         price: 499  },
-  60:  { label: '60-Day Foundation',     desc: 'Build a real movement foundation.',                      price: 799  },
-  90:  { label: '90-Day Transformation', desc: 'Three months of consistent progress.',                   price: 1199 },
-  120: { label: '120-Day Deep Dive',     desc: 'A full season of intentional movement.',                 price: 1499 },
-  150: { label: '150-Day Journey',       desc: 'Half a year of building strength.',                      price: 1699 },
-  180: { label: '180-Day Commitment',    desc: 'Six months of dedicated practice.',                      price: 1999 },
-  210: { label: '210-Day Challenge',     desc: 'A serious commitment to change.',                        price: 2299 },
-  240: { label: '240-Day Quest',         desc: 'Eight months of sustained effort.',                      price: 2499 },
-  270: { label: '270-Day La Ultra',      desc: 'The full La Ultra journey - the ultimate commitment.',   price: 2999 },
-}
+// Every journey is a fixed 90-day program.
+const COMMITMENT_DAYS = 90
 
 const HEARD_ABOUT = [
   'Instagram',
@@ -113,20 +104,18 @@ const STRENGTH_FREQUENCY = [
   { value: '3+',   label: '3+ days/week' },
 ]
 
-const TOTAL_STEPS = 5
+const TOTAL_STEPS = 4
 const STEP_TITLES = {
   1: 'Your Sign Up Details',
   2: 'Your Body',
   3: 'Your History',
   4: 'Choose Your Path',
-  5: 'Your Commitment',
 }
 const STEP_SUBTITLES = {
   1: 'Tell us who you are and what you are committing to.',
   2: 'Biometrics and biological rhythms help us scale loads safely.',
   3: 'A clear picture of past wear lets us protect your structure.',
   4: 'Pick the focus that fits your current state.',
-  5: 'Slide to choose your journey length.',
 }
 
 const MENOPAUSE_NEW_TO_LEGACY = {
@@ -195,9 +184,8 @@ export default function Onboarding() {
     runningHistory: profile?.runningHistory || '',
     strengthFrequency: profile?.strengthFrequency || '',
     path: profile?.path || '',
-    commitment: profile?.commitment || 90,
+    commitment: COMMITMENT_DAYS,
   })
-  const plan = PLANS[data.commitment] || PLANS[90]
   const isFemale = data.gender === 'female'
   const showCycleFields =
     isFemale && (data.menopausalStatus === 'regular' || data.menopausalStatus === 'perimenopause')
@@ -224,6 +212,7 @@ export default function Onboarding() {
     const payload = {
       ...data,
       sex: resolvedSex,
+      commitment: COMMITMENT_DAYS,
       // Legacy aliases so existing systems (training adaptation, Coach) keep working.
       menopauseStatus: MENOPAUSE_NEW_TO_LEGACY[data.menopausalStatus] || '',
       periodLength: data.bleedingDuration,
@@ -667,50 +656,13 @@ export default function Onboarding() {
           </div>
           <div className={styles.btnStack}>
             <button
-              className={styles.primaryBtn}
+              className={styles.startBtn}
               disabled={!data.path}
-              onClick={() => setStep(5)}
+              onClick={handleComplete}
             >
-              Next
-            </button>
-            <button className={styles.backLink} onClick={() => setStep(3)}>Back</button>
-          </div>
-        </section>
-      )}
-
-      {step === 5 && (
-        <section className={styles.section}>
-          <div className={styles.commitmentCard}>
-            <div className={styles.commitDays}>{data.commitment}</div>
-            <div className={styles.commitUnit}>days</div>
-            <div className={styles.commitLabelText}>{plan.label}</div>
-          </div>
-
-          <p className={styles.commitDesc}>{plan.desc}</p>
-
-          <div className={styles.sliderWrap}>
-            <input
-              type="range"
-              min="30"
-              max="270"
-              step="30"
-              value={data.commitment}
-              onChange={e => update({ commitment: Number(e.target.value) })}
-              className={styles.slider}
-            />
-            <div className={styles.sliderTicks}>
-              <span>30d</span>
-              <span>90d</span>
-              <span>180d</span>
-              <span>270d</span>
-            </div>
-          </div>
-
-          <div className={styles.btnStack}>
-            <button className={styles.startBtn} onClick={handleComplete}>
               Start My Journey
             </button>
-            <button className={styles.backLink} onClick={() => setStep(4)}>Back</button>
+            <button className={styles.backLink} onClick={() => setStep(3)}>Back</button>
           </div>
         </section>
       )}

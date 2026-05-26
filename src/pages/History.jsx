@@ -66,7 +66,7 @@ export default function History() {
         <h1 className={styles.title}>Your Progress</h1>
         <p className={styles.commitment}>
           Path: <strong>{profile?.path || 'Rehab'}</strong> · 
-          Goal: <strong>{profile?.commitment || 270} Days</strong>
+          Goal: <strong>90 Days</strong>
         </p>
         {avg !== null && (
           <p className={avg >= 7 ? styles.highAvg : styles.avgText}>

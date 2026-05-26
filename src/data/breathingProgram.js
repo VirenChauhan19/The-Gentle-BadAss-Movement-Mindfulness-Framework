@@ -1,5 +1,5 @@
 // Gentle Badass, Breathing Curriculum
-// A strict, dictated 39-week (9-month) progression. The user does not select.
+// A strict, dictated 13-week (3-month) progression. The user does not select.
 // Each week unlocks once the previous week has logged SESSIONS_PER_WEEK sessions.
 //
 // Schema:
@@ -15,7 +15,7 @@
 //   duration: target session length in seconds
 
 export const SESSIONS_PER_WEEK = 5
-export const TOTAL_WEEKS = 39
+export const TOTAL_WEEKS = 13
 
 export const phaseInfo = {
   '1': {

@@ -408,7 +408,7 @@ export default function Admin() {
           </div>
           <div className={styles.journeyRow}>
             <span className={styles.journeyLabel}>Commitment</span>
-            <span className={styles.journeyValue}>{profile?.commitment || 30} days</span>
+            <span className={styles.journeyValue}>90 days</span>
           </div>
           <div className={styles.journeyRow}>
             <span className={styles.journeyLabel}>Days Logged</span>
@@ -472,21 +472,6 @@ export default function Admin() {
                 {user ? 'Cloud syncing is active.' : 'Sign in to enable cloud sync.'}
               </span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.settingsSection}>
-        <h2 className={styles.sectionTitle}>Membership</h2>
-        <div className={styles.settingsList}>
-          <div className={styles.settingItem}>
-            <div className={styles.settingInfo}>
-              <span className={styles.settingLabel}>Unlock Full Access</span>
-              <span className={styles.settingDesc}>One-time payment · {profile?.commitment || 90}-day journey</span>
-            </div>
-            <button className={styles.paywallPreviewBtn} onClick={() => navigate('/paywall')}>
-              View plans
-            </button>
           </div>
         </div>
       </div>
@@ -617,10 +602,6 @@ function ProfileEditModal({ profile, fallbackName, onClose, onSave }) {
                 <option value="beginner">The Beginner Path</option>
                 <option value="performance">The Performance Path</option>
               </select>
-            </label>
-            <label className={styles.profileEditField}>
-              <span>Commitment (days)</span>
-              <input type="number" value={draft.commitment} onChange={e => set('commitment', Number(e.target.value) || '')} />
             </label>
             <label className={styles.profileEditField}>
               <span>Program goal</span>
