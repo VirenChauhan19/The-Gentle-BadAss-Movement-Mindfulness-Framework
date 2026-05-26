@@ -73,6 +73,17 @@ export default function Home() {
         </p>
       </section>
 
+      <section className={styles.about} aria-label="About this app">
+        <p className={styles.aboutKicker}>What is this?</p>
+        <p className={styles.aboutText}>
+          La Ultra: Run &amp; Bee is your daily companion for movement and mindfulness, built by
+          Dr.&nbsp;Rajat Chauhan. Each day you check in on how your body feels, then move through
+          Breathe, Mobility, and Strength at your own pace — no metrics to chase, no rings to close.
+          It is a quiet practice that helps you feel your own body again. Add it to your home screen
+          and it runs like an app, even offline.
+        </p>
+      </section>
+
       <section className={styles.todayPanel} aria-label="Today">
         <Link
           to="/journal"

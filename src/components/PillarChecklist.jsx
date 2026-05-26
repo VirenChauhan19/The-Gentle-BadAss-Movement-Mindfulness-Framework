@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './PillarChecklist.module.css'
 
 const PILLARS = [
@@ -9,10 +9,20 @@ const PILLARS = [
   { id: 'breathe', label: 'Breathe Slow & Long', desc: '4-8 second rhythmic baseline.' }
 ]
 
-export default function PillarChecklist({ onComplete }) {
+export default function PillarChecklist({ onComplete, autoAdvance = false }) {
   const [checked, setChecked] = useState({})
+  const advancedRef = useRef(false)
 
   const allChecked = PILLARS.every(p => checked[p.id])
+
+  // When all five are ticked, glide on to the next step on its own — no extra
+  // tap needed. A short beat lets the final check register before we leave.
+  useEffect(() => {
+    if (!autoAdvance || !allChecked || advancedRef.current) return
+    advancedRef.current = true
+    const id = setTimeout(() => onComplete?.(), 650)
+    return () => clearTimeout(id)
+  }, [autoAdvance, allChecked, onComplete])
 
   function toggle(id) {
     setChecked(prev => ({ ...prev, [id]: !prev[id] }))

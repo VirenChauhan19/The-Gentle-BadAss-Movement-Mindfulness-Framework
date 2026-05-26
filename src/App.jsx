@@ -11,6 +11,7 @@ import Journal from './pages/Journal'
 import History from './pages/History'
 import Library from './pages/Library'
 import Breathing from './pages/Breathing'
+import Reminder from './pages/Reminder'
 import ExerciseDetail from './pages/ExerciseDetail'
 import FunctionalTests from './pages/FunctionalTests'
 import Admin from './pages/Admin'
@@ -116,6 +117,7 @@ function AppRoutes() {
         <Route path="/onboarding" element={<LockedRoute><Onboarding /></LockedRoute>} />
         <Route path="/journal" element={<LockedRoute feature="Feel"><Journal /></LockedRoute>} />
         <Route path="/breathing" element={<LockedRoute feature="Breathe"><Breathing /></LockedRoute>} />
+        <Route path="/reminder" element={<LockedRoute feature="Your Plan"><Reminder /></LockedRoute>} />
         <Route path="/history" element={<LockedRoute feature="Progress"><History /></LockedRoute>} />
         <Route path="/functional-tests" element={<LockedRoute feature="Functional Tests"><FunctionalTests /></LockedRoute>} />
         <Route path="/library" element={<LockedRoute feature="Your Plan"><Library /></LockedRoute>} />

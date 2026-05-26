@@ -2,13 +2,13 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { EXERCISES, CATEGORIES } from '../data/exercises'
 import ExerciseAnimation from '../components/ExerciseAnimation'
-import PillarChecklist from '../components/PillarChecklist'
 import Metronome from '../components/Metronome'
 import PlanTabs from '../components/PlanTabs'
 import { useData } from '../context/DataContext'
 import styles from './ExerciseDetail.module.css'
 
-const PILLARS = ['Smile', 'Tall Puppet', 'Relaxed Fists & Shoulders', 'Uncurl Toes', 'Breathe Slow & Long']
+// Running/mobility drills auto-advance after this long if not completed manually.
+const DRILL_AUTO_ADVANCE_MS = 60000
 
 function getPerformedExercises() {
   try {
@@ -23,9 +23,6 @@ export default function ExerciseDetail() {
   const navigate = useNavigate()
   const { saveEntry, getTodayEntry } = useData()
   const exercise = EXERCISES.find(e => e.id === id)
-  const [pillarsDone, setPillarsDone] = useState(() => localStorage.getItem('gb_pillars_ready') === new Date().toISOString().split('T')[0])
-  const [tpr, setTpr] = useState(10)
-  const [qualityScore, setQualityScore] = useState(7)
   const [sessionState, setSessionState] = useState('idle')
   const [metronomePlaying, setMetronomePlaying] = useState(false)
   const [detailsOpen, setDetailsOpen] = useState(() => !getPerformedExercises().includes(id))
@@ -34,6 +31,7 @@ export default function ExerciseDetail() {
   const [videoProgress, setVideoProgress] = useState(0)
   const videoRef = useRef(null)
   const hideControlsTimer = useRef(null)
+  const autoAdvanceRef = useRef(null)
   const [controlsVisible, setControlsVisible] = useState(true)
 
   // Reset video state whenever the exercise changes
@@ -45,6 +43,14 @@ export default function ExerciseDetail() {
     setVideoProgress(0)
     setControlsVisible(true)
   }, [id])
+
+  // Mobility/running drills move on by themselves once a minute of work is in,
+  // so the session flows drill-to-drill without needing a tap each time.
+  useEffect(() => {
+    if (sessionState !== 'active' || exercise?.category !== 'running') return
+    const timer = setTimeout(() => autoAdvanceRef.current?.(), DRILL_AUTO_ADVANCE_MS)
+    return () => clearTimeout(timer)
+  }, [sessionState, exercise])
 
   // Auto-hide controls after 3s when playing
   const resetHideTimer = useCallback(() => {
@@ -100,17 +106,13 @@ export default function ExerciseDetail() {
       ? { allowedBpms: [160, 170, 180, 190] }
       : { fixedBpm: 60 }
 
-  function handlePillarsComplete() {
-    localStorage.setItem('gb_pillars_ready', new Date().toISOString().split('T')[0])
-    setPillarsDone(true)
-  }
-
   function handleStart() {
     setSessionState('active')
     setMetronomePlaying(true)
   }
 
   async function handleEndSession(status) {
+    if (sessionState !== 'active') return
     setMetronomePlaying(false)
     const today = getTodayEntry() || { scores: {}, note: '', sessions: [] }
     const sessions = today.sessions || []
@@ -118,8 +120,8 @@ export default function ExerciseDetail() {
       exerciseId: exercise.id,
       exerciseName: exercise.name,
       status,
-      tpr,
-      qualityScore: status === 'missed' ? null : qualityScore,
+      tpr: null,
+      qualityScore: null,
       completedAt: new Date().toISOString(),
     }
 
@@ -135,6 +137,10 @@ export default function ExerciseDetail() {
     window.setTimeout(goNext, 450)
   }
 
+  // Keep a live handle to the completion logic so the auto-advance timer
+  // (declared above, before any early return) can reach the latest closure.
+  autoAdvanceRef.current = () => handleEndSession('completed')
+
   function goNext() {
     navigate(nextExercise ? `/library/${nextExercise.id}` : `/library?section=${exercise.category}`)
   }
@@ -142,12 +148,6 @@ export default function ExerciseDetail() {
   return (
     <div className={styles.page}>
       <PlanTabs active={exercise.category} />
-      <section className={styles.pillarBanner}>
-        <p className={styles.pillarTitle}>5 Pillars</p>
-        <div className={styles.pillarChips}>
-          {PILLARS.map(pillar => <span key={pillar}>{pillar}</span>)}
-        </div>
-      </section>
 
       <div className={styles.topBar}>
         <Link className={styles.back} to={`/library?section=${exercise.category}`}>Library</Link>
@@ -155,13 +155,7 @@ export default function ExerciseDetail() {
         <button className={styles.nextTopBtn} onClick={goNext}>Next</button>
       </div>
 
-      {!pillarsDone ? (
-        <div className={styles.gate}>
-          <PillarChecklist onComplete={handlePillarsComplete} />
-        </div>
-      ) : (
-        <>
-          {exercise.video ? (
+      {exercise.video ? (
             <div className={styles.videoSection}>
               <div
                 className={styles.videoWrap}
@@ -245,50 +239,10 @@ export default function ExerciseDetail() {
               </div>
               {sessionState !== 'idle' && sessionState !== 'active' && (
                 <div className={styles.nextWrap}>
-                  <p>{sessionState === 'missed' ? 'Logged as missed.' : `Saved: ${tpr}s TPR, quality ${qualityScore}/10.`}</p>
+                  <p>{sessionState === 'missed' ? 'Logged as missed.' : 'Logged. Moving on.'}</p>
                   <button className={styles.nextBtn} onClick={goNext}>Next: {nextExercise?.name || 'Library'}</button>
                 </div>
               )}
-            </div>
-
-            <div className={styles.tprTracker}>
-              <h2 className={styles.blockLabel}>Quality Metrics</h2>
-              <p className={styles.tprDesc}>Capture control and form. TPR rewards patience; quality rewards clean movement.</p>
-              <div className={styles.metricRow}>
-                <label>
-                  <span>TPR</span>
-                  <input
-                    type="range"
-                    min="2"
-                    max="30"
-                    value={tpr}
-                    onChange={e => setTpr(Number(e.target.value))}
-                    className={styles.tprSlider}
-                  />
-                </label>
-                <div className={styles.tprDisplay}>
-                  <span className={styles.tprValue}>{tpr}</span>
-                  <span className={styles.tprUnit}>sec / rep</span>
-                </div>
-              </div>
-              <div className={styles.metricRow}>
-                <label>
-                  <span>Quality</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="10"
-                    value={qualityScore}
-                    onChange={e => setQualityScore(Number(e.target.value))}
-                    className={styles.tprSlider}
-                  />
-                </label>
-                <div className={styles.tprDisplay}>
-                  <span className={styles.tprValue}>{qualityScore}</span>
-                  <span className={styles.tprUnit}>/ 10</span>
-                </div>
-              </div>
-              <p className={styles.tprTarget}>Target: {exercise.cadence || 'Slow & Controlled'}</p>
             </div>
 
             <details className={styles.detailPanel} open={detailsOpen} onToggle={e => setDetailsOpen(e.currentTarget.open)}>
@@ -321,8 +275,6 @@ export default function ExerciseDetail() {
               </div>
             )}
           </div>
-        </>
-      )}
     </div>
   )
 }

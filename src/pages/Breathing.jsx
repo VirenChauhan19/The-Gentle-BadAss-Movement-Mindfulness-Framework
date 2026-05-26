@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import Metronome from '../components/Metronome'
 import PlanTabs from '../components/PlanTabs'
 import {
-  breathingProgram,
   buildPhaseSequence,
   cycleSecondsFor,
   deriveCurrentWeek,
@@ -26,6 +26,8 @@ const DEFAULT_REMINDER_SETTINGS = {
 
 export default function Breathing() {
   const { entries, getTodayEntry, saveEntry } = useData()
+  const navigate = useNavigate()
+  const autoNavRef = useRef(false)
 
   const weekTally = useMemo(() => tallyWeekSessions(entries), [entries])
   const currentWeek = useMemo(() => deriveCurrentWeek(weekTally), [weekTally])
@@ -42,6 +44,7 @@ export default function Breathing() {
   const [reminderSettings, setReminderSettings] = useState(() => loadReminderSettings())
   const [notificationPermission, setNotificationPermission] = useState(() => getNotificationPermission())
   const [reminderNotice, setReminderNotice] = useState('')
+  const [remindersOpen, setRemindersOpen] = useState(false)
 
   const phases = useMemo(() => buildPhaseSequence(weekConfig), [weekConfig])
   const cycleSeconds = useMemo(() => cycleSecondsFor(weekConfig), [weekConfig])
@@ -69,12 +72,28 @@ export default function Breathing() {
     }
   }, [elapsed, running, targetDuration])
 
+  // Once the target is reached, log the session automatically — no Save tap.
+  useEffect(() => {
+    if (targetDuration > 0 && elapsed >= targetDuration && !saved) {
+      saveBreathSession()
+    }
+  }, [elapsed, targetDuration, saved])
+
+  // After the session is logged, glide straight on to Mobility (before Running).
+  useEffect(() => {
+    if (!saved || autoNavRef.current) return
+    autoNavRef.current = true
+    const id = setTimeout(() => navigate('/library?section=running'), 1100)
+    return () => clearTimeout(id)
+  }, [saved, navigate])
+
   useEffect(() => {
     setElapsed(0)
     setRunning(false)
     setSaved(false)
     setJustUnlocked(false)
     setSighDuration(300)
+    autoNavRef.current = false
   }, [currentWeek])
 
   useEffect(() => {
@@ -125,6 +144,7 @@ export default function Breathing() {
     setRunning(false)
     setElapsed(0)
     setSaved(false)
+    autoNavRef.current = false
   }
 
   const phaseMeta = phaseInfo[weekConfig.phase]
@@ -146,14 +166,37 @@ export default function Breathing() {
     }
   }
 
+  if (remindersOpen) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.reminderView}>
+          <button
+            type="button"
+            className={styles.reminderBack}
+            onClick={() => setRemindersOpen(false)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Breathe
+          </button>
+          <ReminderPanel
+            settings={reminderSettings}
+            onChange={setReminderSettings}
+            permission={notificationPermission}
+            onRequestPermission={requestNotificationPermission}
+            notice={reminderNotice}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <p className={styles.label}>Daily Foundation</p>
         <h1 className={styles.title}>Breathe</h1>
         <p className={styles.subtitle}>
-          One curriculum. One breath at a time. The orb dictates the cadence — your feet land
-          softly on their own timing, completely independent of the breath.
+          Breathing keeps you alive, so it&apos;s kind of important.
         </p>
       </header>
       <PlanTabs active="breathe" />
@@ -261,15 +304,17 @@ export default function Breathing() {
 
         <Metronome playing={running} onPlayingChange={setRunning} fixedBpm={60} compact />
 
-        <ReminderPanel
-          settings={reminderSettings}
-          onChange={setReminderSettings}
-          permission={notificationPermission}
-          onRequestPermission={requestNotificationPermission}
-          notice={reminderNotice}
-        />
-
-        <Curriculum currentWeek={currentWeek} weekTally={weekTally} />
+        <button
+          type="button"
+          className={styles.reminderEditBtn}
+          onClick={() => setRemindersOpen(true)}
+        >
+          <span className={styles.reminderEditLabel}>Hourly Prompts</span>
+          <span className={styles.reminderEditAction}>
+            {reminderSettings.enabled ? 'On' : 'Off'} · Edit
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </button>
       </section>
     </div>
   )
@@ -294,24 +339,6 @@ function ProgressCard({
         {phaseMeta?.label || `Phase ${weekConfig.phase}`} · Week {weekNumber} of {TOTAL_WEEKS}
       </p>
       <h2 className={styles.weekTitle}>{weekConfig.title}</h2>
-      <p className={styles.weekFocus}>{weekConfig.focus}</p>
-
-      <div className={styles.weekRatios}>
-        <RatioPill label="Inhale" seconds={weekConfig.inhale} />
-        {isSighWeek(weekConfig)
-          ? <RatioPill label="Sip" seconds={weekConfig.microInhale} accent />
-          : <RatioPill label="Hold" seconds={weekConfig.holdFull || 0} muted={!weekConfig.holdFull} />}
-        <RatioPill label={isSighWeek(weekConfig) ? 'Sigh' : 'Exhale'} seconds={weekConfig.exhale} />
-        {!isSighWeek(weekConfig) && (
-          <RatioPill label="Hold" seconds={weekConfig.holdEmpty || 0} muted={!weekConfig.holdEmpty} />
-        )}
-        {breathsPerMinute > 0 && (
-          <RatioPill label="Rate" value={`${breathsPerMinute} br/min`} muted />
-        )}
-        {targetDuration > 0 && (
-          <RatioPill label="Timer" value={formatMinutes(targetDuration)} muted />
-        )}
-      </div>
 
       <div className={styles.dayDots} role="img" aria-label={`${cappedSessions} of ${SESSIONS_PER_WEEK} sessions completed this week`}>
         {Array.from({ length: SESSIONS_PER_WEEK }, (_, i) => (
@@ -325,16 +352,6 @@ function ProgressCard({
               : `Day ${cappedSessions} of ${SESSIONS_PER_WEEK} this week · ${remaining} to unlock next`}
         </p>
       </div>
-    </div>
-  )
-}
-
-function RatioPill({ label, seconds, value, muted, accent }) {
-  const display = value != null ? value : `${seconds}s`
-  return (
-    <div className={`${styles.ratioPill} ${muted ? styles.ratioPillMuted : ''} ${accent ? styles.ratioPillAccent : ''}`}>
-      <span>{label}</span>
-      <strong>{display}</strong>
     </div>
   )
 }
@@ -430,79 +447,6 @@ function ReminderPanel({ settings, onChange, permission, onRequestPermission, no
       </p>
       {notice && <p className={styles.reminderNotice}>{notice}</p>}
     </section>
-  )
-}
-
-function Curriculum({ currentWeek, weekTally }) {
-  const byPhase = useMemo(() => {
-    const groups = {}
-    for (let w = 1; w <= TOTAL_WEEKS; w++) {
-      const cfg = breathingProgram[w]
-      if (!cfg) continue
-      if (!groups[cfg.phase]) groups[cfg.phase] = []
-      groups[cfg.phase].push({ week: w, cfg })
-    }
-    return groups
-  }, [])
-
-  return (
-    <div className={styles.curriculum}>
-      <header className={styles.curriculumHeader}>
-        <p className={styles.curriculumKicker}>The path</p>
-        <h2 className={styles.curriculumTitle}>3 months. Extending to 6 and 9.</h2>
-        <p className={styles.curriculumSub}>
-          Log {SESSIONS_PER_WEEK} sessions to unlock the next week. Future weeks stay blurred until then.
-        </p>
-      </header>
-
-      {Object.keys(byPhase).sort().map(phaseId => {
-        const meta = phaseInfo[phaseId]
-        return (
-          <div key={phaseId} className={styles.phaseGroup}>
-            <div className={styles.phaseHeader}>
-              <span className={styles.phaseHeaderLabel}>{meta?.label || `Phase ${phaseId}`}</span>
-              <h3>{meta?.title}</h3>
-              <p>{meta?.description}</p>
-            </div>
-            <ol className={styles.weekList}>
-              {byPhase[phaseId].map(({ week, cfg }) => {
-                const count = weekTally[week] || 0
-                const done = count >= SESSIONS_PER_WEEK
-                const isCurrent = week === currentWeek
-                const isLocked = week > currentWeek
-                const stateClass = done
-                  ? styles.weekRowDone
-                  : isCurrent
-                    ? styles.weekRowCurrent
-                    : isLocked
-                      ? styles.weekRowLocked
-                      : ''
-                return (
-                  <li key={week} className={`${styles.weekRow} ${stateClass}`} aria-current={isCurrent ? 'step' : undefined}>
-                    <span className={styles.weekRowBadge}>
-                      {done ? '✓' : isLocked ? '🔒' : week}
-                    </span>
-                    <div className={styles.weekRowBody}>
-                      <p className={styles.weekRowKicker}>Week {week}{cfg.type === 'sigh' ? ' · Sigh' : ''}</p>
-                      <strong>{cfg.title}</strong>
-                    </div>
-                    <span className={styles.weekRowStatus}>
-                      {done
-                        ? 'Complete'
-                        : isCurrent
-                          ? `${count}/${SESSIONS_PER_WEEK}`
-                          : isLocked
-                            ? 'Locked'
-                            : `${count}/${SESSIONS_PER_WEEK}`}
-                    </span>
-                  </li>
-                )
-              })}
-            </ol>
-          </div>
-        )
-      })}
-    </div>
   )
 }
 
@@ -624,9 +568,4 @@ function formatTime(seconds) {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   return `${mins}:${String(secs).padStart(2, '0')}`
-}
-
-function formatMinutes(seconds) {
-  const mins = Math.round(seconds / 60)
-  return `${mins} min`
 }

@@ -128,9 +128,9 @@ export function buildPhaseSequence(config) {
     return segments.filter(s => s.seconds > 0)
   }
   const segments = [
-    { id: 'inhale',     label: 'Inhale', cue: 'Breathe in low and wide.',          seconds: config.inhale || 0,    progressStart: 0, progressEnd: 1 },
+    { id: 'inhale',     label: 'Inhale', cue: 'Breathe in slow and deep. Feel your belly expand.', seconds: config.inhale || 0,    progressStart: 0, progressEnd: 1 },
     { id: 'hold-full',  label: 'Hold',   cue: 'Stay relaxed at the top.',          seconds: config.holdFull || 0,  progressStart: 1, progressEnd: 1 },
-    { id: 'exhale',     label: 'Exhale', cue: 'Let the air leave slowly.',         seconds: config.exhale || 0,    progressStart: 1, progressEnd: 0 },
+    { id: 'exhale',     label: 'Exhale', cue: 'Let the air leave slowly. Let your belly soften.',  seconds: config.exhale || 0,    progressStart: 1, progressEnd: 0 },
     { id: 'hold-empty', label: 'Hold',   cue: 'Rest softly at the bottom.',        seconds: config.holdEmpty || 0, progressStart: 0, progressEnd: 0 },
   ]
   return segments.filter(s => s.seconds > 0)

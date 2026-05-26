@@ -1,21 +1,22 @@
 import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { EXERCISES, CATEGORIES } from '../data/exercises'
 import PlanTabs from '../components/PlanTabs'
+import { isReminderDone } from './Reminder'
 import Coach from './Coach'
 import styles from './Library.module.css'
 
-const PILLARS = ['Smile', 'Tall Puppet', 'Relaxed Fists', 'Uncurl Toes', 'Breathe']
 const PLAN_CATEGORY_ORDER = ['running', 'strength']
-const PRINCIPLES = [
-  ['The Hip Engine', 'Hips are the engine. Knees follow; they never lead.'],
-  ['The Stable Pillar', 'The lumbar spine stays quiet while hips and shoulders move around it.'],
-  ['Core as the Bridge', 'The core connects upper and lower body so power does not leak.'],
-]
 
 export default function Library() {
   const [searchParams] = useSearchParams()
   const requestedSection = searchParams.get('section')
+
+  // Opening Plan fresh (no section) sends the runner through the Reminder
+  // page first — the 5 pillars and 3 principles — once per day. After that
+  // it lands on Breathe as usual.
+  const redirectToReminder = !requestedSection && !isReminderDone()
+
   const activeSection = ['breathe', 'coach', ...PLAN_CATEGORY_ORDER].includes(requestedSection)
     ? requestedSection
     : 'breathe'
@@ -28,6 +29,10 @@ export default function Library() {
     return { inCategory, categoryWithVideo }
   }, [filtered])
 
+  if (redirectToReminder) {
+    return <Navigate to="/reminder" replace />
+  }
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -35,13 +40,6 @@ export default function Library() {
         <h1 className={styles.title}>Weekly modules</h1>
         <p className={styles.subtitle}>Choose Breathe, Running, Mobility, or Strength Tools to begin.</p>
       </header>
-
-      <section className={styles.pillarBanner}>
-        <p>5 Pillars</p>
-        <div>
-          {PILLARS.map(pillar => <span key={pillar}>{pillar}</span>)}
-        </div>
-      </section>
 
       <section className={styles.weeklyModule}>
         <div className={styles.weeklyIcon}>90</div>
@@ -84,20 +82,6 @@ export default function Library() {
             )}
           </div>
         </div>
-      )}
-
-      {activeCategory === 'running' && (
-        <section className={styles.principlesBanner}>
-          <p className={styles.principlesTitle}>The Three Principles</p>
-          <div className={styles.principlesGrid}>
-            {PRINCIPLES.map(([title, text]) => (
-              <article key={title}>
-                <strong>{title}</strong>
-                <span>{text}</span>
-              </article>
-            ))}
-          </div>
-        </section>
       )}
 
       {activeCategory && (

@@ -73,6 +73,32 @@
   line-height: 1.65;
 }
 
+.about {
+  margin: 14px 16px 0;
+  padding: 20px 18px;
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 22px var(--shadow-xs);
+  animation: floatIn 540ms var(--ease-elastic) both 120ms;
+}
+
+.aboutKicker {
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--ink-faint);
+  margin-bottom: 9px;
+}
+
+.aboutText {
+  color: var(--ink-light);
+  font-size: clamp(0.92rem, 2.3vw, 1rem);
+  line-height: 1.62;
+  max-width: 660px;
+}
+
 .todayPanel {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
