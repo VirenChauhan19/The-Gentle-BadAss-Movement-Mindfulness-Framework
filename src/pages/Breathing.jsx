@@ -145,10 +145,11 @@ export default function Breathing() {
     setRunning(v => !v)
   }
 
-  function resetTimer() {
+  function stopPractice() {
     setRunning(false)
     setElapsed(0)
     setSaved(false)
+    setJustUnlocked(false)
   }
 
   const phaseMeta = phaseInfo[weekConfig.phase]
@@ -269,14 +270,19 @@ export default function Breathing() {
             <button onClick={toggleRunning} disabled={cycleSeconds <= 0}>
               {running ? 'Pause' : 'Start'}
             </button>
-            <button onClick={resetTimer} className={styles.secondaryBtn}>
-              Reset
+            <button
+              type="button"
+              onClick={stopPractice}
+              className={styles.stopBtn}
+              disabled={!running && elapsed === 0 && !saved}
+            >
+              Stop
             </button>
           </div>
 
           {saved ? (
             <>
-              <p className={styles.savedHint}>Logged. Keep breathing as long as you like, or move on.</p>
+              <p className={styles.savedHint}>Logged. Tap Stop when you&apos;re finished, or move on.</p>
               <button
                 className={styles.saveBtn}
                 onClick={() => navigate('/library?section=running')}

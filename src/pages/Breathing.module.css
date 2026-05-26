@@ -577,16 +577,26 @@
   animation: pressGlow 420ms var(--ease-out);
 }
 
-.secondaryBtn {
+.secondaryBtn,
+.stopBtn {
   background: var(--paper-soft) !important;
   color: var(--ink-light) !important;
   border: 1px solid var(--border-light) !important;
 }
 
-.secondaryBtn:hover {
+.secondaryBtn:hover,
+.stopBtn:hover:not(:disabled) {
   transform: translateY(-2px);
   background: var(--paper) !important;
   box-shadow: 0 10px 22px var(--shadow);
+}
+
+.stopBtn {
+  color: var(--terracotta) !important;
+}
+
+.stopBtn:disabled {
+  opacity: 0.48;
 }
 
 .saveBtn {
