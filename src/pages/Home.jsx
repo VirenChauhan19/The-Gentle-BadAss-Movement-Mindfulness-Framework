@@ -73,6 +73,13 @@ export default function Home() {
         </p>
       </section>
 
+      <section className={styles.freeNotice} aria-label="Free access notice">
+        <p className={styles.freeNoticeKicker}>Free access</p>
+        <p className={styles.freeNoticeText}>
+          The app is free until 30 June 2026. After that, paid access will begin.
+        </p>
+      </section>
+
       <section className={styles.about} aria-label="About this app">
         <p className={styles.aboutKicker}>What is this?</p>
         <p className={styles.aboutText}>

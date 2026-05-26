@@ -83,6 +83,32 @@
   animation: floatIn 540ms var(--ease-elastic) both 120ms;
 }
 
+.freeNotice {
+  margin: 0 16px;
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--sage) 12%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--sage) 32%, var(--border-light));
+  box-shadow: 0 8px 22px var(--shadow-xs);
+  animation: floatIn 540ms var(--ease-elastic) both 90ms;
+}
+
+.freeNoticeKicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 900;
+  color: var(--sage-dark);
+  margin-bottom: 5px;
+}
+
+.freeNoticeText {
+  color: var(--ink-light);
+  font-size: clamp(0.9rem, 2.2vw, 0.98rem);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .aboutKicker {
   font-size: 0.64rem;
   letter-spacing: 0.14em;
@@ -708,6 +734,7 @@
      already disabled on phones, and chained delays make the page feel
      laggy on first paint. */
   .hero,
+  .freeNotice,
   .feelCard,
   .metricGrid,
   .progressBlock,
@@ -754,6 +781,22 @@
 
   .heroCopy {
     display: none;
+  }
+
+  .freeNotice {
+    margin: 0 16px 12px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  .freeNoticeKicker {
+    font-size: 0.54rem;
+    letter-spacing: 0.14em;
+  }
+
+  .freeNoticeText {
+    font-size: 0.84rem;
   }
 
   .todayPanel {
