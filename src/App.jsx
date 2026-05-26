@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { DataProvider, useData } from './context/DataContext'
 import Nav from './components/Nav'
 import FloatingChat from './components/FloatingChat'
+import WelcomeTransition from './components/WelcomeTransition'
 const AuroraBackground = lazy(() => import('./components/AuroraBackground'))
 import Home from './pages/Home'
 import Journal from './pages/Journal'
@@ -220,6 +221,7 @@ export default function App() {
             <AppRoutes />
           </main>
           <SignInGate theme={theme} />
+          <WelcomeTransition />
           <div className={styles.themeDock}>
             <button
               className={styles.themeToggle}

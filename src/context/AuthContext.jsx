@@ -13,6 +13,10 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(isConfigured ? undefined : null)
   const [authError, setAuthError] = useState(null)
+  // True only right after an interactive sign-in (popup success or redirect
+  // return) — never when onAuthStateChanged simply rehydrates an existing
+  // session on page load. The welcome transition keys off this.
+  const [justSignedIn, setJustSignedIn] = useState(false)
 
   useEffect(() => {
     if (!isConfigured) return
@@ -20,7 +24,10 @@ export function AuthProvider({ children }) {
     // Handle the redirect result when the user lands back after Google sign-in
     getRedirectResult(auth)
       .then(result => {
-        if (result?.user) setUser(result.user)
+        if (result?.user) {
+          setUser(result.user)
+          setJustSignedIn(true)
+        }
       })
       .catch(err => {
         // Only set error if it's not a 'no redirect result' case
@@ -42,6 +49,7 @@ export function AuthProvider({ children }) {
       if (method === 'popup') {
         const result = await signInWithPopup(auth, googleProvider)
         setUser(result.user)
+        setJustSignedIn(true)
       } else {
         await signInWithRedirect(auth, googleProvider)
       }
@@ -51,13 +59,18 @@ export function AuthProvider({ children }) {
     }
   }
 
+  function clearJustSignedIn() {
+    setJustSignedIn(false)
+  }
+
   async function signOutUser() {
     if (!isConfigured) return
+    setJustSignedIn(false)
     await signOut(auth)
   }
 
   return (
-    <AuthContext.Provider value={{ user, signInWithGoogle, signOut: signOutUser, isConfigured, authError }}>
+    <AuthContext.Provider value={{ user, signInWithGoogle, signOut: signOutUser, isConfigured, authError, justSignedIn, clearJustSignedIn }}>
       {children}
     </AuthContext.Provider>
   )

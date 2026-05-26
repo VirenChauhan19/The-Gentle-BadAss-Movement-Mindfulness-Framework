@@ -34,6 +34,9 @@ export function DataProvider({ children }) {
   const [guestName, setGuestNameState] = useState(
     () => localStorage.getItem(GUEST_NAME_KEY) || null
   )
+  // Transient: true only the moment a guest first sets their name, so the
+  // welcome transition can greet them too. Never persisted.
+  const [guestJustJoined, setGuestJustJoined] = useState(false)
   const [coachData, setCoachData] = useState(null) // loaded after auth resolves
   const [adminRemarks, setAdminRemarks] = useState([])
 
@@ -255,11 +258,18 @@ export function DataProvider({ children }) {
 
   function setGuestName(name) {
     if (name) {
+      // Only flag a welcome when a guest is genuinely joining (no prior name),
+      // not when an already-named guest gets re-set during data syncs.
+      if (!guestName) setGuestJustJoined(true)
       localStorage.setItem(GUEST_NAME_KEY, name)
     } else {
       localStorage.removeItem(GUEST_NAME_KEY)
     }
     setGuestNameState(name)
+  }
+
+  function clearGuestJustJoined() {
+    setGuestJustJoined(false)
   }
 
   function saveProfile(data) {
@@ -408,7 +418,7 @@ export function DataProvider({ children }) {
   })()
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, guestJustJoined, clearGuestJustJoined, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks }}>
       {children}
     </DataContext.Provider>
   )
