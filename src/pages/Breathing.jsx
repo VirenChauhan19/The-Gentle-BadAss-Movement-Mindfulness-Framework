@@ -301,7 +301,14 @@ export default function Breathing() {
           )}
         </div>
 
-        <Metronome playing={running} onPlayingChange={setRunning} fixedBpm={60} compact syncTick={elapsed} />
+        <Metronome
+          playing={running}
+          onPlayingChange={setRunning}
+          fixedBpm={60}
+          compact
+          syncTick={elapsed}
+          tempoLabel="Each beat represents a second"
+        />
 
         <button
           type="button"

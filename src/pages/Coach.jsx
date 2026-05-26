@@ -1804,6 +1804,8 @@ function RunCuePlayer({ session, week }) {
   const [running, setRunning] = useState(false)
   const [phaseIndex, setPhaseIndex] = useState(0)
   const [secondsLeft, setSecondsLeft] = useState(intervals[0]?.seconds || 0)
+  const [spokenPrompt, setSpokenPrompt] = useState(intervals[0]?.spoken || '')
+  const [speechNotice, setSpeechNotice] = useState('')
   const audioRef = useRef({ ctx: null, carrier: null, carrierGain: null, binaural: [], transient: null })
   const timerRef = useRef(null)
   const phaseStartedRef = useRef(0)
@@ -1814,6 +1816,8 @@ function RunCuePlayer({ session, week }) {
     setPhaseIndex(0)
     phaseIndexRef.current = 0
     setSecondsLeft(intervals[0]?.seconds || 0)
+    setSpokenPrompt(intervals[0]?.spoken || '')
+    setSpeechNotice('')
     stopRunAudio(audioRef)
   }, [intervals])
 
@@ -1845,7 +1849,7 @@ function RunCuePlayer({ session, week }) {
       phaseStartedRef.current = performance.now()
       setPhaseIndex(nextIndex)
       setSecondsLeft(next.seconds)
-      triggerRunCue(audioRef, profile, next)
+      cuePhase(next)
       updateRunMediaSession(session, next, week)
     }, 250)
 
@@ -1856,12 +1860,25 @@ function RunCuePlayer({ session, week }) {
 
   const currentPhase = intervals[phaseIndex] || intervals[0]
 
+  function cuePhase(phase) {
+    if (!phase) return
+    setSpokenPrompt(phase.spoken || '')
+    const result = triggerRunCue(audioRef, profile, phase)
+    setSpeechNotice(result?.notice || '')
+  }
+
   async function startWorkout() {
     if (!currentPhase) return
-    await ensureRunAudio(audioRef, profile, currentPhase)
     phaseStartedRef.current = performance.now() - ((currentPhase.seconds - secondsLeft) * 1000)
     setRunning(true)
-    triggerRunCue(audioRef, profile, currentPhase)
+
+    if (profile === 'spoken') {
+      cuePhase(currentPhase)
+    } else {
+      await ensureRunAudio(audioRef, profile, currentPhase)
+      cuePhase(currentPhase)
+    }
+
     updateRunMediaSession(session, currentPhase, week)
   }
 
@@ -1871,11 +1888,13 @@ function RunCuePlayer({ session, week }) {
     if (navigator.mediaSession) navigator.mediaSession.playbackState = 'paused'
   }
 
-  function resetWorkout() {
+  function stopWorkout() {
     setRunning(false)
     phaseIndexRef.current = 0
     setPhaseIndex(0)
     setSecondsLeft(intervals[0]?.seconds || 0)
+    setSpokenPrompt(intervals[0]?.spoken || '')
+    setSpeechNotice('')
     stopRunAudio(audioRef)
   }
 
@@ -1904,11 +1923,25 @@ function RunCuePlayer({ session, week }) {
         ))}
       </div>
 
+      {profile === 'spoken' && (
+        <div className={styles.spokenPromptCard} aria-live="polite">
+          <span>Spoken prompt</span>
+          <p>{spokenPrompt || currentPhase?.spoken || 'Start the workout to hear the next cue.'}</p>
+          {speechNotice && <small>{speechNotice}</small>}
+        </div>
+      )}
+
       <div className={styles.audioCueControls}>
         <button type="button" onClick={running ? pauseWorkout : startWorkout}>
           {running ? 'Pause cues' : 'Start workout'}
         </button>
-        <button type="button" onClick={resetWorkout}>Reset</button>
+        <button
+          type="button"
+          onClick={stopWorkout}
+          disabled={!running && phaseIndex === 0 && secondsLeft === (intervals[0]?.seconds || 0)}
+        >
+          Stop
+        </button>
       </div>
     </div>
   )
@@ -1991,20 +2024,37 @@ function configureBinaural(audioRef, profile, phase) {
 
 function triggerRunCue(audioRef, profile, phase) {
   if (profile === 'spoken') {
-    speakRunCue(phase.spoken)
-    return
+    return speakRunCue(phase?.spoken)
   }
   playRunTone(audioRef, phase, profile)
+  return { ok: true, notice: '' }
 }
 
 function speakRunCue(text) {
-  if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) return
-  window.speechSynthesis.cancel()
+  if (!text) return { ok: false, notice: 'No spoken cue is available for this phase.' }
+  if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+    return { ok: false, notice: 'Voice prompts are not supported in this browser.' }
+  }
+
+  const synth = window.speechSynthesis
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.rate = 0.92
   utterance.pitch = 0.95
   utterance.volume = 0.9
-  window.speechSynthesis.speak(utterance)
+
+  const voices = synth.getVoices?.() || []
+  const preferredVoice = voices.find(voice => /^en[-_]/i.test(voice.lang)) || voices[0]
+  if (preferredVoice) utterance.voice = preferredVoice
+
+  try {
+    if (synth.speaking || synth.pending) synth.cancel()
+    synth.resume?.()
+    synth.speak(utterance)
+    window.setTimeout(() => synth.resume?.(), 120)
+    return { ok: true, notice: '' }
+  } catch {
+    return { ok: false, notice: 'Voice prompt could not start. Check browser audio permissions.' }
+  }
 }
 
 function playRunTone(audioRef, phase, profile) {
