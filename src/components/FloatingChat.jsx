@@ -6,7 +6,7 @@ const API_URL   = 'https://openrouter.ai/api/v1/chat/completions'
 const chatKey = uid => uid ? `gb_float_chat_${uid}` : 'gb_float_chat'
 
 const QUICK = [
-  "I got injured — what now?",
+  "I got injured, what now?",
   "It's raining, indoor ideas?",
   "How do I prevent shin splints?",
   "Should I run when tired?",
@@ -232,7 +232,7 @@ async function callAI(history, coachData) {
 
 Answer questions about: running training, injury prevention and recovery, indoor workouts for rainy days, pacing, nutrition for runners, strength work, recovery, mindfulness, and general fitness.
 
-Rules: Be direct, warm, and practical. Under 140 words unless the question truly needs more. Skip excessive disclaimers — give real advice like a trusted coach would. If something needs medical care, say so briefly.`
+Rules: Be direct, warm, and practical. Under 140 words unless the question truly needs more. Skip excessive disclaimers, give real advice like a trusted coach would. If something needs medical care, say so briefly. Never use em dashes; use commas, colons, or periods instead.`
 
   const eventRules = goal?.raceGoal === '800m' ? `
 800m rules: default to beginner-safe 100m-200m reps, drills, strides, and easy running before longer reps. Do not prescribe 6 x 300m as the default 800m workout. Never say a 300m rep should be run in 30 seconds; 30 seconds is a fast 200m reference. If exact splits are requested and an 800m goal time is known, calculate 200m = goal / 4, 300m = goal x 0.375, 400m = goal / 2, then adjust for workout purpose. If no goal/recent time exists, give effort-based guidance and ask for a recent 400m/800m/1 mile benchmark first.` : ''
@@ -269,7 +269,7 @@ For beginner plans, start smooth and easy in week 1, then progress gradually.`
 
   if (!res.ok) {
     const e = await res.json().catch(() => ({}))
-    if (res.status === 429) throw new Error('Rate limit reached — wait 30 seconds and try again. (Free tier limit)')
+    if (res.status === 429) throw new Error('Rate limit reached, wait 30 seconds and try again. (Free tier limit)')
     throw new Error(e.error?.message || `Error ${res.status}`)
   }
   const data = await res.json()

@@ -345,7 +345,7 @@
   --shadow-xl: rgba(0, 0, 0, 0.70);
 }
 
-/* La Ultra — the event's own palette: stark black, electric yellow, off-white.
+/* La Ultra, the event's own palette: stark black, electric yellow, off-white.
    Bright #ffe12c lives in --sage-dark (text / particles / glows on black);
    --sage is a rich gold so white labels stay legible on filled buttons. */
 :root[data-theme="laultra"] {
@@ -405,7 +405,7 @@ html, body {
   overscroll-behavior-y: none;
 }
 
-/* Fine paper-grain overlay — sits above the gradient, below all content.
+/* Fine paper-grain overlay, sits above the gradient, below all content.
    Low opacity keeps the visual calm; pointer-events: none keeps it inert. */
 body::before {
   content: '';
@@ -818,7 +818,7 @@ input[type="range"]::-moz-range-progress {
   animation: floatIn 520ms var(--ease-elastic) both;
 }
 
-/* Stagger helpers — pages can opt into these */
+/* Stagger helpers, pages can opt into these */
 .stagger-1 { animation-delay: 60ms; }
 .stagger-2 { animation-delay: 120ms; }
 .stagger-3 { animation-delay: 180ms; }

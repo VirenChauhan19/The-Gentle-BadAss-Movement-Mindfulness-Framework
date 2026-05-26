@@ -5,7 +5,7 @@ import { buildAdaptationContext } from '../data/trainingAdaptation'
 import styles from './Onboarding.module.css'
 
 // Submission timing. Saves that resolve faster than this never paint a loading
-// state — the runner lands straight on the dashboard. Slower (network/DB) saves
+// state, the runner lands straight on the dashboard. Slower (network/DB) saves
 // reveal the Mentor transition, held for a minimum so phrases never flash.
 const REVEAL_AFTER_MS = 500
 const MIN_TRANSITION_MS = 1400

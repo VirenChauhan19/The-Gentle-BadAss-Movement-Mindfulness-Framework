@@ -433,7 +433,7 @@
 }
 
 @media (max-width: 767px) {
-  /* Disable cascading entry animations — they pile up on long lists. */
+  /* Disable cascading entry animations, they pile up on long lists. */
   .header,
   .summaryGrid,
   .dashboard,

@@ -47,7 +47,7 @@ export function DataProvider({ children }) {
       setEntries(getLocalEntries())
       setProfileState(null)
       setCoachData(null)      // Clear any previous user's coach data
-      setProfileFetched(true) // No Firestore needed — gate can release
+      setProfileFetched(true) // No Firestore needed, gate can release
       return
     }
 
@@ -143,7 +143,7 @@ export function DataProvider({ children }) {
     const safetyTimeout = setTimeout(() => {
       setProfileFetched(prev => {
         if (!prev) {
-          // Still waiting — fall back to null so redirect logic can decide
+          // Still waiting, fall back to null so redirect logic can decide
           setProfileState(p => p === undefined ? null : p)
           return true
         }
@@ -195,10 +195,10 @@ export function DataProvider({ children }) {
         setProfileState(data)
         localStorage.setItem(PROFILE_KEY, JSON.stringify(data))
       } else {
-        // No Firestore profile — check if a complete localStorage profile exists
+        // No Firestore profile, check if a complete localStorage profile exists
         // (e.g. user previously used the app as a guest or on another device).
         // If so, migrate it to Firestore so they don't have to redo onboarding.
-        // SKIP this entirely if a tombstone is active — re-migrating would
+        // SKIP this entirely if a tombstone is active, re-migrating would
         // resurrect the account the admin just deleted.
         if (tombstoned) {
           setProfileState(null)
@@ -222,12 +222,12 @@ export function DataProvider({ children }) {
           }
         } catch {}
         setProfileState(null)
-        // Do NOT remove localStorage here — App.jsx uses it as a fallback.
+        // Do NOT remove localStorage here, App.jsx uses it as a fallback.
         // Only clearAllData() should ever wipe localStorage intentionally.
       }
       setProfileFetched(true)
     }, err => {
-      // Permission denied or network error — release the gate gracefully
+      // Permission denied or network error, release the gate gracefully
       clearTimeout(safetyTimeout)
       console.warn('Profile fetch error:', err)
       // Try to fall back to localStorage cache; if none, force null so the
@@ -241,7 +241,7 @@ export function DataProvider({ children }) {
       setProfileFetched(true)
     })
 
-    // Fetch admin remarks once (not a live listener — remarks don't change often)
+    // Fetch admin remarks once (not a live listener, remarks don't change often)
     getDoc(doc(db, 'users', user.uid, 'config', 'adminRemarks'))
       .then(snap => {
         if (snap.exists()) setAdminRemarks(snap.data().remarks || [])

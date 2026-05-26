@@ -15,7 +15,7 @@ export default function PillarChecklist({ onComplete, autoAdvance = false }) {
 
   const allChecked = PILLARS.every(p => checked[p.id])
 
-  // When all five are ticked, glide on to the next step on its own — no extra
+  // When all five are ticked, glide on to the next step on its own, no extra
   // tap needed. A short beat lets the final check register before we leave.
   useEffect(() => {
     if (!autoAdvance || !allChecked || advancedRef.current) return

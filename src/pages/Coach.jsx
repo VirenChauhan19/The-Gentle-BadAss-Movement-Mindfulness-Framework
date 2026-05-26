@@ -1586,7 +1586,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.7 }}>
             <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
           </svg>
-          <p>Your coach actively reviews and updates this plan. Check back regularly — your schedule may be adjusted based on your progress.</p>
+          <p>Your coach actively reviews and updates this plan. Check back regularly, your schedule may be adjusted based on your progress.</p>
         </div>
       )}
 
@@ -1596,7 +1596,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
         return (
           <div className={styles.buildingNotice}>
             <div className={styles.buildingDot} />
-            <p>Building your full plan in the background — week {genW} of {totalW} ready. Keep training, more weeks are on the way.</p>
+            <p>Building your full plan in the background, week {genW} of {totalW} ready. Keep training, more weeks are on the way.</p>
           </div>
         )
       })()}
@@ -1620,7 +1620,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
               </p>
               <h2 className={styles.weekTitle}>Week {weekIndex} <span>of {totalWeeks}</span></h2>
               {weekStart && weekEnd && (
-                <p className={styles.weekRange}>{formatDateShort(weekStart)} — {formatDateShort(weekEnd)}</p>
+                <p className={styles.weekRange}>{formatDateShort(weekStart)} to {formatDateShort(weekEnd)}</p>
               )}
             </div>
             <button
@@ -1647,7 +1647,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
               <p>workouts</p>
             </div>
             <div>
-              <span>{weekKm > 0 ? weekKm.toFixed(1) : '—'}</span>
+              <span>{weekKm > 0 ? weekKm.toFixed(1) : '-'}</span>
               <p>km planned</p>
             </div>
             <div>
@@ -2586,7 +2586,7 @@ async function apiCall(messages, maxTokens = 600, temperature = 0.75) {
   })
   if (!res.ok) {
     const e = await res.json().catch(() => ({}))
-    if (res.status === 429) throw new Error('Rate limit reached — wait 30 seconds and try again.')
+    if (res.status === 429) throw new Error('Rate limit reached, wait 30 seconds and try again.')
     throw new Error(e.error?.message || `OpenRouter error ${res.status}`)
   }
   const data = await res.json()
@@ -2616,9 +2616,9 @@ HARD WORKOUT QUALITY RULES:
 - If the runner's daily Feel score is below 7/10, high-intensity running and high-intensity strength must be replaced with easy aerobic work, mobility, or light activation until Feel is 7/10 or higher.
 - Pick one purpose per workout from: speed mechanics, speed endurance, aerobic power, threshold/lactate, race rhythm, hills, fartlek, progression, controlled time trial.
 - The "purpose" field MUST state that intent in plain English (e.g. "Lactate threshold tolerance", "Race-pace specificity", "Top-end speed mechanics").
-- Match the menu to the runner's level — Beginner: relaxed strides, short reps, hills, fartlek; Intermediate: one focused workout/wk; Advanced/Competitive: event-specific reps, threshold support, race-rhythm work.
-- Vary the menu across weeks: hill repeats, fartlek, progression runs, threshold blocks, race-pace cruise intervals, broken-tempo, time-trial — never repeat the same menu twice in a 4-week block.
-- Every running day's "pace" must be CONCRETE (a min/km range or rep split), not just "easy" — only fall back to RPE if no benchmark is available.
+- Match the menu to the runner's level, Beginner: relaxed strides, short reps, hills, fartlek; Intermediate: one focused workout/wk; Advanced/Competitive: event-specific reps, threshold support, race-rhythm work.
+- Vary the menu across weeks: hill repeats, fartlek, progression runs, threshold blocks, race-pace cruise intervals, broken-tempo, time-trial, never repeat the same menu twice in a 4-week block.
+- Every running day's "pace" must be CONCRETE (a min/km range or rep split), not just "easy", only fall back to RPE if no benchmark is available.
 - Rep speed must match rep distance. Recovery duration matches the rep purpose (full walk on speed, jog on threshold).`
 
   const paceRules = isCompetitive
@@ -2647,7 +2647,7 @@ BENCHMARK-BASED PACE GUIDE:
 - Every running day MUST include the correct calculated pace range in the "pace" field. Do not replace it with vague effort only.
 - Still include feel cues next to the pace.` : `
 BENCHMARK-BASED PACE GUIDE:
-- No benchmark — use effort-based guidance with numerical RPE cues (RPE 5-6/10 etc.).`
+- No benchmark, use effort-based guidance with numerical RPE cues (RPE 5-6/10 etc.).`
 
   const goalPaceRules = goalPace ? `
 GOAL TIME (the runner is chasing this):
@@ -2690,7 +2690,7 @@ MACROCYCLE STRUCTURE RULES:
 - Recovery week every 3-4 weeks: drop totalKm by 15-25%.
 - Long-run distance grows in the build phase, drops in recovery weeks and the taper.
 - qualityFocus must EVOLVE: early weeks = strides + aerobic; mid weeks = threshold + tempo blocks; late weeks = race-pace specificity; final 1-2 weeks = taper / sharpening.
-- weekTemplate is just the 7-day skeleton (which days are run/long/quality/rest/cross). Distances/durations there can be empty — the daily plan is generated separately.
+- weekTemplate is just the 7-day skeleton (which days are run/long/quality/rest/cross). Distances/durations there can be empty, the daily plan is generated separately.
 - Base everything on current volume: ${currentKm}. Week 1 totalKm should be at or slightly below ${currentKm}.
 
 Focus: ${r.raceGoal} · Level: ${experience} · ${daysPerWeek} training days · ${r.restDays} rest days
@@ -2703,7 +2703,7 @@ ${r.trackRules}`
 
   const userMsg = `Design my ${totalWeeks}-week macrocycle for a ${commitmentDays}-day ${r.raceGoal} program. I'm ${experience}, currently doing ${currentKm}, training ${daysPerWeek} days/week.${goalLine}${prefixLine}${notes ? ` Notes: ${notes}` : ''}`
 
-  // Two attempts — second uses a stricter extraction prompt
+  // Two attempts, second uses a stricter extraction prompt
   for (let attempt = 1; attempt <= 2; attempt++) {
     const messages = attempt === 1
       ? [{ role: 'system', content: system }, { role: 'user', content: userMsg }]
@@ -2723,10 +2723,10 @@ async function generateMesocycleChunk({ focus, experience, daysPerWeek, currentK
 
   const targetsBlock = (chunkTargets || []).map(t =>
     `Week ${t.week}: ${t.totalKm || '?'} km · long run ${t.longRunKm || '?'} km · ${t.intensityTier || 'base'} · focus: ${t.qualityFocus || 'general aerobic'}${t.phaseGoal ? ` (${t.phaseGoal})` : ''}`
-  ).join('\n') || 'No specific targets — apply default progression.'
+  ).join('\n') || 'No specific targets, apply default progression.'
 
   const priorBlock = priorTitles
-    ? `\nPRIOR WORKOUTS (do NOT repeat these — vary the menu):\n${priorTitles}`
+    ? `\nPRIOR WORKOUTS (do NOT repeat these, vary the menu):\n${priorTitles}`
     : ''
 
   const system = `You are an expert running coach writing the daily plan for days ${chunkStart}-${chunkEnd} (weeks ${startWeek}-${endWeek}) of a longer program. Return ONLY valid JSON.
@@ -2738,7 +2738,7 @@ JSON shape:
       "dayNumber": ${chunkStart},
       "week": ${startWeek},
       "type": "easy|moderate|hard|long|rest|cross",
-      "title": "Specific session title that names the workout (e.g. '6 x 800m at threshold', 'Hill repeats — 8 x 60s', 'Progression long run')",
+      "title": "Specific session title that names the workout (e.g. '6 x 800m at threshold', 'Hill repeats, 8 x 60s', 'Progression long run')",
       "purpose": "One short sentence: why this workout exists in the plan (e.g. 'Lactate threshold tolerance to support race pace')",
       "distance": "6 km  OR  6 x 400m  OR  45 min",
       "duration": "35-40 min",
@@ -2759,7 +2759,7 @@ PROGRAM CONTEXT (DO NOT VIOLATE):
 - Macrocycle progression: ${macro?.progressionNote || 'Standard progressive overload with recovery weeks.'}
 - Peak target: ${macro?.peakWeeklyVolume || 'TBD'}
 - Plan focus: ${r.raceGoal} · Level: ${experience} · ${daysPerWeek} training days/week, ${r.restDays} rest days
-- ${r.hardSessions} hard/quality session(s) per week — never adjacent to the long run
+- ${r.hardSessions} hard/quality session(s) per week, never adjacent to the long run
 - 1 long run on Saturday or Sunday
 - ${r.easySessions} easy run(s) at truly conversational effort
 ${priorBlock}
@@ -2889,7 +2889,7 @@ async function getCheckinReply(goal, checkins, entries, status, note, todaySessi
   if (!isRunningFitnessQuestion(note)) return COACH_REFUSAL
 
   const scores  = entries.slice(0, 5).map(e => `${e.date}: ${computeFeelScore(e.scores || {}).toFixed(1)}/10`).join(', ') || 'none'
-  const recent  = [...checkins].slice(-5).reverse().map(c => `${c.date}: ${c.status} — ${c.userNote}`).join('\n') || 'none'
+  const recent  = [...checkins].slice(-5).reverse().map(c => `${c.date}: ${c.status}, ${c.userNote}`).join('\n') || 'none'
   const session = todaySession ? `Planned: ${todaySession.type} ${todaySession.distance} (${todaySession.duration})` : 'Rest day'
 
   return apiCall([
@@ -2988,9 +2988,9 @@ Weekly template: ${weekInfo}
 Recent feel scores: ${scores}
 Recent sessions: ${recentLog}`
 
-  const OFF_TOPIC_RULE = `IMPORTANT — SCOPE RESTRICTION:
+  const OFF_TOPIC_RULE = `IMPORTANT, SCOPE RESTRICTION:
 You ONLY answer questions about: running, fitness, training, exercise, nutrition for athletes, recovery, injury prevention, sleep for athletes, mental performance, and this user's program.
-If the user asks about ANYTHING else (sports trivia, celebrities, news, general knowledge, coding, etc.), respond with exactly: "I'm your running coach — I can only help with training, fitness, and your program. What running question can I answer?"
+If the user asks about ANYTHING else (sports trivia, celebrities, news, general knowledge, coding, etc.), respond with exactly: "I'm your running coach, I can only help with training, fitness, and your program. What running question can I answer?"
 Never break this rule regardless of how the question is phrased.`
 
   const eventRules = goal.raceGoal === '800m' ? `
@@ -3003,7 +3003,7 @@ Never break this rule regardless of how the question is phrased.`
 - If target time is unknown, give effort-based guidance and ask for a recent 400m/800m/1 mile time before exact splits.` : ''
 
   const systemPrompt = isPlanQuery
-    ? `You are an expert running coach. When asked for a plan or schedule, give COMPLETE details for every single day — no summaries, no "similar to above".
+    ? `You are an expert running coach. When asked for a plan or schedule, give COMPLETE details for every single day, no summaries, no "similar to above". Never use em dashes in your writing; use commas, colons, or periods instead.
 
 ${RUNNING_SCOPE_RULE}
 
@@ -3011,7 +3011,7 @@ ${profile}
 ${eventRules}
 
 FORMAT each training day exactly like this:
-📅 [Day name] — [Session type]
+📅 [Day name], [Session type]
 • Distance/Duration: [e.g. 5 km / 30 min]
 • Target speed: [for intervals, exact split target if goal/recent time is known; otherwise effort + what benchmark is needed]
 • Warm-up (5 min): [list 3–4 specific dynamic exercises with reps, e.g. leg swings ×10, hip circles ×10, high knees 20 m ×2]
@@ -3062,7 +3062,7 @@ function extractJSON(text) {
   // last complete day entry and re-close the JSON so the week is still usable.
   const repaired = repairTruncatedJSON(stripped)
   if (repaired) { try { return JSON.parse(repaired) } catch {} }
-  throw new Error('Could not read program from AI — the response was not valid JSON. Please try again.')
+  throw new Error('Could not read program from AI, the response was not valid JSON. Please try again.')
 }
 
 // Repairs JSON truncated mid-array (e.g. a "plan": [ ... cut off here).

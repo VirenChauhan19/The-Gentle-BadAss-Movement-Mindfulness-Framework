@@ -5,16 +5,16 @@ export const EXERCISES = [
     category: 'functional',
     name: 'Squat',
     purpose: 'Assess hip mobility and lumbar stability under load.',
-    cue: 'Hinge at the hip first — your knees follow, they do not lead. Keep the lumbar neutral throughout.',
+    cue: 'Hinge at the hip first, your knees follow, they do not lead. Keep the lumbar neutral throughout.',
     animation: 'squat',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Squats%20WebApp.mp4?alt=media&token=756557c6-a0ad-4102-a301-d2947b890cf9',
     steps: [
       'Stand feet shoulder-width, toes slightly out.',
-      'Push your hips back and down — not your knees forward.',
+      'Push your hips back and down, not your knees forward.',
       'Keep your chest tall and lumbar spine neutral (no rounding or arching).',
       'Lower until thighs are parallel, then drive through the heels to rise.'
     ],
-    antiRotationNote: 'Watch for: lumbar rounding at the bottom. The spine stays long — hips do the work.'
+    antiRotationNote: 'Watch for: lumbar rounding at the bottom. The spine stays long, hips do the work.'
   },
   {
     id: 'forward-bend',
@@ -26,7 +26,7 @@ export const EXERCISES = [
     steps: [
       'Stand tall, feet hip-width.',
       'Soft bend in knees, then hinge forward from the hip crease.',
-      'Let the hands hang toward the floor — do not pull down.',
+      'Let the hands hang toward the floor, do not pull down.',
       'Hold 3 breaths, then roll up slowly, one vertebra at a time.'
     ],
     antiRotationNote: 'Watch for: lumbar rounding early in the movement. The fold should come from the hip joint.'
@@ -36,12 +36,12 @@ export const EXERCISES = [
     category: 'functional',
     name: 'Sitting Slump',
     purpose: 'Identify spinal flexibility and the neutral-spine position.',
-    cue: 'Exaggerate the slump, then find the opposite — tall spine. Your ideal sitting posture is between these two.',
+    cue: 'Exaggerate the slump, then find the opposite, tall spine. Your ideal sitting posture is between these two.',
     animation: 'sittingSlump',
     steps: [
       'Sit on the edge of a chair, feet flat.',
-      'Fully slump — round your lower back and drop your chest.',
-      'Now over-arch — stick chest out and curve your lower back forward.',
+      'Fully slump, round your lower back and drop your chest.',
+      'Now over-arch, stick chest out and curve your lower back forward.',
       'Find the midpoint between the two: this is your neutral spine.'
     ],
     antiRotationNote: null
@@ -50,7 +50,7 @@ export const EXERCISES = [
     id: 'hip-rotation',
     category: 'functional',
     name: 'Hip Internal / External Rotation',
-    purpose: 'Assess hip mobility — the engine of healthy running.',
+    purpose: 'Assess hip mobility, the engine of healthy running.',
     cue: 'The hip rotates; the spine stays still. This is the core principle of the "Hip Engine."',
     animation: 'hipRotation',
     steps: [
@@ -71,7 +71,7 @@ export const EXERCISES = [
     steps: [
       'Lie on your back, both legs straight.',
       'Slowly raise one leg, keeping the knee locked.',
-      'Note the angle at which you feel tension — this is your hamstring range.',
+      'Note the angle at which you feel tension, this is your hamstring range.',
       'The other leg must remain flat on the floor throughout.'
     ],
     antiRotationNote: 'If the non-working leg lifts off the floor, the lumbar spine is rotating to compensate. Stop there.'
@@ -113,15 +113,15 @@ export const EXERCISES = [
     category: 'strength',
     name: 'Deadlift',
     cadence: '5 seconds up, 5 seconds down',
-    purpose: 'Build posterior chain strength — the hip engine in its most powerful expression.',
+    purpose: 'Build posterior chain strength, the hip engine in its most powerful expression.',
     cue: 'Push the floor away from you. The bar travels in a straight line. The back never rounds.',
     animation: 'deadlift',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20DeadLift%20WebApp%205.mp4?alt=media&token=5243f2c6-c3cc-417f-8a3b-6c14e82d209e',
     steps: [
       'Stand over the bar, feet hip-width, shins close to it.',
-      'Hinge from the hips to grip the bar — back flat, chest proud.',
+      'Hinge from the hips to grip the bar, back flat, chest proud.',
       'Take a big breath into your belly, brace your core (the bridge).',
-      'Drive through the heels and push the floor away — 5 counts up.',
+      'Drive through the heels and push the floor away, 5 counts up.',
       'Lower in 5 counts: hips back first, then knees bend.'
     ],
     antiRotationNote: 'The lumbar spine is the stable pillar. It does not round or rotate at any point in the lift.'
@@ -131,13 +131,13 @@ export const EXERCISES = [
     category: 'strength',
     name: 'Suitcase Carry',
     cadence: 'Walk 20 steps each side',
-    purpose: 'Train anti-lateral-flexion — core as the bridge under asymmetric load.',
+    purpose: 'Train anti-lateral-flexion, core as the bridge under asymmetric load.',
     cue: 'Walk tall as if a thread is pulling the crown of your head up. Do NOT lean toward the weight.',
     animation: 'suitcaseCarry',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Suitcase%20Carry%20WebApp%209.mp4?alt=media&token=ce1e18e5-2d26-4d62-b7ae-2b4932b532fa',
     steps: [
       'Hold a kettlebell or dumbbell in one hand at your side.',
-      'Stand tall — shoulder blades back and down, lumbar neutral.',
+      'Stand tall, shoulder blades back and down, lumbar neutral.',
       'Walk 20 steps. Resist every urge to lean sideways.',
       'Switch hands and repeat.'
     ],
@@ -148,15 +148,15 @@ export const EXERCISES = [
     category: 'strength',
     name: 'Clean to Press',
     cadence: '5 seconds press, 5 seconds lower',
-    purpose: 'Integrate hip power with shoulder stability — the full kinetic chain.',
-    cue: 'The power comes from the hip snap, not the arms. The press is a shoulder movement — the lumbar does not arch.',
+    purpose: 'Integrate hip power with shoulder stability, the full kinetic chain.',
+    cue: 'The power comes from the hip snap, not the arms. The press is a shoulder movement, the lumbar does not arch.',
     animation: 'cleanToPress',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Clean%20to%20Press%20WebApp%208.mp4?alt=media&token=2245258b-1399-4e59-ae18-26df6c0a83ea',
     steps: [
       'Start with kettlebell at hip level, hinge slightly.',
-      'Drive hips forward explosively — this momentum brings the bell to rack position (shoulder).',
+      'Drive hips forward explosively, this momentum brings the bell to rack position (shoulder).',
       'Pause. Set the core (the bridge).',
-      'Press overhead in 5 counts — do not arch the lower back.',
+      'Press overhead in 5 counts, do not arch the lower back.',
       'Lower in 5 counts back to rack, then to start.'
     ],
     antiRotationNote: 'During the press: if the lower back arches, the core has disengaged. Reduce weight.'
@@ -172,9 +172,9 @@ export const EXERCISES = [
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20BenchPress%20WebApp%202.mp4?alt=media&token=322b4946-36d8-4225-8b03-8c0d6034017e',
     steps: [
       'Lie on the bench, feet flat on the floor.',
-      'Retract shoulder blades — they are pinned to the bench.',
+      'Retract shoulder blades, they are pinned to the bench.',
       'Lower the bar in 5 counts to mid-chest.',
-      'Press back up in 5 counts — drive the floor with your feet.'
+      'Press back up in 5 counts, drive the floor with your feet.'
     ],
     antiRotationNote: 'A natural arch is fine; excessive lumbar arch to gain range is a compensation.'
   },
@@ -184,13 +184,13 @@ export const EXERCISES = [
     name: 'Bent Over Row',
     cadence: '5 seconds pull, 5 seconds lower',
     purpose: 'Upper-back pulling strength while maintaining the hip-hinge.',
-    cue: 'You are in a hinge — the same position as a deadlift. The back is flat. Pull with your elbows, not your hands.',
+    cue: 'You are in a hinge, the same position as a deadlift. The back is flat. Pull with your elbows, not your hands.',
     animation: 'bentOverRow',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Row%20WebApp%203.mp4?alt=media&token=a2c8d0d0-cd1c-49b9-b27b-4eb623f1f706',
     steps: [
       'Hinge forward until torso is roughly parallel to the floor, back flat.',
       'Let the barbell hang at arm\'s length.',
-      'Pull the bar to your lower ribcage in 5 counts — squeeze shoulder blades.',
+      'Pull the bar to your lower ribcage in 5 counts, squeeze shoulder blades.',
       'Lower in 5 counts. The torso does not move throughout.'
     ],
     antiRotationNote: 'The lumbar spine must not rotate or flex/extend during the pull.'
@@ -201,13 +201,13 @@ export const EXERCISES = [
     name: "Farmer's Carry",
     cadence: 'Walk 20 steps',
     purpose: 'Total-body stability under bilateral load.',
-    cue: 'Walk tall, like the Puppet. Two weights pulling you down — your spine resists by growing taller.',
+    cue: 'Walk tall, like the Puppet. Two weights pulling you down, your spine resists by growing taller.',
     animation: 'farmersCarry',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Farmers%20Walk%20WebApp%204.mp4?alt=media&token=35984225-a3e7-41ca-a5d7-0b77dc2bbd59',
     steps: [
       'Hold a weight in each hand, standing tall.',
       'Shoulders back and down, lumbar neutral.',
-      'Walk 20 steps with purpose — controlled, upright.',
+      'Walk 20 steps with purpose, controlled, upright.',
       'Do not let the shoulders creep up to the ears.'
     ],
     antiRotationNote: 'The spine grows taller with each step. Shoulders and hips stay level.'
@@ -218,12 +218,12 @@ export const EXERCISES = [
     name: 'Reverse Lunge',
     cadence: '5 seconds down, 5 seconds up',
     purpose: 'Single-leg hip strength with frontal-plane stability.',
-    cue: 'The front knee tracks over the second toe. The torso stays vertical — do not lean forward.',
+    cue: 'The front knee tracks over the second toe. The torso stays vertical, do not lean forward.',
     animation: 'reverseLunge',
     steps: [
       'Stand tall, feet together.',
       'Step one foot back and lower in 5 counts until back knee nearly touches the floor.',
-      'The front shin stays vertical — weight through the front heel.',
+      'The front shin stays vertical, weight through the front heel.',
       'Drive through the front heel to rise in 5 counts.'
     ],
     antiRotationNote: 'The torso stays upright throughout. Any forward lean shifts load to the knee.'
@@ -234,13 +234,13 @@ export const EXERCISES = [
     name: 'Overhead Press',
     cadence: '5 seconds up, 5 seconds down',
     purpose: 'Shoulder strength with the lumbar as the stable pillar.',
-    cue: 'Before you press, brace your core. The ribs stay down — do not let them flare.',
+    cue: 'Before you press, brace your core. The ribs stay down, do not let them flare.',
     animation: 'overheadPress',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Overhead%20Press%20App%207.mp4?alt=media&token=9ef1e232-fdd3-4b7e-8c66-659d0f2b0730',
     steps: [
       'Stand tall, bar at shoulder height, elbows in front.',
       'Take a breath, brace the core (the bridge).',
-      'Press the bar overhead in 5 counts — the bar passes the face, then the ears.',
+      'Press the bar overhead in 5 counts, the bar passes the face, then the ears.',
       'At the top: biceps by ears, everything stacked.',
       'Lower in 5 counts back to shoulders.'
     ],
@@ -251,15 +251,15 @@ export const EXERCISES = [
     category: 'strength',
     name: 'Bicep Curl',
     cadence: '5 seconds up, 5 seconds down',
-    purpose: 'Elbow flexor strength with strict technique — no momentum.',
+    purpose: 'Elbow flexor strength with strict technique, no momentum.',
     cue: 'The elbows stay pinned at your sides. The only thing moving is the forearm.',
     animation: 'bicepCurl',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Biceps%20Curl%20WebApp%206.mp4?alt=media&token=8dc69dc0-795f-41e4-abbb-b52b6407aab9',
     steps: [
       'Stand tall, dumbbells at your sides, palms facing forward.',
-      'Curl in 5 counts — elbows stay against your torso.',
+      'Curl in 5 counts, elbows stay against your torso.',
       'Squeeze at the top for 1 second.',
-      'Lower in 5 counts — resist the weight all the way down.'
+      'Lower in 5 counts, resist the weight all the way down.'
     ],
     antiRotationNote: 'No swinging, no lumbar extension to initiate the curl. Control over momentum.'
   },
@@ -269,12 +269,12 @@ export const EXERCISES = [
     name: 'Squat (Strength)',
     cadence: '5 seconds down, 5 seconds up',
     purpose: 'Build lower-body strength with the hip as the primary engine.',
-    cue: 'Sit back into the squat — your hips reach behind your heels. The knees follow the hips, not the other way around.',
+    cue: 'Sit back into the squat, your hips reach behind your heels. The knees follow the hips, not the other way around.',
     animation: 'squat',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/DumbBell%20Squats%20WebApp%201.mp4?alt=media&token=f14fc920-a107-4b2a-a616-c08938d390da',
     steps: [
       'Bar across upper back, feet shoulder-width.',
-      'Sit back and down in 5 counts — hips back first, then knees track out.',
+      'Sit back and down in 5 counts, hips back first, then knees track out.',
       'Keep chest tall, lumbar neutral.',
       'Drive through heels to rise in 5 counts.'
     ],
@@ -286,15 +286,15 @@ export const EXERCISES = [
     id: 'cat-camel',
     category: 'functional',
     name: 'Cat Camel',
-    purpose: 'Restore fluid motion through the full spine — from tailbone to skull.',
+    purpose: 'Restore fluid motion through the full spine, from tailbone to skull.',
     cue: 'Move slowly and with control. The spine is a wave, not a hinge.',
     animation: 'default',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Cat%20Camel%20WebApp.mp4?alt=media&token=bec83c50-6b74-4fba-920f-05fd0f4452fa',
     steps: [
-      'Begin on all fours — wrists under shoulders, knees under hips.',
+      'Begin on all fours, wrists under shoulders, knees under hips.',
       'Inhale: let the belly drop toward the floor, lift the tailbone and head (Camel).',
       'Exhale: round the spine toward the ceiling, tuck the tailbone and chin (Cat).',
-      'Move through the full range slowly — 8 to 10 breath cycles.'
+      'Move through the full range slowly, 8 to 10 breath cycles.'
     ],
     antiRotationNote: null
   },
@@ -302,14 +302,14 @@ export const EXERCISES = [
     id: 'arm-rotation',
     category: 'functional',
     name: 'Arm Rotation',
-    purpose: 'Open the thoracic spine and shoulder girdle — the foundation of upper-body freedom.',
+    purpose: 'Open the thoracic spine and shoulder girdle, the foundation of upper-body freedom.',
     cue: 'The rotation comes from the mid-back. The lower back stays still.',
     animation: 'default',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Arm%20Rotation%20WebApp.mp4?alt=media&token=a2ef0fd2-1a63-4e0d-b053-9b8ac2e9573e',
     steps: [
       'Stand tall, arms extended out to the side at shoulder height.',
-      'Slowly rotate both arms in large circles — forward 5 times, then backward 5 times.',
-      'Keep the spine tall throughout — no leaning.',
+      'Slowly rotate both arms in large circles, forward 5 times, then backward 5 times.',
+      'Keep the spine tall throughout, no leaning.',
       'Breathe out on each rotation.'
     ],
     antiRotationNote: null
@@ -318,13 +318,13 @@ export const EXERCISES = [
     id: 'orange-squeeze',
     category: 'functional',
     name: 'Orange Squeeze',
-    purpose: 'Activate the hands without gripping — release tension that travels up the arm into the neck and shoulders.',
-    cue: 'Imagine holding a ripe orange. Squeeze just enough to feel it — never enough to crush it.',
+    purpose: 'Activate the hands without gripping, release tension that travels up the arm into the neck and shoulders.',
+    cue: 'Imagine holding a ripe orange. Squeeze just enough to feel it, never enough to crush it.',
     animation: 'default',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Orange%20Squeeze%20WebApp.mp4?alt=media&token=b75ed566-013c-4eb1-9aee-6c09aa117465',
     steps: [
       'Stand or sit tall, arms relaxed at your sides.',
-      'Imagine an orange in each hand — soft and ripe.',
+      'Imagine an orange in each hand, soft and ripe.',
       'Squeeze gently for 2 seconds, then release fully for 2 seconds.',
       'Repeat 8–10 times. Feel the tension drop from forearms, shoulders, and jaw.'
     ],
@@ -336,12 +336,12 @@ export const EXERCISES = [
     id: 'hopping',
     category: 'running',
     name: 'Hopping Drill',
-    purpose: 'Teach the soft landing — absorb impact through the hip, not the knee.',
+    purpose: 'Teach the soft landing, absorb impact through the hip, not the knee.',
     cue: 'Land like you\'re landing on thin ice. Quiet feet. The sound of your landing tells you everything.',
     animation: 'hopping',
     steps: [
       'Stand on one foot.',
-      'Hop forward a few inches and land softly — bend the knee and hip together on contact.',
+      'Hop forward a few inches and land softly, bend the knee and hip together on contact.',
       'Think: "quiet landing." Your landing should make no sound.',
       'Alternate feet. Focus on the elastic absorption at the hip.'
     ],
@@ -352,14 +352,14 @@ export const EXERCISES = [
     category: 'running',
     name: 'Spot Jogging',
     purpose: 'Find the tall running posture and feel the hip drive without forward movement.',
-    cue: 'Run tall. You are a Puppet — a string from the crown of your head pulling you upward. Feel the hip flexors driving the knees forward.',
+    cue: 'Run tall. You are a Puppet, a string from the crown of your head pulling you upward. Feel the hip flexors driving the knees forward.',
     animation: 'spotJogging',
     video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Spot%20Jog%20WebApp.mp4?alt=media&token=4cdac2bd-599b-4a1a-83e9-5518f6b0bab7',
     steps: [
       'Jog on the spot at an easy pace.',
-      'Feel the string at the crown of your head — grow tall with each step.',
+      'Feel the string at the crown of your head, grow tall with each step.',
       'Drive the knee forward from the hip, not from the foot.',
-      'Land under your centre of mass — not in front of it.'
+      'Land under your centre of mass, not in front of it.'
     ],
     antiRotationNote: null
   },
@@ -373,15 +373,15 @@ export const EXERCISES = [
     steps: [
       'Skip forward with exaggerated arm swing.',
       'On each skip, feel the opposite arm and hip working together.',
-      'Land softly and spring — not thump and bounce.',
-      'Keep the spine tall throughout — the Puppet cue applies here too.'
+      'Land softly and spring, not thump and bounce.',
+      'Keep the spine tall throughout, the Puppet cue applies here too.'
     ],
     antiRotationNote: null
   }
 ]
 
 export const CATEGORIES = {
-  functional: { label: 'Functional Tests', color: '#8b9e7e', description: 'Assess your baseline — where you are today.' },
+  functional: { label: 'Functional Tests', color: '#8b9e7e', description: 'Assess your baseline, where you are today.' },
   strength: { label: 'Strength Tools', color: '#9e8b7e', description: 'Build the engine. 10-second cadence: control over momentum.' },
   running: { label: 'Mobility', color: '#7e8b9e', description: 'Learn the soft landing and the hip engine.' }
 }

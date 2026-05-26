@@ -573,7 +573,7 @@ function MobileFactorScreen({
 
       {needsWhy && (
         <label className={styles.mWhyPrompt}>
-          <span>{value <= 2 ? 'Low signal — what’s the why?' : 'High signal — what’s lifting it?'}</span>
+          <span>{value <= 2 ? 'Low signal, what’s the why?' : 'High signal, what’s lifting it?'}</span>
           <input
             type="text"
             value={note}
@@ -829,7 +829,7 @@ function ReflectionBlock({ note, setNote, setSaved, wordCount }) {
           A page for whatever wants out.
         </h2>
         <p className={styles.reflectionTagline}>
-          <span>Optional.</span> One line or fifty — patterns surface over time.
+          <span>Optional.</span> One line or fifty, patterns surface over time.
         </p>
       </header>
 
@@ -1080,7 +1080,7 @@ function FactorCard({ factor, index, value, note, onChange, onNoteChange }) {
 
       {needsWhy && (
         <label className={styles.whyPrompt}>
-          <span>{value <= 2 ? 'Low signal — what is the why?' : 'High signal — what is the why?'}</span>
+          <span>{value <= 2 ? 'Low signal, what is the why?' : 'High signal, what is the why?'}</span>
           <input
             type="text"
             value={note}

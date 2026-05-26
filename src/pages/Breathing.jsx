@@ -28,6 +28,7 @@ export default function Breathing() {
   const { entries, getTodayEntry, saveEntry } = useData()
   const navigate = useNavigate()
   const autoNavRef = useRef(false)
+  const elapsedRef = useRef(0)
 
   const weekTally = useMemo(() => tallyWeekSessions(entries), [entries])
   const currentWeek = useMemo(() => deriveCurrentWeek(weekTally), [weekTally])
@@ -60,10 +61,28 @@ export default function Breathing() {
   const targetDuration = sighThisWeek ? sighDuration : (weekConfig.duration || cycleSeconds)
   const sessionProgress = targetDuration > 0 ? Math.min(1, elapsed / targetDuration) : 0
 
+  useEffect(() => { elapsedRef.current = elapsed }, [elapsed])
+
+  // Single source of truth for the count. A self-correcting timer anchored to a
+  // start timestamp keeps every second landing on its real wall-clock boundary,
+  // so the orb number and the metronome click (both driven by `elapsed`) stay
+  // locked together with no cumulative drift.
   useEffect(() => {
     if (!running || cycleSeconds <= 0) return
-    const id = window.setInterval(() => setElapsed(v => v + 1), 1000)
-    return () => window.clearInterval(id)
+    const anchorElapsed = elapsedRef.current
+    const anchorTime = performance.now()
+    let count = 0
+    let timeoutId
+    const scheduleNext = () => {
+      count += 1
+      const delay = Math.max(0, anchorTime + count * 1000 - performance.now())
+      timeoutId = window.setTimeout(() => {
+        setElapsed(anchorElapsed + count)
+        scheduleNext()
+      }, delay)
+    }
+    scheduleNext()
+    return () => window.clearTimeout(timeoutId)
   }, [running, cycleSeconds])
 
   useEffect(() => {
@@ -72,7 +91,7 @@ export default function Breathing() {
     }
   }, [elapsed, running, targetDuration])
 
-  // Once the target is reached, log the session automatically — no Save tap.
+  // Once the target is reached, log the session automatically, no Save tap.
   useEffect(() => {
     if (targetDuration > 0 && elapsed >= targetDuration && !saved) {
       saveBreathSession()
@@ -302,7 +321,7 @@ export default function Breathing() {
           </button>
         </div>
 
-        <Metronome playing={running} onPlayingChange={setRunning} fixedBpm={60} compact />
+        <Metronome playing={running} onPlayingChange={setRunning} fixedBpm={60} compact syncTick={elapsed} />
 
         <button
           type="button"
@@ -348,7 +367,7 @@ function ProgressCard({
           {allComplete
             ? 'Curriculum complete. Stay here as long as you like.'
             : justUnlocked
-              ? 'Week complete — next week unlocked.'
+              ? 'Week complete, next week unlocked.'
               : `Day ${cappedSessions} of ${SESSIONS_PER_WEEK} this week · ${remaining} to unlock next`}
         </p>
       </div>

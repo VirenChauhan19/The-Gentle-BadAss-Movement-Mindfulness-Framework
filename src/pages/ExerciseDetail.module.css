@@ -138,7 +138,7 @@
   overflow: hidden;
   cursor: pointer;
   background: #050505;
-  /* Contain the video naturally — no forced crop */
+  /* Contain the video naturally, no forced crop */
   display: flex;
   align-items: center;
   justify-content: center;

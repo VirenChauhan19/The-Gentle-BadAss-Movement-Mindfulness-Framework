@@ -9,7 +9,13 @@ const TEMPOS = [
   { bpm: 190, purpose: 'Running drills', vibe: 'High-turnover drill work.' },
 ]
 
-export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null, allowedBpms = null, compact = false }) {
+export default function Metronome({ playing = false, onPlayingChange, fixedBpm = null, allowedBpms = null, compact = false, syncTick = null }) {
+  // Controlled mode: a parent (e.g. the Breathe page) owns the clock and passes
+  // an advancing `syncTick`. We click exactly when it changes, so the sound and
+  // whatever the parent is counting stay locked together instead of drifting on
+  // two separate timers.
+  const controlled = syncTick !== null
+
   const availableTempos = fixedBpm
     ? TEMPOS.filter(t => t.bpm === fixedBpm)
     : allowedBpms
@@ -24,12 +30,15 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
   const beatRef = useRef(0)
   const volumeRef = useRef(volume)
   const skipImmediateTickRef = useRef(false)
+  const prevTickRef = useRef(null)
 
   useEffect(() => {
     volumeRef.current = volume
   }, [volume])
 
+  // Uncontrolled mode runs its own interval (used by the running drills).
   useEffect(() => {
+    if (controlled) return
     if (!playing) {
       window.clearInterval(timerRef.current)
       timerRef.current = null
@@ -43,7 +52,25 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
     }
     timerRef.current = window.setInterval(tick, 60000 / selectedTempo.bpm)
     return () => window.clearInterval(timerRef.current)
-  }, [playing, selectedTempo.bpm])
+  }, [playing, selectedTempo.bpm, controlled])
+
+  // Controlled mode: click on each advance of syncTick (and a downbeat on start).
+  useEffect(() => {
+    if (!controlled) return
+    if (!playing) { prevTickRef.current = null; return }
+    if (prevTickRef.current === syncTick) return
+    prevTickRef.current = syncTick
+    const nextBeat = ((syncTick % 4) + 4) % 4
+    beatRef.current = nextBeat
+    setBeat(nextBeat)
+    ;(async () => {
+      try {
+        const ctx = ensureAudio()
+        if (ctx.state === 'suspended') await ctx.resume()
+        playClick(ctx, nextBeat === 0, volumeRef.current / 100)
+      } catch {}
+    })()
+  }, [controlled, playing, syncTick])
 
   async function tick() {
     const nextBeat = (beatRef.current + 1) % 4
@@ -57,6 +84,10 @@ export default function Metronome({ playing = false, onPlayingChange, fixedBpm =
   }
 
   async function togglePlaying() {
+    if (controlled) {
+      onPlayingChange?.(!playing)
+      return
+    }
     if (!playing) {
       try {
         const ctx = ensureAudio()

@@ -61,7 +61,7 @@ const FILL = 'var(--ink)'
 const HAIR = 'var(--ink)'
 const SKIN_HIGHLIGHT = 'var(--cream)'
 
-// Base body parts — used by most figures. Composed via SVG <g>.
+// Base body parts, used by most figures. Composed via SVG <g>.
 function Head({ cx = 100, cy = 38 }) {
   return (
     <g>
@@ -76,14 +76,14 @@ function Head({ cx = 100, cy = 38 }) {
 }
 
 // ───────────────────────────────────────────────────────────────
-// SQUAT — figure descends, knees bend, hip hinges back
+// SQUAT, figure descends, knees bend, hip hinges back
 // ───────────────────────────────────────────────────────────────
 function SquatAnim() {
   return (
     <svg viewBox="0 0 200 320" className={styles.svg}>
       <g className={styles.squatBody}>
         <Head />
-        {/* torso — broad shoulders, taper to waist */}
+        {/* torso, broad shoulders, taper to waist */}
         <path d="M 75 62 Q 70 68 70 90 Q 70 115 78 142 L 122 142 Q 130 115 130 90 Q 130 68 125 62 L 115 60 Q 100 56 85 60 Z" fill={FILL} />
         {/* arms forward for balance */}
         <g className={styles.squatArmL}>
@@ -94,7 +94,7 @@ function SquatAnim() {
         </g>
         {/* hip belt */}
         <ellipse cx="100" cy="140" rx="26" ry="8" fill={FILL} />
-        {/* LEFT LEG — hip and knee articulated */}
+        {/* LEFT LEG, hip and knee articulated */}
         <g className={styles.squatHipL}>
           {/* thigh */}
           <path d="M 78 138 Q 76 148 78 175 L 92 175 Q 95 148 95 138 Z" fill={FILL} />
@@ -121,7 +121,7 @@ function SquatAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// DEADLIFT — hip hinge with flat back, bar travels up
+// DEADLIFT, hip hinge with flat back, bar travels up
 // ───────────────────────────────────────────────────────────────
 function DeadliftAnim() {
   return (
@@ -135,14 +135,14 @@ function DeadliftAnim() {
         <path d="M 125 68 Q 130 80 130 130 Q 130 165 124 195 L 112 195 Q 114 165 114 130 Q 114 85 120 70 Z" fill={FILL} />
         {/* hip belt */}
         <ellipse cx="100" cy="140" rx="26" ry="8" fill={FILL} />
-        {/* legs — straight, mostly fixed */}
+        {/* legs, straight, mostly fixed */}
         <path d="M 78 140 Q 76 170 78 230 L 92 230 Q 95 170 95 140 Z" fill={FILL} />
         <path d="M 122 140 Q 124 170 122 230 L 108 230 Q 105 170 105 140 Z" fill={FILL} />
         {/* feet */}
         <path d="M 70 228 L 96 228 Q 98 232 96 236 L 70 236 Q 68 232 70 228 Z" fill={FILL} />
         <path d="M 130 228 L 104 228 Q 102 232 104 236 L 130 236 Q 132 232 130 228 Z" fill={FILL} />
       </g>
-      {/* Barbell — moves with hands */}
+      {/* Barbell, moves with hands */}
       <g className={styles.deadliftBar}>
         <rect x="55" y="195" width="90" height="6" rx="3" fill="var(--ink-light)" />
         <circle cx="55" cy="198" r="14" fill="none" stroke="var(--ink-light)" strokeWidth="3" />
@@ -154,7 +154,7 @@ function DeadliftAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// SUITCASE CARRY — figure walks with weight on one side
+// SUITCASE CARRY, figure walks with weight on one side
 // ───────────────────────────────────────────────────────────────
 function SuitcaseCarryAnim() {
   return (
@@ -163,7 +163,7 @@ function SuitcaseCarryAnim() {
         <Head cx="100" cy="38" />
         {/* tall upright torso */}
         <path d="M 75 62 Q 70 68 70 90 Q 70 115 78 142 L 122 142 Q 130 115 130 90 Q 130 68 125 62 L 115 60 Q 100 56 85 60 Z" fill={FILL} />
-        {/* arms — left holding kettlebell, right swings */}
+        {/* arms, left holding kettlebell, right swings */}
         <path d="M 75 68 Q 68 90 65 130 Q 64 160 68 185 L 80 185 Q 82 160 80 130 Q 80 90 80 70 Z" fill={FILL} />
         <g className={styles.carryArmR}>
           <path d="M 125 68 Q 132 90 135 130 Q 136 160 132 185 L 120 185 Q 118 160 120 130 Q 120 90 120 70 Z" fill={FILL} />
@@ -190,7 +190,7 @@ function SuitcaseCarryAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// FARMER'S CARRY — both hands holding weight
+// FARMER'S CARRY, both hands holding weight
 // ───────────────────────────────────────────────────────────────
 function FarmersCarryAnim() {
   return (
@@ -220,7 +220,7 @@ function FarmersCarryAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// HOPPING — figure bounces, soft landing
+// HOPPING, figure bounces, soft landing
 // ───────────────────────────────────────────────────────────────
 function HoppingAnim() {
   return (
@@ -232,7 +232,7 @@ function HoppingAnim() {
         <path d="M 73 68 Q 60 85 55 115 Q 53 130 58 142 L 68 142 Q 70 128 68 115 Q 75 85 78 70 Z" fill={FILL} />
         <path d="M 127 68 Q 140 85 145 115 Q 147 130 142 142 L 132 142 Q 130 128 132 115 Q 125 85 122 70 Z" fill={FILL} />
         <ellipse cx="100" cy="140" rx="26" ry="8" fill={FILL} />
-        {/* legs — one bent landing, one tucked */}
+        {/* legs, one bent landing, one tucked */}
         <g className={styles.hopLegL}>
           <path d="M 80 138 Q 76 165 80 200 L 95 200 Q 96 170 96 138 Z" fill={FILL} />
           <path d="M 80 198 Q 78 215 80 230 L 96 230 Q 98 215 96 198 Z" fill={FILL} />
@@ -252,7 +252,7 @@ function HoppingAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// SPOT JOGGING — figure runs in place, alternating legs
+// SPOT JOGGING, figure runs in place, alternating legs
 // ───────────────────────────────────────────────────────────────
 function SpotJoggingAnim() {
   return (
@@ -288,7 +288,7 @@ function SpotJoggingAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// FORWARD BEND — hinge from hips, head and torso fold down
+// FORWARD BEND, hinge from hips, head and torso fold down
 // ───────────────────────────────────────────────────────────────
 function ForwardBendAnim() {
   return (
@@ -315,14 +315,14 @@ function ForwardBendAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// OVERHEAD PRESS — arms press up, ribs stay down
+// OVERHEAD PRESS, arms press up, ribs stay down
 // ───────────────────────────────────────────────────────────────
 function OverheadPressAnim() {
   return (
     <svg viewBox="0 0 200 320" className={styles.svg}>
       <Head cx="100" cy="62" />
       <path d="M 75 86 Q 70 92 70 114 Q 70 139 78 166 L 122 166 Q 130 139 130 114 Q 130 92 125 86 L 115 84 Q 100 80 85 84 Z" fill={FILL} />
-      {/* arms — pressing up */}
+      {/* arms, pressing up */}
       <g className={styles.pressArmL}>
         <path d="M 73 92 Q 60 80 50 50 Q 48 40 55 38 L 65 38 Q 70 50 75 80 Q 78 88 78 92 Z" fill={FILL} />
       </g>
@@ -338,7 +338,7 @@ function OverheadPressAnim() {
       {/* core "bridge" highlight */}
       <rect x="80" y="125" width="40" height="30" rx="6" fill="var(--sage-light)" opacity="0.5" />
       <ellipse cx="100" cy="164" rx="26" ry="8" fill={FILL} />
-      {/* legs — stable pillar */}
+      {/* legs, stable pillar */}
       <path d="M 80 162 Q 78 195 76 250 L 92 250 Q 94 195 95 162 Z" fill={FILL} />
       <path d="M 120 162 Q 122 195 124 250 L 108 250 Q 106 195 105 162 Z" fill={FILL} />
       <path d="M 70 248 L 96 248 Q 98 252 96 256 L 70 256 Q 68 252 70 248 Z" fill={FILL} />
@@ -349,7 +349,7 @@ function OverheadPressAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// HIP ROTATION — seated figure, leg rotates internally/externally
+// HIP ROTATION, seated figure, leg rotates internally/externally
 // ───────────────────────────────────────────────────────────────
 function HipRotationAnim() {
   return (
@@ -362,7 +362,7 @@ function HipRotationAnim() {
         <path d="M 125 80 L 130 130 L 120 132 L 118 80 Z" fill={FILL} />
         <ellipse cx="100" cy="150" rx="26" ry="8" fill={FILL} />
       </g>
-      {/* RIGHT leg — rotates */}
+      {/* RIGHT leg, rotates */}
       <g className={styles.rotateLeg}>
         <path d="M 100 148 L 90 220 L 108 224 L 118 148 Z" fill={FILL} />
         <path d="M 88 222 L 110 220 Q 116 222 114 230 L 90 230 Q 84 226 88 222 Z" fill={FILL} />
@@ -379,7 +379,7 @@ function HipRotationAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// BENCH PRESS — lying down, arms press up
+// BENCH PRESS, lying down, arms press up
 // ───────────────────────────────────────────────────────────────
 function BenchPressAnim() {
   return (
@@ -396,7 +396,7 @@ function BenchPressAnim() {
         <path d="M 80 138 Q 78 175 76 230 L 92 230 Q 94 175 95 138 Z" fill={FILL} />
         <path d="M 120 138 Q 122 175 124 230 L 108 230 Q 106 175 105 138 Z" fill={FILL} />
       </g>
-      {/* arms pressing — vertical from chest */}
+      {/* arms pressing, vertical from chest */}
       <g className={styles.benchArms}>
         <path d="M 78 175 Q 70 145 70 110 L 86 110 Q 88 145 90 175 Z" fill={FILL} />
         <path d="M 122 175 Q 130 145 130 110 L 114 110 Q 112 145 110 175 Z" fill={FILL} />
@@ -409,7 +409,7 @@ function BenchPressAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// BENT OVER ROW — hinged figure pulling bar to chest
+// BENT OVER ROW, hinged figure pulling bar to chest
 // ───────────────────────────────────────────────────────────────
 function BentOverRowAnim() {
   return (
@@ -438,7 +438,7 @@ function BentOverRowAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// REVERSE LUNGE — split stance, back leg drops, front shin vertical
+// REVERSE LUNGE, split stance, back leg drops, front shin vertical
 // ───────────────────────────────────────────────────────────────
 function ReverseLungeAnim() {
   return (
@@ -450,11 +450,11 @@ function ReverseLungeAnim() {
         <path d="M 127 68 Q 135 90 140 130 L 130 145 Q 124 105 120 70 Z" fill={FILL} />
         <ellipse cx="100" cy="140" rx="26" ry="8" fill={FILL} />
       </g>
-      {/* front leg — vertical shin */}
+      {/* front leg, vertical shin */}
       <path d="M 80 138 L 75 200 L 92 200 L 92 138 Z" fill={FILL} />
       <path d="M 78 198 L 78 240 L 92 240 L 94 198 Z" fill={FILL} />
       <path d="M 70 238 L 96 238 Q 98 242 96 246 L 70 246 Q 68 242 70 238 Z" fill={FILL} />
-      {/* back leg — knee dropped */}
+      {/* back leg, knee dropped */}
       <g className={styles.lungeBackLeg}>
         <path d="M 120 138 L 145 175 L 130 185 L 108 142 Z" fill={FILL} />
         <path d="M 138 178 L 158 235 L 142 240 L 125 185 Z" fill={FILL} />
@@ -466,7 +466,7 @@ function ReverseLungeAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// BICEP CURL — elbow flexion, upper arm pinned
+// BICEP CURL, elbow flexion, upper arm pinned
 // ───────────────────────────────────────────────────────────────
 function BicepCurlAnim() {
   return (
@@ -476,7 +476,7 @@ function BicepCurlAnim() {
       {/* upper arms pinned to torso */}
       <path d="M 73 68 Q 68 90 70 125 L 82 125 Q 84 90 80 70 Z" fill={FILL} />
       <path d="M 127 68 Q 132 90 130 125 L 118 125 Q 116 90 120 70 Z" fill={FILL} />
-      {/* forearms — rotate at elbow */}
+      {/* forearms, rotate at elbow */}
       <g className={styles.curlForearmL}>
         <path d="M 70 122 Q 60 142 58 165 L 72 165 Q 76 142 84 124 Z" fill={FILL} />
         <ellipse cx="65" cy="170" rx="14" ry="14" fill="var(--ink-light)" />
@@ -495,7 +495,7 @@ function BicepCurlAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// SLR — supine straight leg raise
+// SLR, supine straight leg raise
 // ───────────────────────────────────────────────────────────────
 function SlrAnim() {
   return (
@@ -506,7 +506,7 @@ function SlrAnim() {
         <path d="M 75 62 Q 70 68 70 90 Q 70 115 78 142 L 122 142 Q 130 115 130 90 Q 130 68 125 62 L 115 60 Q 100 56 85 60 Z" fill={FILL} />
         <ellipse cx="100" cy="140" rx="26" ry="8" fill={FILL} />
       </g>
-      {/* bottom leg — flat on floor */}
+      {/* bottom leg, flat on floor */}
       <g transform="translate(0, 0)">
         <path d="M 30 215 L 150 215 L 150 230 L 30 230 Z" fill={FILL} />
       </g>
@@ -521,7 +521,7 @@ function SlrAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// PRONE HIP EXTENSION — face down, lift one leg
+// PRONE HIP EXTENSION, face down, lift one leg
 // ───────────────────────────────────────────────────────────────
 function ProneHipExtensionAnim() {
   return (
@@ -543,7 +543,7 @@ function ProneHipExtensionAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// SITTING SLUMP — chair seated, posture changing
+// SITTING SLUMP, chair seated, posture changing
 // ───────────────────────────────────────────────────────────────
 function SittingSlumpAnim() {
   return (
@@ -552,11 +552,11 @@ function SittingSlumpAnim() {
       <rect x="55" y="200" width="90" height="10" fill="var(--ink-light)" />
       <rect x="55" y="208" width="6" height="40" fill="var(--ink-light)" />
       <rect x="139" y="208" width="6" height="40" fill="var(--ink-light)" />
-      {/* lower body — sitting */}
+      {/* lower body, sitting */}
       <ellipse cx="100" cy="195" rx="26" ry="8" fill={FILL} />
       <path d="M 80 195 L 80 240 L 96 240 L 100 195 Z" fill={FILL} />
       <path d="M 120 195 L 120 240 L 104 240 L 100 195 Z" fill={FILL} />
-      {/* upper body — slumps and straightens */}
+      {/* upper body, slumps and straightens */}
       <g className={styles.slumpBody}>
         <Head cx="100" cy="40" />
         <path d="M 75 64 Q 70 70 70 92 Q 70 120 78 145 L 122 145 Q 130 120 130 92 Q 130 70 125 64 L 115 62 Q 100 58 85 62 Z" fill={FILL} />
@@ -568,7 +568,7 @@ function SittingSlumpAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// SIDE BEND — torso bends laterally, hips stay still
+// SIDE BEND, torso bends laterally, hips stay still
 // ───────────────────────────────────────────────────────────────
 function SideBendAnim() {
   return (
@@ -591,21 +591,21 @@ function SideBendAnim() {
 }
 
 // ───────────────────────────────────────────────────────────────
-// SKIPPING — bigger amplitude jog
+// SKIPPING, bigger amplitude jog
 // ───────────────────────────────────────────────────────────────
 function SkippingAnim() {
   return SpotJoggingAnim()
 }
 
 // ───────────────────────────────────────────────────────────────
-// CLEAN TO PRESS — uses press animation
+// CLEAN TO PRESS, uses press animation
 // ───────────────────────────────────────────────────────────────
 function CleanToPressAnim() {
   return OverheadPressAnim()
 }
 
 // ───────────────────────────────────────────────────────────────
-// DEFAULT — generic standing figure (breath cycle)
+// DEFAULT, generic standing figure (breath cycle)
 // ───────────────────────────────────────────────────────────────
 function DefaultAnim() {
   return (

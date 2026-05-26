@@ -33,7 +33,7 @@ export default function History() {
       ? qualitySessions.reduce((sum, s) => sum + s.qualityScore, 0) / qualitySessions.length
       : null
     
-    let shortDate = '—'
+    let shortDate = '-'
     try {
       if (e.date) {
         const d = new Date(e.date)

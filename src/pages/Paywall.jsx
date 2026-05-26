@@ -21,7 +21,7 @@ const PLANS = {
 
 const FEATURES = [
   'Daily Feel check-ins & body scoring',
-  'Full Movement Library — tests, drills, strength',
+  'Full Movement Library, tests, drills, strength',
   'History dashboard & progress charts',
   'AI Coach with personalised training plans',
   'Cloud sync across all your devices',
@@ -142,7 +142,7 @@ export default function Paywall() {
         >
           {loading
             ? 'Opening payment…'
-            : `Pay ₹${plan.price.toLocaleString('en-IN')} — UPI · Card · Net Banking`}
+            : `Pay ₹${plan.price.toLocaleString('en-IN')}, UPI · Card · Net Banking`}
         </button>
         {checkoutError && <p className={styles.checkoutError}>{checkoutError}</p>}
 
@@ -152,7 +152,7 @@ export default function Paywall() {
 
         {/* Test mode notice */}
         <div className={styles.testBanner}>
-          <strong>Test mode</strong> — use card 4111 1111 1111 1111 · OTP 1234 · or UPI: success@razorpay
+          <strong>Test mode</strong>, use card 4111 1111 1111 1111 · OTP 1234 · or UPI: success@razorpay
         </div>
 
         <button className={styles.skipBtn} onClick={() => navigate('/')}>

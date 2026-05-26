@@ -1770,7 +1770,7 @@
   margin: 0 auto;
 }
 
-/* Race goal grid — 3 columns */
+/* Race goal grid, 3 columns */
 .goalGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1842,7 +1842,7 @@
 
 .goalCardActive .goalSub { color: rgba(255,255,255,0.55); }
 
-/* Experience grid — 2 columns, taller cards */
+/* Experience grid, 2 columns, taller cards */
 .profileDeck {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

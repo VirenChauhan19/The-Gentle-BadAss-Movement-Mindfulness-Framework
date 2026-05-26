@@ -13,7 +13,7 @@ export default function Library() {
   const requestedSection = searchParams.get('section')
 
   // Opening Plan fresh (no section) sends the runner through the Reminder
-  // page first — the 5 pillars and 3 principles — once per day. After that
+  // page first, the 5 pillars and 3 principles, once per day. After that
   // it lands on Breathe as usual.
   const redirectToReminder = !requestedSection && !isReminderDone()
 

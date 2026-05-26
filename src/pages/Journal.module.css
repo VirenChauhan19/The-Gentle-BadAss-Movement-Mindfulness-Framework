@@ -1354,7 +1354,7 @@
     contain-intrinsic-size: auto 320px;
   }
 
-  /* Disable infinite shadow/glow animations on the busiest elements —
+  /* Disable infinite shadow/glow animations on the busiest elements -
      they trigger compositor work every frame and make scroll jank. */
   .saveBtn:not(:disabled),
   .bloomOrb[data-tone="strong"] {
@@ -1369,7 +1369,7 @@
     background: color-mix(in srgb, var(--paper) 96%, transparent);
   }
 
-  /* Hero glow blob — keep the static blur but stop the infinite drift. */
+  /* Hero glow blob, keep the static blur but stop the infinite drift. */
   .hero::before {
     animation: none;
   }

@@ -120,8 +120,8 @@ export function getCycleTrainingSignal(profile, date = todayISO()) {
 
 /**
  * Onboarding precompute. The instant a profile is submitted we derive the full
- * personalisation context — body-mass structural loading, the menstrual-cycle
- * calendar, health-history buffers, and the mental-stress buffer — in one pure,
+ * personalisation context, body-mass structural loading, the menstrual-cycle
+ * calendar, health-history buffers, and the mental-stress buffer, in one pure,
  * synchronous pass. Persisting this on the profile means plan generation can
  * read a ready answer instead of ever showing the runner a "thinking" step.
  * For typical inputs this returns in well under a frame.
@@ -141,7 +141,7 @@ export function buildAdaptationContext(profile = {}) {
   const cycle = normalizeCycleProfile(profile)
   const cycleWindows = getCycleWindows(profile, startDate, 91)
 
-  // Health-history protective flags — the single source the plan layer reads.
+  // Health-history protective flags, the single source the plan layer reads.
   const structuralFlags = {
     lowerBackPain: Boolean(profile.lowerBackPain),
     kneePain: Boolean(profile.kneePain),

@@ -95,9 +95,9 @@ const THEME_OPTIONS = [
 ]
 
 const WORKOUT_PRESETS = [
-  { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 30 min',          distance: '4–5 km',    duration: '30 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Keep it very easy — full conversation throughout. Focus on form and breathing.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 30 min',          distance: '4–5 km',    duration: '30 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Keep it very easy, full conversation throughout. Focus on form and breathing.', crossTraining: '', strength: '', mobility: '' },
   { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 40 min',          distance: '5–7 km',    duration: '40 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Keep it easy. Full conversation pace the entire way. Focus on cadence and form.', crossTraining: '', strength: '', mobility: '' },
-  { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 50 min',          distance: '7–9 km',    duration: '50 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Steady easy effort. Stay fully aerobic. Walk if needed — keep heart rate low.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 50 min',          distance: '7–9 km',    duration: '50 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Steady easy effort. Stay fully aerobic. Walk if needed, keep heart rate low.', crossTraining: '', strength: '', mobility: '' },
   { category: 'Easy Run',       icon: '🏃', type: 'easy',     title: 'Easy Run 60 min',          distance: '9–12 km',   duration: '60 min',       pace: 'Conversational (Z1–Z2)',  notes: 'Build aerobic base. Keep effort fully conversational throughout the session.', crossTraining: '', strength: '', mobility: '' },
   { category: 'Tempo',          icon: '⚡',  type: 'moderate', title: 'Tempo Run 40 min',         distance: '6–8 km',    duration: '40 min',       pace: 'Comfortably hard (Z3)',   notes: '10 min easy warm-up → 20 min at tempo effort → 10 min easy cool-down.', crossTraining: '', strength: '', mobility: '' },
   { category: 'Tempo',          icon: '⚡',  type: 'moderate', title: 'Tempo Run 50 min',         distance: '8–10 km',   duration: '50 min',       pace: 'Comfortably hard (Z3)',   notes: '10 min easy warm-up → 30 min at tempo effort → 10 min easy cool-down.', crossTraining: '', strength: '', mobility: '' },
@@ -112,8 +112,8 @@ const WORKOUT_PRESETS = [
   { category: 'Long Run',       icon: '🎯', type: 'long',     title: 'Long Run 120 min',         distance: '18–24 km',  duration: '120 min',      pace: 'Easy (Z1–Z2)',            notes: 'Race-prep long run. Practice full nutrition, pacing, and kit strategy.', crossTraining: '', strength: '', mobility: '' },
   { category: 'Cross Training', icon: '🚴', type: 'cross',    title: 'Cross Training 40 min',    distance: '',          duration: '40 min',       pace: 'Low–moderate effort',     notes: 'Active recovery using non-impact cardio. Keep heart rate in Z1–Z2.', crossTraining: '40 min easy cycling, swimming, elliptical, or rowing at conversational effort.', strength: '', mobility: '' },
   { category: 'Cross Training', icon: '🚴', type: 'cross',    title: 'Cross Training 50 min',    distance: '',          duration: '50 min',       pace: 'Low–moderate effort',     notes: 'Non-impact aerobic session. Stay comfortable and aerobic throughout.', crossTraining: '50 min easy cycling, swimming, elliptical, or rowing. Comfortable throughout.', strength: '', mobility: '' },
-  { category: 'Cross Training', icon: '🚴', type: 'cross',    title: 'Cross Training 60 min',    distance: '',          duration: '60 min',       pace: 'Moderate effort',         notes: 'Sustained cross-training with a moderate push in the final 15 minutes.', crossTraining: '60 min cycling, swimming, or elliptical — push to moderate effort for last 15 min.', strength: '', mobility: '' },
-  { category: 'Rest',           icon: '😴', type: 'rest',     title: 'Rest Day',                 distance: '',          duration: '—',            pace: '—',                       notes: 'Complete rest. Optional 15–20 min walk if you feel like moving. Sleep, hydrate, recover.', crossTraining: '', strength: '', mobility: '' },
+  { category: 'Cross Training', icon: '🚴', type: 'cross',    title: 'Cross Training 60 min',    distance: '',          duration: '60 min',       pace: 'Moderate effort',         notes: 'Sustained cross-training with a moderate push in the final 15 minutes.', crossTraining: '60 min cycling, swimming, or elliptical, push to moderate effort for last 15 min.', strength: '', mobility: '' },
+  { category: 'Rest',           icon: '😴', type: 'rest',     title: 'Rest Day',                 distance: '',          duration: '-',            pace: '-',                       notes: 'Complete rest. Optional 15–20 min walk if you feel like moving. Sleep, hydrate, recover.', crossTraining: '', strength: '', mobility: '' },
   { category: 'Rest',           icon: '🧘', type: 'rest',     title: 'Active Recovery',          distance: '',          duration: '20–30 min',    pace: 'Very easy',               notes: 'Gentle walk or light yoga only. Keep heart rate very low. This is a recovery day.', crossTraining: '', strength: '', mobility: '' },
 ]
 
@@ -243,7 +243,7 @@ export default function Admin() {
   useEffect(() => {
     if (!isAdmin || !db) return
     const unsub = onSnapshot(query(collectionGroup(db, 'config')), snapshot => {
-      // Collect uids that have a tombstone — they should NOT appear in the list.
+      // Collect uids that have a tombstone, they should NOT appear in the list.
       const deletedUids = new Set(
         snapshot.docs
           .filter(d => d.id === '_deleted')
@@ -542,7 +542,7 @@ export default function Admin() {
 // Mirrors the fields a user set during onboarding so they can keep their bio,
 // goal, path and (for women) cycle details up to date. Saves through
 // DataContext.saveProfile, which merges into the current profile and syncs to
-// localStorage + Firestore — never another user's record.
+// localStorage + Firestore, never another user's record.
 function ProfileEditModal({ profile, fallbackName, onClose, onSave }) {
   const p = profile || {}
   const [draft, setDraft] = useState({
@@ -630,7 +630,7 @@ function ProfileEditModal({ profile, fallbackName, onClose, onSave }) {
 
           <label className={styles.profileEditField}>
             <span>Your story / bio</span>
-            <textarea rows={4} value={draft.fitnessHistory} onChange={e => set('fitnessHistory', e.target.value)} placeholder="Your journey so far — injuries, life events, what brought you here." />
+            <textarea rows={4} value={draft.fitnessHistory} onChange={e => set('fitnessHistory', e.target.value)} placeholder="Your journey so far, injuries, life events, what brought you here." />
           </label>
           <label className={styles.profileEditField}>
             <span>Why you're committing</span>
@@ -640,7 +640,7 @@ function ProfileEditModal({ profile, fallbackName, onClose, onSave }) {
           {isWoman && (
             <div className={styles.profileEditSection}>
               <h3>Cycle and physiology</h3>
-              <p>Optional — these drive period-aware adjustments across your plan.</p>
+              <p>Optional, these drive period-aware adjustments across your plan.</p>
               <div className={styles.profileEditGrid}>
                 <label className={styles.profileEditField}>
                   <span>Last period start</span>
@@ -872,7 +872,7 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
                   </span>
                 </div>
                 <span className={styles.userListScore} style={{ color }}>
-                  {u.avgScore !== null ? u.avgScore.toFixed(1) : '—'}
+                  {u.avgScore !== null ? u.avgScore.toFixed(1) : '-'}
                 </span>
               </button>
             )
@@ -1294,7 +1294,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
         </div>
         <div className={styles.userDetailScoreBig}>
           <span className={styles.scoreBigNum} style={{ color: scoreColor }}>
-            {avgScore !== null ? avgScore.toFixed(1) : '—'}
+            {avgScore !== null ? avgScore.toFixed(1) : '-'}
           </span>
           <span className={styles.scoreBigLabel}>avg feel</span>
           {confirmDelete ? (
@@ -1429,7 +1429,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
                 <label className={styles.profileEditField}>
                   <span>Path</span>
                   <select value={draft.path || ''} onChange={e => set('path', e.target.value)}>
-                    <option value="">— not set —</option>
+                    <option value="">Not set</option>
                     <option value="rehab">The Rehab Path</option>
                     <option value="beginner">The Beginner Path</option>
                     <option value="performance">The Performance Path</option>
@@ -1577,7 +1577,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
                     ].map(([label, val]) => (
                       <div key={label} className={styles.coachGoalRow}>
                         <span className={styles.coachGoalLabel}>{label}</span>
-                        <span className={styles.coachGoalValue}>{val || '—'}</span>
+                        <span className={styles.coachGoalValue}>{val || '-'}</span>
                       </div>
                     ))}
                     {goal.overview && (
@@ -2026,7 +2026,7 @@ function AdminPlanEditor({
           <div className={styles.adminGenProgressBanner}>
             <div className={styles.adminGenProgressDot} />
             <p>
-              Plan auto-generating on user's device — <strong>{genW} of {totalW} weeks</strong> ready.
+              Plan auto-generating on user's device, <strong>{genW} of {totalW} weeks</strong> ready.
               Ungenerated weeks show template previews. Use <strong>✦ Generate Week</strong> to create AI sessions manually.
             </p>
           </div>

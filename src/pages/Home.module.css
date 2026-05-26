@@ -704,7 +704,7 @@
     padding: 0 0 24px;
   }
 
-  /* Disable per-block floatIn entries — the global routeTransition is
+  /* Disable per-block floatIn entries, the global routeTransition is
      already disabled on phones, and chained delays make the page feel
      laggy on first paint. */
   .hero,
@@ -725,7 +725,7 @@
     gap: 12px;
   }
 
-  /* Smaller, lighter "kicker" — the page already has clear context. */
+  /* Smaller, lighter "kicker", the page already has clear context. */
   .subtitle {
     padding: 5px 9px;
     font-size: 0.58rem;

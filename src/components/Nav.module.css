@@ -393,7 +393,7 @@
     transform: scale(0.92);
   }
 
-  /* Tiny dot under the active item — calmer than a pill. */
+  /* Tiny dot under the active item, calmer than a pill. */
   .active .shortLabel::after {
     content: '';
     display: block;

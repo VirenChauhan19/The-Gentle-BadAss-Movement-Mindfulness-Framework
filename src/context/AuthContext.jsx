@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(isConfigured ? undefined : null)
   const [authError, setAuthError] = useState(null)
   // True only right after an interactive sign-in (popup success or redirect
-  // return) — never when onAuthStateChanged simply rehydrates an existing
+  // return), never when onAuthStateChanged simply rehydrates an existing
   // session on page load. The welcome transition keys off this.
   const [justSignedIn, setJustSignedIn] = useState(false)
 

@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import styles from './AuroraBackground.module.css'
 
 /*
- * AuroraBackground — a WebGL "energetic aurora / flow" backdrop.
+ * AuroraBackground, a WebGL "energetic aurora / flow" backdrop.
  *
  *  • Flowing aurora ribbons (domain-warped simplex noise shader)
  *  • A particle field that drifts upward and accelerates with scroll velocity
@@ -160,7 +160,7 @@ function Aurora({ colors, reduced, intensity = 1 }) {
   useFrame((state, delta) => {
     const u = matRef.current?.uniforms
     if (!u) return
-    // Always animate — the flow is part of the brand. Under prefers-reduced-
+    // Always animate, the flow is part of the brand. Under prefers-reduced-
     // motion we keep it moving but slow it down rather than freezing.
     u.uTime.value += delta * (reduced ? 0.22 : 0.5)
     u.uScroll.value += input.scrollVel * 0.04
@@ -226,7 +226,7 @@ function Particles({ colors, count, reduced }) {
   useFrame((state, delta) => {
     const grp = groupRef.current
     if (grp) {
-      // parallax tilt — particles lean with pointer / device for depth
+      // parallax tilt, particles lean with pointer / device for depth
       const tx = (input.pointerX + input.tiltX)
       const ty = (input.pointerY + input.tiltY)
       grp.rotation.y += ((tx * 0.35) - grp.rotation.y) * 0.05
@@ -293,7 +293,7 @@ export default function AuroraBackground({ theme, variant = 'app' }) {
     return () => cancelAnimationFrame(id)
   }, [theme])
 
-  // Global interaction listeners — scroll velocity, pointer, device tilt.
+  // Global interaction listeners, scroll velocity, pointer, device tilt.
   useEffect(() => {
     let lastY = window.scrollY
     let raf = 0
