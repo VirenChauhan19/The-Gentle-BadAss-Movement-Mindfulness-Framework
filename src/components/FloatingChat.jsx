@@ -29,7 +29,7 @@ export default function FloatingChat() {
   const [unread,  setUnread]  = useState(0)
   const bottomRef = useRef(null)
   const inputRef  = useRef(null)
-  const { coachData, user } = useData()
+  const { coachData, user, onboardingRequired } = useData()
   const hasKey = !!import.meta.env.VITE_OPENROUTER_API_KEY
 
   // Keyed per user so chat history never leaks between accounts
@@ -84,7 +84,7 @@ export default function FloatingChat() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   }
 
-  if (!user) return null
+  if (!user || onboardingRequired) return null
 
   return (
     <>

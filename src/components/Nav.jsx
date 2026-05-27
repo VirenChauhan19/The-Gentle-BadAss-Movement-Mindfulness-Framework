@@ -16,7 +16,7 @@ const links = [
 export default function Nav() {
   const location = useLocation()
   const navRef = useRef(null)
-  const { user, guestName } = useData()
+  const { user, guestName, onboardingRequired } = useData()
   const guestLocked = !user && !!guestName
   const visibleLinks = guestLocked ? links.filter(link => !link.lockedForGuest) : links
 
@@ -24,6 +24,10 @@ export default function Nav() {
     const active = navRef.current?.querySelector(`.${styles.active}`)
     active?.scrollIntoView?.({ inline: 'center', block: 'nearest', behavior: 'smooth' })
   }, [location.pathname])
+
+  // A new account must complete onboarding first. Hide the whole nav so there
+  // are no tabs to escape to until the profile is filled out.
+  if (onboardingRequired) return null
 
   function tapFeedback() {
     if (navigator.vibrate && window.innerWidth <= 767) navigator.vibrate(6)

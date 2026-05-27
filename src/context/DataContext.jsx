@@ -183,10 +183,12 @@ export function DataProvider({ children }) {
         let data = snapshot.data()
         // If Firestore profile is missing onboardingComplete (e.g. old/partial save),
         // recover it from localStorage and repair Firestore so future logins work.
+        // Only trust the cache if it belongs to THIS user. A profile left behind by
+        // a different account on this device must never mark a new account complete.
         if (!data.onboardingComplete) {
           try {
             const cached = JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null')
-            if (cached?.onboardingComplete) {
+            if (cached?.onboardingComplete && cached.userId === user.uid) {
               data = { ...data, onboardingComplete: true }
               setDoc(profileRef, { onboardingComplete: true }, { merge: true }).catch(() => {})
             }
@@ -209,7 +211,11 @@ export function DataProvider({ children }) {
           const cached = localStorage.getItem(PROFILE_KEY)
           if (cached) {
             const cachedProfile = JSON.parse(cached)
-            if (cachedProfile?.onboardingComplete) {
+            // Migrate only a guest profile (no userId) or this same user's own
+            // cache. A profile tagged with a DIFFERENT uid belongs to another
+            // account that signed in on this device, never resurrect it here.
+            const ownsCache = !cachedProfile?.userId || cachedProfile.userId === user.uid
+            if (cachedProfile?.onboardingComplete && ownsCache) {
               const migrated = { ...cachedProfile, userId: user.uid, migratedAt: new Date().toISOString() }
               setProfileState(migrated)
               localStorage.setItem(PROFILE_KEY, JSON.stringify(migrated))
@@ -411,14 +417,30 @@ export function DataProvider({ children }) {
       try {
         const raw = localStorage.getItem(PROFILE_KEY)
         const local = raw ? JSON.parse(raw) : null
-        if (local?.onboardingComplete) return local
+        // Only honour the cache if it has no owner (guest) or belongs to the
+        // signed-in user, otherwise a stale profile from a previous account
+        // would let a brand-new account skip onboarding.
+        const ownsCache = !local?.userId || local.userId === user?.uid
+        if (local?.onboardingComplete && ownsCache) return local
       } catch {}
     }
     return profile
   })()
 
+  // A signed-in user must finish onboarding before they can use the app. We hold
+  // off while the profile is still loading (undefined) so returning users never
+  // flash the onboarding screen. exposedProfile already incorporates a
+  // user-scoped localStorage fallback, so if it still isn't complete here,
+  // onboarding is genuinely required.
+  const onboardingRequired = (() => {
+    if (!user) return false
+    if (exposedProfile === undefined) return false
+    if (exposedProfile && exposedProfile.onboardingComplete && exposedProfile.sex) return false
+    return true
+  })()
+
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, guestJustJoined, clearGuestJustJoined, profile: exposedProfile, saveProfile, clearAllData, user, coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, guestJustJoined, clearGuestJustJoined, profile: exposedProfile, onboardingRequired, saveProfile, clearAllData, user, coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks }}>
       {children}
     </DataContext.Provider>
   )

@@ -39,25 +39,16 @@ function AppRoutes() {
 
   const user = data?.user
   const profile = data?.profile
+  const onboardingRequired = data?.onboardingRequired
 
   useEffect(() => {
     if (!user || location.pathname === '/onboarding') return
-
-    const needsOnboarding =
-      profile === null ||
-      (profile && (!profile.onboardingComplete || !profile.sex))
-
-    if (needsOnboarding) {
-      // Last-resort check: Firestore writes are fire-and-forget and can fail
-      // silently. If localStorage already has a completed profile on this
-      // device, honour it and never redirect to onboarding.
-      try {
-        const local = JSON.parse(localStorage.getItem('gb_profile') || 'null')
-        if (local?.onboardingComplete && local?.sex) return
-      } catch {}
-      navigate('/onboarding')
-    }
-  }, [user, profile, navigate, location.pathname])
+    // onboardingRequired already accounts for the loading state and a
+    // user-scoped localStorage fallback, so this fires only for accounts that
+    // genuinely have not finished onboarding (including brand-new accounts on a
+    // device where a different account previously completed it).
+    if (onboardingRequired) navigate('/onboarding', { replace: true })
+  }, [user, onboardingRequired, navigate, location.pathname])
 
   useEffect(() => {
     const mobileRoutes = user ? ['/', '/journal', '/library', '/functional-tests', '/history', '/profile'] : ['/', '/profile']
