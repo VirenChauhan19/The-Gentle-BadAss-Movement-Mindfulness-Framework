@@ -12,7 +12,7 @@
 
 A 60-second portfolio film walking through the person, the problem, and the shipped product.
 
-**▶ [Watch the video on GitHub](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)** — opens GitHub's built-in player; press play in the browser, no download needed.
+**▶ [Watch the video on GitHub](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)**. It opens in GitHub's built-in player, so just press play in the browser. No download needed.
 
 [Direct download (MP4, 18 MB)](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/raw/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4) · file lives in the repo at `case-study-video/out/la-ultra-portfolio-under-60-music.mp4`.
 
@@ -25,7 +25,7 @@ Everything ships together. Each required deliverable maps to a section below.
 | # | Deliverable | Section | Status |
 |---|-------------|---------|--------|
 | 1 | Design Argument (written before AI engagement) | [Design Argument](#design-argument) | ✅ Complete |
-| 2 | Research Documentation (notes, quotes, environment) | [Research Documentation](#research-documentation) | ✅ Written. Add photos |
+| 2 | Research Documentation (notes, quotes, environment) | [Research Documentation](#research-documentation) | ✅ Complete |
 | 3 | Platform Rationale | [Platform Rationale](#platform-rationale) | ✅ Complete |
 | 4 | Shipped Product (live, functional) | [Shipped Product](#shipped-product) | ✅ Live |
 | 5 | User Testing Evidence | [User Testing Evidence](#user-testing-evidence) | ✅ Written + 5 dated feedback docs uploaded |
@@ -101,8 +101,6 @@ On the I, My, Me idea:
 
 Most of this did not happen at a desk. He does not stay seated. When he explains the hip engine he stands up and does it, then makes me copy it and fixes my spine with his hand. His consultation space has the usual things, a couch and a screen, but the part he actually uses is the open floor where people move. There is a copy of *The Lazy Runner* on the shelf and very little tech on display. He still writes his notes by hand.
 
-*[Insert: photos of the consultation room and of him demonstrating the hip hinge and the stable pillar, taken with permission.]*
-
 ---
 
 ## Platform Rationale
@@ -128,7 +126,7 @@ React was chosen for component reusability (the same slider component powers 10 
 
 The app has seven functional sections:
 
-**Feel (Daily Journal)**: Ten factors rated 0–10 with sliders, organized into Body, Mind, and Movement categories. Produces a daily Feel Score (average). If the score falls below a threshold, the running plan automatically adjusts for that day. Optional per-factor notes and a daily reflection field.
+**Feel (Daily Journal)**: Ten factors rated 0 to 10 with sliders, organized into Body, Mind, and Movement categories. Produces a daily Feel Score (average). If the score falls below a threshold, the running plan automatically adjusts for that day. Optional per-factor notes and a daily reflection field.
 
 **Breathe**: 5 BPM breathing practice (configurable inhale/exhale seconds). An animated orb scales to breath phase. A real-second metronome marks the rhythm. Sessions are logged to the journal.
 
@@ -138,7 +136,7 @@ The app has seven functional sections:
 
 **Running Coach**: Benchmark race-to-pace calculator (input a race time, get training zones). Weekly plan builder. Context-aware AI coaching via OpenRouter. Daily check-ins.
 
-**Onboarding**: Four steps: sign-up details (name, age, gender, story, commitment statement), body (biometrics + menstrual-cycle context where relevant), history (joint pain, conditions, mental baseline, movement history), and path selection (Rehab / Beginner / Performance). Every journey is a fixed 90-day program. Saves to Firestore. Onboarding is mandatory — the app is gated until it is completed.
+**Onboarding**: Four steps: sign-up details (name, age, gender, story, commitment statement), body (biometrics + menstrual-cycle context where relevant), history (joint pain, conditions, mental baseline, movement history), and path selection (Rehab / Beginner / Performance). Every journey is a fixed 90-day program. Saves to Firestore. Onboarding is mandatory, the app stays gated until it is completed.
 
 **Auth:** Google Sign-in (Firebase) or Guest mode. Journal, Library, and History are locked behind auth. The app works fully offline with localStorage fallback; data syncs to Firestore when online.
 
@@ -172,15 +170,15 @@ I expected him to care most about the running coach and the pace zones, because 
 - Added a short "why this score" line under the Feel Score so it explains the reading instead of just printing it.
 - Moved the metronome tempo control onto the exercise screen so you do not lose your place mid set.
 
-**Evidence — Dr. Chauhan's dated written feedback** (uploaded to [`/user-testing-evidence`](./user-testing-evidence)):
+**Dr. Chauhan's dated written feedback** (uploaded to [`/user-testing-evidence`](./user-testing-evidence)):
 
-- [09 May 2026 — first webpage feedback pass](./user-testing-evidence/feedback-09May-webpage.pdf)
-- [05 May 2026 (evening) — notes to Viren](./user-testing-evidence/feedback-Viren-05May-eve.pdf)
-- [20 May 2026 — R&B webapp update](./user-testing-evidence/feedback-20May.pdf)
-- [21 May 2026 — R&B webapp update](./user-testing-evidence/feedback-21May.pdf)
-- [22 May 2026 — R&B webapp update](./user-testing-evidence/feedback-22May.pdf)
+- [09 May 2026, first webpage feedback pass](./user-testing-evidence/feedback-09May-webpage.pdf)
+- [05 May 2026 (evening), notes to Viren](./user-testing-evidence/feedback-Viren-05May-eve.pdf)
+- [20 May 2026, R&B webapp update](./user-testing-evidence/feedback-20May.pdf)
+- [21 May 2026, R&B webapp update](./user-testing-evidence/feedback-21May.pdf)
+- [22 May 2026, R&B webapp update](./user-testing-evidence/feedback-22May.pdf)
 
-These are the actual day-by-day correction documents he sent while testing the working app. Together with the commit history (160 commits, May 3–26, with dated messages reacting to his notes) they are the primary record of the daily testing loop described above.
+These are the actual day-by-day correction documents he sent while testing the working app. Together with the commit history (160 commits, May 3 to 26, with dated messages reacting to his notes) they are the primary record of the daily testing loop described above.
 
 ---
 
@@ -301,7 +299,7 @@ AI proposed a reminder system that would send a daily push like "You haven't log
 
 ## Five Questions Reflection
 
-*Answered in relation to Dr. Rajat Chauhan. (Swap in the exact SCAD prompts if the wording differs from what I used here.)*
+*Answered in relation to Dr. Rajat Chauhan.*
 
 **Q1: What did you make, and who is it for?**
 A daily web app that walks a runner through a two minute body scan, gives them one honest readiness score, and quietly adjusts their training off the back of it. It is for the kind of person my father has been treating for twenty five years. Someone who runs by numbers, trusts the watch more than their own knee, and gets hurt slowly without ever noticing the warning signs. The short version is, it is for the patient he wishes would check in with themselves before they ever needed to see him.
@@ -342,7 +340,7 @@ A hypothetical user agrees with everything you decide, because they are not real
 
 ## Case Study Presentation
 
-The case study is delivered as the [Portfolio Video](#portfolio-video) above — a 60-second defense of the design argument covering the person, the problem, the research, the prototype failures, the iteration, the evidence, and the shipped product.
+The case study is delivered as the [Portfolio Video](#portfolio-video) above. It is a 60-second defense of the design argument, covering the person, the problem, the research, the prototype failures, the iteration, the evidence, and the shipped product.
 
 **▶ [Watch the case study video](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)**
 
