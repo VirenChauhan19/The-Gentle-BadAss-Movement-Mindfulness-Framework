@@ -788,19 +788,6 @@ export default function Coach({ embedded = false }) {
   return (
     <div className={`${styles.page} ${embedded ? styles.embedded : ''}`}>
       {!embedded && <PlanTabs active="coach" />}
-      <header className={styles.header}>
-        <p className={styles.label}>Running</p>
-        <h1 className={styles.title}>{goal.focus || goal.raceGoal}</h1>
-        <p className={styles.headerSub}>
-          {isComplete ? 'Program complete!' : `Week ${weekNum} · Day ${Math.max(1, dayNum)} of ${totalDays}`}
-        </p>
-        <div className={styles.progressTrack}>
-          <div className={styles.progressFill} style={{ width: `${progress * 100}%` }} />
-        </div>
-        <p className={styles.progressText}>
-          {isComplete ? 'You made it.' : `${remaining} day${remaining !== 1 ? 's' : ''} to go`}
-        </p>
-      </header>
 
       <div className={styles.tabs}>
         <button className={`${styles.tab} ${tab === 'program' ? styles.tabActive : ''}`} onClick={() => setTab('program')}>
@@ -1548,6 +1535,12 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
               {todayStyle.label}
             </span>
           </div>
+          {/* On phone the Start workout sits right at the top, under the title,
+              so it's the first thing within reach. On desktop it stays below the
+              session details. */}
+          {isPhone && todaySession.type !== 'rest' && (
+            <RunCuePlayer session={todaySession} week={currentWeek} />
+          )}
           <AdaptationBanners session={todaySession} />
           <div className={styles.todayMetrics}>
             <span>{todaySession.distance || 'No distance'}</span>
@@ -1558,7 +1551,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
           {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
           {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
           <DailyTrainingBlocks session={todaySession} exclude={['strength', 'mobility']} />
-          {todaySession.type !== 'rest' && (
+          {!isPhone && todaySession.type !== 'rest' && (
             <RunCuePlayer session={todaySession} week={currentWeek} />
           )}
           {todayRemarks.length > 0 && <AttachedRemarks remarks={todayRemarks} />}

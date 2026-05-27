@@ -549,7 +549,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 16px;
+  margin: 0 0 20px;
 }
 
 .controls button,
@@ -1167,17 +1167,12 @@
   }
 
   .controls {
-    position: sticky;
-    bottom: calc(84px + env(safe-area-inset-bottom));
-    z-index: 12;
     padding: 8px;
     margin-left: -8px;
     margin-right: -8px;
     background: var(--cream);
     border: 1px solid var(--border-light);
     border-radius: 22px;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
     box-shadow: 0 8px 20px var(--shadow-xs);
   }
 

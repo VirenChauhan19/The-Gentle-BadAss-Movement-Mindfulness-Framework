@@ -223,6 +223,22 @@ export default function Breathing() {
         />
 
         <div className={styles.breathCard}>
+          {/* Start / Stop sit at the top so the primary action is the first
+              thing within reach, the same as the run tab. */}
+          <div className={styles.controls}>
+            <button onClick={toggleRunning} disabled={cycleSeconds <= 0}>
+              {running ? 'Pause' : 'Start'}
+            </button>
+            <button
+              type="button"
+              onClick={stopPractice}
+              className={styles.stopBtn}
+              disabled={!running && elapsed === 0 && !saved}
+            >
+              Stop
+            </button>
+          </div>
+
           <div
             className={`${styles.orbWrap} ${running ? styles.orbWrapActive : ''}`}
           >
@@ -268,20 +284,6 @@ export default function Breathing() {
               <span>{Math.round(sessionProgress * 100)}%</span>
               <p>done</p>
             </div>
-          </div>
-
-          <div className={styles.controls}>
-            <button onClick={toggleRunning} disabled={cycleSeconds <= 0}>
-              {running ? 'Pause' : 'Start'}
-            </button>
-            <button
-              type="button"
-              onClick={stopPractice}
-              className={styles.stopBtn}
-              disabled={!running && elapsed === 0 && !saved}
-            >
-              Stop
-            </button>
           </div>
 
           {saved ? (
