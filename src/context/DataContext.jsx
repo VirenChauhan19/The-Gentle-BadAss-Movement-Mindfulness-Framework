@@ -76,6 +76,13 @@ export function DataProvider({ children }) {
     // immediately. Stops any further Firestore writes from this client and
     // prevents the localStorage→Firestore profile re-migration below from
     // resurrecting the account.
+    //
+    // The tombstone is a ONE-SHOT kick, not a permanent ban. After clearing the
+    // dead session we delete the tombstone itself (while still authenticated, so
+    // the user's own-config rule still applies) — otherwise it would survive
+    // forever and bounce the person out on every future login attempt, making it
+    // impossible to ever sign back in. With it consumed, the next login finds no
+    // tombstone and starts fresh, exactly as a deleted account should be able to.
     let tombstoned = false
     const tombstoneRef = doc(db, 'users', user.uid, 'config', '_deleted')
     const unsubTombstone = onSnapshot(tombstoneRef, snap => {
@@ -94,7 +101,11 @@ export function DataProvider({ children }) {
       setAdminRemarks([])
       setGuestNameState(null)
       setProfileFetched(true)
-      fbSignOut(auth).catch(() => {})
+      // Consume the tombstone, then sign out. Delete first (still authenticated)
+      // so the write is permitted; sign out only after, regardless of outcome.
+      deleteDoc(tombstoneRef)
+        .catch(() => {})
+        .finally(() => { fbSignOut(auth).catch(() => {}) })
     }, () => {})
 
     // Load this user's coach data from Firestore (source of truth) or their local cache

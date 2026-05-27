@@ -42,15 +42,6 @@ function AppRoutes() {
   const onboardingRequired = data?.onboardingRequired
 
   useEffect(() => {
-    if (!user || location.pathname === '/onboarding') return
-    // onboardingRequired already accounts for the loading state and a
-    // user-scoped localStorage fallback, so this fires only for accounts that
-    // genuinely have not finished onboarding (including brand-new accounts on a
-    // device where a different account previously completed it).
-    if (onboardingRequired) navigate('/onboarding', { replace: true })
-  }, [user, onboardingRequired, navigate, location.pathname])
-
-  useEffect(() => {
     const mobileRoutes = user ? ['/', '/journal', '/library', '/functional-tests', '/history', '/profile'] : ['/', '/profile']
     let startX = 0
     let startY = 0
@@ -99,6 +90,16 @@ function AppRoutes() {
   // profile === undefined means we are logged in but still checking Firestore for a profile
   if (user === undefined || (user && profile === undefined)) {
     return <div className={styles.loading}>Initializing...</div>
+  }
+
+  // Hard onboarding gate: a signed-in account that hasn't finished onboarding
+  // gets ONLY the onboarding flow, no matter what URL they're on. Rendering it
+  // here (instead of relying on a post-navigation redirect) means there is no
+  // other screen or nav mounted to slip out to — Profile, swipe gestures, and
+  // the browser Back button can't bypass it. Onboarding itself enforces that
+  // every required field is filled before its Next/Start buttons enable.
+  if (user && onboardingRequired) {
+    return <Onboarding />
   }
 
   return (

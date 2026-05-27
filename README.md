@@ -4,6 +4,17 @@
 **Designer:** Viren Chauhan | **Person:** Dr. Rajat Chauhan
 **AI Development Support:** ChatGPT / Codex
 **Live App:** https://laultrarunandbee.web.app
+**Portfolio Video (60s):** [▶ Watch](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/raw/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)
+
+---
+
+## Portfolio Video
+
+A 60-second portfolio film walking through the person, the problem, and the shipped product.
+
+https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/raw/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4
+
+> If the inline player does not load, [download / watch the video here](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/raw/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4).
 
 ---
 
@@ -17,12 +28,13 @@ Everything ships together. Each required deliverable maps to a section below.
 | 2 | Research Documentation (notes, quotes, environment) | [Research Documentation](#research-documentation) | ✅ Written. Add photos |
 | 3 | Platform Rationale | [Platform Rationale](#platform-rationale) | ✅ Complete |
 | 4 | Shipped Product (live, functional) | [Shipped Product](#shipped-product) | ✅ Live |
-| 5 | User Testing Evidence | [User Testing Evidence](#user-testing-evidence) | ✅ Written. Add recording/photos |
+| 5 | User Testing Evidence | [User Testing Evidence](#user-testing-evidence) | ✅ Written + 5 dated feedback docs uploaded |
 | 6 | Mermaid Diagram (full system architecture) | [Mermaid Diagram](#mermaid-diagram) | ✅ Complete |
 | 7 | AI Direction Log (5+ entries) | [AI Direction Log](#ai-direction-log) | ✅ 7 entries |
 | 8 | Records of Resistance (3+ moments) | [Records of Resistance](#records-of-resistance) | ✅ 4 records |
 | 9 | Five Questions Reflection | [Five Questions Reflection](#five-questions-reflection) | ✅ Complete |
 | 10 | Post-Mortem | [Post-Mortem](#post-mortem) | ✅ Complete |
+| + | Portfolio Video (60s) | [Portfolio Video](#portfolio-video) | ✅ Complete |
 | + | Case Study Presentation | [Case Study Presentation](#case-study-presentation) | Session 20, May 27, 2026 |
 | + | Marketing Minute | [Marketing Minute](#marketing-minute) | Script ready, video pending |
 
@@ -120,13 +132,13 @@ The app has seven functional sections:
 
 **Breathe**: 5 BPM breathing practice (configurable inhale/exhale seconds). An animated orb scales to breath phase. A real-second metronome marks the rhythm. Sessions are logged to the journal.
 
-**Move (Library)**: 24 exercises across three categories: Functional Tests (weekly baseline self-assessments), Strength Tools (10-second cadence, lumbar-neutral), and Running Drills (hip-driven, soft landing). Each exercise includes purpose, verbal cue, step-by-step breakdown, category-matched metronome, and an anti-rotation warning.
+**Move (Library)**: 23 exercises across three categories: Functional Tests (10 weekly baseline self-assessments), Strength Tools (10, 10-second cadence, lumbar-neutral), and Running Drills (3, hip-driven, soft landing). Each exercise includes purpose, verbal cue, step-by-step breakdown, category-matched metronome, and an anti-rotation warning.
 
 **History (Quality Dashboard)**: Recharts trend lines for Feel Score, Training Perceived Readiness, and Quality Score over time. Factor breakdown showing strongest and weakest dimensions. Session log.
 
 **Running Coach**: Benchmark race-to-pace calculator (input a race time, get training zones). Weekly plan builder. Context-aware AI coaching via OpenRouter. Daily check-ins.
 
-**Onboarding**: Three steps: fitness history, path selection (Rehab / Beginner / Performance), commitment duration (30–270 days). Saves to Firestore.
+**Onboarding**: Four steps: sign-up details (name, age, gender, story, commitment statement), body (biometrics + menstrual-cycle context where relevant), history (joint pain, conditions, mental baseline, movement history), and path selection (Rehab / Beginner / Performance). Every journey is a fixed 90-day program. Saves to Firestore. Onboarding is mandatory — the app is gated until it is completed.
 
 **Auth:** Google Sign-in (Firebase) or Guest mode. Journal, Library, and History are locked behind auth. The app works fully offline with localStorage fallback; data syncs to Firestore when online.
 
@@ -160,7 +172,15 @@ I expected him to care most about the running coach and the pace zones, because 
 - Added a short "why this score" line under the Feel Score so it explains the reading instead of just printing it.
 - Moved the metronome tempo control onto the exercise screen so you do not lose your place mid set.
 
-**Evidence:** *[Insert: phone screen recording of the session, two photos of him doing the breathing round, my handwritten notes, and a few of his feedback voice messages / texts. The commit history is itself part of the evidence.]*
+**Evidence — Dr. Chauhan's dated written feedback** (uploaded to [`/user-testing-evidence`](./user-testing-evidence)):
+
+- [09 May 2026 — first webpage feedback pass](./user-testing-evidence/feedback-09May-webpage.pdf)
+- [05 May 2026 (evening) — notes to Viren](./user-testing-evidence/feedback-Viren-05May-eve.pdf)
+- [20 May 2026 — R&B webapp update](./user-testing-evidence/feedback-20May.pdf)
+- [21 May 2026 — R&B webapp update](./user-testing-evidence/feedback-21May.pdf)
+- [22 May 2026 — R&B webapp update](./user-testing-evidence/feedback-22May.pdf)
+
+These are the actual day-by-day correction documents he sent while testing the working app. Together with the commit history (160 commits, May 3–26, with dated messages reacting to his notes) they are the primary record of the daily testing loop described above.
 
 ---
 
@@ -179,7 +199,7 @@ graph TD
 
     User -->|Exercise Practice| Lib[Movement Library - 24 Exercises]
     Lib --> Cat{Category Filter}
-    Cat -->|Functional Tests| FT[7 Self-Assessment Tests]
+    Cat -->|Functional Tests| FT[10 Self-Assessment Tests]
     Cat -->|Strength Tools| ST[10 Strength Exercises]
     Cat -->|Running Drills| RD[3 Running Drills]
     FT & ST & RD --> ED[Exercise Detail Page]
