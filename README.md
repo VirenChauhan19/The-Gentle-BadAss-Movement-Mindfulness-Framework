@@ -35,7 +35,7 @@ Everything ships together. Each required deliverable maps to a section below.
 | 9 | Five Questions Reflection | [Five Questions Reflection](#five-questions-reflection) | ✅ Complete |
 | 10 | Post-Mortem | [Post-Mortem](#post-mortem) | ✅ Complete |
 | + | Portfolio Video (60s) | [Portfolio Video](#portfolio-video) | ✅ Complete |
-| + | Case Study Presentation | [Case Study Presentation](#case-study-presentation) | Session 20, May 27, 2026 |
+| + | Case Study Presentation | [Case Study Presentation](#case-study-presentation) | ✅ Portfolio video |
 | + | Marketing Minute | [Marketing Minute](#marketing-minute) | ✅ Video (landscape + vertical) |
 
 ---
@@ -342,22 +342,9 @@ A hypothetical user agrees with everything you decide, because they are not real
 
 ## Case Study Presentation
 
-**Session 20, May 27, 2026**
+The case study is delivered as the [Portfolio Video](#portfolio-video) above — a 60-second defense of the design argument covering the person, the problem, the research, the prototype failures, the iteration, the evidence, and the shipped product.
 
-This is not a demo. It is a defense of a design argument.
-
-The presentation covers:
-
-1. **The Person**: Who is Dr. Rajat Chauhan? Why does his problem matter?
-2. **The Problem**: What is interoceptive illiteracy? How did it get this bad? What does the data say?
-3. **The Research**: What did I learn that I didn't know before the interviews?
-4. **The Prototype Failures**: What didn't work and why? What did First Contact reveal?
-5. **The Iteration**: What changed, what was rebuilt, what was cut?
-6. **The Evidence**: What does it look like when Dr. Chauhan uses this tool?
-7. **The Product**: Live demonstration of the shipped PWA.
-8. **The Argument**: Does this tool do what the design argument said it would?
-
-[Slide deck / presentation materials: link here when ready]
+**▶ [Watch the case study video](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)**
 
 ---
 
