@@ -2,7 +2,7 @@
 
 **SCAD AI 201 | Project 3: Persons Required**
 **Designer:** Viren Chauhan | **Person:** Dr. Rajat Chauhan
-**AI Development Support:** ChatGPT / Codex
+**AI Development Support:** ChatGPT / Codex / Claude
 **Live App:** https://laultrarunandbee.web.app
 **Portfolio Video (60s):** [▶ Watch on GitHub](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)
 
@@ -49,8 +49,6 @@ What's broken: the fitness technology industry has replaced self-knowledge with 
 What "helped" looks like: a person who wakes up, does a 2-minute body scan, scores how they actually feel across ten dimensions, and makes a training decision based on that, not on what the plan says. A person who knows the difference between the soreness that means "push through" and the tightness that means "back off." A person who can run for thirty more years.
 
 Why I am the one building this: I have direct access to 25 years of clinical philosophy that has never been digitized. My father does not want an app, he wants his methodology in a form that other people can use. He is the subject matter expert. I am the translator. That is my unfair advantage: proximity to the source, and a reason to get it right.
-
-This argument was written before any AI engagement. Every decision in this product is evaluated against it.
 
 ---
 
