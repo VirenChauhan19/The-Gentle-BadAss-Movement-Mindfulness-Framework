@@ -4,7 +4,7 @@
 **Designer:** Viren Chauhan | **Person:** Dr. Rajat Chauhan
 **AI Development Support:** ChatGPT / Codex
 **Live App:** https://laultrarunandbee.web.app
-**Portfolio Video (60s):** [▶ Watch](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/raw/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)
+**Portfolio Video (60s):** [▶ Watch on GitHub](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)
 
 ---
 
@@ -12,9 +12,9 @@
 
 A 60-second portfolio film walking through the person, the problem, and the shipped product.
 
-https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/raw/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4
+**▶ [Watch the video on GitHub](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4)** — opens GitHub's built-in player; press play in the browser, no download needed.
 
-> If the inline player does not load, [download / watch the video here](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/raw/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4).
+[Direct download (MP4, 18 MB)](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/raw/main/case-study-video/out/la-ultra-portfolio-under-60-music.mp4) · file lives in the repo at `case-study-video/out/la-ultra-portfolio-under-60-music.mp4`.
 
 ---
 
