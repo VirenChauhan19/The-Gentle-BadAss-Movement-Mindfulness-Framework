@@ -270,7 +270,11 @@ For beginner plans, start smooth and easy in week 1, then progress gradually.`
   if (!res.ok) {
     const e = await res.json().catch(() => ({}))
     if (res.status === 429) throw new Error('Rate limit reached, wait 30 seconds and try again. (Free tier limit)')
-    throw new Error(e.error?.message || `Error ${res.status}`)
+    const message = e.error?.message || `Error ${res.status}`
+    if (/insufficient credits/i.test(message)) {
+      throw new Error(`${message}. If you just added credits, this deploy is probably still using an old OpenRouter key. Update the GitHub secret and redeploy.`)
+    }
+    throw new Error(message)
   }
   const data = await res.json()
   return data.choices?.[0]?.message?.content?.trim() || 'No response.'
