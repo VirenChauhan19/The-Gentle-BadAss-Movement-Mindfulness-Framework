@@ -1535,10 +1535,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
               {todayStyle.label}
             </span>
           </div>
-          {/* On phone the Start workout sits right at the top, under the title,
-              so it's the first thing within reach. On desktop it stays below the
-              session details. */}
-          {isPhone && todaySession.type !== 'rest' && (
+          {todaySession.type !== 'rest' && (
             <RunCuePlayer session={todaySession} week={currentWeek} />
           )}
           <AdaptationBanners session={todaySession} />
@@ -1551,9 +1548,6 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
           {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
           {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
           <DailyTrainingBlocks session={todaySession} exclude={['strength', 'mobility']} />
-          {!isPhone && todaySession.type !== 'rest' && (
-            <RunCuePlayer session={todaySession} week={currentWeek} />
-          )}
           {todayRemarks.length > 0 && <AttachedRemarks remarks={todayRemarks} />}
         </div>
       )}
@@ -1901,6 +1895,19 @@ function RunCuePlayer({ session, week }) {
         <p>{formatTime(secondsLeft)}</p>
       </div>
 
+      <div className={styles.audioCueControls}>
+        <button type="button" onClick={running ? pauseWorkout : startWorkout}>
+          {running ? 'Pause cues' : 'Start workout'}
+        </button>
+        <button
+          type="button"
+          onClick={stopWorkout}
+          disabled={!running && phaseIndex === 0 && secondsLeft === (intervals[0]?.seconds || 0)}
+        >
+          Stop
+        </button>
+      </div>
+
       <div className={styles.audioProfileGrid} aria-label="Audio cue profiles">
         {AUDIO_CUE_PROFILES.map(item => (
           <button
@@ -1923,19 +1930,6 @@ function RunCuePlayer({ session, week }) {
           {speechNotice && <small>{speechNotice}</small>}
         </div>
       )}
-
-      <div className={styles.audioCueControls}>
-        <button type="button" onClick={running ? pauseWorkout : startWorkout}>
-          {running ? 'Pause cues' : 'Start workout'}
-        </button>
-        <button
-          type="button"
-          onClick={stopWorkout}
-          disabled={!running && phaseIndex === 0 && secondsLeft === (intervals[0]?.seconds || 0)}
-        >
-          Stop
-        </button>
-      </div>
     </div>
   )
 }

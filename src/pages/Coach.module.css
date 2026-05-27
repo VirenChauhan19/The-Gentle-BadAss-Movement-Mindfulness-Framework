@@ -113,16 +113,20 @@
 /* ── Tabs ────────────────────────────────────────────────────── */
 .tabs {
   display: flex;
-  margin: 0 16px;
+  width: min(520px, calc(100% - 32px));
+  margin: 12px auto 18px;
   background: var(--paper);
   border-radius: var(--r-lg);
   padding: 4px;
   gap: 4px;
   box-shadow: 0 10px 24px var(--shadow-xs);
+  border: 1px solid var(--border-light);
 }
 
 .tab {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 40px;
   padding: 10px;
   border: none;
   border-radius: var(--r-md);
@@ -132,7 +136,8 @@
   color: var(--ink-faint);
   cursor: pointer;
   transition: all 0.2s;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
+  text-align: center;
 }
 
 .tabActive {
@@ -3312,10 +3317,12 @@
   }
 
   .tabs {
-    margin: -16px 12px 14px;
+    width: calc(100% - 24px);
+    margin: 10px 12px 14px;
     position: relative;
     z-index: 3;
     border-radius: 18px;
+    gap: 4px;
   }
 
   .tab {
