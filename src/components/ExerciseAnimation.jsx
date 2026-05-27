@@ -1,46 +1,15 @@
-import { useState } from 'react'
 import styles from './ExerciseAnimation.module.css'
 
-const GIF_URLS = {
-  squat:             'https://gymvisual.com/img/p/2/4/9/8/4/24984.gif',
-  deadlift:          'https://gymvisual.com/img/p/4/1/5/6/1/41561.gif',
-  benchPress:        'https://gymvisual.com/img/p/3/3/1/3/8/33138.gif',
-  overheadPress:     'https://gymvisual.com/img/p/4/8/2/7/4827.gif',
-  cleanToPress:      'https://gymvisual.com/img/p/4/7/5/9/4759.gif',
-  bentOverRow:       'https://gymvisual.com/img/p/1/0/6/1/7/10617.gif',
-  bicepCurl:         'https://gymvisual.com/img/p/2/1/8/3/5/21835.gif',
-  reverseLunge:      'https://gymvisual.com/img/p/6/9/7/7/6977.gif',
-  farmersCarry:      'https://gymvisual.com/img/p/3/7/3/4/0/37340.gif',
-  suitcaseCarry:     'https://gymvisual.com/img/p/1/2/6/3/9/12639.gif',
-  forwardBend:       'https://gymvisual.com/img/p/2/9/6/0/7/29607.gif',
-  hipRotation:       'https://gymvisual.com/img/p/5/6/9/5/5695.gif',
-  slr:               'https://gymvisual.com/img/p/5/8/7/4/5874.gif',
-  proneHipExtension: 'https://gymvisual.com/img/p/1/8/5/3/1/18531.gif',
-  sideBend:          'https://gymvisual.com/img/p/2/5/8/2/9/25829.gif',
-  sittingSlump:      'https://gymvisual.com/img/p/4/0/3/8/5/40385.gif',
-  hopping:           'https://gymvisual.com/img/p/2/4/0/3/5/24035.gif',
-  spotJogging:       'https://gymvisual.com/img/p/4/0/0/3/1/40031.gif',
-  skipping:          'https://gymvisual.com/img/p/1/8/3/5/2/18352.gif',
-}
-
+// Lightweight, branded SVG fallback shown only while an exercise video is
+// resolving or if it fails to load. Demo footage now lives in Firebase Storage
+// and is the primary medium (see ExerciseDetail), so there are no external GIFs.
 export default function ExerciseAnimation({ type, cadence }) {
-  const [gifFailed, setGifFailed] = useState(false)
-  const gifUrl = GIF_URLS[type]
   const Anim = animations[type] || animations.default
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.stage}>
-        {gifUrl && !gifFailed ? (
-          <img
-            src={gifUrl}
-            alt={type}
-            className={styles.gif}
-            onError={() => setGifFailed(true)}
-          />
-        ) : (
-          <Anim />
-        )}
+        <Anim />
       </div>
       {cadence && (
         <p className={styles.cadenceLabel}>{cadence}</p>

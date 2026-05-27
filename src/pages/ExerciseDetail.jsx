@@ -1,11 +1,15 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
+import { ref as storageRef, getDownloadURL } from 'firebase/storage'
 import { EXERCISES, CATEGORIES } from '../data/exercises'
+import { storage } from '../firebase'
 import ExerciseAnimation from '../components/ExerciseAnimation'
 import Metronome from '../components/Metronome'
 import PlanTabs from '../components/PlanTabs'
 import { useData } from '../context/DataContext'
 import styles from './ExerciseDetail.module.css'
+
+const isHttpUrl = url => /^https?:\/\//i.test(url || '')
 
 // Running/mobility drills auto-advance after this long if not completed manually.
 const DRILL_AUTO_ADVANCE_MS = 60000
@@ -29,6 +33,12 @@ export default function ExerciseDetail() {
   const [videoPlaying, setVideoPlaying] = useState(false)
   const [videoMuted, setVideoMuted] = useState(true)
   const [videoProgress, setVideoProgress] = useState(0)
+  // Resolved, playable video URL. Plain https links are used as-is; gs:// or
+  // storage-path values are resolved to a tokened download URL at runtime so we
+  // never hardcode tokens that can rot or change on re-upload.
+  const [videoUrl, setVideoUrl] = useState(() =>
+    isHttpUrl(exercise?.video) ? exercise.video : null
+  )
   const videoRef = useRef(null)
   const hideControlsTimer = useRef(null)
   const autoAdvanceRef = useRef(null)
@@ -43,6 +53,28 @@ export default function ExerciseDetail() {
     setVideoProgress(0)
     setControlsVisible(true)
   }, [id])
+
+  // Resolve the exercise video source. https URLs are used directly; gs:// or
+  // storage paths are resolved through the Firebase SDK (the signed-in user's
+  // read permission applies). On failure we fall back to the SVG animation, so
+  // a missing/blocked video never leaves the page blank.
+  useEffect(() => {
+    let cancelled = false
+    const src = exercise?.video
+    if (!src) { setVideoUrl(null); return }
+    if (isHttpUrl(src)) { setVideoUrl(src); return }
+    setVideoUrl(null)
+    if (!storage) return
+    getDownloadURL(storageRef(storage, src))
+      .then(url => { if (!cancelled) setVideoUrl(url) })
+      .catch(err => {
+        if (!cancelled) {
+          console.warn('Exercise video failed to resolve:', src, err?.code || err)
+          setVideoUrl(null)
+        }
+      })
+    return () => { cancelled = true }
+  }, [exercise?.video])
 
   // Mobility/running drills move on by themselves once a minute of work is in,
   // so the session flows drill-to-drill without needing a tap each time.
@@ -145,7 +177,7 @@ export default function ExerciseDetail() {
     navigate(nextExercise ? `/library/${nextExercise.id}` : `/library?section=${exercise.category}`)
   }
 
-  const media = exercise.video ? (
+  const media = videoUrl ? (
     <div className={styles.videoSection}>
       <div
         className={styles.videoWrap}
@@ -154,7 +186,7 @@ export default function ExerciseDetail() {
       >
         <video
           ref={videoRef}
-          src={exercise.video}
+          src={videoUrl}
           className={styles.videoEl}
           loop
           muted

@@ -119,7 +119,10 @@
       "Bash(cp la-ultra-3d-walkthrough.mp4 la-ultra-main-video.mp4)",
       "Read(//c/c/Users/Administrator/Desktop/gb-showcase-video/**)",
       "Bash(nohup bash render-all.sh)",
-      "Bash(echo \"launched render-all pid $!\")"
+      "Bash(echo \"launched render-all pid $!\")",
+      "Bash(ls *.rules *.json)",
+      "Bash(cat firebase.json)",
+      "Bash(node -e \"console.log\\('firebase', require\\('./node_modules/firebase/package.json'\\).version\\); require.resolve\\('firebase/storage'\\); console.log\\('firebase/storage OK'\\)\")"
     ]
   },
   "enableAllProjectMcpServers": true,
