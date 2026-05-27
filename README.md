@@ -36,7 +36,7 @@ Everything ships together. Each required deliverable maps to a section below.
 | 10 | Post-Mortem | [Post-Mortem](#post-mortem) | ✅ Complete |
 | + | Portfolio Video (60s) | [Portfolio Video](#portfolio-video) | ✅ Complete |
 | + | Case Study Presentation | [Case Study Presentation](#case-study-presentation) | Session 20, May 27, 2026 |
-| + | Marketing Minute | [Marketing Minute](#marketing-minute) | Script ready, video pending |
+| + | Marketing Minute | [Marketing Minute](#marketing-minute) | ✅ Video (landscape + vertical) |
 
 ---
 
@@ -363,30 +363,10 @@ The presentation covers:
 
 ## Marketing Minute
 
-**60-Second Commercial: The Gentle BadAss Movement Framework**
+A 60-second commercial: one runner knows their pace, the other knows their body.
 
-*Formatted for YouTube (16:9) and Instagram Reels (9:16 vertical)*
-
-**Concept:** We open on a runner staring at their watch. Cut to a runner sitting quietly with their eyes closed. One knows their pace. One knows their body.
-
-**Script (60 seconds):**
-
-> [0-5s] You track everything.
-> [5-10s] Your pace. Your heart rate. Your sleep score.
-> [10-15s] And you still get injured.
-> [15-20s] Because no wearable can tell you how you feel.
-> [20-30s] The Gentle BadAss Movement Framework is a daily tool built on 25 years of Sports-Exercise Medicine.
-> [30-40s] Every morning: ten questions. Two minutes. One number that tells you how ready your body actually is.
-> [40-50s] It adjusts your training plan. It teaches you to move with form. It brings you back to your body.
-> [50-55s] Not a fitness app. A practice.
-> [55-60s] laultrarunandbee.com. Start listening.
-
-**Production notes:**
-- YouTube cut: 16:9 landscape, titles centered, voiceover + ambient sound (morning birds, footsteps on a path)
-- Instagram Reels cut: 9:16 vertical, bold text overlays on each beat, same audio
-- Tone: quiet, unhurried, confident, matches the app's visual language
-
-[Final video: link here when produced]
+- **▶ [YouTube cut (16:9 landscape)](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-run-and-bee-commercial-landscape.mp4)**
+- **▶ [Instagram Reels cut (9:16 vertical)](https://github.com/VirenChauhan19/The-Gentle-BadAss-Movement-Mindfulness-Framework/blob/main/case-study-video/out/la-ultra-run-and-bee-commercial-vertical.mp4)**
 
 ---
 
