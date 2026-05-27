@@ -197,7 +197,7 @@ graph TD
     FeelScore -->|Score below threshold| Adj[Running Plan Auto-Adjustment]
     Journal -->|Persist entry| DC[DataContext]
 
-    User -->|Exercise Practice| Lib[Movement Library - 24 Exercises]
+    User -->|Exercise Practice| Lib[Movement Library - 23 Exercises]
     Lib --> Cat{Category Filter}
     Cat -->|Functional Tests| FT[10 Self-Assessment Tests]
     Cat -->|Strength Tools| ST[10 Strength Exercises]
