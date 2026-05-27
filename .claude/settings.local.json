@@ -122,7 +122,8 @@
       "Bash(echo \"launched render-all pid $!\")",
       "Bash(ls *.rules *.json)",
       "Bash(cat firebase.json)",
-      "Bash(node -e \"console.log\\('firebase', require\\('./node_modules/firebase/package.json'\\).version\\); require.resolve\\('firebase/storage'\\); console.log\\('firebase/storage OK'\\)\")"
+      "Bash(node -e \"console.log\\('firebase', require\\('./node_modules/firebase/package.json'\\).version\\); require.resolve\\('firebase/storage'\\); console.log\\('firebase/storage OK'\\)\")",
+      "Bash(grep -iE \"\\\\.\\(mp4|mov|webm|gif|png|jpg|jpeg\\)$\")"
     ]
   },
   "enableAllProjectMcpServers": true,
