@@ -41,14 +41,16 @@ export default function Library() {
         <p className={styles.subtitle}>Choose Breathe, Mobility, Strength, or Running to begin.</p>
       </header>
 
-      <section className={styles.weeklyModule}>
-        <div className={styles.weeklyIcon}>90</div>
-        <div className={styles.weeklyCopy}>
-          <p className={styles.weeklyLabel}>Main course</p>
-          <h2>Your Plan</h2>
-          <p>Start with Breathe, move through Mobility and Strength, then build your Running plan when you are ready.</p>
-        </div>
-      </section>
+      {activeSection !== 'coach' && (
+        <section className={styles.weeklyModule}>
+          <div className={styles.weeklyIcon}>90</div>
+          <div className={styles.weeklyCopy}>
+            <p className={styles.weeklyLabel}>Main course</p>
+            <h2>Your Plan</h2>
+            <p>Start with Breathe, move through Mobility and Strength, then build your Running plan when you are ready.</p>
+          </div>
+        </section>
+      )}
 
       <PlanTabs active={activeSection} />
 

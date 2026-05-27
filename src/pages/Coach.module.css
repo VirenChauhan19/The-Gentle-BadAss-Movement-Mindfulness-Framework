@@ -660,11 +660,51 @@
   border-radius: 14px;
   font-weight: 900;
   font-size: 0.84rem;
+  letter-spacing: 0;
+  transition:
+    transform var(--d-base) var(--ease-out),
+    box-shadow var(--d-base) var(--ease-out),
+    filter var(--d-base) var(--ease-out),
+    background var(--d-base) var(--ease-out);
 }
 
 .audioCueControls button:first-child {
-  background: var(--ink);
-  color: var(--on-ink);
+  position: relative;
+  overflow: hidden;
+  background: var(--sage-gradient);
+  color: var(--on-accent);
+  box-shadow:
+    0 9px 22px rgba(63, 95, 62, 0.30),
+    0 0 0 1px color-mix(in srgb, var(--sage) 34%, transparent),
+    0 0 28px color-mix(in srgb, var(--sage) 28%, transparent);
+}
+
+.audioCueControls button:first-child::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0 34%, rgba(255,255,255,0.34) 48%, transparent 62%);
+  transform: translateX(-120%);
+  transition: transform 760ms var(--ease-out);
+  pointer-events: none;
+}
+
+.audioCueControls button:first-child:hover {
+  transform: translateY(-2px);
+  filter: saturate(1.08) brightness(1.05);
+  box-shadow:
+    0 14px 30px rgba(63, 95, 62, 0.36),
+    0 0 0 1px color-mix(in srgb, var(--sage) 42%, transparent),
+    0 0 36px color-mix(in srgb, var(--sage) 34%, transparent);
+}
+
+.audioCueControls button:first-child:hover::after {
+  transform: translateX(120%);
+}
+
+.audioCueControls button:first-child:active {
+  animation: pressGlow 420ms var(--ease-out);
+  transform: translateY(0) scale(0.985);
 }
 
 .audioCueControls button:last-child {
@@ -672,6 +712,12 @@
   border: 1px solid var(--border-light);
   color: var(--terracotta);
   padding: 0 14px;
+}
+
+.audioCueControls button:last-child:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--paper-soft);
+  box-shadow: 0 10px 22px var(--shadow-xs);
 }
 
 .audioCueControls button:last-child:disabled {
