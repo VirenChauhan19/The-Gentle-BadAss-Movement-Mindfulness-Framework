@@ -147,9 +147,13 @@ export default function Breathing() {
 
   function stopPractice() {
     setRunning(false)
-    setElapsed(0)
-    setSaved(false)
-    setJustUnlocked(false)
+    // If the one-minute target was reached but the auto-save hasn't fired yet,
+    // log the session so finishing via Stop still counts it. saveEntry writes to
+    // localStorage synchronously, so the record survives the navigation below.
+    if (elapsed >= targetDuration && !saved) saveBreathSession()
+    // Stop ends the practice and moves the runner on to the next step (Mobility),
+    // rather than just resetting the timer in place.
+    navigate('/library?section=running')
   }
 
   const phaseMeta = phaseInfo[weekConfig.phase]

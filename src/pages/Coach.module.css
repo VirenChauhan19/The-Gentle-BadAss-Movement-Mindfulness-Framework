@@ -311,6 +311,7 @@
 .todayHero {
   border-left: 5px solid var(--sage);
   padding: 18px;
+  margin: 0 16px 16px;
 }
 
 /* ── Adaptation banners (Feel / safety / breathing overrides) ─ */
@@ -470,6 +471,66 @@
   color: var(--ink-light);
   font-size: 0.82rem;
   line-height: 1.5;
+}
+
+/* ── Collapsible secondary sections (run tab) ─────────────────── */
+.collapsible {
+  margin: 0 16px 12px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg);
+  box-shadow: 0 10px 26px var(--shadow-xs);
+  overflow: hidden;
+}
+
+.collapsibleSummary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 16px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--ink);
+  user-select: none;
+}
+
+.collapsibleSummary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsibleChevron {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  transition: transform 0.22s ease;
+}
+
+.collapsible[open] .collapsibleSummary {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.collapsible[open] .collapsibleChevron {
+  transform: rotate(180deg);
+}
+
+.collapsibleBody {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+/* Children bring their own card chrome and the grid gap handles spacing, so
+   strip any built-in margins (including the mobile side insets) to keep the
+   inside flush and tidy. */
+.collapsibleBody > * {
+  margin: 0 !important;
+  width: 100%;
+}
+
+.collapsibleBody > .section {
+  padding: 0;
 }
 
 .audioCueCard {
@@ -3286,6 +3347,18 @@
     padding-right: 12px;
   }
 
+  /* Match the tighter phone side margins used by the other cards so today's
+     session and the collapsible sections line up with the week board. */
+  .todayHero,
+  .collapsible {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .collapsibleBody {
+    padding: 12px;
+  }
+
   .planSummary {
     display: flex;
     overflow-x: auto;
@@ -3338,8 +3411,29 @@
     grid-template-columns: 1fr;
   }
 
+  /* Stacked full-width profile buttons don't need the tall square height the
+     3-up grid relied on; without this each becomes a half-empty box with the
+     label floating at the top. Center the text into tidy, compact rows. */
+  .audioProfileGrid button {
+    min-height: 0;
+    padding: 11px 13px;
+    align-content: center;
+    gap: 2px;
+  }
+
   .audioCueCard {
     border-radius: 18px;
+    gap: 10px;
+    padding: 14px 14px 16px;
+  }
+
+  /* Let the phase label and timer breathe instead of colliding mid-line. */
+  .audioCueHeader {
+    align-items: flex-start;
+  }
+
+  .audioCueHeader p {
+    font-size: 1.35rem;
   }
 
   .statusBtn {

@@ -154,7 +154,7 @@ function SignInGate({ theme }) {
           Sign in to sync Feel, Your Plan, Functional Tests, and Progress across devices. Guest mode saves on this device only.
         </p>
         {authError && <p className={styles.authError}>{authError}</p>}
-        <button className={styles.googleBtn} onClick={() => signInWithGoogle('popup')} disabled={!isConfigured}>
+        <button className={styles.googleBtn} onClick={() => signInWithGoogle()} disabled={!isConfigured}>
           Continue with Google
         </button>
         {!isConfigured && <p className={styles.lockHint}>Firebase is not configured yet, so Google sign-in is unavailable in this environment.</p>}

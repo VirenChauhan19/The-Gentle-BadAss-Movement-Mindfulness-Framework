@@ -1421,11 +1421,52 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
 }
 
 // ── Program Tab ───────────────────────────────────────────────────────────────
+
+// Tracks the phone breakpoint so secondary run-tab sections can default to
+// collapsed on phone (to cut clutter) while staying open on larger screens.
+function useIsPhone() {
+  const [isPhone, setIsPhone] = useState(() =>
+    typeof window !== 'undefined' && !!window.matchMedia?.('(max-width: 767px)').matches
+  )
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mq = window.matchMedia('(max-width: 767px)')
+    const onChange = e => setIsPhone(e.matches)
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
+  }, [])
+  return isPhone
+}
+
+// Native <details> section: collapsed by default on phone, open on desktop.
+function CollapsibleSection({ title, defaultOpen = false, children }) {
+  return (
+    <details className={styles.collapsible} open={defaultOpen}>
+      <summary className={styles.collapsibleSummary}>
+        <span>{title}</span>
+        <svg className={styles.collapsibleChevron} viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </summary>
+      <div className={styles.collapsibleBody}>{children}</div>
+    </details>
+  )
+}
+
 function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, entries, dayNum, actuals, onRetune, retuning, retuneNotice, isComplete, onCheckin, onNewGoal, adminRemarks = [], profile, expandingWeek = false }) {
+  const isPhone = useIsPhone()
+  const sectionsOpen = !isPhone
   const visiblePlan = plan.length ? plan : getPlan(goal)
   const currentDay = Math.max(1, dayNum)
   const currentWeek = Math.max(1, Math.ceil(currentDay / 7))
   const totalWeeks = Math.max(1, Math.ceil(visiblePlan.length / 7))
+  // Runners see the current week, and the next week only once this week is
+  // nearly over (its last two days), so they can't read ahead into a plan the
+  // coach may still be adjusting. Past weeks stay viewable as history. The admin
+  // reviews the whole plan through a separate view in the Admin panel.
+  const dayOfWeek = ((currentDay - 1) % 7) + 1 // 1..7 within the current week
+  const nextWeekUnlocked = dayOfWeek >= 6
+  const maxVisibleWeek = Math.min(totalWeeks, currentWeek + (nextWeekUnlocked ? 1 : 0))
   const [weekIndex, setWeekIndex] = useState(currentWeek)
   const [selectedDay, setSelectedDay] = useState(null)
   const weekStartDay = (weekIndex - 1) * 7 + 1
@@ -1484,7 +1525,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
 
   function goToNextWeek() {
     setSelectedDay(null)
-    setWeekIndex(w => Math.min(totalWeeks, w + 1))
+    setWeekIndex(w => Math.min(maxVisibleWeek, w + 1))
   }
 
   function goToCurrentWeek() {
@@ -1495,104 +1536,32 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
   return (
     <div className={styles.tabContent}>
 
-      <div className={styles.runningDashboard}>
-        <InsightCard
-          label="Today readiness"
-          title={readinessInsight.title}
-          summary={readinessInsight.summary}
-          action={readinessInsight.action}
-          tone={readinessInsight.tone}
-        />
-        <TrendIntelligence insight={trendInsight} />
-        <CoachIntelligenceCard
-          goal={goal}
-          actuals={fallbackActuals}
-          weekTarget={weekTarget}
-          weekIndex={weekIndex}
-          totalWeeks={totalWeeks}
-          avgFeel={avgRecentFeel}
-          onRetune={onRetune}
-          retuning={retuning}
-          retuneNotice={retuneNotice}
-        />
-        {profile?.sex === 'woman' && (
-          <div className={styles.paceGuideCard}>
+      {/* ── PRIMARY: today's session + Start workout ─────────────────── */}
+      {todaySession && !isComplete && (
+        <div className={styles.todayHero} style={{ borderColor: todayStyle.border }}>
+          <div className={styles.todayHeroTop}>
             <div>
-              <span>Monthly context</span>
-              <p>{formatCycleSummary(profile)}</p>
+              <p className={styles.sectionLabel}>Today</p>
+              <h2>{todaySession.title || todayStyle.label}</h2>
             </div>
-            <div className={styles.paceGuideGrid}>
-              <p><strong>Last period</strong>{profile.lastPeriod || 'Not set'}</p>
-              <p><strong>Period length</strong>{profile.periodLength ? `${profile.periodLength} days` : 'Not set'}</p>
-              <p><strong>Cycle length</strong>{profile.cycleLength ? `${profile.cycleLength} days` : 'Not set'}</p>
-              <p><strong>Stage</strong>{formatMenopauseStatus(profile.menopauseStatus)}</p>
-            </div>
+            <span className={styles.sessionChip} style={{ color: todayStyle.color, background: todayStyle.bg }}>
+              {todayStyle.label}
+            </span>
           </div>
-        )}
-        {goal.paceGuide && (
-          <div className={styles.paceGuideCard}>
-            <div>
-              <span>Personal pace guide</span>
-              <p>{goal.paceGuide.benchmark}</p>
-            </div>
-            <div className={styles.paceGuideGrid}>
-              <p><strong>Recovery</strong>{goal.paceGuide.recovery}</p>
-              <p><strong>Zone 2</strong>{goal.paceGuide.zone2}</p>
-              <p><strong>Long</strong>{goal.paceGuide.long}</p>
-              <p><strong>Tempo</strong>{goal.paceGuide.tempo}</p>
-            </div>
+          <AdaptationBanners session={todaySession} />
+          <div className={styles.todayMetrics}>
+            <span>{todaySession.distance || 'No distance'}</span>
+            <span>{todaySession.duration || 'Open duration'}</span>
+            <span>Day {todaySession.dayNumber || currentDay}</span>
           </div>
-        )}
-        {todaySession && !isComplete && (
-          <div className={styles.todayHero} style={{ borderColor: todayStyle.border }}>
-            <div className={styles.todayHeroTop}>
-              <div>
-                <p className={styles.sectionLabel}>Today</p>
-                <h2>{todaySession.title || todayStyle.label}</h2>
-              </div>
-              <span className={styles.sessionChip} style={{ color: todayStyle.color, background: todayStyle.bg }}>
-                {todayStyle.label}
-              </span>
-            </div>
-            <AdaptationBanners session={todaySession} />
-            <div className={styles.todayMetrics}>
-              <span>{todaySession.distance || 'No distance'}</span>
-              <span>{todaySession.duration || 'Open duration'}</span>
-              <span>Day {todaySession.dayNumber || currentDay}</span>
-            </div>
-            {todaySession.purpose && <p className={styles.todayPurpose}>Why: {todaySession.purpose}</p>}
-            {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
-            {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
-            <DailyTrainingBlocks session={todaySession} />
-            {todaySession.type !== 'rest' && (
-              <RunCuePlayer session={todaySession} week={currentWeek} />
-            )}
-            {todayRemarks.length > 0 && <AttachedRemarks remarks={todayRemarks} />}
-          </div>
-        )}
-
-        <div className={styles.planSummary}>
-          <div>
-            <span>{visiblePlan.length}</span>
-            <p>days mapped</p>
-          </div>
-          <div>
-            <span>{trainingDays}</span>
-            <p>workouts</p>
-          </div>
-          <div>
-            <span>{completedDates.size}</span>
-            <p>logged</p>
-          </div>
-        </div>
-      </div>
-
-      {visiblePlan.length > 0 && (
-        <div className={styles.adminPlanNotice}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.7 }}>
-            <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
-          </svg>
-          <p>Your coach actively reviews and updates this plan. Check back regularly, your schedule may be adjusted based on your progress.</p>
+          {todaySession.purpose && <p className={styles.todayPurpose}>Why: {todaySession.purpose}</p>}
+          {todaySession.pace && <p className={styles.todayPace}>{todaySession.pace}</p>}
+          {todaySession.notes && <p className={styles.todayNotes}>{todaySession.notes}</p>}
+          <DailyTrainingBlocks session={todaySession} exclude={['strength', 'mobility']} />
+          {todaySession.type !== 'rest' && (
+            <RunCuePlayer session={todaySession} week={currentWeek} />
+          )}
+          {todayRemarks.length > 0 && <AttachedRemarks remarks={todayRemarks} />}
         </div>
       )}
 
@@ -1607,6 +1576,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
         )
       })()}
 
+      {/* ── PRIMARY: this week ───────────────────────────────────────── */}
       {visiblePlan.length > 0 && (
         <div className={styles.weekBoard}>
           <div className={styles.weekNav}>
@@ -1632,7 +1602,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
             <button
               className={styles.weekNavBtn}
               onClick={goToNextWeek}
-              disabled={weekIndex >= totalWeeks}
+              disabled={weekIndex >= maxVisibleWeek}
               aria-label="Next week"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
@@ -1719,54 +1689,7 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
         </div>
       )}
 
-      {nextSessions.length > 0 && (
-        <div className={styles.upNext}>
-          <p className={styles.sectionLabel}>Up next</p>
-          {nextSessions.slice(0, 5).map(s => {
-            const st = SESSION_STYLE[s.type] || SESSION_STYLE.rest
-            return (
-              <button key={s.id || s.date} className={styles.upNextRow} onClick={() => setSelectedDay(s)}>
-                <span style={{ background: st.border }} />
-                <div>
-                  <strong>Day {s.dayNumber}: {s.title}</strong>
-                  <p>{s.date} · {s.distance || s.duration || SESSION_STYLE[s.type]?.label}</p>
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      )}
-
-      {/* Program overview */}
-      {goal.overview && (
-        <div className={styles.overviewCard}>
-          <p className={styles.sectionLabel}>Your Plan</p>
-          <p className={styles.overviewText}>{goal.overview}</p>
-          {goal.progressionNote && <p className={styles.progressionNote}>{goal.progressionNote}</p>}
-          {goal.peakWeeklyVolume && (
-            <p className={styles.peakVolume}>Peak weekly volume: <strong>{goal.peakWeeklyVolume}</strong></p>
-          )}
-        </div>
-      )}
-
-      {/* Today's session */}
-      {false && todaySession && !isComplete && (
-        <div className={styles.todaySessionCard} style={{
-          borderLeft: `4px solid ${SESSION_STYLE[todaySession.type]?.border || '#ccc'}`,
-        }}>
-          <div className={styles.sessionTop}>
-            <span className={styles.sessionType} style={{ color: SESSION_STYLE[todaySession.type]?.color }}>
-              {SESSION_STYLE[todaySession.type]?.label || todaySession.type}
-            </span>
-            <span className={styles.sessionMeta}>{todaySession.distance} · {todaySession.duration}</span>
-          </div>
-          <p className={styles.sessionTitle}>{todaySession.title}</p>
-          {todaySession.pace && <p className={styles.sessionPace}>Pace: {todaySession.pace}</p>}
-          {todaySession.notes && <p className={styles.sessionNotes}>{todaySession.notes}</p>}
-        </div>
-      )}
-
-      {/* Check-in or completion */}
+      {/* ── PRIMARY: today's check-in / completion ───────────────────── */}
       {isComplete ? (
         <div className={styles.completionCard}>
           <p className={styles.completionMsg}>You finished your {PROGRAM_DAYS}-day {goal.focus || goal.raceGoal} program. That's the work.</p>
@@ -1781,16 +1704,93 @@ function ProgramTab({ goal, plan = [], todaySession, todayCheckin, checkins, ent
         />
       )}
 
-      {generalRemarks.length > 0 && (
-        <DailyRemarks remarks={generalRemarks} checkins={checkins} />
+      {/* ── SECONDARY: tap-to-expand on phone, open on desktop ───────── */}
+      <CollapsibleSection title="Coach insights" defaultOpen={sectionsOpen}>
+        <InsightCard
+          label="Today readiness"
+          title={readinessInsight.title}
+          summary={readinessInsight.summary}
+          action={readinessInsight.action}
+          tone={readinessInsight.tone}
+        />
+        <TrendIntelligence insight={trendInsight} />
+        <CoachIntelligenceCard
+          goal={goal}
+          actuals={fallbackActuals}
+          weekTarget={weekTarget}
+          weekIndex={weekIndex}
+          totalWeeks={totalWeeks}
+          avgFeel={avgRecentFeel}
+          onRetune={onRetune}
+          retuning={retuning}
+          retuneNotice={retuneNotice}
+        />
+        {visiblePlan.length > 0 && (
+          <div className={styles.adminPlanNotice}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.7 }}>
+              <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+            </svg>
+            <p>Your coach actively reviews and updates this plan. Check back regularly, your schedule may be adjusted based on your progress.</p>
+          </div>
+        )}
+      </CollapsibleSection>
+
+      {(profile?.sex === 'woman' || goal.paceGuide) && (
+        <CollapsibleSection title="Pace & cycle" defaultOpen={sectionsOpen}>
+          {profile?.sex === 'woman' && (
+            <div className={styles.paceGuideCard}>
+              <div>
+                <span>Monthly context</span>
+                <p>{formatCycleSummary(profile)}</p>
+              </div>
+              <div className={styles.paceGuideGrid}>
+                <p><strong>Last period</strong>{profile.lastPeriod || 'Not set'}</p>
+                <p><strong>Period length</strong>{profile.periodLength ? `${profile.periodLength} days` : 'Not set'}</p>
+                <p><strong>Cycle length</strong>{profile.cycleLength ? `${profile.cycleLength} days` : 'Not set'}</p>
+                <p><strong>Stage</strong>{formatMenopauseStatus(profile.menopauseStatus)}</p>
+              </div>
+            </div>
+          )}
+          {goal.paceGuide && (
+            <div className={styles.paceGuideCard}>
+              <div>
+                <span>Personal pace guide</span>
+                <p>{goal.paceGuide.benchmark}</p>
+              </div>
+              <div className={styles.paceGuideGrid}>
+                <p><strong>Recovery</strong>{goal.paceGuide.recovery}</p>
+                <p><strong>Zone 2</strong>{goal.paceGuide.zone2}</p>
+                <p><strong>Long</strong>{goal.paceGuide.long}</p>
+                <p><strong>Tempo</strong>{goal.paceGuide.tempo}</p>
+              </div>
+            </div>
+          )}
+        </CollapsibleSection>
       )}
 
-      {/* Run log */}
-      {checkins.length > 0 && (
-        <div className={styles.section}>
-          <p className={styles.sectionLabel}>Run Log</p>
-          {[...checkins].reverse().map(c => <RunLogEntry key={c.date} checkin={c} remarks={remarksByDate[c.date] || []} />)}
-        </div>
+      {goal.overview && (
+        <CollapsibleSection title="Your plan" defaultOpen={sectionsOpen}>
+          <div className={styles.overviewCard}>
+            <p className={styles.overviewText}>{goal.overview}</p>
+            {goal.progressionNote && <p className={styles.progressionNote}>{goal.progressionNote}</p>}
+            {goal.peakWeeklyVolume && (
+              <p className={styles.peakVolume}>Peak weekly volume: <strong>{goal.peakWeeklyVolume}</strong></p>
+            )}
+          </div>
+        </CollapsibleSection>
+      )}
+
+      {(generalRemarks.length > 0 || checkins.length > 0) && (
+        <CollapsibleSection title="Run log" defaultOpen={sectionsOpen}>
+          {generalRemarks.length > 0 && (
+            <DailyRemarks remarks={generalRemarks} checkins={checkins} />
+          )}
+          {checkins.length > 0 && (
+            <div className={styles.section}>
+              {[...checkins].reverse().map(c => <RunLogEntry key={c.date} checkin={c} remarks={remarksByDate[c.date] || []} />)}
+            </div>
+          )}
+        </CollapsibleSection>
       )}
 
       <button className={styles.changeGoalBtn} onClick={onNewGoal}>← Change program</button>
@@ -2030,6 +2030,38 @@ function triggerRunCue(audioRef, profile, phase) {
   return { ok: true, notice: '' }
 }
 
+// Names commonly used by female TTS voices across iOS, Android, Windows, macOS
+// and Chrome. We match on these first so the run cue sounds like a woman.
+const FEMALE_VOICE_HINTS = [
+  'female', 'woman',
+  'samantha', 'victoria', 'karen', 'moira', 'tessa', 'fiona', 'serena',
+  'allison', 'ava', 'susan', 'nicky', 'joelle',
+  'zira', 'aria', 'jenny', 'michelle', 'sonia', 'libby', 'jane', 'clara', 'hazel',
+  'google us english', 'google uk english female',
+]
+
+function pickHappyFemaleVoice(voices) {
+  if (!voices.length) return null
+  const en = voices.filter(v => /^en[-_]/i.test(v.lang))
+  const pool = en.length ? en : voices
+  const byHint = pool.find(v =>
+    FEMALE_VOICE_HINTS.some(hint => (v.name || '').toLowerCase().includes(hint))
+  )
+  return byHint || pool[0]
+}
+
+// Voice lists load asynchronously on many browsers (getVoices() is empty until
+// the engine finishes). Prime it at load so a female voice is ready by the time
+// the first run cue speaks.
+if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+  try {
+    window.speechSynthesis.getVoices()
+    window.speechSynthesis.addEventListener?.('voiceschanged', () => {
+      window.speechSynthesis.getVoices()
+    })
+  } catch {}
+}
+
 function speakRunCue(text) {
   if (!text) return { ok: false, notice: 'No spoken cue is available for this phase.' }
   if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
@@ -2038,12 +2070,14 @@ function speakRunCue(text) {
 
   const synth = window.speechSynthesis
   const utterance = new SpeechSynthesisUtterance(text)
-  utterance.rate = 0.92
-  utterance.pitch = 0.95
-  utterance.volume = 0.9
+  // Slightly brighter and quicker than neutral so the cue lands warm and upbeat
+  // rather than flat. Higher pitch reads as a happier, encouraging tone.
+  utterance.rate = 1.02
+  utterance.pitch = 1.18
+  utterance.volume = 1.0
 
   const voices = synth.getVoices?.() || []
-  const preferredVoice = voices.find(voice => /^en[-_]/i.test(voice.lang)) || voices[0]
+  const preferredVoice = pickHappyFemaleVoice(voices)
   if (preferredVoice) utterance.voice = preferredVoice
 
   try {
@@ -2220,11 +2254,11 @@ function AdaptationBanners({ session }) {
   )
 }
 
-function DailyTrainingBlocks({ session }) {
+function DailyTrainingBlocks({ session, exclude = [] }) {
   const blocks = [
-    session.crossTraining && { label: 'Cross-training', text: session.crossTraining },
-    session.strength && { label: 'Strength', text: session.strength },
-    session.mobility && { label: 'Mobility', text: session.mobility },
+    !exclude.includes('crossTraining') && session.crossTraining && { label: 'Cross-training', text: session.crossTraining },
+    !exclude.includes('strength') && session.strength && { label: 'Strength', text: session.strength },
+    !exclude.includes('mobility') && session.mobility && { label: 'Mobility', text: session.mobility },
   ].filter(Boolean)
   if (!blocks.length) return null
 
