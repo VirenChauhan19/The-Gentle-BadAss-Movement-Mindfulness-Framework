@@ -23,7 +23,7 @@ export const EXERCISES = [
     purpose: 'Assess hamstring length and the hip-hinge pattern.',
     cue: 'Fold from the hips, not the lower back. Feel the stretch in the backs of the legs.',
     animation: 'forwardBend',
-    video: 'gs://gentle-badass.firebasestorage.app/Standing forward bent.mp4',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Standing%20forward%20bent.mp4?alt=media&token=1e301c63-f353-43af-be08-e702f48f0259',
     steps: [
       'Stand tall, feet hip-width.',
       'Soft bend in knees, then hinge forward from the hip crease.',
@@ -39,7 +39,7 @@ export const EXERCISES = [
     purpose: 'Identify spinal flexibility and the neutral-spine position.',
     cue: 'Exaggerate the slump, then find the opposite, tall spine. Your ideal sitting posture is between these two.',
     animation: 'sittingSlump',
-    video: 'gs://gentle-badass.firebasestorage.app/Sitting Slump.mov',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Sitting%20Slump.mp4?alt=media&token=068e2d7c-aef7-40d3-867c-23eecbb79780',
     steps: [
       'Sit on the edge of a chair, feet flat.',
       'Fully slump, round your lower back and drop your chest.',
@@ -55,7 +55,7 @@ export const EXERCISES = [
     purpose: 'Assess hip mobility, the engine of healthy running.',
     cue: 'The hip rotates; the spine stays still. This is the core principle of the "Hip Engine."',
     animation: 'hipRotation',
-    video: 'gs://gentle-badass.firebasestorage.app/Hip Internal & External Rotation.mp4',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Hip%20Internal%20%26%20External%20Rotation.mp4?alt=media&token=764b9905-2a40-4bd4-8ed1-47159d707cff',
     steps: [
       'Sit on the floor, legs straight in front.',
       'For internal rotation: let one leg fall inward, knee pointing in.',
@@ -71,7 +71,7 @@ export const EXERCISES = [
     purpose: 'Assess hamstring length and lumbar stability under hip flexion.',
     cue: 'The resting leg stays completely flat. If it lifts, the lumbar is compensating.',
     animation: 'slr',
-    video: 'gs://gentle-badass.firebasestorage.app/Supine Straight Leg Raise.mov',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Supine%20Straight%20Leg%20Raise.mp4?alt=media&token=57fb007d-dc91-44f1-8618-3b65cbcfb17a',
     steps: [
       'Lie on your back, both legs straight.',
       'Slowly raise one leg, keeping the knee locked.',
@@ -87,7 +87,7 @@ export const EXERCISES = [
     purpose: 'Assess glute activation and lumbar stability.',
     cue: 'The glute fires to lift the leg; the lower back stays completely still.',
     animation: 'proneHipExtension',
-    video: 'gs://gentle-badass.firebasestorage.app/Prone Hip Extension.mp4',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Prone%20Hip%20Extension.mp4?alt=media&token=095ade52-86bd-43b9-b555-9b4d690a3da8',
     steps: [
       'Lie face down, legs straight, forehead resting on hands.',
       'Squeeze one glute and lift that leg a few inches off the floor.',
@@ -103,7 +103,7 @@ export const EXERCISES = [
     purpose: 'Assess lateral and rotational mobility of the thoracic spine.',
     cue: 'The movement comes from the mid-back (thoracic), not the lumbar.',
     animation: 'sideBend',
-    video: 'gs://gentle-badass.firebasestorage.app/Side Bending & Rotation.mov',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Side%20Bending%20%26%20Rotation.mp4?alt=media&token=d6aa6ebc-07e9-4e48-8e72-6d17b4b535bb',
     steps: [
       'Stand tall, arms at sides.',
       'For side bend: slide one hand down toward your knee, keeping hips still.',
@@ -226,7 +226,7 @@ export const EXERCISES = [
     purpose: 'Single-leg hip strength with frontal-plane stability.',
     cue: 'The front knee tracks over the second toe. The torso stays vertical, do not lean forward.',
     animation: 'reverseLunge',
-    video: 'gs://gentle-badass.firebasestorage.app/Reverse Lunge.mp4',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Reverse%20Lunge.mp4?alt=media&token=b0791537-09e9-47c3-b1f1-aab87c2d999b',
     steps: [
       'Stand tall, feet together.',
       'Step one foot back and lower in 4 counts until back knee nearly touches the floor.',
@@ -346,7 +346,7 @@ export const EXERCISES = [
     purpose: 'Teach the soft landing, absorb impact through the hip, not the knee.',
     cue: 'Land like you\'re landing on thin ice. Quiet feet. The sound of your landing tells you everything.',
     animation: 'hopping',
-    video: 'gs://gentle-badass.firebasestorage.app/Hopping.mp4',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Hopping.mp4?alt=media&token=2bff169b-03ef-4332-817d-a9facb372f3e',
     steps: [
       'Stand on one foot.',
       'Hop forward a few inches and land softly, bend the knee and hip together on contact.',
@@ -378,7 +378,7 @@ export const EXERCISES = [
     purpose: 'Reinforce the elastic, hip-driven landing pattern at a higher amplitude.',
     cue: 'The arm swing drives the hip. Opposite arm, opposite hip. The core is the bridge between them.',
     animation: 'skipping',
-    video: 'gs://gentle-badass.firebasestorage.app/Skipping.mp4',
+    video: 'https://firebasestorage.googleapis.com/v0/b/gentle-badass.firebasestorage.app/o/Skipping.mp4?alt=media&token=fd829bee-e206-43a8-b0ef-f35ce18528fa',
     steps: [
       'Skip forward with exaggerated arm swing.',
       'On each skip, feel the opposite arm and hip working together.',

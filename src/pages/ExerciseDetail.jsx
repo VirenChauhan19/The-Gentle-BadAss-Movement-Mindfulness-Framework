@@ -111,6 +111,14 @@ export default function ExerciseDetail() {
     if (v.duration) setVideoProgress((v.currentTime / v.duration) * 100)
   }, [])
 
+  // If the resolved video can't be loaded or decoded (404, blocked, or a codec
+  // the browser can't play), drop back to the SVG animation instead of leaving
+  // a broken/black player on screen.
+  const handleVideoError = useCallback((e) => {
+    console.warn('Exercise video failed to play:', e.currentTarget?.src)
+    setVideoUrl(null)
+  }, [])
+
   const toggleMute = useCallback((e) => {
     e.stopPropagation()
     const v = videoRef.current
@@ -193,6 +201,7 @@ export default function ExerciseDetail() {
           playsInline
           preload="metadata"
           onTimeUpdate={handleTimeUpdate}
+          onError={handleVideoError}
         />
 
         {/* Centre play/pause button */}
