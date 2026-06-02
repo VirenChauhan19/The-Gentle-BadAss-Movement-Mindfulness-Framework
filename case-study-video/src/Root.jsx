@@ -40,6 +40,17 @@ const scenes = [
   { id: 'end', from: 1455, dur: 285 },
 ]
 
+const voiceScenes = [
+  { from: 0, dur: 135, file: 'commercial-scenes/01-hook.mp3' },
+  { from: 135, dur: 225, file: 'commercial-scenes/02-feel.mp3' },
+  { from: 360, dur: 195, file: 'commercial-scenes/03-plan.mp3' },
+  { from: 555, dur: 225, file: 'commercial-scenes/04-breathe.mp3' },
+  { from: 780, dur: 255, file: 'commercial-scenes/05-move.mp3' },
+  { from: 1035, dur: 225, file: 'commercial-scenes/06-running.mp3' },
+  { from: 1260, dur: 195, file: 'commercial-scenes/07-progress.mp3' },
+  { from: 1455, dur: 285, file: 'commercial-scenes/08-end.mp3' },
+]
+
 const features = [
   'Daily Feel check-in',
   'Adaptive running plan',
@@ -104,7 +115,11 @@ function Commercial({ format }) {
       }}>
         laultrarunandbee.web.app
       </div>
-      <Audio src={staticFile('case-study-voice-portfolio-58.mp3')} volume={0.98} />
+      {voiceScenes.map((scene) => (
+        <Sequence key={scene.file} from={scene.from} durationInFrames={scene.dur}>
+          <Audio src={staticFile(scene.file)} volume={0.98} />
+        </Sequence>
+      ))}
       <Audio
         src={staticFile('soft-portfolio-bed.wav')}
         volume={(f) =>
@@ -204,10 +219,10 @@ function Hook({ isVertical }) {
       visual={<Phone type="home" isVertical={isVertical} lift={Math.sin(frame / 28) * 10} />}
     >
       <Copy
-        eyebrow="Portfolio case study"
+        eyebrow="Meet the app"
         title="La Ultra: Run & Bee"
-        body="A movement and mindfulness app built for one real person: Dr. Rajat Chauhan, a sports-medicine expert who teaches runners to listen before they train."
-        chips={['Person', 'Problem', 'Prototype', 'Evidence']}
+        body="A movement and mindfulness app by Dr. Rajat Chauhan for runners who want to train the engine without fighting the body."
+        chips={['Feel', 'Breathe', 'Move', 'Coach']}
         isVertical={isVertical}
       />
     </Stage>
@@ -221,10 +236,10 @@ function Feel({ isVertical }) {
       visual={<Phone type="feel" isVertical={isVertical} />}
     >
       <Copy
-        eyebrow="The person"
-        title="The expert was also the user."
-        body="Dr. Chauhan brought 25 years of clinical practice, his I-My-Me framework, and daily feedback that made every generic choice visible."
-        chips={['Sports medicine', 'The Lazy Runner', 'Clinical language']}
+        eyebrow="Start with Feel"
+        title="Two minutes before the shoes go on."
+        body="Rate real signals across body, mind, and movement. The app turns that check-in into a daily Feel Score you can understand."
+        chips={['Body', 'Mind', 'Movement', 'Reflection']}
         isVertical={isVertical}
       />
     </Stage>
@@ -235,13 +250,13 @@ function Adapt({ isVertical }) {
   return (
     <Stage
       isVertical={isVertical}
-      visual={<PlanCard isVertical={isVertical} />}
+      visual={<Phone type="plan" isVertical={isVertical} />}
     >
       <Copy
-        eyebrow="The problem"
-        title="Runners trust numbers before signals."
-        body="Wearables track pace and heart rate, but they rarely ask if the body is ready. The injury starts before the run."
-        chips={['Under-listening', 'Plan obedience', 'Readiness gap']}
+        eyebrow="Your plan adapts"
+        title="The plan bends before the body breaks."
+        body="When Feel is low, the day can shift from intensity to recovery, mobility, or nasal-only easy work."
+        chips={['Readiness', 'Recovery', 'Daily plan']}
         isVertical={isVertical}
       />
     </Stage>
@@ -256,10 +271,10 @@ function Breathe({ isVertical }) {
       visual={<Phone type="breathe" isVertical={isVertical} pulse={0.78 + Math.sin(frame / 20) * 0.1} />}
     >
       <Copy
-        eyebrow="The research"
-        title="The first question became the product."
-        body="Interviews, observation, and clinical language shaped the ritual: check Feel, breathe, move with form, then adapt the run."
-        chips={['I', 'My', 'Me', 'Feel first']}
+        eyebrow="Breathe"
+        title="Settle the system first."
+        body="The 5 BPM breathing practice uses a calm orb and metronome to slow the rhythm before training starts."
+        chips={['5 BPM', 'Orb timer', 'Metronome']}
         isVertical={isVertical}
       />
     </Stage>
@@ -273,10 +288,10 @@ function Move({ isVertical }) {
       visual={<Phone type="move" isVertical={isVertical} />}
     >
       <Copy
-        eyebrow="Prototype failures"
-        title="The first app looked too normal."
-        body="Streak pressure, generic exercise copy, busy motion, and the wrong front door all had to be cut or rebuilt."
-        chips={['No guilt', 'No generic cues', 'No noise']}
+        eyebrow="Move"
+        title="Clinical cues in your pocket."
+        body="Open functional tests, strength tools, and running drills with precise movement language from the actual framework."
+        chips={['Functional tests', 'Strength tools', 'Running drills']}
         isVertical={isVertical}
       />
     </Stage>
@@ -290,10 +305,10 @@ function Coach({ isVertical }) {
       visual={<Phone type="coach" isVertical={isVertical} />}
     >
       <Copy
-        eyebrow="The iteration"
-        title="The app learned to listen first."
-        body="The breathing start became direct, the running coach asks about readiness, and clinical cues replaced generic fitness language."
-        chips={['Start direct', 'Coach context', 'Exact cues']}
+        eyebrow="Running coach"
+        title="Plans that know today's context."
+        body="Build weekly running plans, calculate pace zones, log check-ins, and ask training questions with recent history in view."
+        chips={['Pace zones', 'Weekly plan', 'AI coach']}
         isVertical={isVertical}
       />
     </Stage>
@@ -307,10 +322,10 @@ function History({ isVertical }) {
       visual={<Phone type="history" isVertical={isVertical} />}
     >
       <Copy
-        eyebrow="The evidence"
-        title="Feedback became the build log."
-        body="A sit-down test turned into daily corrections and 160 commits across 16 active build days."
-        chips={['Testing', 'Iteration', '160 commits']}
+        eyebrow="History"
+        title="Patterns become visible."
+        body="Feel, readiness, quality, breathing sessions, and workouts turn into trends you can read without chasing metrics."
+        chips={['Feel trends', 'Session log', 'Quality score']}
         isVertical={isVertical}
       />
     </Stage>
@@ -330,7 +345,7 @@ function End({ isVertical }) {
       <div style={{ transform: `scale(${scale})`, maxWidth: isVertical ? 900 : 1180 }}>
         <LogoMark size={isVertical ? 170 : 142} />
         <div style={{ marginTop: 42, color: palette.dim, fontSize: isVertical ? 28 : 22, fontWeight: 950, letterSpacing: 5, textTransform: 'uppercase' }}>
-          Google sign-in · guest mode · offline PWA
+          Google sign-in | guest mode | offline PWA
         </div>
         <div style={{ marginTop: 22, fontFamily: 'Georgia, serif', fontSize: isVertical ? 94 : 90, lineHeight: 1, fontWeight: 900 }}>
           Listen first.<br />Then move.
@@ -374,12 +389,24 @@ function Phone({ type, isVertical, pulse = 0.82, lift = 0 }) {
 }
 
 function MiniScreen({ type, pulse, isVertical }) {
-  if (type === 'feel') return <FeelScreen isVertical={isVertical} />
-  if (type === 'breathe') return <BreatheScreen pulse={pulse} isVertical={isVertical} />
-  if (type === 'move') return <MoveScreen isVertical={isVertical} />
-  if (type === 'coach') return <CoachScreen isVertical={isVertical} />
-  if (type === 'history') return <HistoryScreen isVertical={isVertical} />
-  return <HomeScreen isVertical={isVertical} />
+  const active = type === 'feel' ? 'Feel' : type === 'history' ? 'Progress' : type === 'home' ? 'Home' : 'Plan'
+  const content =
+    type === 'feel' ? <FeelScreen isVertical={isVertical} />
+      : type === 'breathe' ? <BreatheScreen pulse={pulse} isVertical={isVertical} />
+        : type === 'plan' ? <PlanScreen isVertical={isVertical} />
+          : type === 'move' ? <MoveScreen isVertical={isVertical} />
+            : type === 'coach' ? <CoachScreen isVertical={isVertical} />
+              : type === 'history' ? <HistoryScreen isVertical={isVertical} />
+                : <HomeScreen isVertical={isVertical} />
+
+  return (
+    <div style={{ position: 'relative', height: '100%', overflow: 'hidden', background: '#080806' }}>
+      <div style={{ height: '100%', overflow: 'hidden', paddingBottom: isVertical ? 118 : 96 }}>
+        {content}
+      </div>
+      <AppBottomNav active={active} isVertical={isVertical} />
+    </div>
+  )
 }
 
 function Header({ label, title, sub, isVertical }) {
@@ -392,13 +419,104 @@ function Header({ label, title, sub, isVertical }) {
   )
 }
 
+function AppBottomNav({ active, isVertical }) {
+  const items = [
+    ['Home', 'home'],
+    ['Feel', 'feel'],
+    ['Plan', 'plan'],
+    ['Progress', 'progress'],
+    ['Me', 'me'],
+  ]
+  return (
+    <div style={{
+      position: 'absolute',
+      left: isVertical ? 18 : 14,
+      right: isVertical ? 18 : 14,
+      bottom: isVertical ? 18 : 14,
+      padding: isVertical ? 8 : 6,
+      borderRadius: isVertical ? 22 : 18,
+      background: 'rgba(248,241,223,0.94)',
+      border: '1px solid rgba(70,68,58,0.22)',
+      boxShadow: '0 12px 30px rgba(0,0,0,0.32)',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(5, 1fr)',
+      gap: 2,
+      color: '#27251d',
+      zIndex: 10,
+    }}>
+      {items.map(([label, icon]) => {
+        const selected = label === active
+        return (
+          <div key={label} style={{
+            minHeight: isVertical ? 70 : 58,
+            display: 'grid',
+            placeItems: 'center',
+            alignContent: 'center',
+            gap: isVertical ? 5 : 3,
+            color: selected ? '#17150f' : 'rgba(39,37,29,0.58)',
+            fontSize: isVertical ? 16 : 12,
+            fontWeight: 850,
+            letterSpacing: 0.8,
+            textTransform: 'uppercase',
+          }}>
+            <NavGlyph name={icon} selected={selected} size={isVertical ? 26 : 21} />
+            <span>{label}</span>
+            {selected && <span style={{ width: 5, height: 5, borderRadius: 99, background: '#5f7f56' }} />}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function NavGlyph({ name, selected, size }) {
+  const stroke = selected ? '#17150f' : 'rgba(39,37,29,0.58)'
+  const common = { fill: 'none', stroke, strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' }
+  if (name === 'home') return <svg width={size} height={size} viewBox="0 0 24 24"><path {...common} d="M3.5 10.5 12 4l8.5 6.5v8a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" /><path {...common} d="M9.5 20v-6h5v6" /></svg>
+  if (name === 'feel') return <svg width={size} height={size} viewBox="0 0 24 24"><path {...common} d="M12 3a9 9 0 1 0 9 9" /><path {...common} d="M12 7v5l3 2" /></svg>
+  if (name === 'plan') return <svg width={size} height={size} viewBox="0 0 24 24"><circle {...common} cx="12" cy="12" r="9" /><path {...common} d="M12 8v8M8 12h8" /></svg>
+  if (name === 'progress') return <svg width={size} height={size} viewBox="0 0 24 24"><path {...common} d="M3 13h4l3-7 4 13 3-6h4" /></svg>
+  return <svg width={size} height={size} viewBox="0 0 24 24"><circle {...common} cx="12" cy="8" r="3.5" /><path {...common} d="M5 20c.8-4 4-6 7-6s6.2 2 7 6" /></svg>
+}
+
+function ActualPlanTabs({ active, isVertical }) {
+  const tabs = ['Breathe', 'Mobility', 'Strength', 'Running']
+  return (
+    <div style={{
+      display: 'flex',
+      gap: isVertical ? 10 : 8,
+      padding: isVertical ? '20px 24px 0' : '16px 18px 0',
+      overflow: 'hidden',
+    }}>
+      {tabs.map((tab) => {
+        const selected = tab === active
+        return (
+          <div key={tab} style={{
+            flexShrink: 0,
+            padding: isVertical ? '10px 17px' : '8px 13px',
+            borderRadius: isVertical ? 14 : 12,
+            border: `1px solid ${selected ? 'transparent' : 'rgba(248,241,223,0.20)'}`,
+            background: selected ? 'linear-gradient(135deg, #d6aa23, #9dbb8f)' : 'rgba(248,241,223,0.08)',
+            color: selected ? '#14120b' : palette.muted,
+            fontSize: isVertical ? 19 : 14,
+            fontWeight: 900,
+            lineHeight: 1,
+          }}>
+            {tab}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 function HomeScreen({ isVertical }) {
   return (
     <div>
       <Header label="La Ultra: Run & Bee" title="Good morning" sub="Train the engine without fighting the body." isVertical={isVertical} />
       <div style={{ padding: isVertical ? 32 : 24, display: 'grid', gap: isVertical ? 22 : 16 }}>
         <Metric title="Today's Feel" value="7.4 / 10" tone={palette.sage} isVertical={isVertical} />
-        <Metric title="Open Today's Plan" value="Breathe -> Mobility -> Run" tone={palette.gold} isVertical={isVertical} />
+        <Metric title="Open Today's Plan" value="Breathe / Mobility / Strength / Running" tone={palette.gold} isVertical={isVertical} />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
           {['12 day streak', '43% complete', '51 days'].map((item) => <Tiny key={item} text={item} isVertical={isVertical} />)}
         </div>
@@ -437,6 +555,7 @@ function BreatheScreen({ pulse, isVertical }) {
   return (
     <div>
       <Header label="Breathe" title="5 BPM practice" sub="Settle before training." isVertical={isVertical} />
+      <ActualPlanTabs active="Breathe" isVertical={isVertical} />
       <div style={{ padding: isVertical ? 32 : 24, display: 'grid', gap: 18 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <ButtonLabel text="Start" active isVertical={isVertical} />
@@ -464,10 +583,27 @@ function BreatheScreen({ pulse, isVertical }) {
   )
 }
 
+function PlanScreen({ isVertical }) {
+  return (
+    <div>
+      <Header label="Your Plan" title="Today's Plan" sub="Breathe, Mobility, Strength, and Running." isVertical={isVertical} />
+      <ActualPlanTabs active="Mobility" isVertical={isVertical} />
+      <div style={{ padding: isVertical ? 32 : 24, display: 'grid', gap: isVertical ? 18 : 13 }}>
+        {[
+          ['Breathe', '5 BPM practice before training', palette.gold],
+          ['Mobility', 'Ankle rocks, hip flexor stretch, thoracic rotations', palette.sage],
+          ['Running', 'Easy aerobic run, adjusted when Feel is low', palette.blue],
+        ].map(([title, value, tone]) => <Metric key={title} title={title} value={value} tone={tone} isVertical={isVertical} />)}
+      </div>
+    </div>
+  )
+}
+
 function MoveScreen({ isVertical }) {
   return (
     <div>
-      <Header label="Move" title="Library" sub="Functional tests, strength tools, running drills." isVertical={isVertical} />
+      <Header label="Your Plan" title="Move" sub="Functional tests, strength tools, running drills." isVertical={isVertical} />
+      <ActualPlanTabs active="Strength" isVertical={isVertical} />
       <div style={{ padding: isVertical ? 32 : 24, display: 'grid', gap: isVertical ? 18 : 13 }}>
         {[
           ['Functional Tests', 'Weekly baseline self-assessments', palette.blue],
@@ -483,7 +619,8 @@ function MoveScreen({ isVertical }) {
 function CoachScreen({ isVertical }) {
   return (
     <div>
-      <Header label="Running" title="Coach" sub="Plans, pace zones, and daily check-ins." isVertical={isVertical} />
+      <Header label="Your Plan" title="Running" sub="Plans, pace zones, and daily check-ins." isVertical={isVertical} />
+      <ActualPlanTabs active="Running" isVertical={isVertical} />
       <div style={{ padding: isVertical ? 32 : 24, display: 'grid', gap: 16 }}>
         <Metric title="Benchmark race" value="45:00 10K -> zones" tone={palette.blue} isVertical={isVertical} />
         <Metric title="Today's session" value="Easy aerobic run" tone={palette.sage} isVertical={isVertical} />
