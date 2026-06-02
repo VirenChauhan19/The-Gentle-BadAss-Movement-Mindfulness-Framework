@@ -160,6 +160,7 @@ export default function Onboarding() {
     age: profile?.age || '',
     ageRange: profile?.ageRange || '',
     gender: normalizeGender(profile?.gender || profile?.sex),
+    invitedBy: profile?.invitedBy || '',
     heightCm: profile?.heightCm || '',
     weightKg: profile?.weightKg || '',
     waistCm: profile?.waistCm || '',
@@ -187,6 +188,7 @@ export default function Onboarding() {
     commitment: COMMITMENT_DAYS,
   })
   const isFemale = data.gender === 'female'
+  const isMale = data.gender === 'male'
   const showCycleFields =
     isFemale && (data.menopausalStatus === 'regular' || data.menopausalStatus === 'perimenopause')
 
@@ -194,6 +196,7 @@ export default function Onboarding() {
     data.name.trim() &&
     data.age &&
     data.gender &&
+    (!isMale || data.invitedBy.trim()) &&
     data.fitnessHistory.trim() &&
     data.commitmentStatement.trim()
   const bodyReady = data.heightCm && data.weightKg && data.waistCm && (!isFemale || data.menopausalStatus)
@@ -332,6 +335,17 @@ export default function Onboarding() {
               </select>
             </label>
           </div>
+          {isMale && (
+            <label>
+              <span>Name of the lady who invited you</span>
+              <input
+                type="text"
+                value={data.invitedBy}
+                onChange={e => update({ invitedBy: e.target.value })}
+                placeholder="This program is entry-by-invitation for men. Please provide her name or email."
+              />
+            </label>
+          )}
           <textarea
             className={styles.textarea}
             value={data.fitnessHistory}
