@@ -189,8 +189,9 @@ export default function Onboarding() {
   })
   const isFemale = data.gender === 'female'
   const isMale = data.gender === 'male'
-  const showCycleFields =
-    isFemale && (data.menopausalStatus === 'regular' || data.menopausalStatus === 'perimenopause')
+  const isRegularCycle = isFemale && data.menopausalStatus === 'regular'
+  const isPerimenopause = isFemale && data.menopausalStatus === 'perimenopause'
+  const showCycleFields = isRegularCycle || isPerimenopause
 
   const storyReady =
     data.name.trim() &&
@@ -456,21 +457,37 @@ export default function Onboarding() {
                   </select>
                 </label>
 
+                {isPerimenopause && (
+                  <p className={styles.subsectionDesc}>
+                    Perimenopausal cycles are irregular, so we will not assume a fixed
+                    monthly schedule, there are no fixed days here. Just log your most
+                    recent period below. Training de-escalates around the days you
+                    actually bleed, with ongoing perimenopause-aware pacing the rest of
+                    the time.
+                  </p>
+                )}
+
                 {showCycleFields && (
                   <>
+                    {isRegularCycle && (
+                      <label>
+                        <span>Average Cycle Length (days)</span>
+                        <input
+                          type="number"
+                          min="15"
+                          max="90"
+                          value={data.cycleLength || 28}
+                          onChange={e => update({ cycleLength: e.target.value })}
+                          placeholder="28"
+                        />
+                      </label>
+                    )}
                     <label>
-                      <span>Average Cycle Length (days)</span>
-                      <input
-                        type="number"
-                        min="15"
-                        max="90"
-                        value={data.cycleLength || 28}
-                        onChange={e => update({ cycleLength: e.target.value })}
-                        placeholder="28"
-                      />
-                    </label>
-                    <label>
-                      <span>Date of the first day of your last period</span>
+                      <span>
+                        {isPerimenopause
+                          ? 'First day of your most recent period'
+                          : 'Date of the first day of your last period'}
+                      </span>
                       <input
                         type="date"
                         value={data.lastPeriod}
@@ -478,15 +495,19 @@ export default function Onboarding() {
                       />
                     </label>
                     <label>
-                      <span>Average Duration of Bleeding (days)</span>
+                      <span>Typical Duration of Bleeding (days)</span>
                       <input
                         type="number"
                         min="1"
                         max="14"
                         value={data.bleedingDuration || 5}
                         onChange={e => update({ bleedingDuration: e.target.value })}
-                        placeholder="5"
+                        placeholder="e.g. 7"
                       />
+                      <small className={styles.fieldHint}>
+                        Most people log 3-7 days. Heavier or perimenopausal bleeds can
+                        run 7-10 or more, anything up to 14 is fine.
+                      </small>
                     </label>
                   </>
                 )}

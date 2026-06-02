@@ -70,6 +70,27 @@ export function getCycleWindows(profile, startDate, totalDays = 91) {
   const planStart = new Date(`${startDate}T00:00:00`)
   if (Number.isNaN(planStart.getTime())) return []
 
+  const planEnd = addDaysISO(startDate, totalDays - 1)
+
+  // Perimenopause: cycles are irregular, so we never project periods on a fixed
+  // monthly cadence. We only mark the single bleeding window the runner actually
+  // logged (last period start + bleeding duration) when it overlaps the plan
+  // range. The always-on perimenopause support is carried separately by
+  // getCycleTrainingSignal, so training is never blanket-downgraded.
+  if (cycle.menopauseStatus === 'perimenopause') {
+    const periodStart = cycle.lastPeriod
+    if (!periodStart) return []
+    const periodEnd = addDaysISO(periodStart, cycle.periodLength - 1)
+    if (periodEnd < startDate || periodStart > planEnd) return []
+    return [{
+      start: periodStart,
+      end: periodEnd,
+      reason: 'period phase',
+      irregular: true,
+      periodLength: cycle.periodLength,
+    }]
+  }
+
   const windows = []
   let periodStart = cycle.lastPeriod || cycle.nextPeriod
   if (!periodStart) return windows
@@ -84,7 +105,6 @@ export function getCycleWindows(profile, startDate, totalDays = 91) {
     offsetToPlanStart = daysBetweenISO(periodStart, startDate)
   }
 
-  const planEnd = addDaysISO(startDate, totalDays - 1)
   while (periodStart <= planEnd) {
     const periodEnd = addDaysISO(periodStart, cycle.periodLength - 1)
     if (periodEnd >= startDate) {
@@ -106,7 +126,13 @@ export function getCycleTrainingSignal(profile, date = todayISO()) {
   const cycle = normalizeCycleProfile(profile)
   if (cycle.sex !== 'woman') return null
   if (cycle.menopauseStatus === 'perimenopause') {
-    return { label: 'perimenopause context', reason: 'perimenopause context', active: true }
+    // Irregular cycles: never blanket-downgrade. De-escalate only on days that
+    // fall inside the bleeding window the runner actually logged; otherwise keep
+    // a non-active awareness flag so normal training (incl. impact work) runs.
+    const windows = getCycleWindows(cycle, date, 1)
+    const active = windows.find(window => date >= window.start && date <= window.end)
+    if (active) return { label: 'period phase', reason: 'period phase', active: true, window: active }
+    return { label: 'perimenopause context', reason: 'perimenopause context', active: false }
   }
   if (cycle.menopauseStatus === 'menopause') {
     return { label: 'menopause context', reason: 'menopause context', active: true }

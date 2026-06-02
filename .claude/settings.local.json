@@ -124,7 +124,8 @@
       "Bash(cat firebase.json)",
       "Bash(node -e \"console.log\\('firebase', require\\('./node_modules/firebase/package.json'\\).version\\); require.resolve\\('firebase/storage'\\); console.log\\('firebase/storage OK'\\)\")",
       "Bash(grep -iE \"\\\\.\\(mp4|mov|webm|gif|png|jpg|jpeg\\)$\")",
-      "Bash(node -e \"const fs=require\\('fs'\\);const t=fs.readFileSync\\('src/data/exercises.js','utf8'\\);console.log\\('MARK2 gscount='+\\(t.match\\(/gs:\\\\/\\\\//g\\)||[]\\).length+' webapp='+\\(t.match\\(/WebApp[^']*token=/g\\)||[]\\).length\\);const j=fs.readFileSync\\('src/pages/ExerciseDetail.jsx','utf8'\\);console.log\\('MARK2 errDef='+j.includes\\('const handleVideoError'\\)+' errWired='+j.includes\\('onError={handleVideoError}'\\)\\);\")"
+      "Bash(node -e \"const fs=require\\('fs'\\);const t=fs.readFileSync\\('src/data/exercises.js','utf8'\\);console.log\\('MARK2 gscount='+\\(t.match\\(/gs:\\\\/\\\\//g\\)||[]\\).length+' webapp='+\\(t.match\\(/WebApp[^']*token=/g\\)||[]\\).length\\);const j=fs.readFileSync\\('src/pages/ExerciseDetail.jsx','utf8'\\);console.log\\('MARK2 errDef='+j.includes\\('const handleVideoError'\\)+' errWired='+j.includes\\('onError={handleVideoError}'\\)\\);\")",
+      "Bash(node --input-type=module -e ' *)"
     ]
   },
   "enableAllProjectMcpServers": true,
