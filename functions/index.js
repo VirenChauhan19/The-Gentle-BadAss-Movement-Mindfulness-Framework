@@ -52,18 +52,8 @@ async function ensureHeader(sheets) {
   }
 }
 
-exports.mirrorActivityToSheet = onDocumentCreated('activity/{eventId}', async (event) => {
-  if (!SHEET_ID) {
-    console.error('GOOGLE_SHEET_ID is not set — skipping. Set it in functions/.env')
-    return
-  }
-  const data = event.data && event.data.data()
-  if (!data) return
-
-  const sheets = getSheetsClient()
-  await ensureHeader(sheets)
-
-  const row = [
+function rowFromActivity(data) {
+  return [
     data.isoTs || new Date().toISOString(),
     data.actorRole || '',
     data.actorName || '',
@@ -73,14 +63,89 @@ exports.mirrorActivityToSheet = onDocumentCreated('activity/{eventId}', async (e
     data.summary || '',
     data.details ? JSON.stringify(data.details) : '',
   ]
+}
+
+async function appendActivityRow(data) {
+  const sheets = getSheetsClient()
+  await ensureHeader(sheets)
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
     range: `${TAB}!A1`,
     valueInputOption: 'USER_ENTERED',
     insertDataOption: 'INSERT_ROWS',
-    requestBody: { values: [row] },
+    requestBody: { values: [rowFromActivity(data)] },
   })
+}
+
+async function syncAllActivityRowsToSheet() {
+  if (!SHEET_ID) throw new Error('GOOGLE_SHEET_ID is not set')
+
+  const sheets = getSheetsClient()
+  const snap = await admin.firestore().collection('activity').orderBy('isoTs', 'asc').get()
+  const rows = [HEADER]
+
+  snap.forEach(doc => {
+    rows.push(rowFromActivity(doc.data() || {}))
+  })
+
+  await sheets.spreadsheets.values.clear({
+    spreadsheetId: SHEET_ID,
+    range: `${TAB}!A:H`,
+  })
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SHEET_ID,
+    range: `${TAB}!A1`,
+    valueInputOption: 'USER_ENTERED',
+    requestBody: { values: rows },
+  })
+
+  return rows.length - 1
+}
+
+exports.mirrorActivityToSheet = onDocumentCreated('activity/{eventId}', async (event) => {
+  if (!SHEET_ID) {
+    console.error('GOOGLE_SHEET_ID is not set — skipping. Set it in functions/.env')
+    return
+  }
+  const data = event.data && event.data.data()
+  if (!data) return
+
+  await appendActivityRow(data)
+})
+
+// One-off repair command. Create an adminCommands document with:
+// { action: 'activitySheet.syncAll' }
+// The function rewrites only the configured Activity Log tab from Firestore.
+exports.syncActivitySheet = onDocumentCreated('adminCommands/{commandId}', async (event) => {
+  const commandRef = event.data && event.data.ref
+  const data = event.data && event.data.data()
+  if (!data || data.action !== 'activitySheet.syncAll') return
+
+  try {
+    await commandRef.set({
+      status: 'running',
+      startedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true })
+
+    const mirroredRows = await syncAllActivityRowsToSheet()
+
+    await commandRef.set({
+      status: 'completed',
+      mirroredRows,
+      completedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true })
+    console.log(`syncActivitySheet completed: ${mirroredRows} activity rows mirrored`)
+  } catch (err) {
+    await commandRef.set({
+      status: 'failed',
+      error: err?.message || String(err),
+      failedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true }).catch(() => {})
+    console.error('syncActivitySheet failed:', err?.message || err)
+    throw err
+  }
 })
 
 // ── 2. AI coach proxy (keeps the OpenRouter key server-side) ──────────────────
