@@ -120,7 +120,7 @@ React was chosen for component reusability (the same slider component powers 10 
 ## Shipped Product
 
 **Live URL:** https://laultrarunandbee.web.app (Firebase Hosting)
-**Stack:** Vite + React 18, React Router 6, Firebase Auth + Firestore, Recharts, Web Audio API, Three.js / @react-three/fiber (ambient aurora + exercise animation), OpenRouter (AI coach), vite-plugin-pwa
+**Stack:** Vite + React 18, React Router 6, Firebase Auth + Firestore, Firebase Functions, Recharts, Web Audio API, Three.js / @react-three/fiber (ambient aurora + exercise animation), OpenRouter via server-side proxy (AI coach), vite-plugin-pwa
 
 The app has seven functional sections:
 
@@ -132,7 +132,7 @@ The app has seven functional sections:
 
 **History (Quality Dashboard)**: Recharts trend lines for Feel Score, Training Perceived Readiness, and Quality Score over time. Factor breakdown showing strongest and weakest dimensions. Session log.
 
-**Running Coach**: Benchmark race-to-pace calculator (input a race time, get training zones). Weekly plan builder. Context-aware AI coaching via OpenRouter. Daily check-ins.
+**Running Coach**: Benchmark race-to-pace calculator (input a race time, get training zones). Weekly plan builder. Context-aware AI coaching through a Firebase Function proxy. Daily check-ins.
 
 **Onboarding**: Four steps: sign-up details (name, age, gender, story, commitment statement), body (biometrics + menstrual-cycle context where relevant), history (joint pain, conditions, mental baseline, movement history), and path selection (Rehab / Beginner / Performance). Every journey is a fixed 90-day program. Saves to Firestore. Onboarding is mandatory, the app stays gated until it is completed.
 
@@ -209,7 +209,8 @@ graph TD
 
     User -->|Race time input| Coach[Running Coach]
     Coach -->|Pace Calculator| Zones[Training Zone Targets]
-    Coach -->|AI Chat| OR[OpenRouter API]
+    Coach -->|AI Chat| Proxy[Firebase Function AI proxy]
+    Proxy -->|Server-side secret| OR[OpenRouter API]
     OR -->|LLM Response| Advice[Context-Aware Running Advice]
 
     DC -->|Sync writes| Firestore
@@ -363,4 +364,4 @@ npm run dev
 **Environment variables required** (see `.env.example`):
 - `VITE_FIREBASE_API_KEY` and related Firebase config
 - `VITE_ADMIN_EMAILS` comma-separated admin emails
-- `VITE_OPENROUTER_API_KEY` for AI running coach
+- `OPENROUTER_API_KEY` stored as a Firebase Functions secret, not a frontend `VITE_*` variable

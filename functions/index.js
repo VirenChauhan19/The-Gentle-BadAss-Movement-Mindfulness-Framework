@@ -1,35 +1,34 @@
 /**
- * Live Google Sheet mirror.
+ * Cloud Functions for La Ultra Run & Bee.
  *
- * Every time a change is recorded in the `activity` collection (which the app
- * writes on every user/admin edit), this Cloud Function appends a row to a
- * Google Sheet — giving the admin a spreadsheet that updates live with no
- * clicking. The on-demand .xlsx export in the app covers the offline case.
+ *  1. mirrorActivityToSheet — appends every audit-log change to a live Google Sheet.
+ *  2. aiProxy — server-side proxy for the AI coach. Holds the OpenRouter API key
+ *     as a real secret (Secret Manager) so it is NEVER shipped to browsers, and
+ *     only serves signed-in users (verifies their Firebase ID token).
  *
- * Setup (one time) — see the notes at the bottom of this file.
+ * Setup notes are at the bottom of this file.
  */
 
 const { onDocumentCreated } = require('firebase-functions/v2/firestore')
+const { onRequest } = require('firebase-functions/v2/https')
 const { setGlobalOptions } = require('firebase-functions/v2')
+const { defineSecret } = require('firebase-functions/params')
 const { google } = require('googleapis')
+const admin = require('firebase-admin')
+
+if (!admin.apps.length) admin.initializeApp()
 
 setGlobalOptions({
   region: process.env.FUNCTIONS_REGION || 'us-central1',
-  maxInstances: 5,
-  // Run the function AS this service account. Set it to an account you can see
-  // in IAM today (e.g. the Firebase Admin SDK one) so you can share the Sheet
-  // with it immediately. If left unset, Functions uses the default compute
-  // service account, which only exists after the first deploy.
+  maxInstances: 10,
   serviceAccount: process.env.FUNCTION_SERVICE_ACCOUNT || undefined,
 })
 
+// ── 1. Live Google Sheet mirror ──────────────────────────────────────────────
 const SHEET_ID = process.env.GOOGLE_SHEET_ID
 const TAB = process.env.GOOGLE_SHEET_TAB || 'Activity Log'
 const HEADER = ['Time', 'Role', 'Actor', 'Actor email', 'Action', 'Target', 'Summary', 'Details']
 
-// Authenticates as the function's own service account (Application Default
-// Credentials). Share the target Sheet with that service account's email
-// (as Editor) and enable the Google Sheets API on the project.
 function getSheetsClient() {
   const auth = new google.auth.GoogleAuth({
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -37,13 +36,9 @@ function getSheetsClient() {
   return google.sheets({ version: 'v4', auth })
 }
 
-// Write the header row once, if the sheet's first row is empty.
 async function ensureHeader(sheets) {
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: SHEET_ID,
-      range: `${TAB}!A1:H1`,
-    })
+    const res = await sheets.spreadsheets.values.get({ spreadsheetId: SHEET_ID, range: `${TAB}!A1:H1` })
     if (!res.data.values || res.data.values.length === 0) {
       await sheets.spreadsheets.values.update({
         spreadsheetId: SHEET_ID,
@@ -88,20 +83,137 @@ exports.mirrorActivityToSheet = onDocumentCreated('activity/{eventId}', async (e
   })
 })
 
+// ── 2. AI coach proxy (keeps the OpenRouter key server-side) ──────────────────
+const OPENROUTER_API_KEY = defineSecret('OPENROUTER_API_KEY')
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
+const ALLOWED_MODELS = new Set(['anthropic/claude-sonnet-4.5'])
+const MAX_BODY_BYTES = 100_000
+const MAX_MESSAGE_CHARS = 8_000
+const MAX_TOTAL_MESSAGE_CHARS = 40_000
+const RATE_LIMIT_WINDOW_MS = 60_000
+const RATE_LIMIT_MAX_REQUESTS = 20
+const rateLimitBuckets = new Map()
+
+// Only the app's own origins may call this from a browser.
+const CORS_ORIGINS = [
+  /^https:\/\/laultrarunandbee\.web\.app$/,
+  /^https:\/\/laultrarunandbee\.firebaseapp\.com$/,
+  /^http:\/\/localhost:\d+$/,
+  /^http:\/\/127\.0\.0\.1:\d+$/,
+]
+
+function isRateLimited(uid) {
+  const now = Date.now()
+  const existing = rateLimitBuckets.get(uid) || []
+  const recent = existing.filter(ts => now - ts < RATE_LIMIT_WINDOW_MS)
+  if (recent.length >= RATE_LIMIT_MAX_REQUESTS) {
+    rateLimitBuckets.set(uid, recent)
+    return true
+  }
+  recent.push(now)
+  rateLimitBuckets.set(uid, recent)
+  return false
+}
+
+function sanitizeMessages(messages) {
+  const trimmed = messages.slice(-30).map(message => {
+    const role = ['system', 'user', 'assistant'].includes(message?.role) ? message.role : 'user'
+    const content = typeof message?.content === 'string'
+      ? message.content.slice(0, MAX_MESSAGE_CHARS)
+      : ''
+    return { role, content }
+  }).filter(message => message.content.trim())
+
+  let totalChars = 0
+  const kept = []
+  for (let i = trimmed.length - 1; i >= 0; i--) {
+    totalChars += trimmed[i].content.length
+    if (totalChars > MAX_TOTAL_MESSAGE_CHARS) break
+    kept.unshift(trimmed[i])
+  }
+  return kept
+}
+
+exports.aiProxy = onRequest(
+  { secrets: [OPENROUTER_API_KEY], cors: CORS_ORIGINS, maxInstances: 10 },
+  async (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).json({ error: 'Method not allowed' })
+      return
+    }
+
+    const contentLength = Number(req.get('content-length') || 0)
+    if (contentLength > MAX_BODY_BYTES) {
+      res.status(413).json({ error: 'Request is too large.' })
+      return
+    }
+
+    // Require a valid Firebase sign-in. This stops anyone from using the proxy
+    // (and your credits) just because they found the URL.
+    const authz = req.get('Authorization') || ''
+    const match = authz.match(/^Bearer (.+)$/)
+    if (!match) {
+      res.status(401).json({ error: 'Missing sign-in token.' })
+      return
+    }
+    let decoded
+    try {
+      decoded = await admin.auth().verifyIdToken(match[1])
+    } catch {
+      res.status(401).json({ error: 'Invalid or expired sign-in. Please sign in again.' })
+      return
+    }
+    if (isRateLimited(decoded.uid)) {
+      res.status(429).json({ error: 'Rate limit reached, wait a minute and try again.' })
+      return
+    }
+
+    const body = req.body || {}
+    const messages = Array.isArray(body.messages) ? sanitizeMessages(body.messages) : null
+    if (!messages || messages.length === 0) {
+      res.status(400).json({ error: 'messages array is required.' })
+      return
+    }
+
+    // Clamp inputs so a forged request can't run up a huge bill.
+    const requestedModel = typeof body.model === 'string' ? body.model : ''
+    const payload = {
+      model: ALLOWED_MODELS.has(requestedModel) ? requestedModel : 'anthropic/claude-sonnet-4.5',
+      messages,
+      max_tokens: Math.min(Math.max(parseInt(body.max_tokens, 10) || 600, 1), 4000),
+      temperature: typeof body.temperature === 'number'
+        ? Math.min(Math.max(body.temperature, 0), 2) : 0.7,
+    }
+
+    try {
+      const upstream = await fetch(OPENROUTER_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENROUTER_API_KEY.value()}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://laultrarunandbee.web.app',
+          'X-Title': 'La Ultra Run & Bee',
+        },
+        body: JSON.stringify(payload),
+      })
+      const data = await upstream.json().catch(() => ({}))
+      res.status(upstream.status).json(data)
+    } catch (err) {
+      res.status(502).json({ error: 'Upstream AI request failed: ' + (err?.message || err) })
+    }
+  }
+)
+
 /*
- ── One-time setup ───────────────────────────────────────────────────────────
- 1. Firebase must be on the Blaze (pay-as-you-go) plan to deploy functions.
- 2. Create a Google Sheet. Copy its ID from the URL:
-      https://docs.google.com/spreadsheets/d/<THIS_IS_THE_ID>/edit
-    Put it in functions/.env as GOOGLE_SHEET_ID=<id>
- 3. In Google Cloud Console (same project, "gentle-badass"):
-      APIs & Services → enable "Google Sheets API".
- 4. Find the function's service account email:
-      Cloud Console → IAM, the "Default compute service account"
-      (looks like <project-number>-compute@developer.gserviceaccount.com).
-    Share the Sheet with that email as "Editor".
- 5. Deploy:
-      cd functions && npm install && cd ..
-      firebase deploy --only functions
- From then on, every change in the app appends a row to the Sheet live.
+ ── Setup ────────────────────────────────────────────────────────────────────
+ AI proxy:
+   1. Rotate the OpenRouter key (the old one is public): https://openrouter.ai/keys
+   2. Store the NEW key as a server secret (you paste it; it is encrypted in
+      Google Secret Manager and never enters the frontend or git):
+        firebase functions:secrets:set OPENROUTER_API_KEY
+   3. Deploy:  firebase deploy --only functions
+ The browser calls the function with the user's Firebase token; the key stays
+ on the server.
+
+ Live Sheet: see GOOGLE_SHEET_ID / FUNCTION_SERVICE_ACCOUNT in functions/.env.
 */

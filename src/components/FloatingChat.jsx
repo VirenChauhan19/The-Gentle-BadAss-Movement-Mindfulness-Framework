@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useData } from '../context/DataContext'
+import { callOpenRouter } from '../data/aiClient'
 import styles from './FloatingChat.module.css'
 
-const API_URL   = 'https://openrouter.ai/api/v1/chat/completions'
 const chatKey = uid => uid ? `gb_float_chat_${uid}` : 'gb_float_chat'
 
 const QUICK = [
@@ -30,7 +30,6 @@ export default function FloatingChat() {
   const bottomRef = useRef(null)
   const inputRef  = useRef(null)
   const { coachData, user, onboardingRequired } = useData()
-  const hasKey = !!import.meta.env.VITE_OPENROUTER_API_KEY
 
   // Keyed per user so chat history never leaks between accounts
   const key = chatKey(user?.uid)
@@ -63,7 +62,7 @@ export default function FloatingChat() {
 
   async function send(text) {
     const content = (text ?? input).trim()
-    if (!content || loading || !hasKey) return
+    if (!content || loading) return
     setInput('')
     setError(null)
     const next = [...msgs, { role: 'user', content }]
@@ -127,18 +126,12 @@ export default function FloatingChat() {
               <p className={styles.welcomeText}>
                 Ask me about running, pacing, workouts, injuries, strength, nutrition, or recovery.
               </p>
-              {!hasKey && (
-                <p className={styles.noKeyMsg}>
-                  API key not configured. Add <code>VITE_OPENROUTER_API_KEY</code> to deploy settings.
-                </p>
-              )}
               <div className={styles.quickGrid}>
                 {QUICK.map(q => (
                   <button
                     key={q}
                     className={styles.quickBtn}
                     onClick={() => send(q)}
-                    disabled={!hasKey}
                   >
                     {q}
                   </button>
@@ -181,16 +174,16 @@ export default function FloatingChat() {
           <input
             ref={inputRef}
             className={styles.input}
-            placeholder={hasKey ? 'Ask about running…' : 'API key not configured'}
+            placeholder="Ask about running..."
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={onKey}
-            disabled={loading || !hasKey}
+            disabled={loading}
           />
           <button
             className={styles.sendBtn}
             onClick={() => send()}
-            disabled={!input.trim() || loading || !hasKey}
+            disabled={!input.trim() || loading}
             aria-label="Send message"
           >
             <SendIcon />
@@ -218,8 +211,7 @@ export default function FloatingChat() {
 
 // ── AI call ────────────────────────────────────────────────────────────────────
 async function callAI(history, coachData) {
-  const key   = import.meta.env.VITE_OPENROUTER_API_KEY
-  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'anthropic/claude-sonnet-4.5'
+  const model = 'anthropic/claude-sonnet-4.5'
   const goal  = coachData?.goal
   const lastMsg = history[history.length - 1]?.content || ''
   if (!isRunningFitnessQuestion(lastMsg)) return COACH_REFUSAL
@@ -248,35 +240,15 @@ Hard workout rules: prescribe coach-like sessions for the runner's event and lev
 
 For beginner plans, start smooth and easy in week 1, then progress gradually.`
 
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${key}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': window.location.origin,
-      'X-Title': 'La Ultra Run & Bee',
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: 'system', content: scopedSystem },
-        ...history.slice(-14),
-      ],
-      max_tokens: 300,
-      temperature: 0.72,
-    }),
+  const data = await callOpenRouter({
+    model,
+    messages: [
+      { role: 'system', content: scopedSystem },
+      ...history.slice(-14),
+    ],
+    max_tokens: 300,
+    temperature: 0.72,
   })
-
-  if (!res.ok) {
-    const e = await res.json().catch(() => ({}))
-    if (res.status === 429) throw new Error('Rate limit reached, wait 30 seconds and try again. (Free tier limit)')
-    const message = e.error?.message || `Error ${res.status}`
-    if (/insufficient credits/i.test(message)) {
-      throw new Error(`${message}. If you just added credits, this deploy is probably still using an old OpenRouter key. Update the GitHub secret and redeploy.`)
-    }
-    throw new Error(message)
-  }
-  const data = await res.json()
   return data.choices?.[0]?.message?.content?.trim() || 'No response.'
 }
 

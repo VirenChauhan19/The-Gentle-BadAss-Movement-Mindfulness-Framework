@@ -7,9 +7,9 @@ import {
   applyCycleAdaptationToPlan,
   getCycleTrainingSignal as getCycleSignal,
 } from '../data/trainingAdaptation'
+import { callOpenRouter } from '../data/aiClient'
 import styles from './Coach.module.css'
 
-const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 // Every running plan is a fixed 90-day program. We never ask for a length and
 // never read a stored commitment, so new and legacy plans both render as 90.
 const PROGRAM_DAYS = 90
@@ -1043,7 +1043,6 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
     })
   }
 
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
   // Every plan is a fixed 90-day program; we never ask the runner for a length.
   const commitmentDays = PROGRAM_DAYS
   const profilePath = profile?.path || 'not set'
@@ -1122,23 +1121,6 @@ function GoalSetup({ onSave, profile, defaultCommitment = 30, embedded = false }
       setError(err.message)
       setLoading(false)
     }
-  }
-
-  if (!apiKey) {
-    return (
-      <div className={`${styles.page} ${embedded ? styles.embedded : ''}`}>
-        <header className={styles.header}>
-          <p className={styles.label}>Running</p>
-          <h1 className={styles.title}>Setup Required</h1>
-        </header>
-        <div className={styles.warnCard}>
-          <p className={styles.warnTitle}>OpenRouter API key not configured</p>
-          <p className={styles.warnText}>
-            Add <code>VITE_OPENROUTER_API_KEY=your-key</code> to <code>.env.local</code> and restart the dev server.
-          </p>
-        </div>
-      </div>
-    )
   }
 
   if (loading) {
@@ -2647,30 +2629,9 @@ function ChatTab({ history, goal, checkins, entries, onMessage }) {
 
 // ── API Helpers ───────────────────────────────────────────────────────────────
 async function apiCall(messages, maxTokens = 600, temperature = 0.75) {
-  const key = import.meta.env.VITE_OPENROUTER_API_KEY
-  if (!key) throw new Error('OpenRouter API key not configured')
-  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'anthropic/claude-sonnet-4.5'
-
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${key}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': window.location.origin,
-      'X-Title': 'La Ultra Run & Bee',
-    },
-    body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
-  })
-  if (!res.ok) {
-    const e = await res.json().catch(() => ({}))
-    if (res.status === 429) throw new Error('Rate limit reached, wait 30 seconds and try again.')
-    const message = e.error?.message || `OpenRouter error ${res.status}`
-    if (/insufficient credits/i.test(message)) {
-      throw new Error(`${message}. If you just added credits, this deploy is probably still using an old OpenRouter key. Update the GitHub secret and redeploy.`)
-    }
-    throw new Error(message)
-  }
-  const data = await res.json()
+  const model = 'anthropic/claude-sonnet-4.5'
+  // Routed through our Cloud Function proxy; the OpenRouter key stays server-side.
+  const data = await callOpenRouter({ model, messages, max_tokens: maxTokens, temperature })
   return data.choices?.[0]?.message?.content?.trim() || ''
 }
 
