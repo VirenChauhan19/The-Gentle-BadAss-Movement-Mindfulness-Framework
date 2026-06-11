@@ -1,0 +1,13 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for La Ultra Run & Bee — live activity → Google Sheet mirror",
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-functions": "^5.1.1",
+    "googleapis": "^144.0.0"
+  },
+  "private": true
+}

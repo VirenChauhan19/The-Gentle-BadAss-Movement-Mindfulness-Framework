@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// The Storage bucket holds only non-sensitive app media (exercise videos).
+// Clients never upload, so all writes are denied. Reads require a signed-in
+// account; guests fall back to the built-in SVG animation, so nothing breaks.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read:  if request.auth != null;
+      allow write: if false;
+    }
+  }
+}

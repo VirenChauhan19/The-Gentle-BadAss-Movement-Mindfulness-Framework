@@ -6,7 +6,9 @@ import { useAuth } from './AuthContext'
 import {
   getJournalEntries as getLocalEntries,
   saveJournalEntry as saveLocalEntry,
+  computeFeelScore,
 } from '../data/storage'
+import { logActivity, actorFromUser } from '../data/activityLog'
 
 const GUEST_NAME_KEY = 'gb_guest_name'
 const PROFILE_KEY    = 'gb_profile'
@@ -297,6 +299,16 @@ export function DataProvider({ children }) {
 
     if (user && db) {
       const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
+      const completedOnboarding = data?.onboardingComplete && !profile?.onboardingComplete
+      const changed = Object.keys(data || {}).filter(k => k !== 'updatedAt')
+      logActivity({
+        actor: actorFromUser(user, 'user', guestName),
+        action: completedOnboarding ? 'onboarding.complete' : 'profile.update',
+        summary: completedOnboarding
+          ? 'completed onboarding'
+          : `updated their profile${changed.length ? ` (${changed.join(', ')})` : ''}`,
+        details: { changedFields: changed },
+      })
       return setDoc(profileRef, updated, { merge: true }).catch(err =>
         console.warn('Profile sync error:', err)
       )
@@ -319,6 +331,17 @@ export function DataProvider({ children }) {
         { merge: true }
       )
       // Firestore snapshot listener updates entries automatically
+      const score = entry.scores ? computeFeelScore(entry.scores) : null
+      logActivity({
+        actor: actorFromUser(user, 'user', guestName),
+        action: entry.scores ? 'journal.save' : entry.sessions?.length ? 'exercise.session' : 'journal.save',
+        summary: score != null
+          ? `logged a daily feel of ${score}/10`
+          : entry.sessions?.length
+            ? `logged ${entry.sessions.length} exercise session${entry.sessions.length === 1 ? '' : 's'}`
+            : 'updated their journal',
+        details: { date: today, feel: score },
+      })
     } else {
       setEntries(getLocalEntries())
     }
@@ -343,6 +366,14 @@ export function DataProvider({ children }) {
     localStorage.setItem(key, JSON.stringify(next))
     setCoachData(next)
     syncCoachToFirestore(next)
+    if (user && db) {
+      logActivity({
+        actor: actorFromUser(user, 'user', guestName),
+        action: 'coach.goal.set',
+        summary: `created a training plan${goal?.focus ? `: ${goal.focus}` : goal?.raceGoal ? `: ${goal.raceGoal}` : ''}`,
+        details: { focus: goal?.focus || goal?.raceGoal || '', days: goal?.commitmentDays || null },
+      })
+    }
   }
 
   function updateCoachGoal(goal) {
@@ -368,6 +399,14 @@ export function DataProvider({ children }) {
       syncCoachToFirestore(next)
       return next
     })
+    if (user && db) {
+      logActivity({
+        actor: actorFromUser(user, 'user', guestName),
+        action: 'coach.checkin',
+        summary: `checked in their run as ${checkin.status || 'logged'}`,
+        details: { date: today, status: checkin.status || null },
+      })
+    }
   }
 
   function clearCoachGoal() {
@@ -376,6 +415,11 @@ export function DataProvider({ children }) {
     setCoachData(null)
     if (user && db) {
       deleteDoc(doc(db, 'users', user.uid, 'config', 'coach')).catch(() => {})
+      logActivity({
+        actor: actorFromUser(user, 'user', guestName),
+        action: 'coach.goal.clear',
+        summary: 'cleared their own training plan',
+      })
     }
   }
 
@@ -408,6 +452,13 @@ export function DataProvider({ children }) {
 
     // Wipe Firestore if signed in
     if (user && db) {
+      // Log first — the audit log lives in a separate collection, so the record
+      // of this action survives the wipe.
+      logActivity({
+        actor: actorFromUser(user, 'user', guestName),
+        action: 'data.clear',
+        summary: 'cleared all of their own data',
+      })
       const journalRef = collection(db, 'users', user.uid, 'journal')
       const snap = await getDocs(journalRef)
       await Promise.all(snap.docs.map(d => deleteDoc(d.ref)))

@@ -2,38 +2,90 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Each user can read and write their own journal entries
+    // ── Admin identity ───────────────────────────────────────────────────────
+    // Founding "owner" admins — always admins, can never be locked out. Also
+    // hardcoded in the app (DEFAULT_ADMIN_EMAILS).
+    function isDefaultAdmin() {
+      return request.auth != null
+             && request.auth.token.email in [
+               'chauhan.viren08@gmail.com',
+               'drrajatchauhan@gmail.com'
+             ];
+    }
+
+    // An admin is a founder OR has a doc in the `admins` collection keyed by
+    // their (verified) email. Single source of truth shared with the app.
+    function isAdmin() {
+      return isDefaultAdmin()
+             || (request.auth != null
+                 && request.auth.token.email != null
+                 && exists(/databases/$(database)/documents/admins/$(request.auth.token.email)));
+    }
+
+    // True when the caller owns this uid (and has a verified account).
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── Dynamic admin list ───────────────────────────────────────────────────
+    // A signed-in user may read ONLY their own entry (to learn if they're an
+    // admin). Only admins can list everyone or grant/revoke access, and a new
+    // admin doc must be keyed by the email it names (no spoofing).
+    match /admins/{adminEmail} {
+      allow get:    if request.auth != null
+                    && (request.auth.token.email == adminEmail || isAdmin());
+      allow list:   if isAdmin();
+      allow create, update: if isAdmin()
+                    && request.resource.data.email == adminEmail
+                    && request.resource.data.keys().hasOnly(['email', 'addedBy', 'addedAt']);
+      allow delete: if isAdmin();
+    }
+
+    // ── A user's own data ────────────────────────────────────────────────────
+    // Journal entries and config (profile, coach, remarks, tombstone) are
+    // private to the owner. No cross-user access for normal users.
     match /users/{userId}/journal/{entryId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
-
-    // Each user can read and write their own config (profile, coach data)
     match /users/{userId}/config/{configId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
 
-    // Admin (Viren) can read and delete any user's journal entries
+    // ── Admin access to user data ────────────────────────────────────────────
+    // Admins can read any journal entry (collection-group) and read/write/delete
+    // any config doc (remarks, plan edits, profile fixes, tombstones).
     match /{path=**}/journal/{entryId} {
-      allow read, delete: if request.auth != null
-                          && request.auth.token.email == 'chauhan.viren08@gmail.com';
+      allow read, delete: if isAdmin();
     }
-
-    // Admin can read, write and delete any user's config documents
-    // (covers tombstone writes for deleted accounts too)
     match /users/{userId}/config/{configId} {
-      allow read, write, delete: if request.auth != null
-                                 && request.auth.token.email == 'chauhan.viren08@gmail.com';
+      allow read, write, delete: if isAdmin();
     }
 
-    // Admin can edit any user's running coach plan and write remarks
-    match /users/{userId}/config/coach {
-      allow write: if request.auth != null
-                   && request.auth.token.email == 'chauhan.viren08@gmail.com';
+    // ── Audit log ────────────────────────────────────────────────────────────
+    // Append-only. A user may create an event ONLY for themselves, with their
+    // verified identity, a fixed set of fields, sane sizes, and may NOT label
+    // themselves 'admin' unless they actually are one. No edits, ever. Reading
+    // the log is admin-only (it can reference other users).
+    match /activity/{eventId} {
+      allow create: if request.auth != null
+                    && request.resource.data.actorUid == request.auth.uid
+                    && request.resource.data.actorEmail == request.auth.token.email
+                    && request.resource.data.keys().hasOnly([
+                         'actorUid', 'actorEmail', 'actorName', 'actorRole',
+                         'action', 'targetUid', 'targetName', 'summary',
+                         'details', 'isoTs', 'ts'
+                       ])
+                    && request.resource.data.action is string
+                    && request.resource.data.action.size() <= 100
+                    && request.resource.data.summary is string
+                    && request.resource.data.summary.size() <= 1000
+                    && request.resource.data.actorName.size() <= 200
+                    && request.resource.data.targetName.size() <= 200
+                    && (request.resource.data.actorRole == 'user' || isAdmin());
+      allow read, delete: if isAdmin();
+      allow update: if false;
     }
 
-    match /users/{userId}/config/adminRemarks {
-      allow write: if request.auth != null
-                   && request.auth.token.email == 'chauhan.viren08@gmail.com';
-    }
+    // Everything else is denied by default.
   }
 }

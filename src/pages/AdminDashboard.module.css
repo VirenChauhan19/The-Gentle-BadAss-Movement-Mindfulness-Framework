@@ -1,0 +1,257 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dashHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.dashTitle {
+  font-family: var(--font-display, inherit);
+  font-size: 1.35rem;
+  color: var(--ink);
+  margin: 0;
+}
+.dashSub {
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+  margin: 4px 0 0;
+}
+
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--r-md, 10px);
+  background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
+  color: var(--on-ink, #fff);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease-out, ease), opacity 0.15s ease;
+  white-space: nowrap;
+}
+.exportBtn:hover:not(:disabled) { transform: translateY(-1px); }
+.exportBtn:disabled { opacity: 0.6; cursor: progress; }
+
+/* ── Metric cards ── */
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.metric {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg, 14px);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
+}
+.metricAccent {
+  border-color: var(--sage, #8b9e7e);
+  background: linear-gradient(180deg, rgba(139,158,126,0.10), var(--paper));
+}
+.metricValue {
+  font-family: var(--font-display, inherit);
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--ink);
+}
+.metricLabel {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+/* ── Charts ── */
+.chartGrid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+}
+@media (max-width: 820px) {
+  .chartGrid { grid-template-columns: 1fr; }
+}
+.chartCard {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg, 14px);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
+}
+.chartTitle {
+  font-size: 0.95rem;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.chartBox { width: 100%; height: 200px; }
+
+.actionList { display: flex; flex-direction: column; gap: 10px; }
+.actionRow {
+  display: grid;
+  grid-template-columns: 130px 1fr 32px;
+  align-items: center;
+  gap: 10px;
+}
+.actionLabel { font-size: 0.78rem; color: var(--ink-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.actionBarTrack { height: 8px; border-radius: 999px; background: var(--cream, rgba(128,128,128,0.12)); overflow: hidden; }
+.actionBarFill { height: 100%; border-radius: 999px; transition: width 0.4s var(--ease-out, ease); }
+.actionCount { font-size: 0.8rem; font-weight: 600; color: var(--ink); text-align: right; }
+
+/* ── Feed ── */
+.feedCard {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg, 14px);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
+}
+.feedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.feedTools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.roleTabs { display: inline-flex; background: var(--cream, rgba(128,128,128,0.1)); border-radius: 999px; padding: 3px; }
+.roleTab {
+  border: none;
+  background: transparent;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.roleTabActive { background: var(--paper); color: var(--ink); box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.08)); font-weight: 600; }
+.feedSearch {
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md, 10px);
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  background: var(--paper-soft, var(--paper));
+  color: var(--ink);
+  min-width: 180px;
+}
+
+.feed { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.feedRow {
+  display: flex;
+  gap: 12px;
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--border-light);
+}
+.feedRow:last-child { border-bottom: none; }
+.feedDot { width: 9px; height: 9px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.feedBody { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.feedLine { margin: 0; font-size: 0.86rem; color: var(--ink-light); line-height: 1.45; }
+.feedLine strong { color: var(--ink); }
+.feedRoleTag {
+  display: inline-block;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--cream, rgba(128,128,128,0.14));
+  color: var(--ink-faint);
+  margin: 0 4px;
+  vertical-align: middle;
+}
+.feedRoleAdmin { background: rgba(154,134,200,0.18); color: #7a5fc0; }
+.feedTarget { color: var(--ink-faint); }
+.feedTime { font-size: 0.72rem; color: var(--ink-faint); }
+
+.empty {
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+  text-align: center;
+  padding: 24px 12px;
+}
+
+/* ── Admin access management ── */
+.adminAccessCard {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg, 14px);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
+}
+.adminAccessHead { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+.adminAccessSub { font-size: 0.78rem; color: var(--ink-faint); }
+.adminAccessList { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; }
+.adminAccessRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--border-light);
+}
+.adminAccessRow:last-child { border-bottom: none; }
+.adminAccessAvatar {
+  width: 26px; height: 26px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--cream, rgba(128,128,128,0.16));
+  color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 600;
+}
+.adminAccessEmail { flex: 1; min-width: 0; font-size: 0.85rem; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adminAccessYou {
+  margin-left: 6px; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 1px 6px; border-radius: 999px; background: rgba(122,160,200,0.18); color: #4a78b0;
+}
+.adminAccessOwner {
+  font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+  padding: 3px 9px; border-radius: 999px;
+  background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
+  color: var(--on-ink, #fff);
+}
+.adminAccessRemoveBtn {
+  border: 1px solid var(--border-light); background: transparent;
+  color: var(--ink-faint); font-size: 0.74rem; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+}
+.adminAccessRemoveBtn:hover { color: #c05040; border-color: rgba(192,80,64,0.4); }
+.adminAccessConfirm { display: inline-flex; gap: 6px; }
+.adminAccessRemoveYes {
+  border: none; background: #c05040; color: #fff; font-size: 0.74rem; font-weight: 600;
+  padding: 5px 12px; border-radius: 999px; cursor: pointer;
+}
+.adminAccessRemoveNo {
+  border: 1px solid var(--border-light); background: transparent; color: var(--ink-faint);
+  font-size: 0.74rem; padding: 5px 12px; border-radius: 999px; cursor: pointer;
+}
+.adminAccessAdd { display: flex; gap: 8px; }
+.adminAccessInput {
+  flex: 1;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md, 10px);
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  background: var(--paper-soft, var(--paper));
+  color: var(--ink);
+}
+.adminAccessAddBtn {
+  border: none;
+  border-radius: var(--r-md, 10px);
+  padding: 9px 16px;
+  background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
+  color: var(--on-ink, #fff);
+  font-weight: 600; font-size: 0.82rem; cursor: pointer; white-space: nowrap;
+}
+.adminAccessAddBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+.adminAccessError { font-size: 0.78rem; color: #c05040; margin: 8px 0 0; }
+.adminAccessNote { font-size: 0.72rem; color: var(--ink-faint); margin: 10px 0 0; }

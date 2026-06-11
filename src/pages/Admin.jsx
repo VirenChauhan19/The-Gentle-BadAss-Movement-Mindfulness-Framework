@@ -1,14 +1,16 @@
 import { useDeferredValue, useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { db } from '../firebase'
-import { collectionGroup, onSnapshot, query, doc, getDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore'
+import { collectionGroup, onSnapshot, query, doc, getDoc, setDoc, deleteDoc, getDocs, collection, orderBy, limit } from 'firebase/firestore'
 import { arrayUnion } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { computeFeelScore } from '../data/storage'
 import { JOURNAL_FACTORS } from '../data/journalFactors'
 import { applyCycleAdaptationToPlan, getCycleWindows } from '../data/trainingAdaptation'
+import { logActivity, actorFromUser } from '../data/activityLog'
 import { generateSingleWeek } from './Coach'
+import AdminDashboard from './AdminDashboard'
 import styles from './Admin.module.css'
 
 const DEFAULT_ADMIN_EMAILS = [
@@ -186,14 +188,21 @@ export default function Admin() {
   const [adminMode,    setAdminMode]    = useState(false)
   const [allEntries,   setAllEntries]   = useState([])
   const [allUserData,  setAllUserData]  = useState({})
+  const [activity,     setActivity]     = useState([])
   const [indexError,   setIndexError]   = useState(false)
   const [nameInput,    setNameInput]    = useState('')
   const [namePending,  setNamePending]  = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
   const [clearing,     setClearing]     = useState(false)
   const [theme,        setTheme]        = useState(() => localStorage.getItem('gb_theme') || 'dark')
+  const [dynamicAdmin, setDynamicAdmin] = useState(false)
+  const [adminList,    setAdminList]    = useState([])
 
-  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())
+  const adminEmail = user?.email?.toLowerCase() || ''
+  // Founders (hardcoded) are always admins; everyone else is granted via the
+  // `admins` Firestore collection, detected reactively below.
+  const isDefaultAdmin = !!adminEmail && ADMIN_EMAILS.includes(adminEmail)
+  const isAdmin = isDefaultAdmin || dynamicAdmin
 
   function changeTheme(nextTheme) {
     setTheme(nextTheme)
@@ -270,6 +279,68 @@ export default function Admin() {
     return unsub
   }, [isAdmin])
 
+  // Live listener for the audit log (admin only)
+  useEffect(() => {
+    if (!isAdmin || !db) return
+    const unsub = onSnapshot(
+      query(collection(db, 'activity'), orderBy('isoTs', 'desc'), limit(500)),
+      snapshot => setActivity(snapshot.docs.map(d => ({ id: d.id, ...d.data() }))),
+      err => console.warn('Activity log listener error:', err?.message || err)
+    )
+    return unsub
+  }, [isAdmin])
+
+  // Detect dynamically-granted admins by watching this user's own admin doc.
+  // Founders skip this (they're admins regardless of the collection).
+  useEffect(() => {
+    if (!db || !adminEmail || isDefaultAdmin) { setDynamicAdmin(false); return }
+    const unsub = onSnapshot(
+      doc(db, 'admins', adminEmail),
+      snap => setDynamicAdmin(snap.exists()),
+      () => setDynamicAdmin(false)
+    )
+    return unsub
+  }, [adminEmail, isDefaultAdmin])
+
+  // Live list of all dynamically-granted admins (for the management UI).
+  useEffect(() => {
+    if (!isAdmin || !db) return
+    const unsub = onSnapshot(
+      collection(db, 'admins'),
+      snapshot => setAdminList(snapshot.docs.map(d => ({ email: d.id, ...d.data() }))),
+      err => console.warn('Admin list listener error:', err?.message || err)
+    )
+    return unsub
+  }, [isAdmin])
+
+  // Grant admin access to an email (adds an `admins/{email}` doc).
+  async function addAdmin(email) {
+    const clean = (email || '').trim().toLowerCase()
+    if (!clean || !clean.includes('@')) throw new Error('Enter a valid email address.')
+    await setDoc(doc(db, 'admins', clean), {
+      email: clean,
+      addedBy: user.email,
+      addedAt: new Date().toISOString(),
+    })
+    logActivity({
+      actor: actorFromUser(user, 'admin'), action: 'admin.access.grant',
+      targetName: clean, summary: `granted admin access to ${clean}`,
+      details: { email: clean },
+    })
+  }
+
+  // Revoke admin access. Founders are protected (they stay admins via rules).
+  async function removeAdmin(email) {
+    const clean = (email || '').trim().toLowerCase()
+    if (ADMIN_EMAILS.includes(clean)) throw new Error('Owner admins cannot be removed.')
+    await deleteDoc(doc(db, 'admins', clean))
+    logActivity({
+      actor: actorFromUser(user, 'admin'), action: 'admin.access.revoke',
+      targetName: clean, summary: `revoked admin access from ${clean}`,
+      details: { email: clean },
+    })
+  }
+
   if (user === undefined) {
     return <div className={styles.page}><p className={styles.loading}>Loading…</p></div>
   }
@@ -332,6 +403,11 @@ export default function Admin() {
       <AdminPanel
         allEntries={allEntries}
         allUserData={allUserData}
+        activity={activity}
+        adminList={adminList}
+        defaultAdmins={ADMIN_EMAILS}
+        onAddAdmin={addAdmin}
+        onRemoveAdmin={removeAdmin}
         indexError={indexError}
         adminUser={user}
         onClose={() => setAdminMode(false)}
@@ -662,10 +738,11 @@ function ProfileEditModal({ profile, fallbackName, onClose, onSave }) {
 }
 
 // ── Admin Panel ───────────────────────────────────────────────────────────────
-function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, onRemarkSent, onRemarkDeleted, onCoachUpdated, onUserDeleted, onProfileUpdated }) {
+function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], defaultAdmins = [], onAddAdmin, onRemoveAdmin, indexError, adminUser, onClose, onRemarkSent, onRemarkDeleted, onCoachUpdated, onUserDeleted, onProfileUpdated }) {
   const [selectedUid, setSelectedUid] = useState(null)
   const [searchText, setSearchText] = useState('')
   const [userFilter, setUserFilter] = useState('all')
+  const [view, setView] = useState('users') // 'users' | 'dashboard'
   const deferredSearchText = useDeferredValue(searchText)
 
   const userMap = useMemo(() => {
@@ -788,13 +865,44 @@ function AdminPanel({ allEntries, allUserData, indexError, adminUser, onClose, o
         </div>
       </div>
 
+      {/* View switcher: per-user management vs. global activity dashboard */}
+      <div className={styles.userFilterRow} style={{ marginBottom: 4 }} aria-label="Switch view">
+        <button
+          type="button"
+          className={`${styles.userFilterBtn} ${view === 'users' ? styles.userFilterBtnActive : ''}`}
+          onClick={() => setView('users')}
+        >
+          Users
+        </button>
+        <button
+          type="button"
+          className={`${styles.userFilterBtn} ${view === 'dashboard' ? styles.userFilterBtnActive : ''}`}
+          onClick={() => setView('dashboard')}
+        >
+          Dashboard &amp; Activity
+        </button>
+      </div>
+
       {indexError && (
         <div className={styles.indexWarn}>
           Firestore index needed. Check browser console for the setup link.
         </div>
       )}
 
-      <div className={styles.adminLayout}>
+      {view === 'dashboard' && (
+        <AdminDashboard
+          activity={activity}
+          userList={userList}
+          allEntries={allEntries}
+          adminList={adminList}
+          defaultAdmins={defaultAdmins}
+          currentAdminEmail={adminUser?.email?.toLowerCase() || ''}
+          onAddAdmin={onAddAdmin}
+          onRemoveAdmin={onRemoveAdmin}
+        />
+      )}
+
+      <div className={styles.adminLayout} style={view === 'dashboard' ? { display: 'none' } : undefined}>
         {/* Left: user list */}
         <aside className={styles.userListPanel}>
           <div className={styles.userListTools}>
@@ -933,6 +1041,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
   const checkins    = coach?.checkins || []
   const plan        = useMemo(() => applyCycleAdaptationToPlan(getFullCoachPlan(goal), userProfile), [goal, userProfile])
   const insights    = useMemo(() => getUserInsights(user, plan, checkins), [user, plan, checkins])
+  const adminActor  = useMemo(() => actorFromUser(adminUser, 'admin'), [adminUser])
 
   useEffect(() => {
     setPlanDraft(plan)
@@ -991,6 +1100,12 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
       setRemarkText('')
       setRemarkRunDate('')
       onRemarkSent(remark)
+      logActivity({
+        actor: adminActor, action: 'admin.remark.send',
+        targetUid: user.uid, targetName: user.name,
+        summary: `sent a remark to ${user.name}`,
+        details: { runDate: remark.runDate, preview: remark.text.slice(0, 120) },
+      })
     } catch (err) {
       setRemarkError('Could not send remark: ' + err.message)
     }
@@ -1011,6 +1126,11 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
       setLocalRemarks(nextRemarks)
       setPendingRemarkDelete(null)
       onRemarkDeleted?.(remarkId)
+      logActivity({
+        actor: adminActor, action: 'admin.remark.delete',
+        targetUid: user.uid, targetName: user.name,
+        summary: `deleted a remark for ${user.name}`,
+      })
     } catch (err) {
       setRemarkDeleteError('Could not delete remark: ' + err.message)
     }
@@ -1039,6 +1159,12 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
           .filter(d => d.id !== '_deleted')
           .map(d => deleteDoc(d.ref))
       )
+      logActivity({
+        actor: adminActor, action: 'admin.user.delete',
+        targetUid: user.uid, targetName: user.name,
+        summary: `deleted the account and all data for ${user.name}`,
+        details: { email: user.email, entries: user.entries?.length || 0 },
+      })
       setConfirmDelete(false)
       onDeleted?.()
     } catch (err) {
@@ -1053,11 +1179,23 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
     setProfileError(null)
     try {
       const nextProfile = { ...profileDraft, updatedAt: new Date().toISOString() }
+      const baseline = buildAdminProfileDraft(user)
+      const changedFields = Object.keys(profileDraft).filter(
+        k => k !== 'updatedAt' && String(profileDraft[k] ?? '') !== String(baseline[k] ?? '')
+      )
       await setDoc(doc(db, 'users', user.uid, 'config', 'profile'), nextProfile, { merge: true })
       setProfileDraft(nextProfile)
       setProfileDirty(false)
       setProfileLiveNotice('')
       onProfileUpdated?.(nextProfile)
+      logActivity({
+        actor: adminActor, action: 'admin.profile.update',
+        targetUid: user.uid, targetName: user.name,
+        summary: changedFields.length
+          ? `edited ${user.name}'s profile (${changedFields.join(', ')})`
+          : `saved ${user.name}'s profile`,
+        details: { changedFields },
+      })
     } catch (err) {
       setProfileError('Could not save profile: ' + err.message)
     }
@@ -1070,6 +1208,12 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
       await deleteDoc(doc(db, 'users', user.uid, 'journal', date))
       setLocalEntries(prev => prev.filter(e => e.date !== date))
       if (expandedEntry === date) setExpandedEntry(null)
+      logActivity({
+        actor: adminActor, action: 'admin.journal.delete',
+        targetUid: user.uid, targetName: user.name,
+        summary: `deleted ${user.name}'s journal entry from ${date}`,
+        details: { date },
+      })
     } catch (err) {
       console.warn('Could not delete entry:', err)
     }
@@ -1084,6 +1228,11 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
       await deleteDoc(doc(db, 'users', user.uid, 'config', 'coach'))
       onCoachUpdated(null)
       setConfirmClearGoal(false)
+      logActivity({
+        actor: adminActor, action: 'admin.coach.clear',
+        targetUid: user.uid, targetName: user.name,
+        summary: `cleared ${user.name}'s training program`,
+      })
     } catch (err) {
       setClearGoalError('Could not clear goal: ' + err.message)
     }
@@ -1190,6 +1339,12 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
       await setDoc(doc(db, 'users', user.uid, 'config', 'coach'), nextCoach, { merge: true })
       onCoachUpdated?.(nextCoach)
       setEditingPlan(false)
+      logActivity({
+        actor: adminActor, action: 'admin.plan.edit',
+        targetUid: user.uid, targetName: user.name,
+        summary: `edited ${user.name}'s training plan (${planDraft.length} days)`,
+        details: { days: planDraft.length },
+      })
     } catch (err) {
       setPlanError('Could not save plan: ' + err.message)
     }
@@ -1238,6 +1393,12 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
       await setDoc(doc(db, 'users', user.uid, 'config', 'coach'), nextCoach, { merge: true })
       onCoachUpdated?.(nextCoach)
       setPlanDraft(merged)
+      logActivity({
+        actor: adminActor, action: 'admin.plan.generate',
+        targetUid: user.uid, targetName: user.name,
+        summary: `generated week ${weekNum} of ${user.name}'s plan`,
+        details: { week: weekNum },
+      })
     } catch (err) {
       setGenerateWeekError(`Week ${weekNum} generation failed: ${err.message}`)
     }

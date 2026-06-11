@@ -7,3 +7,8 @@ dev-dist
 .env
 .env.local
 .env.*.local
+
+# Untracked from the app repo but kept on disk:
+# marketing video sub-project (211 MB) and user-testing PDFs.
+case-study-video/
+user-testing-evidence/
