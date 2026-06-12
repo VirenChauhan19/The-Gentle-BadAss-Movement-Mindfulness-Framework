@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "higgsfield": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "higgsfield-mcp"
+      ]
+    }
+  }
+}

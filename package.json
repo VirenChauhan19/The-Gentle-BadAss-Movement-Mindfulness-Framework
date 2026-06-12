@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "npm run build && firebase deploy"
+    "deploy": "npm run build && firebase deploy",
+    "video:audit": "node marketing-video/scripts/audit.mjs",
+    "video:capture": "node marketing-video/scripts/capture.mjs",
+    "video:render": "node marketing-video/scripts/render.mjs",
+    "video:all": "npm run video:audit && npm run video:capture && npm run video:render"
   },
   "dependencies": {
     "@react-three/fiber": "^8.18.0",
@@ -20,9 +24,14 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.476",
+    "@remotion/media-utils": "^4.0.476",
+    "@remotion/renderer": "^4.0.476",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "playwright": "^1.60.0",
+    "remotion": "^4.0.476",
     "vite": "^5.4.2",
     "vite-plugin-pwa": "^0.20.5"
   }

@@ -131,6 +131,7 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
+    "higgsfield",
     "ruflo"
   ]
 }
