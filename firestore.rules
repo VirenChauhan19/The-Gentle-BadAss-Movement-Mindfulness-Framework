@@ -61,6 +61,54 @@ service cloud.firestore {
       allow read, write, delete: if isAdmin();
     }
 
+    // ── Member ↔ admin messaging ─────────────────────────────────────────────
+    // A two-way conversation thread per user. The user reads their own thread,
+    // posts messages labelled 'user' (never 'admin'), and may flip admin
+    // messages to read (readByUser only). Admins read every thread (directly and
+    // via collection-group), reply, mark read, and moderate. Message text is
+    // size-bounded; keys are fixed so the shape can't be polluted.
+    match /users/{userId}/messages/{messageId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId)
+                        && request.resource.data.from == 'user'
+                        && request.resource.data.authorUid == request.auth.uid
+                        && request.resource.data.text is string
+                        && request.resource.data.text.size() > 0
+                        && request.resource.data.text.size() <= 4000
+                        && request.resource.data.readByUser == true
+                        && request.resource.data.readByAdmin == false
+                        && request.resource.data.keys().hasOnly([
+                             'from', 'authorUid', 'authorName', 'authorEmail',
+                             'text', 'createdAt', 'ts', 'readByUser', 'readByAdmin'
+                           ]))
+                    || (isAdmin()
+                        && request.resource.data.from == 'admin'
+                        && request.resource.data.text is string
+                        && request.resource.data.text.size() > 0
+                        && request.resource.data.text.size() <= 4000);
+      // The user may only toggle readByUser; admins can update anything.
+      allow update: if (isOwner(userId)
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readByUser']))
+                    || isAdmin();
+      allow delete: if isAdmin();
+    }
+    // Admin collection-group read of every thread (unread badges + dashboard).
+    match /{path=**}/messages/{messageId} {
+      allow read: if isAdmin();
+    }
+
+    // ── Announcements ─────────────────────────────────────────────────────────
+    // One-to-many notices. Any signed-in member may read the global feed; only
+    // admins post or remove them. Text is size-bounded.
+    match /announcements/{announcementId} {
+      allow read: if request.auth != null;
+      allow create, update: if isAdmin()
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() > 0
+                    && request.resource.data.text.size() <= 4000;
+      allow delete: if isAdmin();
+    }
+
     // ── Audit log ────────────────────────────────────────────────────────────
     // Append-only. A user may create an event ONLY for themselves, with their
     // verified identity, a fixed set of fields, sane sizes, and may NOT label
@@ -84,6 +132,27 @@ service cloud.firestore {
                     && (request.resource.data.actorRole == 'user' || isAdmin());
       allow read, delete: if isAdmin();
       allow update: if false;
+    }
+
+    // ── Sheet-sync plumbing ──────────────────────────────────────────────────
+    // Admins can ask the Cloud Function to rebuild the Google Sheet (create a
+    // command) and watch its progress (read). Status updates are written by
+    // the function via the Admin SDK, never from browsers.
+    match /adminCommands/{commandId} {
+      allow create: if isAdmin()
+                    && request.resource.data.keys().hasOnly(['action', 'requestedBy', 'requestedAt'])
+                    && request.resource.data.action is string
+                    && request.resource.data.action.size() <= 100
+                    && request.resource.data.requestedBy == request.auth.token.email;
+      allow read:   if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // Sync state written by the Cloud Function; the dashboard reads it to show
+    // "last synced" info for the Google Sheet mirror.
+    match /syncState/{stateId} {
+      allow read:  if isAdmin();
+      allow write: if false;
     }
 
     // Everything else is denied by default.

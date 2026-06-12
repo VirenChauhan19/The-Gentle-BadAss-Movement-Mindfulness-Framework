@@ -10,13 +10,15 @@ const links = [
   { to: '/library', label: 'Your Plan', shortLabel: 'Plan', icon: LibraryIcon, lockedForGuest: true },
   { to: '/functional-tests', label: 'Functional Tests', shortLabel: 'Tests', icon: TestIcon, lockedForGuest: true, hiddenOnMobile: true },
   { to: '/history', label: 'Progress', shortLabel: 'Progress', icon: HistoryIcon, lockedForGuest: true },
+  { to: '/messages', label: 'Messages', shortLabel: 'Chat', icon: MessageIcon },
   { to: '/profile', label: 'Profile', shortLabel: 'Me', icon: ProfileIcon },
 ]
 
 export default function Nav() {
   const location = useLocation()
   const navRef = useRef(null)
-  const { user, guestName, onboardingRequired } = useData()
+  const { user, guestName, onboardingRequired, unreadMessages = 0, unreadAnnouncements = 0 } = useData()
+  const unreadTotal = unreadMessages + unreadAnnouncements
   const guestLocked = !user && !!guestName
   const visibleLinks = guestLocked ? links.filter(link => !link.lockedForGuest) : links
 
@@ -37,12 +39,13 @@ export default function Nav() {
     <nav className={styles.nav} ref={navRef} aria-label="Primary">
       {visibleLinks.map(({ to, label, shortLabel, icon: Icon, lockedForGuest, hiddenOnMobile }) => {
         const locked = guestLocked && lockedForGuest
+        const showBadge = to === '/messages' && unreadTotal > 0
         return (
         <NavLink
           key={to}
           to={to}
           end={to === '/'}
-          title={locked ? `${label}: sign in to unlock` : label}
+          title={locked ? `${label}: sign in to unlock` : showBadge ? `${label}: ${unreadTotal} new` : label}
           onClick={tapFeedback}
           className={({ isActive }) =>
             `${styles.link} ${isActive ? styles.active : ''} ${locked ? styles.locked : ''} ${hiddenOnMobile ? styles.hiddenOnMobile : ''}`
@@ -52,6 +55,11 @@ export default function Nav() {
           <span className={styles.fullLabel}>{label}</span>
           <span className={styles.shortLabel}>{shortLabel || label}</span>
           {locked && <span className={styles.lockDot} aria-label="Sign in to unlock"><LockIcon /></span>}
+          {showBadge && (
+            <span className={styles.msgBadge} aria-label={`${unreadTotal} unread`}>
+              {unreadTotal > 9 ? '9+' : unreadTotal}
+            </span>
+          )}
         </NavLink>
       )})}
     </nav>
@@ -118,6 +126,14 @@ function CoachIcon() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2a7 7 0 0 1 7 7c0 3.5-2.5 6.5-6 7.4V18h2a1 1 0 0 1 0 2h-2v2a1 1 0 0 1-2 0v-2H9a1 1 0 0 1 0-2h2v-1.6C7.5 15.5 5 12.5 5 9a7 7 0 0 1 7-7z" />
       <path d="M9.5 9.5 11 11l3.5-3.5" />
+    </svg>
+  )
+}
+
+function MessageIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   )
 }

@@ -204,6 +204,34 @@
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
 }
 
+/* Unread-message count badge on the Profile tab. */
+.msgBadge {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--terracotta, #ba5f45);
+  border: 1.5px solid var(--brand-gradient, #181713);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff8f2;
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.22);
+  animation: msgBadgePop 0.3s var(--ease-spring, ease) both;
+}
+@keyframes msgBadgePop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
 .navAvatar {
   width: 22px;
   height: 22px;
@@ -328,13 +356,13 @@
     flex: 1 1 0;
     min-width: 0;
     min-height: 52px;
-    padding: 8px 4px 6px;
+    padding: 8px 2px 6px;
     gap: 4px;
     border-radius: 14px;
     color: var(--ink-faint);
-    font-size: 0.58rem;
+    font-size: 0.54rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.02em;
     background: transparent;
     transition: color 180ms var(--ease-out);
   }

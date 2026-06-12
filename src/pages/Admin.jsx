@@ -5,12 +5,15 @@ import { collectionGroup, onSnapshot, query, doc, getDoc, setDoc, deleteDoc, get
 import { arrayUnion } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
-import { computeFeelScore } from '../data/storage'
+import { computeFeelScore, computeEntryStreak } from '../data/storage'
 import { JOURNAL_FACTORS } from '../data/journalFactors'
 import { applyCycleAdaptationToPlan, getCycleWindows } from '../data/trainingAdaptation'
 import { logActivity, actorFromUser } from '../data/activityLog'
+import { countUnread } from '../data/messaging'
+import { postAnnouncement, deleteAnnouncement, subscribeToAnnouncements } from '../data/announcements'
 import { generateSingleWeek } from './Coach'
 import AdminDashboard from './AdminDashboard'
+import MessageThread from '../components/MessageThread'
 import styles from './Admin.module.css'
 
 const DEFAULT_ADMIN_EMAILS = [
@@ -239,10 +242,14 @@ export default function Admin() {
           ]).then(([userProfile, coach, remarks]) => [uid, { userProfile, coach, remarks }])
         )
       )
-      setAllUserData(prev => ({
-        ...prev,
-        ...Object.fromEntries(pairs),
-      }))
+      // Merge per-uid so keys set by other listeners (e.g. messages) survive.
+      setAllUserData(prev => {
+        const next = { ...prev }
+        pairs.forEach(([uid, data]) => {
+          next[uid] = { ...(next[uid] || {}), ...data }
+        })
+        return next
+      })
     }, err => {
       if (err.code === 'failed-precondition') setIndexError(err.message)
     })
@@ -287,6 +294,30 @@ export default function Admin() {
       snapshot => setActivity(snapshot.docs.map(d => ({ id: d.id, ...d.data() }))),
       err => console.warn('Activity log listener error:', err?.message || err)
     )
+    return unsub
+  }, [isAdmin])
+
+  // Live listener for every user's message thread (admin only). Powers the
+  // unread badges on the user list; each open conversation re-subscribes on its
+  // own inside MessageThread.
+  useEffect(() => {
+    if (!isAdmin || !db) return
+    const unsub = onSnapshot(query(collectionGroup(db, 'messages')), snapshot => {
+      const byUid = {}
+      snapshot.docs.forEach(d => {
+        const uid = d.ref.parent.parent?.id
+        if (!uid) return
+        ;(byUid[uid] ||= []).push({ id: d.id, ...d.data() })
+      })
+      setAllUserData(prev => {
+        const next = { ...prev }
+        Object.entries(byUid).forEach(([uid, msgs]) => {
+          msgs.sort((a, b) => String(a.createdAt || '').localeCompare(String(b.createdAt || '')))
+          next[uid] = { ...(next[uid] || {}), messages: msgs }
+        })
+        return next
+      })
+    }, err => console.warn('Messages listener error:', err?.message || err))
     return unsub
   }, [isAdmin])
 
@@ -772,6 +803,7 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
       map[uid].userProfile = data.userProfile
       map[uid].coach       = data.coach
       map[uid].remarks     = data.remarks || []
+      map[uid].messages    = data.messages || []
       map[uid].name = displayUserName(data.userProfile, map[uid].name)
       map[uid].email = displayUserEmail(data.userProfile, map[uid].email)
     })
@@ -787,6 +819,7 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
           : null,
         lastDate: u.entries[0]?.date || null,
         lastSeenAt: u.userProfile?.lastLoginAt || u.userProfile?.updatedAt || u.userProfile?.createdAt || null,
+        unreadMessages: countUnread(u.messages, 'admin'),
       }))
       .sort((a, b) => (b.lastDate || b.lastSeenAt || '').localeCompare(a.lastDate || a.lastSeenAt || ''))
   , [userMap])
@@ -802,6 +835,8 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
       recent: userList.filter(u => u.lastDate && u.lastDate >= weekAgo).length,
       checkedToday: userList.filter(u => u.lastDate === today).length,
       lowFeel: userList.filter(u => typeof u.avgScore === 'number' && u.avgScore < 5).length,
+      unread: userList.filter(u => u.unreadMessages > 0).length,
+      unreadTotal: userList.reduce((n, u) => n + (u.unreadMessages || 0), 0),
     }
   }, [userList])
 
@@ -815,6 +850,7 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
       if (userFilter === 'no-plan' && u.coach?.goal) return false
       if (userFilter === 'low-feel' && (!(typeof u.avgScore === 'number') || u.avgScore >= 5)) return false
       if (userFilter === 'no-entries' && u.entries.length > 0) return false
+      if (userFilter === 'unread' && !(u.unreadMessages > 0)) return false
       if (!q) return true
       const profile = u.userProfile || {}
       return [
@@ -876,6 +912,13 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
         </button>
         <button
           type="button"
+          className={`${styles.userFilterBtn} ${view === 'inbox' ? styles.userFilterBtnActive : ''} ${adminStats.unreadTotal ? styles.userFilterBtnAlert : ''}`}
+          onClick={() => setView('inbox')}
+        >
+          Inbox{adminStats.unreadTotal ? ` (${adminStats.unreadTotal})` : ''}
+        </button>
+        <button
+          type="button"
           className={`${styles.userFilterBtn} ${view === 'dashboard' ? styles.userFilterBtnActive : ''}`}
           onClick={() => setView('dashboard')}
         >
@@ -889,6 +932,10 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
         </div>
       )}
 
+      {view === 'inbox' && (
+        <AdminInbox userList={userList} adminUser={adminUser} />
+      )}
+
       {view === 'dashboard' && (
         <AdminDashboard
           activity={activity}
@@ -899,10 +946,11 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
           currentAdminEmail={adminUser?.email?.toLowerCase() || ''}
           onAddAdmin={onAddAdmin}
           onRemoveAdmin={onRemoveAdmin}
+          onOpenUser={uid => { setSelectedUid(uid); setView('users') }}
         />
       )}
 
-      <div className={styles.adminLayout} style={view === 'dashboard' ? { display: 'none' } : undefined}>
+      <div className={styles.adminLayout} style={view !== 'users' ? { display: 'none' } : undefined}>
         {/* Left: user list */}
         <aside className={styles.userListPanel}>
           <div className={styles.userListTools}>
@@ -918,6 +966,7 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
             <div className={styles.userFilterRow} aria-label="Filter users">
               {[
                 ['all', `All ${adminStats.totalUsers}`],
+                ['unread', `Unread${adminStats.unread ? ` ${adminStats.unread}` : ''}`],
                 ['recent', `Recent ${adminStats.recent}`],
                 ['low-feel', `Low Feel ${adminStats.lowFeel}`],
                 ['no-plan', 'No Plan'],
@@ -926,7 +975,7 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
                 <button
                   key={id}
                   type="button"
-                  className={`${styles.userFilterBtn} ${userFilter === id ? styles.userFilterBtnActive : ''}`}
+                  className={`${styles.userFilterBtn} ${userFilter === id ? styles.userFilterBtnActive : ''} ${id === 'unread' && adminStats.unread ? styles.userFilterBtnAlert : ''}`}
                   onClick={() => setUserFilter(id)}
                 >
                   {label}
@@ -952,9 +1001,21 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
                 className={`${styles.userListItem} ${selectedUid === u.uid ? styles.userListItemActive : ''}`}
                 onClick={() => setSelectedUid(u.uid)}
               >
-                <div className={styles.userListAvatar}>{(u.name || '?')[0].toUpperCase()}</div>
+                <div className={styles.userListAvatar}>
+                  {(u.name || '?')[0].toUpperCase()}
+                  {u.unreadMessages > 0 && (
+                    <span className={styles.userListUnreadDot} aria-hidden="true" />
+                  )}
+                </div>
                 <div className={styles.userListInfo}>
-                  <span className={styles.userListName}>{u.name}</span>
+                  <span className={styles.userListName}>
+                    {u.name}
+                    {u.unreadMessages > 0 && (
+                      <span className={styles.userListUnreadBadge}>
+                        {u.unreadMessages > 9 ? '9+' : u.unreadMessages} new
+                      </span>
+                    )}
+                  </span>
                   <span className={styles.userListEmail}>{u.email}</span>
                   <span className={styles.userListMeta}>
                     {u.entries.length} entries · {u.lastDate || u.lastSeenAt?.slice(0, 10) || 'new login'}
@@ -994,6 +1055,274 @@ function AdminPanel({ allEntries, allUserData, activity = [], adminList = [], de
           )}
         </main>
       </div>
+    </div>
+  )
+}
+
+// Compact relative time for inbox rows ("now", "4m", "3h", "2d", or a date).
+function relativeTime(iso) {
+  if (!iso) return ''
+  const then = new Date(iso).getTime()
+  if (Number.isNaN(then)) return ''
+  const mins = Math.floor((Date.now() - then) / 60000)
+  if (mins < 1) return 'now'
+  if (mins < 60) return `${mins}m`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h`
+  const days = Math.floor(hrs / 24)
+  if (days < 7) return `${days}d`
+  return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' })
+}
+
+// ── Admin Inbox ───────────────────────────────────────────────────────────────
+// One place to read and reply to every member's thread without hopping through
+// individual user profiles. Conversations are ordered unread-first, then by the
+// most recent message, with the open thread shown alongside.
+function AdminInbox({ userList, adminUser }) {
+  const [selectedUid, setSelectedUid] = useState(null)
+  const [broadcastOpen, setBroadcastOpen] = useState(false)
+
+  const conversations = useMemo(() => {
+    return userList
+      .filter(u => (u.messages || []).length > 0)
+      .map(u => {
+        const last = u.messages[u.messages.length - 1]
+        return { ...u, lastMessage: last, lastAt: last?.createdAt || '' }
+      })
+      .sort((a, b) => {
+        const au = a.unreadMessages > 0 ? 1 : 0
+        const bu = b.unreadMessages > 0 ? 1 : 0
+        if (au !== bu) return bu - au
+        return String(b.lastAt).localeCompare(String(a.lastAt))
+      })
+  }, [userList])
+
+  useEffect(() => {
+    if (!conversations.length) { setSelectedUid(null); return }
+    if (!conversations.some(c => c.uid === selectedUid)) setSelectedUid(conversations[0].uid)
+  }, [conversations, selectedUid])
+
+  const selected = conversations.find(c => c.uid === selectedUid) || null
+
+  function openConversation(uid) {
+    setBroadcastOpen(false)
+    setSelectedUid(uid)
+  }
+
+  return (
+    <div className={styles.adminLayout}>
+      {/* Left: conversation list */}
+      <aside className={styles.userListPanel}>
+        <div className={styles.inboxTools}>
+          <button
+            type="button"
+            className={`${styles.broadcastBtn} ${broadcastOpen ? styles.broadcastBtnActive : ''}`}
+            onClick={() => setBroadcastOpen(true)}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m3 11 18-5v12L3 14v-3z" /><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+            </svg>
+            Post announcement
+          </button>
+        </div>
+        {conversations.length === 0 && (
+          <p className={styles.inboxListEmpty}>No conversations yet. Replies will appear here.</p>
+        )}
+        {conversations.map(c => {
+          const fromYou = c.lastMessage?.from === 'admin'
+          const unread = c.unreadMessages > 0
+          const previewText = `${fromYou ? 'You: ' : ''}${c.lastMessage?.text || ''}`
+          return (
+            <button
+              key={c.uid}
+              className={`${styles.userListItem} ${styles.inboxItem} ${!broadcastOpen && selectedUid === c.uid ? styles.userListItemActive : ''}`}
+              onClick={() => openConversation(c.uid)}
+            >
+              <div className={styles.userListAvatar}>
+                {(c.name || '?')[0].toUpperCase()}
+                {unread && <span className={styles.userListUnreadDot} aria-hidden="true" />}
+              </div>
+              <div className={styles.userListInfo}>
+                <span className={styles.inboxTopRow}>
+                  <span className={styles.userListName}>{c.name}</span>
+                  <span className={`${styles.inboxTime} ${unread ? styles.inboxTimeUnread : ''}`}>
+                    {relativeTime(c.lastAt)}
+                  </span>
+                </span>
+                <span className={styles.inboxBottomRow}>
+                  <span className={`${styles.inboxPreview} ${unread ? styles.inboxPreviewUnread : ''}`}>
+                    {previewText}
+                  </span>
+                  {unread && (
+                    <span className={styles.inboxCount}>
+                      {c.unreadMessages > 9 ? '9+' : c.unreadMessages}
+                    </span>
+                  )}
+                </span>
+              </div>
+            </button>
+          )
+        })}
+      </aside>
+
+      {/* Right: broadcast composer, open thread, or empty prompt */}
+      <main className={styles.userDetailPanel}>
+        {broadcastOpen ? (
+          <AnnouncementComposer
+            adminUser={adminUser}
+            onClose={() => setBroadcastOpen(false)}
+          />
+        ) : !selected ? (
+          <div className={styles.noSelection}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.25">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <p>Select a conversation, or broadcast to everyone.</p>
+          </div>
+        ) : (
+          <div className={styles.messagesTab}>
+            <p className={styles.messagesTabHint}>
+              Chatting with <strong>{selected.name}</strong>{selected.email ? ` · ${selected.email}` : ''}. They
+              see and reply to this from their Messages tab.
+            </p>
+            <MessageThread
+              key={selected.uid}
+              uid={selected.uid}
+              role="admin"
+              selfUser={adminUser}
+              targetName={selected.name}
+            />
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+// ── Announcement composer ─────────────────────────────────────────────────────
+// Posts ONE announcement to the global feed every member reads in their
+// Announcements tab. One-way (no replies). Shows a confirm step plus a live list
+// of recent announcements that can be removed.
+function AnnouncementComposer({ adminUser, onClose }) {
+  const [text, setText] = useState('')
+  const [confirming, setConfirming] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [justPosted, setJustPosted] = useState(false)
+  const [error, setError] = useState('')
+  const [items, setItems] = useState([])
+  const [deletingId, setDeletingId] = useState(null)
+
+  useEffect(() => {
+    const unsub = subscribeToAnnouncements(setItems, () => {})
+    return unsub
+  }, [])
+
+  const body = text.trim()
+  const canSend = !!body && !sending
+
+  async function handlePost() {
+    if (!canSend) return
+    setSending(true); setError('')
+    try {
+      await postAnnouncement({ adminUser, text: body })
+      setText(''); setConfirming(false); setJustPosted(true)
+      setTimeout(() => setJustPosted(false), 2800)
+    } catch (err) {
+      setError(err?.message || 'Could not post the announcement. Please try again.')
+    }
+    setSending(false)
+  }
+
+  async function handleDelete(id) {
+    if (deletingId) return
+    setDeletingId(id)
+    try { await deleteAnnouncement(id) } catch (err) { setError(err?.message || 'Could not delete.') }
+    setDeletingId(null)
+  }
+
+  return (
+    <div className={styles.broadcastPanel}>
+      <div className={styles.broadcastHeader}>
+        <div className={styles.broadcastHeaderIcon}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m3 11 18-5v12L3 14v-3z" /><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+          </svg>
+        </div>
+        <div>
+          <h3 className={styles.broadcastTitle}>Post an announcement</h3>
+          <p className={styles.broadcastSub}>
+            Appears in every member&apos;s Announcements tab. One-way — members read it but
+            don&apos;t reply, and no group chat is created.
+          </p>
+        </div>
+      </div>
+
+      {error && <p className={styles.broadcastError}>{error}</p>}
+      {justPosted && <p className={styles.broadcastPosted}>✓ Announcement posted to all members.</p>}
+
+      <textarea
+        className={styles.broadcastInput}
+        rows={5}
+        placeholder="Write an announcement, update, or reminder for everyone…"
+        value={text}
+        onChange={e => { setText(e.target.value); setConfirming(false) }}
+        maxLength={4000}
+        disabled={sending}
+      />
+      <div className={styles.broadcastFootRow}>
+        <span className={styles.broadcastCount}>{body.length}/4000</span>
+        {!confirming ? (
+          <div className={styles.broadcastActions}>
+            <button type="button" className={styles.broadcastCancelBtn} onClick={onClose} disabled={sending}>
+              Close
+            </button>
+            <button
+              type="button"
+              className={styles.broadcastSendBtn}
+              onClick={() => setConfirming(true)}
+              disabled={!canSend}
+            >
+              Review &amp; post
+            </button>
+          </div>
+        ) : (
+          <div className={styles.broadcastConfirm}>
+            <span className={styles.broadcastConfirmText}>Post to all members?</span>
+            <button type="button" className={styles.broadcastCancelBtn} onClick={() => setConfirming(false)} disabled={sending}>
+              Back
+            </button>
+            <button type="button" className={styles.broadcastSendBtn} onClick={handlePost} disabled={!canSend}>
+              {sending ? 'Posting…' : 'Post announcement'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {items.length > 0 && (
+        <div className={styles.annAdminList}>
+          <p className={styles.annAdminListLabel}>Recent announcements</p>
+          {items.slice(0, 20).map(a => (
+            <div key={a.id} className={styles.annAdminItem}>
+              <div className={styles.annAdminItemBody}>
+                <span className={styles.annAdminItemMeta}>
+                  {a.authorName || 'Coach'} · {relativeTime(a.createdAt)}
+                </span>
+                <p className={styles.annAdminItemText}>{a.text}</p>
+              </div>
+              <button
+                type="button"
+                className={styles.annAdminDelete}
+                onClick={() => handleDelete(a.id)}
+                disabled={deletingId === a.id}
+                aria-label="Delete announcement"
+                title="Delete announcement"
+              >
+                {deletingId === a.id ? '…' : '×'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -1042,6 +1371,7 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
   const plan        = useMemo(() => applyCycleAdaptationToPlan(getFullCoachPlan(goal), userProfile), [goal, userProfile])
   const insights    = useMemo(() => getUserInsights(user, plan, checkins), [user, plan, checkins])
   const adminActor  = useMemo(() => actorFromUser(adminUser, 'admin'), [adminUser])
+  const unreadFromUser = useMemo(() => countUnread(user.messages, 'admin'), [user.messages])
 
   useEffect(() => {
     setPlanDraft(plan)
@@ -1488,6 +1818,9 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
           >
             {goal ? 'Edit Plan' : 'View Running'}
           </button>
+          <button type="button" onClick={() => setTab('messages')}>
+            Message{unreadFromUser > 0 ? ` (${unreadFromUser})` : ''}
+          </button>
           <button type="button" onClick={() => setTab('remarks')}>Send Remark</button>
           <button type="button" className={styles.adminBossDanger} onClick={() => setConfirmDelete(true)}>Delete</button>
         </div>
@@ -1500,11 +1833,12 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
           { id: 'profile',  label: 'Edit Profile' },
           { id: 'journal',  label: `Journal (${localEntries.length})` },
           { id: 'coach',    label: goal ? `Running · ${goal.focus || goal.raceGoal}` : 'Running' },
+          { id: 'messages', label: `Messages${unreadFromUser > 0 ? ` (${unreadFromUser})` : ''}`, alert: unreadFromUser > 0 },
           { id: 'remarks',  label: `Remarks (${localRemarks.length})` },
         ].map(t => (
           <button
             key={t.id}
-            className={`${styles.detailTab} ${tab === t.id ? styles.detailTabActive : ''}`}
+            className={`${styles.detailTab} ${tab === t.id ? styles.detailTabActive : ''} ${t.alert ? styles.detailTabAlert : ''}`}
             onClick={() => setTab(t.id)}
           >
             {t.label}
@@ -1778,6 +2112,22 @@ function UserDetail({ user, adminUser, onRemarkSent, onRemarkDeleted, onCoachUpd
           </div>
         )}
 
+        {/* ── Messages Tab (two-way chat) ─────────────────────── */}
+        {tab === 'messages' && (
+          <div className={styles.messagesTab}>
+            <p className={styles.messagesTabHint}>
+              Chat directly with {user.name}. They see and reply to this from their profile, and
+              get a badge when you write. Use Remarks for run-specific coaching notes.
+            </p>
+            <MessageThread
+              uid={user.uid}
+              role="admin"
+              selfUser={adminUser}
+              targetName={user.name}
+            />
+          </div>
+        )}
+
         {/* ── Remarks Tab ─────────────────────────────────────── */}
         {tab === 'remarks' && (
           <div>
@@ -1902,18 +2252,6 @@ function getUserInsights(user, plan, checkins) {
     plannedWorkouts: plan.filter(day => day.type !== 'rest').length,
     timeline,
   }
-}
-
-function computeEntryStreak(entries) {
-  if (!entries.length) return 0
-  const dates = new Set(entries.map(entry => entry.date))
-  let cursor = new Date()
-  let streak = 0
-  while (dates.has(cursor.toISOString().split('T')[0])) {
-    streak += 1
-    cursor.setDate(cursor.getDate() - 1)
-  }
-  return streak
 }
 
 function CycleWindowPreview({ profile, goal }) {

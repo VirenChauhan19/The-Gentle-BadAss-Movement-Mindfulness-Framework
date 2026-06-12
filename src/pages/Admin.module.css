@@ -829,6 +829,16 @@
 .adminModeBtn:active { transform: scale(0.97); }
 
 /* ── Coach remarks on profile page ─── */
+.messageSignInHint {
+  font-size: 0.86rem;
+  color: var(--ink-faint);
+  line-height: 1.55;
+  padding: 16px 18px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg, 14px);
+}
+
 .remarksList {
   display: flex;
   flex-direction: column;
@@ -1089,6 +1099,13 @@
   color: var(--on-ink);
 }
 
+/* "Unread N" filter highlights itself when conversations are waiting. */
+.userFilterBtnAlert:not(.userFilterBtnActive) {
+  border-color: var(--terracotta, #ba5f45);
+  color: var(--terracotta, #ba5f45);
+  font-weight: 800;
+}
+
 .userListCount,
 .userListLimit {
   margin-top: 9px;
@@ -1125,6 +1142,7 @@
 }
 
 .userListAvatar {
+  position: relative;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -1136,6 +1154,31 @@
   font-size: 1rem;
   font-weight: 700;
   flex-shrink: 0;
+}
+
+/* Unread-message indicators on the user list. */
+.userListUnreadDot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--terracotta, #ba5f45);
+  border: 2px solid var(--paper);
+}
+.userListUnreadBadge {
+  margin-left: 8px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--terracotta, #ba5f45);
+  background: rgba(186, 95, 69, 0.14);
+  padding: 1px 7px;
+  border-radius: 999px;
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .userListInfo {
@@ -1369,9 +1412,368 @@
   border-bottom-color: var(--ink);
 }
 
+/* Tab flags unread member messages until the admin opens it. */
+.detailTabAlert:not(.detailTabActive) {
+  color: var(--terracotta, #ba5f45);
+  font-weight: 800;
+}
+
 .detailContent {
   padding: 20px 28px;
 }
+
+/* ── Messages tab ─── */
+.messagesTab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.messagesTabHint {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Admin Inbox ─── */
+.inboxItem { align-items: center; }
+
+.inboxTopRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inboxTime {
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+.inboxTimeUnread { color: var(--terracotta, #ba5f45); font-weight: 800; }
+
+.inboxBottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.inboxPreview {
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+.inboxPreviewUnread { color: var(--ink); font-weight: 600; }
+
+.inboxCount {
+  flex-shrink: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--terracotta, #ba5f45);
+  color: #fff8f2;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+}
+
+.inboxEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 320px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  padding: 24px;
+}
+.inboxEmpty p { max-width: 340px; margin: 0; line-height: 1.5; }
+
+.inboxListEmpty {
+  padding: 16px 16px 8px;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+/* ── Inbox tools / broadcast button ─── */
+.inboxTools {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 12px;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  border-bottom: 1px solid var(--border-light);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.broadcastBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--sage, #8b9e7e) 40%, var(--border-light));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sage, #8b9e7e) 12%, var(--paper));
+  color: var(--sage-dark, #4a7244);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.14s var(--ease-out), box-shadow 0.14s ease, background 0.14s ease;
+}
+.broadcastBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--sage-dark, #4a7244) 18%, transparent);
+}
+.broadcastBtnActive {
+  background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
+  color: var(--on-dark, #fff);
+  border-color: transparent;
+}
+
+/* ── Broadcast composer ─── */
+.broadcastPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  max-width: 640px;
+}
+
+.broadcastHeader {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.broadcastHeaderIcon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
+  color: var(--on-dark, #fff);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--sage-dark, #4a7244) 30%, transparent);
+}
+.broadcastTitle {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0 0 4px;
+}
+.broadcastSub {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.broadcastError {
+  font-size: 0.8rem;
+  color: var(--terracotta, #c05040);
+  background: rgba(186, 95, 69, 0.1);
+  border: 1px solid rgba(186, 95, 69, 0.25);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 0;
+}
+
+.broadcastInput {
+  width: 100%;
+  resize: vertical;
+  min-height: 130px;
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  line-height: 1.5;
+  background: var(--paper-soft, var(--paper));
+  color: var(--ink);
+  transition: border-color 0.16s var(--ease-out), box-shadow 0.16s ease;
+}
+.broadcastInput:focus {
+  outline: none;
+  border-color: var(--sage, #8b9e7e);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sage, #8b9e7e) 18%, transparent);
+}
+
+.broadcastFootRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.broadcastCount {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.broadcastActions,
+.broadcastConfirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.broadcastConfirmText {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.broadcastSendBtn {
+  min-height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--on-ink, #fff);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.14s var(--ease-out), box-shadow 0.14s ease, opacity 0.14s ease;
+}
+.broadcastSendBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px var(--shadow-md);
+}
+.broadcastSendBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.broadcastCancelBtn {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink-light);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+.broadcastCancelBtn:hover:not(:disabled) { background: var(--cream); }
+.broadcastCancelBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Broadcast sent confirmation ─── */
+.broadcastDone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  min-height: 320px;
+  padding: 32px 24px;
+}
+.broadcastDoneIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--sage, #8b9e7e) 18%, transparent);
+  color: var(--sage-dark, #4a7244);
+  animation: scaleIn 360ms var(--ease-spring, ease) both;
+}
+.broadcastDone h3 { font-size: 1.15rem; font-weight: 800; color: var(--ink); margin: 0; }
+.broadcastDone p { font-size: 0.86rem; color: var(--ink-light); line-height: 1.5; max-width: 340px; margin: 0; }
+.broadcastDoneActions { display: flex; gap: 10px; margin-top: 8px; }
+
+.broadcastPosted {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--sage-dark, #4a7244);
+  background: color-mix(in srgb, var(--sage, #8b9e7e) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sage, #8b9e7e) 32%, transparent);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 0;
+  animation: floatIn 280ms var(--ease-out, ease) both;
+}
+
+/* ── Admin: recent announcements list ─── */
+.annAdminList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+}
+.annAdminListLabel {
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  margin: 0 0 2px;
+}
+.annAdminItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-light);
+  border-radius: 11px;
+  background: var(--paper-soft, var(--paper));
+}
+.annAdminItemBody { flex: 1; min-width: 0; }
+.annAdminItemMeta {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--ink-faint);
+  margin-bottom: 3px;
+}
+.annAdminItemText {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.annAdminDelete {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border-light);
+  background: var(--paper);
+  color: var(--ink-faint);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+.annAdminDelete:hover:not(:disabled) {
+  background: rgba(186, 95, 69, 0.12);
+  color: var(--terracotta, #c05040);
+  border-color: rgba(186, 95, 69, 0.4);
+}
+.annAdminDelete:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Story card ─── */
 .storyCard {

@@ -1,0 +1,264 @@
+.card {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg, 14px);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.title {
+  font-size: 0.95rem;
+  color: var(--ink);
+  margin: 0;
+}
+.sub {
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+  margin: 3px 0 0;
+  max-width: 520px;
+}
+.search {
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md, 10px);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  background: var(--paper-soft, var(--paper));
+  color: var(--ink);
+  min-width: 220px;
+}
+
+/* ── Filter chips ── */
+.filterRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.filterChip {
+  border: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 0.75rem;
+  padding: 5px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.filterChip:hover { color: var(--ink); }
+.filterChipActive {
+  background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
+  border-color: transparent;
+  /* The brand gradient is dark in every theme; --on-dark stays light. */
+  color: var(--on-dark, #fff);
+  font-weight: 600;
+}
+.filterCount {
+  font-size: 0.68rem;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(128,128,128,0.16);
+}
+.filterChipActive .filterCount { background: rgba(255,255,255,0.22); }
+
+/* ── Table ── */
+.tableWrap {
+  overflow: auto;
+  max-height: 560px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md, 10px);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1280px;
+  font-size: 0.8rem;
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--paper);
+  border-bottom: 1px solid var(--border-light);
+  padding: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+.thNum { text-align: right; }
+
+.sortBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.thNum .sortBtn { justify-content: flex-end; }
+.sortBtn:hover { color: var(--ink); }
+.sortBtnActive { color: var(--ink); }
+.sortArrow { font-size: 0.62rem; opacity: 0.55; }
+.sortBtnActive .sortArrow { opacity: 1; }
+
+.table tbody td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--ink-light);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.table tbody tr:last-child td { border-bottom: none; }
+.row { cursor: pointer; }
+.row:hover td { background: rgba(128,128,128,0.06); }
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 190px;
+}
+.avatar,
+.avatarImg {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+.avatar {
+  background: var(--cream, rgba(128,128,128,0.16));
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.avatarImg { object-fit: cover; }
+.userText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.userText strong {
+  color: var(--ink);
+  font-size: 0.82rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.userText em {
+  font-style: normal;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statusPill {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+/* Status colours ride the theme palette (--sage/--gold/--terracotta/--slate
+   all flip brightness per theme) so they stay readable on every paper. */
+.pillToday {
+  color: var(--sage-dark, #4a7244);
+  background: rgba(122,148,112,0.18);
+  background: color-mix(in srgb, var(--sage, #637f5f) 20%, transparent);
+}
+.pillWeek {
+  color: var(--sage, #6f8a63);
+  background: rgba(139,158,126,0.14);
+  background: color-mix(in srgb, var(--sage, #637f5f) 12%, transparent);
+}
+.pillQuiet {
+  color: #8a6a20;
+  color: color-mix(in srgb, var(--gold, #c38b3f) 72%, var(--ink, #181713));
+  background: rgba(190,155,80,0.16);
+  background: color-mix(in srgb, var(--gold, #c38b3f) 16%, transparent);
+}
+.pillInactive {
+  color: var(--terracotta, #c05040);
+  background: rgba(186,95,69,0.14);
+  background: color-mix(in srgb, var(--terracotta, #ba5f45) 14%, transparent);
+}
+.pillNew {
+  color: var(--slate, #4a78b0);
+  background: rgba(122,160,200,0.16);
+  background: color-mix(in srgb, var(--slate, #42697d) 16%, transparent);
+}
+
+.dateCell {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+.dateCell em {
+  font-style: normal;
+  font-size: 0.68rem;
+  color: var(--ink-faint);
+}
+
+.numCell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.planCell { max-width: 180px; }
+.planCell .dateCell { max-width: 170px; overflow: hidden; }
+
+.okTag   { font-size: 0.72rem; color: var(--sage-dark, #4a7244); font-weight: 600; }
+.warnTag {
+  font-size: 0.72rem;
+  color: #8a6a20;
+  color: color-mix(in srgb, var(--gold, #c38b3f) 72%, var(--ink, #181713));
+  font-weight: 600;
+}
+.mutedTag { font-size: 0.72rem; color: var(--ink-faint); }
+
+.openCell { width: 30px; text-align: center; }
+.openArrow {
+  font-size: 1.05rem;
+  color: var(--ink-faint);
+  transition: transform 0.15s ease, color 0.15s ease;
+  display: inline-block;
+}
+.row:hover .openArrow { color: var(--ink); transform: translateX(2px); }
+
+.count {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  margin: 10px 0 0;
+}
+.empty {
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+  text-align: center;
+  padding: 24px 12px;
+  margin: 0;
+}

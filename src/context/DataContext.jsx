@@ -9,6 +9,10 @@ import {
   computeFeelScore,
 } from '../data/storage'
 import { logActivity, actorFromUser } from '../data/activityLog'
+import {
+  subscribeToAnnouncements, countUnreadAnnouncements,
+  getAnnouncementsLastRead, setAnnouncementsLastRead,
+} from '../data/announcements'
 
 const GUEST_NAME_KEY = 'gb_guest_name'
 const PROFILE_KEY    = 'gb_profile'
@@ -41,6 +45,11 @@ export function DataProvider({ children }) {
   const [guestJustJoined, setGuestJustJoined] = useState(false)
   const [coachData, setCoachData] = useState(null) // loaded after auth resolves
   const [adminRemarks, setAdminRemarks] = useState([])
+  // Count of admin replies the user hasn't seen yet (drives the nav badge).
+  const [unreadMessages, setUnreadMessages] = useState(0)
+  // Global announcements feed + per-device "last seen" marker.
+  const [announcements, setAnnouncements] = useState([])
+  const [annLastRead, setAnnLastRead] = useState(() => getAnnouncementsLastRead())
 
   useEffect(() => {
     if (user === undefined) return // auth still resolving
@@ -49,11 +58,13 @@ export function DataProvider({ children }) {
       setEntries(getLocalEntries())
       setProfileState(null)
       setCoachData(null)      // Clear any previous user's coach data
+      setUnreadMessages(0)
       setProfileFetched(true) // No Firestore needed, gate can release
       return
     }
 
     setAdminRemarks([]) // clear previous user's remarks
+    setUnreadMessages(0)
 
     const profileRef = doc(db, 'users', user.uid, 'config', 'profile')
     const nowIso = new Date().toISOString()
@@ -101,6 +112,7 @@ export function DataProvider({ children }) {
       setProfileState(null)
       setCoachData(null)
       setAdminRemarks([])
+      setUnreadMessages(0)
       setGuestNameState(null)
       setProfileFetched(true)
       // Consume the tombstone, then sign out. Delete first (still authenticated)
@@ -267,13 +279,44 @@ export function DataProvider({ children }) {
       })
       .catch(() => {})
 
+    // Live count of unread admin messages so the nav can badge the Profile tab.
+    const unsubMessages = onSnapshot(
+      collection(db, 'users', user.uid, 'messages'),
+      snap => {
+        const unread = snap.docs.reduce((n, d) => {
+          const m = d.data()
+          return n + (m.from === 'admin' && !m.readByUser ? 1 : 0)
+        }, 0)
+        setUnreadMessages(unread)
+      },
+      () => {}
+    )
+
     return () => {
       clearTimeout(safetyTimeout)
       unsubJournal()
       unsubProfile()
       unsubTombstone()
+      unsubMessages()
     }
   }, [user])
+
+  // Live announcements feed (reading requires auth, so members only).
+  useEffect(() => {
+    if (!user || !db) { setAnnouncements([]); return }
+    const unsub = subscribeToAnnouncements(setAnnouncements, () => {})
+    return unsub
+  }, [user])
+
+  const unreadAnnouncements = countUnreadAnnouncements(announcements, annLastRead)
+
+  // Mark the feed read up to the newest item (called when the user opens the tab).
+  function markAnnouncementsRead() {
+    const newest = announcements[0]?.createdAt || new Date().toISOString()
+    if (newest === annLastRead) return
+    setAnnouncementsLastRead(newest)
+    setAnnLastRead(newest)
+  }
 
   function setGuestName(name) {
     if (name) {
@@ -502,7 +545,7 @@ export function DataProvider({ children }) {
   })()
 
   return (
-    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, guestJustJoined, clearGuestJustJoined, profile: exposedProfile, onboardingRequired, saveProfile, clearAllData, user, coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks }}>
+    <DataContext.Provider value={{ entries, saveEntry, getTodayEntry, guestName, setGuestName, guestJustJoined, clearGuestJustJoined, profile: exposedProfile, onboardingRequired, saveProfile, clearAllData, user, coachData, saveCoachGoal, updateCoachGoal, saveCoachCheckin, clearCoachGoal, addChatMessage, adminRemarks, unreadMessages, announcements, unreadAnnouncements, markAnnouncementsRead }}>
       {children}
     </DataContext.Provider>
   )

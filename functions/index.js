@@ -2,18 +2,24 @@
  * Cloud Functions for La Ultra Run & Bee.
  *
  *  1. mirrorActivityToSheet — appends every audit-log change to a live Google Sheet.
- *  2. aiProxy — server-side proxy for the AI coach. Holds the OpenRouter API key
+ *  2. mirrorJournalToSheet / mirrorUserConfigToSheet / mirrorAdminListToSheet —
+ *     rebuild the full dashboard tabs (Users, Journal, Training Plans,
+ *     Check-ins, Remarks, Summary) in the same Sheet whenever any user data
+ *     changes. Debounced; see dashboardSheet.js.
+ *  3. syncActivitySheet / syncDashboardSheet — admin commands that rebuild the
+ *     Sheet from scratch (triggered from the dashboard's "Sync now" button or
+ *     by creating an adminCommands doc by hand).
+ *  4. aiProxy — server-side proxy for the AI coach. Holds the OpenRouter API key
  *     as a real secret (Secret Manager) so it is NEVER shipped to browsers, and
  *     only serves signed-in users (verifies their Firebase ID token).
  *
  * Setup notes are at the bottom of this file.
  */
 
-const { onDocumentCreated } = require('firebase-functions/v2/firestore')
+const { onDocumentCreated, onDocumentWritten } = require('firebase-functions/v2/firestore')
 const { onRequest } = require('firebase-functions/v2/https')
 const { setGlobalOptions } = require('firebase-functions/v2')
 const { defineSecret } = require('firebase-functions/params')
-const { google } = require('googleapis')
 const admin = require('firebase-admin')
 
 if (!admin.apps.length) admin.initializeApp()
@@ -24,17 +30,13 @@ setGlobalOptions({
   serviceAccount: process.env.FUNCTION_SERVICE_ACCOUNT || undefined,
 })
 
-// ── 1. Live Google Sheet mirror ──────────────────────────────────────────────
-const SHEET_ID = process.env.GOOGLE_SHEET_ID
-const TAB = process.env.GOOGLE_SHEET_TAB || 'Activity Log'
-const HEADER = ['Time', 'Role', 'Actor', 'Actor email', 'Action', 'Target', 'Summary', 'Details']
+const {
+  getSheetsClient, writeDashboardTabs, requestDashboardSync, SHEET_ID, ACTIVITY_TAB,
+} = require('./dashboardSheet')
 
-function getSheetsClient() {
-  const auth = new google.auth.GoogleAuth({
-    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-  })
-  return google.sheets({ version: 'v4', auth })
-}
+// ── 1. Live Google Sheet mirror — activity log tab ───────────────────────────
+const TAB = ACTIVITY_TAB
+const HEADER = ['Time', 'Role', 'Actor', 'Actor email', 'Action', 'Target', 'Summary', 'Details']
 
 async function ensureHeader(sheets) {
   try {
@@ -148,7 +150,70 @@ exports.syncActivitySheet = onDocumentCreated('adminCommands/{commandId}', async
   }
 })
 
-// ── 2. AI coach proxy (keeps the OpenRouter key server-side) ──────────────────
+// ── 2. Full dashboard mirror ─────────────────────────────────────────────────
+// Everything the admin dashboard shows is kept in sync with the Sheet — not
+// just activity. Any journal save, profile/plan/remark change, or admin grant
+// schedules a debounced rebuild of the Users/Journal/Plans/Check-ins/Remarks/
+// Summary tabs. The timeout leaves room for the debounce sleep + rebuild.
+exports.mirrorJournalToSheet = onDocumentWritten(
+  { document: 'users/{userId}/journal/{entryId}', timeoutSeconds: 120 },
+  () => requestDashboardSync('journal change')
+)
+
+exports.mirrorUserConfigToSheet = onDocumentWritten(
+  { document: 'users/{userId}/config/{configId}', timeoutSeconds: 120 },
+  () => requestDashboardSync('profile/plan/remark change')
+)
+
+exports.mirrorAdminListToSheet = onDocumentWritten(
+  { document: 'admins/{adminEmail}', timeoutSeconds: 120 },
+  () => requestDashboardSync('admin list change')
+)
+
+exports.mirrorMessagesToSheet = onDocumentWritten(
+  { document: 'users/{userId}/messages/{messageId}', timeoutSeconds: 120 },
+  () => requestDashboardSync('message change')
+)
+
+// Full rebuild command — the dashboard's "Sync everything now" button creates
+// an adminCommands doc with { action: 'dashboard.syncAll' }. Rewrites every
+// dashboard tab AND the activity tab, reporting progress on the command doc.
+exports.syncDashboardSheet = onDocumentCreated(
+  { document: 'adminCommands/{commandId}', timeoutSeconds: 300 },
+  async (event) => {
+    const commandRef = event.data && event.data.ref
+    const data = event.data && event.data.data()
+    if (!data || data.action !== 'dashboard.syncAll') return
+
+    try {
+      await commandRef.set({
+        status: 'running',
+        startedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true })
+
+      const counts = await writeDashboardTabs('manual full sync')
+      const activityRows = await syncAllActivityRowsToSheet()
+
+      await commandRef.set({
+        status: 'completed',
+        counts,
+        activityRows,
+        completedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true })
+      console.log('syncDashboardSheet completed:', JSON.stringify({ ...counts, activityRows }))
+    } catch (err) {
+      await commandRef.set({
+        status: 'failed',
+        error: err?.message || String(err),
+        failedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true }).catch(() => {})
+      console.error('syncDashboardSheet failed:', err?.message || err)
+      throw err
+    }
+  }
+)
+
+// ── 3. AI coach proxy (keeps the OpenRouter key server-side) ──────────────────
 const OPENROUTER_API_KEY = defineSecret('OPENROUTER_API_KEY')
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 const ALLOWED_MODELS = new Set(['anthropic/claude-sonnet-4.5'])
@@ -281,4 +346,7 @@ exports.aiProxy = onRequest(
  on the server.
 
  Live Sheet: see GOOGLE_SHEET_ID / FUNCTION_SERVICE_ACCOUNT in functions/.env.
+ The dashboard tabs (Summary, Users, Journal, Training Plans, Check-ins,
+ Remarks) are created automatically on the first sync; only the Sheet itself
+ must exist and be shared with the function's service account as Editor.
 */

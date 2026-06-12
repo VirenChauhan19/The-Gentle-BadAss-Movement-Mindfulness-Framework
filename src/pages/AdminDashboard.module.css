@@ -31,7 +31,9 @@
   border: none;
   border-radius: var(--r-md, 10px);
   background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
-  color: var(--on-ink, #fff);
+  /* --on-dark stays light in every theme; the brand gradient is always dark.
+     (--on-ink flips to near-black on dark themes and becomes unreadable.) */
+  color: var(--on-dark, #fff);
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
@@ -171,7 +173,13 @@
   margin: 0 4px;
   vertical-align: middle;
 }
-.feedRoleAdmin { background: rgba(154,134,200,0.18); color: #7a5fc0; }
+.feedRoleAdmin {
+  background: rgba(154,134,200,0.18);
+  color: #8b74cf;
+  /* Lean the violet toward the theme's text colour so it stays readable on
+     both light and dark papers. */
+  color: color-mix(in srgb, #8b74cf 78%, var(--ink, #181713));
+}
 .feedTarget { color: var(--ink-faint); }
 .feedTime { font-size: 0.72rem; color: var(--ink-faint); }
 
@@ -181,6 +189,48 @@
   text-align: center;
   padding: 24px 12px;
 }
+
+/* ── Google Sheet mirror card ── */
+.sheetSyncCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg, 14px);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,0.04));
+}
+.sheetSyncInfo { flex: 1; min-width: 260px; }
+.sheetSyncText {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  margin: 0 0 6px;
+  line-height: 1.5;
+  max-width: 640px;
+}
+.sheetSyncMeta { font-size: 0.74rem; color: var(--ink-faint); margin: 0; }
+.sheetSyncOk { font-size: 0.76rem; color: var(--sage-dark, #4a7244); margin: 6px 0 0; font-weight: 600; }
+.sheetSyncError { font-size: 0.76rem; color: var(--terracotta, #c05040); margin: 6px 0 0; }
+.sheetSyncBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md, 10px);
+  background: var(--paper-soft, var(--paper));
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.15s var(--ease-out, ease), border-color 0.15s ease;
+}
+.sheetSyncBtn:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--sage, #8b9e7e); }
+.sheetSyncBtn:disabled { opacity: 0.6; cursor: progress; }
 
 /* ── Admin access management ── */
 .adminAccessCard {
@@ -212,19 +262,19 @@
 .adminAccessEmail { flex: 1; min-width: 0; font-size: 0.85rem; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .adminAccessYou {
   margin-left: 6px; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em;
-  padding: 1px 6px; border-radius: 999px; background: rgba(122,160,200,0.18); color: #4a78b0;
+  padding: 1px 6px; border-radius: 999px; background: rgba(122,160,200,0.18); color: var(--slate, #4a78b0);
 }
 .adminAccessOwner {
   font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
   padding: 3px 9px; border-radius: 999px;
   background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
-  color: var(--on-ink, #fff);
+  color: var(--on-dark, #fff);
 }
 .adminAccessRemoveBtn {
   border: 1px solid var(--border-light); background: transparent;
   color: var(--ink-faint); font-size: 0.74rem; padding: 5px 11px; border-radius: 999px; cursor: pointer;
 }
-.adminAccessRemoveBtn:hover { color: #c05040; border-color: rgba(192,80,64,0.4); }
+.adminAccessRemoveBtn:hover { color: var(--terracotta, #c05040); border-color: rgba(192,80,64,0.4); }
 .adminAccessConfirm { display: inline-flex; gap: 6px; }
 .adminAccessRemoveYes {
   border: none; background: #c05040; color: #fff; font-size: 0.74rem; font-weight: 600;
@@ -249,9 +299,9 @@
   border-radius: var(--r-md, 10px);
   padding: 9px 16px;
   background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
-  color: var(--on-ink, #fff);
+  color: var(--on-dark, #fff);
   font-weight: 600; font-size: 0.82rem; cursor: pointer; white-space: nowrap;
 }
 .adminAccessAddBtn:disabled { opacity: 0.55; cursor: not-allowed; }
-.adminAccessError { font-size: 0.78rem; color: #c05040; margin: 8px 0 0; }
+.adminAccessError { font-size: 0.78rem; color: var(--terracotta, #c05040); margin: 8px 0 0; }
 .adminAccessNote { font-size: 0.72rem; color: var(--ink-faint); margin: 10px 0 0; }

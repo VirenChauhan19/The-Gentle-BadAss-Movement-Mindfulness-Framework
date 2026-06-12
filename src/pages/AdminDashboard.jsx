@@ -1,8 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
 } from 'recharts'
+import { db } from '../firebase'
+import { addDoc, collection, doc, onSnapshot } from 'firebase/firestore'
 import { exportAdminWorkbook } from '../data/exportWorkbook'
+import AdminUsersTable from './AdminUsersTable'
 import styles from './AdminDashboard.module.css'
 
 // Friendly labels + colours for each tracked action.
@@ -15,6 +18,8 @@ const ACTION_META = {
   'coach.goal.update':    { label: 'Plan updated',       color: '#c89a6a' },
   'coach.goal.clear':     { label: 'Plan cleared',       color: '#b08068' },
   'coach.checkin':        { label: 'Run check-in',       color: '#8b9e7e' },
+  'message.send':         { label: 'Member messaged team', color: '#5b8fb0' },
+  'admin.message.send':   { label: 'Admin replied',      color: '#7aa0c8' },
   'data.clear':           { label: 'Cleared own data',   color: '#c87a7a' },
   'admin.profile.update': { label: 'Admin edited profile', color: '#9a86c8' },
   'admin.plan.edit':      { label: 'Admin edited plan',  color: '#c89a6a' },
@@ -44,6 +49,7 @@ function timeAgo(iso) {
 export default function AdminDashboard({
   activity = [], userList = [], allEntries = [],
   adminList = [], defaultAdmins = [], currentAdminEmail = '', onAddAdmin, onRemoveAdmin,
+  onOpenUser,
 }) {
   const [roleFilter, setRoleFilter] = useState('all') // all | user | admin
   const [search, setSearch] = useState('')
@@ -122,7 +128,7 @@ export default function AdminDashboard({
       <div className={styles.dashHeader}>
         <div>
           <h2 className={styles.dashTitle}>Activity Dashboard</h2>
-          <p className={styles.dashSub}>Live feed of every change made across the app — by users and admins.</p>
+          <p className={styles.dashSub}>Every user in detail, plus a live feed of every change made across the app — by users and admins.</p>
         </div>
         <button className={styles.exportBtn} onClick={handleExport} disabled={exporting}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -141,6 +147,12 @@ export default function AdminDashboard({
         <Metric label="Active users (7d)" value={metrics.activeUsers} />
         <Metric label="Admin edits" value={metrics.adminEdits} />
       </div>
+
+      {/* Full user directory */}
+      <AdminUsersTable userList={userList} onOpenUser={onOpenUser} />
+
+      {/* Google Sheet mirror status + manual full sync */}
+      <SheetSyncCard currentAdminEmail={currentAdminEmail} />
 
       {/* Admin access management */}
       <AdminAccessPanel
@@ -254,6 +266,102 @@ function Metric({ label, value, accent }) {
     <div className={`${styles.metric} ${accent ? styles.metricAccent : ''}`}>
       <strong className={styles.metricValue}>{value}</strong>
       <span className={styles.metricLabel}>{label}</span>
+    </div>
+  )
+}
+
+// The Google Sheet now mirrors the whole dashboard (Users, Journal, Training
+// Plans, Check-ins, Remarks, Summary + the live Activity Log). The Cloud
+// Function keeps it fresh automatically; this card shows its state and lets an
+// admin force a full rebuild via an `adminCommands` doc the function watches.
+function SheetSyncCard({ currentAdminEmail = '' }) {
+  const [syncState, setSyncState] = useState(null)
+  const [commandId, setCommandId] = useState(null)
+  const [command, setCommand] = useState(null)
+  const [requesting, setRequesting] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!db) return
+    const unsub = onSnapshot(
+      doc(db, 'syncState', 'dashboard'),
+      snap => setSyncState(snap.exists() ? snap.data() : null),
+      () => {}
+    )
+    return unsub
+  }, [])
+
+  useEffect(() => {
+    if (!db || !commandId) return
+    const unsub = onSnapshot(
+      doc(db, 'adminCommands', commandId),
+      snap => setCommand(snap.exists() ? snap.data() : null),
+      () => {}
+    )
+    return unsub
+  }, [commandId])
+
+  const busy = requesting || command?.status === 'running' || (!!commandId && !command?.status)
+
+  async function syncNow() {
+    if (busy || !db) return
+    setRequesting(true)
+    setError('')
+    setCommand(null)
+    try {
+      const ref = await addDoc(collection(db, 'adminCommands'), {
+        action: 'dashboard.syncAll',
+        requestedBy: currentAdminEmail,
+        requestedAt: new Date().toISOString(),
+      })
+      setCommandId(ref.id)
+    } catch (err) {
+      setError(err?.message || 'Could not start the sync.')
+    }
+    setRequesting(false)
+  }
+
+  if (!db) return null
+
+  const counts = syncState?.counts
+  const countsLine = counts
+    ? `${counts.users ?? 0} users · ${counts.journalEntries ?? 0} journal entries · ${counts.planDays ?? 0} plan days · ${counts.checkins ?? 0} check-ins · ${counts.remarks ?? 0} remarks · ${counts.messages ?? 0} messages`
+    : null
+
+  return (
+    <div className={styles.sheetSyncCard}>
+      <div className={styles.sheetSyncInfo}>
+        <h3 className={styles.chartTitle}>Google Sheet mirror</h3>
+        <p className={styles.sheetSyncText}>
+          The connected Sheet carries this whole dashboard — Users, Journal, Training Plans,
+          Check-ins, Remarks, Messages and a Summary tab — next to the live Activity Log. Every
+          change a user or admin makes re-syncs it automatically.
+        </p>
+        <p className={styles.sheetSyncMeta}>
+          {syncState?.lastSyncedIso
+            ? <>Last synced {timeAgo(syncState.lastSyncedIso)} ({syncState.lastSyncedIso.slice(0, 16).replace('T', ' ')}){countsLine ? <> · {countsLine}</> : null}</>
+            : 'Not synced yet — it will fill in on the next change, or sync everything now.'}
+        </p>
+        {syncState?.lastSyncStatus === 'error' && (
+          <p className={styles.sheetSyncError}>Last auto-sync failed: {syncState.lastSyncError}</p>
+        )}
+        {command?.status === 'completed' && (
+          <p className={styles.sheetSyncOk}>
+            Full sync done — {command.counts?.users ?? 0} users, {command.counts?.journalEntries ?? 0} entries,
+            {' '}{command.activityRows ?? 0} activity rows written.
+          </p>
+        )}
+        {command?.status === 'failed' && (
+          <p className={styles.sheetSyncError}>Full sync failed: {command.error}</p>
+        )}
+        {error && <p className={styles.sheetSyncError}>{error}</p>}
+      </div>
+      <button className={styles.sheetSyncBtn} onClick={syncNow} disabled={busy}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36" /><polyline points="21 3 21 9 15 9" />
+        </svg>
+        {busy ? 'Syncing…' : 'Sync everything now'}
+      </button>
     </div>
   )
 }

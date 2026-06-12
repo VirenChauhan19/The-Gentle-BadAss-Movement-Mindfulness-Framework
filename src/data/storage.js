@@ -34,3 +34,16 @@ export function computeFeelScore(scores) {
   if (!vals.length) return 0
   return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10
 }
+
+// Consecutive days (ending today) with a journal entry.
+export function computeEntryStreak(entries) {
+  if (!entries.length) return 0
+  const dates = new Set(entries.map(entry => entry.date))
+  const cursor = new Date()
+  let streak = 0
+  while (dates.has(cursor.toISOString().split('T')[0])) {
+    streak += 1
+    cursor.setDate(cursor.getDate() - 1)
+  }
+  return streak
+}

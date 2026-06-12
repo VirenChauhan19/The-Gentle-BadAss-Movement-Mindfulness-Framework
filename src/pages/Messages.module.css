@@ -1,0 +1,266 @@
+/* Full-height chat shell. The page fills the viewport between the top of the
+   screen and the floating bottom nav, so the thread scrolls and the composer
+   stays docked just above the tab bar — like a native messaging app. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+  height: calc(100dvh - 96px - env(safe-area-inset-bottom));
+  padding: calc(20px + env(safe-area-inset-top)) 16px 4px;
+  animation: floatIn 480ms var(--ease-elastic, ease) both;
+}
+
+/* ── App-like chat header ─── */
+.chatHeader {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 4px 6px 2px;
+  flex-shrink: 0;
+}
+
+.coachAvatar {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-gradient, linear-gradient(135deg, #8b9e7e, #6f8a63));
+  color: var(--on-dark, #fff);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--sage-dark, #4a7244) 32%, transparent);
+}
+
+.coachMeta { min-width: 0; }
+
+.coachName {
+  font-family: var(--font-display, inherit);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+  margin: 0;
+}
+
+.coachStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  margin: 3px 0 0;
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--sage, #8b9e7e);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sage, #8b9e7e) 22%, transparent);
+  animation: statusPulse 2.4s ease-in-out infinite;
+}
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+/* ── Segmented control: Chat | Announcements ─── */
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--ink-faint) 10%, var(--paper));
+  border: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.segBtn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink-light);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s var(--ease-out), color 0.18s var(--ease-out), box-shadow 0.18s ease;
+}
+.segBtn:hover:not(.segBtnActive) { color: var(--ink); }
+
+.segBtnActive {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 2px 8px var(--shadow-xs), 0 0 0 1px var(--border-light);
+}
+
+.segBadge {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--terracotta, #ba5f45);
+  color: #fff8f2;
+  font-size: 0.6rem;
+  font-weight: 800;
+  line-height: 17px;
+  text-align: center;
+}
+
+/* ── Announcements feed ─── */
+.annScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 2px 8px;
+  overscroll-behavior: contain;
+}
+
+.annCard {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--sage, #8b9e7e);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 18px var(--shadow-xs);
+  animation: floatIn 360ms var(--ease-out, ease) both;
+}
+
+.annCardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.annFrom {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--sage-dark, #4a7244);
+}
+.annDate {
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+.annText {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.annEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  color: var(--ink-faint);
+  padding: 30px 24px;
+}
+.annEmpty svg {
+  padding: 16px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--sage, #8b9e7e) 12%, transparent);
+  color: var(--sage-dark, #4a7244);
+}
+.annEmpty p { max-width: 280px; margin: 0; font-size: 0.88rem; line-height: 1.55; }
+
+/* ── Signed-out state ─── */
+.signInWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.signInCard {
+  width: 100%;
+  max-width: 380px;
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-lg, 18px);
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 16px 40px var(--shadow-xs);
+}
+.signInCard .coachAvatar { width: 56px; height: 56px; margin-bottom: 6px; }
+
+.signInTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.signInHint {
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.55;
+  margin: 0 0 8px;
+}
+
+.googleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 22px;
+  border: none;
+  border-radius: var(--r-md, 12px);
+  background: var(--ink);
+  color: var(--on-ink, #fff);
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease-out, ease), box-shadow 0.15s ease;
+}
+.googleBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px var(--shadow-md);
+}
+.googleBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Tablet / desktop: bounded height, roomy header ─── */
+@media (min-width: 768px) {
+  .page {
+    height: calc(100vh - 110px);
+    padding: 28px 24px 0;
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page {
+    max-width: 820px;
+    height: calc(100vh - 56px);
+    padding: 32px 40px 0;
+  }
+  .coachName { font-size: 1.5rem; }
+}

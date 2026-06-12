@@ -15,6 +15,7 @@ import Reminder from './pages/Reminder'
 import ExerciseDetail from './pages/ExerciseDetail'
 import FunctionalTests from './pages/FunctionalTests'
 import Admin from './pages/Admin'
+import Messages from './pages/Messages'
 import Coach from './pages/Coach'
 import Onboarding from './pages/Onboarding'
 import Paywall from './pages/Paywall'
@@ -42,7 +43,7 @@ function AppRoutes() {
   const onboardingRequired = data?.onboardingRequired
 
   useEffect(() => {
-    const mobileRoutes = user ? ['/', '/journal', '/library', '/functional-tests', '/history', '/profile'] : ['/', '/profile']
+    const mobileRoutes = user ? ['/', '/journal', '/library', '/functional-tests', '/history', '/messages', '/profile'] : ['/', '/messages', '/profile']
     let startX = 0
     let startY = 0
     let startTime = 0
@@ -115,6 +116,7 @@ function AppRoutes() {
         <Route path="/library" element={<LockedRoute feature="Your Plan"><Library /></LockedRoute>} />
         <Route path="/library/:id" element={<LockedRoute feature="Your Plan"><ExerciseDetail /></LockedRoute>} />
         <Route path="/coach" element={<LockedRoute feature="Coach"><Coach /></LockedRoute>} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/profile" element={<Admin />} />
         <Route path="/admin" element={<LockedRoute feature="Admin"><Admin /></LockedRoute>} />
         <Route path="/paywall" element={<LockedRoute feature="Paywall"><Paywall /></LockedRoute>} />
