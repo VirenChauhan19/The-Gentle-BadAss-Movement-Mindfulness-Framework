@@ -29,6 +29,11 @@
   --on-dark:      #f7f5ef;
   --on-ink:       #ffffff;
   --on-accent:    #ffffff;
+  /* Subtle shadow that lifts text off the background so it reads sharper.
+     Light theme uses a faint dark shadow; dark themes override below.
+     `-soft` is a gentler version for body copy so small text stays crisp. */
+  --text-pop: 0 1px 1px rgba(24, 23, 19, 0.10);
+  --text-pop-soft: 0 1px 1px rgba(24, 23, 19, 0.06);
   --ambient-sheen: rgba(255, 255, 255, 0.28);
   --ambient-glow:  rgba(99, 127, 95, 0.16);
   --ambient-glow-2: rgba(66, 105, 125, 0.12);
@@ -354,9 +359,9 @@
   --cream-mid:    #16150d;
   --paper:        #18160e;
   --paper-soft:   #110f09;
-  --ink:          #f6f4ea;
-  --ink-light:    #d8d2bd;
-  --ink-faint:    #998f6f;
+  --ink:          #ffffff;
+  --ink-light:    #ece6d6;
+  --ink-faint:    #b3a984;
   --sage:         #b5860b;
   --sage-dark:    #ffe12c;
   --sage-light:   #2c2308;
@@ -534,6 +539,20 @@ html[data-theme="laultra"] #root {
   background-attachment: fixed;
 }
 
+/* On dark themes a deeper shadow lifts bright text off the dark, gradient-lit
+   backdrop so it reads crisp and "pops" instead of sitting flat. */
+html[data-theme="dark"],
+html[data-theme="ember"],
+html[data-theme="ocean"],
+html[data-theme="forest"],
+html[data-theme="violet"],
+html[data-theme="rose"],
+html[data-theme="midnight"],
+html[data-theme="laultra"] {
+  --text-pop: 0 1px 3px rgba(0, 0, 0, 0.50);
+  --text-pop-soft: 0 1px 2px rgba(0, 0, 0, 0.32);
+}
+
 html[data-theme="dark"] input,
 html[data-theme="ember"] input,
 html[data-theme="ocean"] input,
@@ -609,17 +628,18 @@ html[data-theme="laultra"] img {
 
 h1, h2, h3 {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.18;
   color: var(--ink);
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
+  text-shadow: var(--text-pop);
 }
 
 h1 { font-size: clamp(1.7rem, 5.6vw, 2.1rem); }
 h2 { font-size: clamp(1.25rem, 4vw, 1.5rem); }
 h3 { font-size: clamp(1rem, 3.2vw, 1.15rem); }
 
-p { line-height: 1.7; }
+p { line-height: 1.7; text-shadow: var(--text-pop-soft); }
 
 a {
   color: inherit;

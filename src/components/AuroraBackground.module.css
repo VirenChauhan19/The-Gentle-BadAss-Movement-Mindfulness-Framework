@@ -1,76 +1,29 @@
 /*
- * Mobile aurora, a lightweight, battery-friendly animated backdrop used on
- * phones in place of the WebGL canvas. Four soft, theme-coloured blobs drift
- * and breathe over the base colour, giving motion without a GPU render loop.
- *
- * Colours arrive as CSS custom properties (set inline from the live theme):
- *   --bg-base, --blob-a, --blob-b, --blob-c, --blob-d
+ * Simple, clean gradient backdrop. A solid base colour with two soft
+ * theme-coloured glows in opposite corners. Colours come from the live theme
+ * variables, so the background re-skins itself with the theme automatically.
  */
 
-.mobile {
-  background-color: var(--bg-base);
+.bg {
+  pointer-events: none;
+  background-color: var(--cream);
+  background-image:
+    radial-gradient(60% 60% at 18% 12%,
+      color-mix(in srgb, var(--sage) 22%, transparent) 0%,
+      transparent 70%),
+    radial-gradient(55% 55% at 85% 90%,
+      color-mix(in srgb, var(--slate) 20%, transparent) 0%,
+      transparent 72%);
 }
 
-.mobile span {
+.app {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.overlay {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(46px);
-  will-change: transform, opacity;
-}
-
-.blobA {
-  width: 72vw;
-  height: 72vw;
-  top: -12vh;
-  left: -16vw;
-  background: radial-gradient(circle, var(--blob-a), transparent 70%);
-  animation: driftA 19s ease-in-out infinite;
-}
-
-.blobB {
-  width: 84vw;
-  height: 84vw;
-  bottom: -16vh;
-  right: -22vw;
-  background: radial-gradient(circle, var(--blob-b), transparent 70%);
-  animation: driftB 25s ease-in-out infinite;
-}
-
-.blobC {
-  width: 60vw;
-  height: 60vw;
-  top: 28vh;
-  left: 18vw;
-  background: radial-gradient(circle, var(--blob-c), transparent 72%);
-  animation: driftC 31s ease-in-out infinite;
-}
-
-.blobD {
-  width: 52vw;
-  height: 52vw;
-  top: 6vh;
-  right: 4vw;
-  background: radial-gradient(circle, var(--blob-d), transparent 72%);
-  animation: driftD 27s ease-in-out infinite;
-}
-
-@keyframes driftA {
-  0%, 100% { transform: translate(0, 0) scale(1);    opacity: 0.55; }
-  50%      { transform: translate(14vw, 12vh) scale(1.2); opacity: 0.8; }
-}
-
-@keyframes driftB {
-  0%, 100% { transform: translate(0, 0) scale(1.1);  opacity: 0.5; }
-  50%      { transform: translate(-12vw, -10vh) scale(1); opacity: 0.78; }
-}
-
-@keyframes driftC {
-  0%, 100% { transform: translate(0, 0) scale(0.9);  opacity: 0.4; }
-  33%      { transform: translate(-10vw, 8vh) scale(1.15); opacity: 0.65; }
-  66%      { transform: translate(8vw, -6vh) scale(1);  opacity: 0.55; }
-}
-
-@keyframes driftD {
-  0%, 100% { transform: translate(0, 0) scale(1);    opacity: 0.35; }
-  50%      { transform: translate(-8vw, 10vh) scale(1.25); opacity: 0.6; }
+  inset: 0;
+  z-index: 0;
 }
